@@ -1,0 +1,120 @@
+*** DESCRIPTION ***
+
+Madcow is an extensible IRC/SILC/AIM bot written in Python. It is fully
+customizable and has a simple API for creating modules that extend its
+functionality. Madocw ships with modules that emulate classic Infobot behavior
+and much more.
+
+
+*** REQUIREMENTS ***
+
+- python 2.4 or higher
+- a DBM of some sort (such as BerkeleyDB)
+
+madcow can use a variety of protocol formats.  Depending on which you choose,
+you will need a third-party library to handle the protocol.  Most of these are
+available from your operating systems's default package/ports handler.  If not,
+the URL to their homepage is provided.
+
+IRC  - python-irclib
+SILC - silc-client & silc-toolkit
+AIM  - twisted-words/im
+
+madcow also comes with a suite of plugins that provide functionality.  Most
+of them use the core Python library, however a few do not.  You can disable
+these in the config or install the necessary tools.  The ones in this
+distribution that have a library requirement are:
+
+urban.py (look up definitions in Urban Dictionary): SOAPpy
+memebot.py (url tracking): sqlobject, pysqlite
+
+
+
+*** BASIC USAGE ***
+
+Copy madcow.ini-sample to madcow.ini, edit options, and run:
+
+$ ./madcow.py
+
+When editing the config, you *must* choose which protocol to use.
+By default IRC is enabled (as this is the most common use for chatterbots).
+Please note that one instance of madcow can only support one protocol at a time.
+The configuration for that module will be handled under the heading of the same
+name.  So for example, if you wish to make this an AIM bot, make sure module=aim
+in the [main] section, and edit the configurations in the [aim] section.
+
+
+>>>>>>>>>>>> DEVELOPERS <<<<<<<<<<<<<
+
+
+*** WRITING EXTENSIONS ***
+
+In the modules/ dir, copy template.py to your new module.
+Edit the various options in the match() class and make the
+response() function return desired output.  See existing modules
+for example usage.
+
+
+*** WRITING OUTPUT PLUGINS ***
+
+Copy cli.py to your new output plugin.  Edit the various
+functions to behave how you wish.  Add a section to madcow.ini
+with the same name as your output extension and set module=(name)
+in the [main] section to use it.
+
+You *must* redefine the start() function at the very
+minimum.  processMessage() is called with a callback function for
+output() so that it can handle threading.  botName() can also be
+over-ridden and is used for checking addressing in public enviorments
+to cut down on spammy chatter from the bot.  See existing output
+plugins (as of this writing, irc.py, aim.py, silcplugin.py and cli.py)
+for example protocol extension classes.
+
+
+*** TODO ***
+
+- ignore list
+- authentication for remote admin or whatnot
+- priority on modules and/or short-circuiting
+- explicitly disable modules from config
+- option to create a FIFO unix file that you can pipe to to fist madcow
+
+
+*** LICENSE ***
+
+Copyright (C) 2007 Christopher Jones <cjones@insub.org>
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+(see LICENSE for full details)
+
+
+*** CONTRIBUTORS ***
+
+This release has module contributions from the following people:
+
+- toast: silcplugin, slutcheck
+- twid: woot
+- killfile: bbcnews
+
+Additionally, Mark Pilgrim's rssparser.py is included in its unmodified form.
+This is a convenience, as it is not present in unix/linux package managers.
+The author of madcow does not assume any credit or liability for this code,
+and is merely redistributing it under the license provided to make your life
+easier.
+
+
+
+
