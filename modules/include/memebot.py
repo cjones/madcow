@@ -72,6 +72,7 @@ class MemeBot(object):
 		uri[5] = ''
 		return urlparse.urlunparse(uri)
 
+	# XXX magic numbers, move to config
 	def getScoreForAuthor(self, a):
 		return	a.pointsNew    *  1 + \
 			a.pointsOld    * -2 + \
