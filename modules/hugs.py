@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: hugs.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Get a random confession from grouphug.us
-"""
+# Get a random confession from grouphug.us
 
 import sys
 import re

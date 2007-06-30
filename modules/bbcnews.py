@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: bbcnews.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-This fuction is designed to serach the BBC News website and report the number one result.
-
-"""
+# This fuction is designed to serach the BBC News website and report the number one result.
 
 import sys
 import re

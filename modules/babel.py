@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: babel.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Use AV's babel translator for language conversion
-"""
+# Use AV's babel translator for language conversion
 
 import sys
 import re

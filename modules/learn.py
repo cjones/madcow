@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: learn.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Module to handle learning
-"""
+# Module to handle learning
 
 import sys
 import re

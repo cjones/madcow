@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: bash.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Interface for getting really stupid IRC quotes
-"""
+# Interface for getting really stupid IRC quotes
 
 import sys
 import re

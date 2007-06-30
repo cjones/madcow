@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: webtender.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Look up drink mixing ingredients
-"""
+# Look up drink mixing ingredients
 
 import sys
 import re

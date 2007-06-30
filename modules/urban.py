@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: urban.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Look up a definition in the Urban Dictionary
-"""
+# Look up a definition in the Urban Dictionary
 
 import sys
 import re

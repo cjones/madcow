@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: seen.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Keep track of what people last said
-"""
+# Keep track of what people last said
 
 import sys
 import re

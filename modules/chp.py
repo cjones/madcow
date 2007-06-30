@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: chp.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Get traffic info from CHP website (bay area only)
-"""
+# Get traffic info from CHP website (bay area only)
 
 import sys
 import re

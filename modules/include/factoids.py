@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: factoids.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-This implements the infobot factoid database work-a-like
-"""
+# This implements the infobot factoid database work-a-like
 
 import sys
 import re

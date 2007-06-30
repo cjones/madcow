@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: stockquote.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Get stock quote
-"""
+# Get stock quote
 
 import sys
 import re

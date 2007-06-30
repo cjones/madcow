@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 """
-$Id: template.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
 NOTE: This is the template for creating your own user modules.  Copy this file
 to something unique (it must end with .py!).  Edit the __init__ object.  This is
 where you set what regular expression will trigger the process() function when run

@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: artfart.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Get a random offensive ASCII art
-"""
+# Get a random offensive ASCII art
 
 import sys
 import re

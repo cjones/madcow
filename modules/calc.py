@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: calc.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Use Google as a calculator
-"""
+# Use Google as a calculator
 
 import sys
 import re

@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: nslookup.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Perform DNS lookups
-"""
+# Perform DNS lookups
 
 import sys
 import re

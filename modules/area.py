@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: area.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-This module looks up area codes and returns the most likely city
-"""
+# This module looks up area codes and returns the most likely city
 
 import sys
 import re

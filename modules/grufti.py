@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: grufti.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Implement Grufti trigger/response spam
-"""
+# Implement Grufti trigger/response spam
 
 import sys
 import re

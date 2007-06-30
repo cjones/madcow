@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: tac.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Useful tool for oncall support!
-"""
+# Useful tool for oncall support!
 
 import sys
 import re

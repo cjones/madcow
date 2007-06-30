@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: terror.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Get the current TERRA level
-"""
+# Get the current TERRA level
 
 import sys
 import re

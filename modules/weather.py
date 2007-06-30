@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-"""
-$Id: weather.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
+# Get a weather report from wunderground
 
-Get a weather report from wunderground
-"""
 
 import sys
 import re

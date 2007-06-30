@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: livejournal.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-get a random lj
-"""
+# get a random lj
 
 import sys
 import re

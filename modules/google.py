@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: google.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-I'm feeling lucky
-"""
+# I'm feeling lucky
 
 import sys
 import re

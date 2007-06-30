@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: bullshitr.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Make up some nonsense about web-2.0, like the peole who run the sites do
-"""
+# Make up some nonsense about web-2.0, like the peole who run the sites do
 
 import sys
 import re

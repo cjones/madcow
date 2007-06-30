@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: memebot.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Watch URLs in channel, punish people for living under a rock
-"""
+# Watch URLs in channel, punish people for living under a rock
 
 import sys
 import re

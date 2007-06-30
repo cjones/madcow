@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-"""
-$Id: dictionary.py,v 1.1.1.1 2007/06/25 23:09:20 cjones Exp $
-
-Lookup a definition in the dictionary... btw, hardest module to write ever.. HTML scraping sucks :(
-"""
+# Lookup a definition in the dictionary... btw, hardest module to write ever.. HTML scraping sucks :(
 
 import sys
 import re
