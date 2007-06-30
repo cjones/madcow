@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-"""
-$Id:$
-"""
-
 __version__ ='1.0.0'
 
 __copyright__ = """
@@ -25,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 (see LICENSE for full details)
 """
-
 
 import sys
 import optparse
