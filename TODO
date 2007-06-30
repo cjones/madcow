@@ -1,0 +1,43 @@
+This is a list of known bugs, requested features, and potential improvements.
+Not everything here will necessarily be addressed. If you make any improvements
+to the bot, feel free to share patches with me by emailing them to cjones@insub.org.
+
+In no particular order..
+
+FIXME: (blatant bugs, broken stuff)
+
+- bible module still has some tags that make it through
+- stockquote doesn't do mutual funds, weak regex
+
+XXX: (known shortcomings)
+
+- db files really need the option of giving them a namespace. right now any bots run
+  from the same directory will share the same datafiles. while DB4 makes this *safe* to
+  do, it's not very useful for having bots on different networks/channels.
+- identify with nickserv in irc module
+- channel or server passwords in irc module
+- change urban/bbcnew/dictionary match syntax for defintion number. can't look up "area 52" e.g.
+- add some verbosity. right now you don't know what's going on until it gets in channel
+- grufti module *needs* boundary checking so substrings don't trigger
+- factoids and grufti *always* trigger, which is annoying sometimes. when addressed they should always trigger,
+  but when not addressed, only triggering n% of the time would be ideal. or not at all. should be configurable
+- too many modules sitting in the include directory because they aren't getting enough metadata from the bot
+  controller. this is a case of too much abstraction. modules should have access to this data whether they
+  decide to use it or not. the only thing that should be in the include directory are third party tools and the
+  util.py module that has helper functions
+- documentation on individual modules is lacking. they should be explained so users can enable/disable them
+  in config without being assaulted by potentially offensive or spammy stuff when deployed
+
+TODO: (feature requests)
+
+- ignore list for other bots that might get in a spam war
+- authentication for remote admin functions
+- priority on modules and/or short-circuiting to prevent match chaining spam
+- ability to explicitly disable modules from config
+- option to create a FIFO unix file that you can pipe to to fist madcow.. maybe
+- chatroom support for aim/oscar module
+- color support ported from insub.pl for higher levels of obnoxiousness
+- memebot is missing some features from the original: ability to request a specific score, ability to ignore
+  certain urls, the web backend (need to decide on django or turbogears..)
+- consider some higher level admin duties such as auto-opping/kickban/etc. eggdrop module? would be nice to
+  obsolete having multiple bots, although eggdrops are largely replaced by chanserv/nickserv
