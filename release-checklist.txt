@@ -1,0 +1,24 @@
+exit # yeah, not gonna automate this right now..
+
+# update __version__ in main bot
+# diff trunk from previous release and update ChangeLog
+# make a release tag:
+
+release="madcow-1.0.1"
+
+svn copy https://madcow.svn.sourceforge.net/svnroot/madcow/trunk https://madcow.svn.sourceforge.net/svnroot/madcow/tags/$release
+
+# export & make a bundle
+svn exoprt https://madcow.svn.sourceforge.net/svnroot/madcow/tags/$release
+tar cfjv ${release}.tar.bz2 $release
+
+# upload to anon ftp
+#
+# ftp upload.sourceforge.net
+# cd /incoming
+# put ${release}.tar.bz2
+
+# activate release on SF.net:
+# http://sourceforge.net/project/admin/editpackages.php?group_id=199970
+
+
