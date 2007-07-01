@@ -36,7 +36,6 @@ class madcow(object):
 		if config is not None: self.config = config
 		self.ns = self.config.modules.dbnamespace
 		self.ignoreModules = [ '__init__', 'template' ]
-		self.disabledModules = [] # XXX load this from config
 		self.dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 		self.moduleDir = self.dir + '/modules'
 		self.verbose = True
@@ -66,6 +65,12 @@ class madcow(object):
 		self.modules = {}
 		self.usageLines = []
 
+		try: disabled = re.split('\s*[,;]\s*', self.config.modules.disabled)
+		except: disabled = []
+
+		if len(disabled) == 0: self.status('No modules are disabled')
+		else: self.status('The following modules will not be loaded: %s' % ', '.join(disabled))
+
 		for base, subdirs, files in os.walk(self.moduleDir):
 			self.status('*** Reading modules from %s' % base)
 			for file in files:
@@ -75,8 +80,8 @@ class madcow(object):
 				if moduleName in self.ignoreModules:
 					continue
 
-				if moduleName in self.disabledModules:
-					self.status('* Skipping module %s' % moduleName)
+				if moduleName in disabled:
+					self.status('* Skipping %s because it is disabled in config' % moduleName)
 					continue
 
 

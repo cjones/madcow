@@ -18,46 +18,64 @@ detach=no
 ; you should give them a unique namespace. this is used to
 ; name the db files something unique. if you do not change this,
 ; then multiple bots will share the same backend data store.
-; this may be what you want. but probably not wot.
-dbNamespace=madcow
-; 
-; below are a list of included modules. implicity, modules inside
-; the modules directory are enabled. you can uncomment these
-; to disable any of them
-;
-;area=no
-;artfart=no
-;babel=no
-;bash=no
-;bbcnews=no
-;bible=no
-;bullshitr=no
-;calc=no
-;chp=no
-;dictionary=no
-;doomsday=no
-;factoids=no
-;google=no
-;grufti=no
-;hugs=no
-;learn=no
-;livejournal=no
-;memebot=no
-;nslookup=no
-;seen=no
-;slut=no
-;stockquote=no
-;tac=no
-;terror=no
-;urban=no
-;weather=no
-;webtender=no
-;woot=no
+; this may be what you want. but probably not.
 
+dbNamespace=madcow
+
+; by default, all modules that come with madcow are enabled. you can
+; disable any you wish by adding them to the "disabled" option below,
+; separated by commas. below this is a list and brief description of 
+; each module. most of these are probably fine as they don't do anything
+; without being invoked directly by addressing the bot.
 ;
+; ********** WARNING *************
+; some of these produce OFFENSIVE output. if you are using this on a work
+; server or in a family environment, you are encouraged to review
+; what these modules do before putting it up. In particular: 
+; artfart, bash, hugs, lifejournal, and urban all pull 
+; content from the web which may be inappropriate for your environment.
+; For your convenience, there is a line that disables these potentially
+; offensive modules. Uncomment it if you are unsure.
+;
+; YOU'VE BEEN WARNED
+
+;disabled=artfart, bash, hugs, lifejournal, urban
+
+; MODULE DESCRIPTIONS:
+;
+;area		look up city/state for US area codes
+;artfart	get a random offensive ascii art
+;babel		use altavista babelfish to translate languages
+;bash		get a random IRC/IM quote from bash.org
+;bbcnews	get news headlines from BBC RSS feed
+;bible		get quotes from the bible based on book/chapter/verse
+;bullshitr	make fun of people who think web 2.0 has meaning
+;calc		use google calculator to perform any arithmetic
+;chp		BAY AREA ONLY - get california highway patrol incidents
+;dictionary	look up a word or phrase on dictionary.com
+;doomsday	find out how close we are to destruction with thebulletin
+;factoids	infobot work-a-like to remember factoids said in channel
+;google		i'm feeling lucky url for a specified search term
+;grufti		grufti chatterbot module. allows automatic responsees for set phrases
+;hugs		get a random confession from grouphug.us
+;learn		part of the weather module, learn where someone lives permanently
+;livejournal	get latest livejournal entry (random or a specific user)
+;memebot	track urls posted in channel, chastise people for posting old memes
+;nslookup	look up forward/reverse dns
+;seen		keep track of what people said in channel last
+;slut		gives you a porno rating in % of a google search terms.
+;stockquote	yahoo finance stock and mutual fund quotes
+;tac		get a random excuse for why the network is down
+;terror		up-to-date information on our threat advisory according to DHS
+;urban		look up a word or phrase in the urban dictionary
+;weather	look up weather forecast for your area using wunderground
+;webtender	look up mixing instructions for any drink on webtender
+;woot		get the latest offer from woot.com
+
+
 ; connection settings for IRC plugin. should be fairly obvious
 ; channels is a comma-delimited list of channels to join
-;
+
 [irc]
 host=localhost
 port=6667
