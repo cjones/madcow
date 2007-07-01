@@ -11,11 +11,8 @@ XXX: (known shortcomings)
 
 *** config-related
 
-- db files really need the option of giving them a namespace. right now any bots run
-  from the same directory will share the same datafiles. while DB4 makes this *safe* to
-  do, it's not very useful for having bots on different networks/channels.
-
 - ability to explicitly disable modules from config
+- need verbosity flags in config & cli
 
 *** irc module
 

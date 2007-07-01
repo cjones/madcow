@@ -1,3 +1,11 @@
+; core bot settings. please only have one module directive.
+; this will tell the bot which protocol to use. you must then
+; scroll down and edit the appropriate config section.
+; 
+; setting detach to true will cause the bot to always run
+; as a daemon (if you are on a posix system such is unix).
+; you can get the same behavior by specifying -d on the commandline
+
 [main]
 ;module=cli
 ;module=aim
@@ -5,6 +13,51 @@
 module=irc
 detach=no
 
+[modules]
+; if you wish to run multiple bots from the same directory
+; you should give them a unique namespace. this is used to
+; name the db files something unique. if you do not change this,
+; then multiple bots will share the same backend data store.
+; this may be what you want. but probably not wot.
+dbNamespace=madcow
+; 
+; below are a list of included modules. implicity, modules inside
+; the modules directory are enabled. you can uncomment these
+; to disable any of them
+;
+;area=no
+;artfart=no
+;babel=no
+;bash=no
+;bbcnews=no
+;bible=no
+;bullshitr=no
+;calc=no
+;chp=no
+;dictionary=no
+;doomsday=no
+;factoids=no
+;google=no
+;grufti=no
+;hugs=no
+;learn=no
+;livejournal=no
+;memebot=no
+;nslookup=no
+;seen=no
+;slut=no
+;stockquote=no
+;tac=no
+;terror=no
+;urban=no
+;weather=no
+;webtender=no
+;woot=no
+
+;
+; connection settings for IRC plugin. should be fairly obvious
+; channels is a comma-delimited list of channels to join
+;
 [irc]
 host=localhost
 port=6667
@@ -18,13 +71,22 @@ rejoinReply=
 oper=no
 operUser=
 operPass=
+; if you don't want wrapping, set this very high. the rfc has
+; a limitation and your bot WILL get dropped for sending raw
+; messages that exceed it. 400 is a good number if you are
+; against wrapping
 wrapSize=78
 
+;
+; settings for AIM plugin. you need to register a screenname 
+; with AOL beforehand and plug it in here.  see aim.com
+;
 [aim]
 username=
 password=
 profile=
 
+; settings for SILC plugin. channels are a comma-delimited list
 [silcplugin]
 nick=madcow
 channels=#madcow

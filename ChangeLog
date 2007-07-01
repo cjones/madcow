@@ -4,3 +4,11 @@
 * Get a rid of all the CVS Id tags
 * Clean up jesus module to not have footnotes
 * Stock module can now do mutual funds
+
+
+
+
+* Refactor module API to expose more data to the extensions
+* Move seen/factoids/memebot into standard extension API
+* Add namespace config for unique database files
+* Added some startup verbosity
