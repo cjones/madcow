@@ -6,7 +6,6 @@ In no particular order..
 
 FIXME: (blatant bugs, broken stuff)
 
-- bible module still has some tags that make it through
 - stockquote doesn't do mutual funds, weak regex
 
 XXX: (known shortcomings)

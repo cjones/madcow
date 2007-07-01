@@ -19,7 +19,8 @@ class match(object):
 
 		self.baseURL = 'http://www.biblegateway.com/passage/'
 		self.verse = re.compile('<div class="result-text-style-normal">(.*?)</div>', re.DOTALL)
-		self.junkHTML = re.compile(r'<(h4|h5|span|sup|strong|ol).*?</\1>', re.I)
+		self.footnotes = re.compile('<strong>Footnotes:</strong>.*$', re.DOTALL)
+		self.junkHTML = re.compile(r'<(h4|h5|span|sup|strong|ol|a).*?</\1>', re.I)
 		self.max = 800
 
 	# function to generate a response
@@ -32,6 +33,7 @@ class match(object):
 			doc = urllib.urlopen(url).read()
 
 			response = self.verse.search(doc).group(1)
+			response = self.footnotes.sub('', response)
 			response = self.junkHTML.sub('', response)
 			response = utils.stripHTML(response)
 			response = response.strip()
