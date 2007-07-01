@@ -6,9 +6,11 @@
 * Stock module can now do mutual funds
 
 
-
+1.0.2: Sat Jun 30 22:32:09 PDT 2007
 
 * Refactor module API to expose more data to the extensions
 * Move seen/factoids/memebot into standard extension API
 * Add namespace config for unique database files
 * Added some startup verbosity
+* Listed a description of all base modules in config
+* Allow modules to be disabled in config file

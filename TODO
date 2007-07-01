@@ -11,7 +11,6 @@ XXX: (known shortcomings)
 
 *** config-related
 
-- ability to explicitly disable modules from config
 - need verbosity flags in config & cli
 
 *** irc module
