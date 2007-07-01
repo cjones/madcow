@@ -41,13 +41,21 @@ class channel(SQLObject):
 
 
 # class for this module
-class MemeBot(object):
-	def __init__(self):
-		self.matchURL = re.compile('(http://\S+)', re.I)
-		self.dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-		self.file = self.dir + '/db-memes'
+class match(object):
+	def __init__(self, ns='default', config=None, dir=None):
+		self.enabled = True				# True/False - enabled?
+		self.pattern = re.compile('(.+)')	# regular expression that needs to be matched
+		self.requireAddressing = False			# True/False - require addressing?
+		self.thread = False				# True/False - should bot spawn thread?
+		self.wrap = False				# True/False - wrap output?
+		self.help = 'score - get memescore'
 
-		sqlhub.processConnection = connectionForURI('sqlite://' + self.file)
+		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
+		file = dir + '/db-%s-memes' % ns
+
+		self.matchURL = re.compile('(http://\S+)', re.I)
+
+		sqlhub.processConnection = connectionForURI('sqlite://' + file)
 		url.createTable(ifNotExists = True)
 		author.createTable(ifNotExists = True)
 		channel.createTable(ifNotExists = True)
@@ -84,8 +92,11 @@ class MemeBot(object):
 
 
 	# function to generate a response
-	def check(self, nick, chan, message, addressed):
-		nick = nick.lower()
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick'].lower()
+		chan = kwargs['channel']
+		addressed = kwargs['addressed']
+		message = kwargs['args'][0]
 
 		if addressed is True and 'score' in message:
 			scores = []
@@ -136,8 +147,8 @@ class MemeBot(object):
 # this is just here so we can test the module from the commandline
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
-	obj = MemeBot()
-	print obj.check('cj_', '#hugs', argv[0], True)
+	obj = match()
+	print obj.response(nick='testUser', channel='#test', args=[argv[0]], addressed=True)
 
 	return 0
 

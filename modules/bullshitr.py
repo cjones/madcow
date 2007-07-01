@@ -8,7 +8,7 @@ import random
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('web.*2\.0')	# regular expression that needs to be matched
 		self.requireAddressing = False			# True/False - require addressing?
@@ -39,7 +39,9 @@ class match(object):
 	
 
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
 		try:
 			words = ' '.join([random.choice(word) for word in self.wordList])
 			return 'Web 2.0: %s' % words
@@ -53,7 +55,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

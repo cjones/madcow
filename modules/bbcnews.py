@@ -9,7 +9,7 @@ from include import rssparser
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('bbcnews\s+(.*)')	# regular expression that needs to be matched
 		self.requireAddressing = True			# True/False - require addressing?
@@ -18,7 +18,10 @@ class match(object):
 		self.help = 'bbcnews <String> - Searches the BBC News Website' # Put your usage line here as a string
 	
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
+
 		try:
 			try:
 				url = 'http://newsapi.bbc.co.uk/feeds/search/news/' + urllib.quote(args[0])
@@ -50,7 +53,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

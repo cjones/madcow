@@ -19,7 +19,7 @@ class NoErrors(urllib2.HTTPDefaultErrorHandler):
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('google\s+(.+)')	# regular expression that needs to be matched
 		self.requireAddressing = True			# True/False - require addressing?
@@ -28,7 +28,9 @@ class match(object):
 		self.help = "google <query> - i'm feeling lucky"
 
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
 		try:
 			query = args[0]
 			url = 'http://www.google.com/search?btnI=I&' + urllib.urlencode({'q' : query})
@@ -48,7 +50,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

@@ -9,14 +9,14 @@ import os
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('learn\s+(\S+)\s+(.+)')	# regular expression that needs to be matched
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = False				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?
-
-		self.dbfile = os.path.abspath(os.path.dirname(sys.argv[0]) + '/db-locations')
+		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
+		self.dbfile = dir + '/db-%s-locations' % ns
 
 	def lookup(self, nick):
 		db = anydbm.open(self.dbfile, 'c', 0640)
@@ -31,7 +31,9 @@ class match(object):
 		db.close()
 
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
 		if len(args) == 1:
 			return self.lookup(args[0])
 		else:
@@ -43,7 +45,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

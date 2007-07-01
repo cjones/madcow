@@ -10,12 +10,15 @@ import learn
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('^(?:fc|forecast|weather)(?:\s+(.*)$)?')
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?
+		self.ns = ns
+		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
+		self.dir = dir
 		self.help = 'fc <location> - look up forecast for location'
 		self.help = self.help + '\nfc @nick - lookup forecast for this nick\'s location'
 		self.help = self.help + '\nlearn <nick> <location> - permanently learn a nick\'s location'
@@ -34,10 +37,13 @@ class match(object):
   		self.windDir = re.compile('[0-9.]+&deg;</span>\s*\(([NSEW]+)\)</td>')
 
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
+
 		try:
 			if args[0] is None:
-				query = learn.match().lookup(nick)
+				query = learn.match(dir=self.dir, ns=self.ns).lookup(nick)
 				if not query:
 					return '%s: Teach me where you live: learn <nick> <location>' % nick
 			else:
@@ -128,7 +134,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

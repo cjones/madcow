@@ -24,23 +24,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 import sys
 import optparse
-import glob
 import os
 import ConfigParser
 import copy
 import re
 import threading
-from modules.include import factoids, seen, memebot
+import time
 
 class madcow(object):
-	def __init__(self):
-		self.factoids = factoids.Factoids()
-		self.seen = seen.Seen()
-		self.memebot = memebot.MemeBot()
-		self.ignoreModules = ['__init__', 'template', 'seen']
-		self.moduleDir = os.path.abspath(os.path.dirname(sys.argv[0])) + '/modules'
+	def __init__(self, config=None):
+		if config is not None: self.config = config
+		self.ns = self.config.modules.dbnamespace
+		self.ignoreModules = [ '__init__', 'template' ]
+		self.disabledModules = [] # XXX load this from config
+		self.dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+		self.moduleDir = self.dir + '/modules'
+		self.verbose = True
 		self.loadModules()
 		self.outputLock = threading.RLock()
+
+	def status(self, msg=None):
+		if msg is not None and self.verbose is True:
+			print '[%s] %s' % (time.asctime(), msg.strip())
 
 	def start(self):
 		pass
@@ -51,21 +56,52 @@ class madcow(object):
 	def botName(self):
 		pass
 
-	# dynamically load module classes
+	"""
+	Dynamic loading of module extensions. This looks for .py files in
+	The module directory. They must be well-formed (based on template.py).
+	If there are any problems loading, it will skip them instead of crashing.
+	"""
+
 	def loadModules(self):
 		self.modules = {}
 		self.usageLines = []
-		for file in glob.glob(self.moduleDir + '/*.py'):
-			moduleName = os.path.basename(file[0:-3])
-			if moduleName in self.ignoreModules: continue
-			module = __import__('modules.' + moduleName)
-			exec 'obj = module.%s.match()' % moduleName
-			if obj.enabled is False: continue
-			self.modules[moduleName] = obj
-			try:
-				if obj.help: self.usageLines.append(obj.help)
-			except:
-				pass
+
+		for base, subdirs, files in os.walk(self.moduleDir):
+			self.status('*** Reading modules from %s' % base)
+			for file in files:
+				if file.endswith('.py') is False: continue
+				moduleName = file[:-3]
+
+				if moduleName in self.ignoreModules:
+					continue
+
+				if moduleName in self.disabledModules:
+					self.status('* Skipping module %s' % moduleName)
+					continue
+
+
+				try:
+					module = __import__('modules.%s' % moduleName)
+					exec 'obj = module.%s.match(config=self.config, ns=self.ns, dir=self.dir)' % moduleName
+
+					if obj is None: raise Exception, 'no match() class'
+					if obj.enabled is False: raise Exception, 'disabled'
+
+					try:
+						if obj.help is not None:
+							self.usageLines.append(obj.help)
+
+					except: pass
+
+					self.status('* Loaded module %s' % moduleName)
+					self.modules[moduleName] = obj
+
+				except Exception, e:
+					self.status("WARN: Couldn't load module %s: %s" % (moduleName, e))
+
+			# don't recurse
+			break
+
 
 	# checks if we're being addressed and if so, strips that out
 	def checkAddressing(self, message):
@@ -101,8 +137,12 @@ class madcow(object):
 	def usage(self):
 		return '\n'.join(self.usageLines)
 
-	def processThread(self, obj, nick, args, output):
-		response = obj.response(nick, args)
+	def processThread(self, *args, **kwargs):
+		obj = args[0]
+		output = args[1]
+		nick = kwargs['nick']
+
+		response = obj.response(nick, **kwargs)
 		if response is not None:
 			self.outputLock.acquire()
 			try: output(response)
@@ -127,37 +167,28 @@ class madcow(object):
 			output(self.usage())
 			return
 
-		# factoids
-		response = self.factoids.check(nick, addressed, correction, message)
-		if response is not None:
-			output(response)
-
-		# seen
-		if private is False:
-			response = self.seen.response(nick, channel, message)
-			if response is not None:
-				output(response)
-
-		# memebot
-		if private is False:
-			response = self.memebot.check(nick, channel, message, addressed)
-			if response is not None:
-				output(response)
-
 
 		### DYNAMIC MODULES ###
 
-		for module, obj in self.modules.iteritems():
+		for moduleName, obj in self.modules.iteritems():
 			if obj.requireAddressing and addressed is not True: continue
 
-			try: args = obj.pattern.search(message).groups()
+			try: matchGroups = obj.pattern.search(message).groups()
 			except: continue
 
+			kwargs = {
+				'nick'		: nick,
+				'channel'	: channel,
+				'addressed'	: addressed,
+				'correction'	: correction,
+				'args'		: matchGroups,
+			}
+
 			if self.allowThreading is True and obj.thread is True:
-				t = threading.Thread(target = self.processThread, args = (obj, nick, args, output))
+				t = threading.Thread(target=self.processThread, args=(obj, output), kwargs=kwargs)
 				t.start()
 			else:
-				response = obj.response(nick, args)
+				response = obj.response(**kwargs)
 				if response is not None: output(response)
 
 

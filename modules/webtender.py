@@ -9,7 +9,7 @@ from include import utils
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('drinks?\s+(.+)')	# regular expression that needs to be matched
 		self.requireAddressing = True			# True/False - require addressing?
@@ -25,7 +25,9 @@ class match(object):
 		self.instructions = re.compile('<H3>Mixing instructions:</H3>.*?<P>(.*?)</P>', re.DOTALL)
 
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
 		url = self.baseURL + '/cgi-bin/search?' + urllib.urlencode(
 				{	'verbose'	: 'on',
 					'name'		: args[0],	}
@@ -54,7 +56,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

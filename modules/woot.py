@@ -24,7 +24,7 @@ class currency(float):
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('(?:woot)(?:\s+(\S+))?')
 		self.requireAddressing = True			# True/False - require addressing?
@@ -36,7 +36,9 @@ class match(object):
 		self.max = 200
 	
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
 		try:
 	
 			url = self.baseURL + '/Blog/Rss.aspx'
@@ -70,7 +72,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

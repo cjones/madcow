@@ -8,7 +8,7 @@ import urllib
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('(?:stocks?|quote)\s+([a-z0-9.-]+)', re.I)
 		self.requireAddressing = True			# True/False - require addressing?
@@ -21,7 +21,9 @@ class match(object):
 		self.change = re.compile('Change:</td><td class="yfnc_tabledata1">(?:<img.*?alt="(.*?)">)? <b.*?>(.*?)</b>')
 
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
 		try:
 			doc = urllib.urlopen('http://finance.yahoo.com/q?s=' + args[0]).read()
 			company = self.company.search(doc).group(1)
@@ -44,7 +46,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 

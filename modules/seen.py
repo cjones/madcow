@@ -9,10 +9,17 @@ import time
 import os
 
 # class for this module
-class Seen(object):
-	def __init__(self, dir = None):
-		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-		self.file = dir + '/db-seen'
+class match(object):
+	def __init__(self, dir=None, ns='default', config=None):
+		self.enabled = True				# True/False - enabled?
+		self.pattern = re.compile('(.+)')	# regular expression that needs to be matched
+		self.requireAddressing = False			# True/False - require addressing?
+		self.thread = False				# True/False - should bot spawn thread?
+		self.wrap = False				# True/False - wrap output?
+		self.help = 'seen <nick> - query bot about last time someone was seen speaking'
+
+		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
+		self.file = dir + '/db-%s-seen' % ns
 		self.seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)
 
 	def get(self, user):
@@ -48,7 +55,11 @@ class Seen(object):
 		db.close()
 
 	# function to generate a response
-	def response(self, nick, channel, line):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		channel = kwargs['channel']
+		line = kwargs['args'][0]
+
 		try:
 			self.set(nick, channel, line)
 
@@ -64,14 +75,13 @@ class Seen(object):
 
 		except Exception, e:
 			print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-			return '%s: I failed to perform that lookup' % nick
 
 
 # this is just here so we can test the module from the commandline
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
-	obj = match(dir = '../..')
-	print obj.response('testUser', argv)
+	obj = match()
+	print obj.response(nick='testUser', args=argv, channel='#test')
 
 	return 0
 

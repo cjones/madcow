@@ -9,10 +9,17 @@ import anydbm
 import random
 
 # class for this module
-class Factoids(object):
-	def __init__(self, dir = None):
-		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+class match(object):
+	def __init__(self, dir=None, ns='default', config=None):
+		self.enabled = True				# True/False - enabled?
+		self.pattern = re.compile('(.+)')	# regular expression that needs to be matched
+		self.requireAddressing = False			# True/False - require addressing?
+		self.thread = False				# True/False - should bot spawn thread?
+		self.wrap = False				# True/False - wrap output?
+
+		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
 		self.dir = dir
+		self.ns = ns
 
 		self.qmark = re.compile('\s*\?+\s*$')
 		self.isare = re.compile('^(.+?)\s+(is|are)\s+(.+)\s*$', re.I)
@@ -24,13 +31,21 @@ class Factoids(object):
 		self.forget = re.compile('forget[:\-, ]+(.+)$', re.I)
 
 	def dbFile(self, type):
-		return self.dir + '/db-factoids-' + type.lower()
+		return self.dir + '/db-%s-factoids-%s' % (self.ns, type.lower())
 
-	def get(self, type, key):
+	def get(self, type, key, val=None):
 		db = anydbm.open(self.dbFile(type), 'c', 0640)
-		val = db.get(key.lower())
-		db.close()
+
+		try:
+			key = key.lower()
+			if db.has_key(key):
+				val = db[key]
+		finally:
+			db.close()
+
 		return val
+
+
 
 	def set(self, type, key, val):
 		db = anydbm.open(self.dbFile(type), 'c', 0640)
@@ -52,7 +67,12 @@ class Factoids(object):
 		else:
 			return True
 
-	def check(self, nick, addressed, correction, message):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		addressed = kwargs['addressed']
+		correction = kwargs['correction']
+		message = kwargs['args'][0]
+
 		try:
 			# remove dubious whitespace
 			message = message.strip()
@@ -91,15 +111,12 @@ class Factoids(object):
 					val = None
 					question = True
 
-			# XXX this should test both, if is doesn't work, use are :P
-			# foo? use 'is' database, ambiguous
 			elif question is True:
 				key = message
 				type = 'is'
 				question = True
 			else:
 				return
-
 
 			### QUERY
 			if question is True:
@@ -169,8 +186,8 @@ def main(argv = None):
 
 	a = argv[0] == 'True' and True or False
 	c = argv[1] == 'True' and True or False
-	f = Factoids('../..')
-	print f.check('testUser', a, c, argv[2])
+	obj = match()
+	print obj.response(nick='testUser', addressed=a, correction=c, args=[argv[2]])
 
 	return 0
 

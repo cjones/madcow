@@ -9,7 +9,7 @@ import urllib2
 
 # class for this module
 class match(object):
-	def __init__(self):
+	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
 		self.pattern = re.compile('calc\s+(.+)')	# regular expression that needs to be matched
 		self.requireAddressing = True			# True/False - require addressing?
@@ -22,7 +22,9 @@ class match(object):
 		self.strip = re.compile('<[^>]+>')
 
 	# function to generate a response
-	def response(self, nick, args):
+	def response(self, *args, **kwargs):
+		nick = kwargs['nick']
+		args = kwargs['args']
 		try:
 			query = ' '.join(args)
 			url = 'http://www.google.com/search?' + urllib.urlencode(
@@ -54,7 +56,7 @@ class match(object):
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
 	obj = match()
-	print obj.response('testUser', argv)
+	print obj.response(nick='testUser', args=argv)
 
 	return 0
 
