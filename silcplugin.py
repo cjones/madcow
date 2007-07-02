@@ -39,7 +39,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   
   def private_message(self, sender, flags, message):
     output = lambda m: self.send_to_user(sender, m)
-    response = self.processMessage(message, sender.nickname, channel.channel_name, True, output)
+    response = self.processMessage(message, sender.nickname, None, True, output)
   
   # not much of a point recovering from a kick when the silc code just segfaults on you :/
   #def notify_kicked(self, kicked, reason, kicker, channel):
