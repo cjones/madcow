@@ -11,7 +11,7 @@ import random
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('(.*)')	# regular expression that needs to be matched
+		self.pattern = re.compile('^(.+)$')	# regular expression that needs to be matched
 		self.requireAddressing = False			# True/False - require addressing?
 		self.thread = False				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?
@@ -32,22 +32,25 @@ class match(object):
 				
 				matchString, responses = responses[0], responses[1:]
 				matches = re.compile('\s*,\s*').split(matchString)
-
+				matches = [re.compile(r'\b' + m + r'\b', re.I) for m in matches]
 				self.data.append((matches, responses))
 		except:
 			self.enabled = False
 
+		#print self.data
+
 
 	# function to generate a response
 	def response(self, *args, **kwargs):
-		nick = kwargs['nick']
-		args = kwargs['args']
 		if self.enabled is False: return
 
-		line = ' '.join(args)
+		nick = kwargs['nick']
+		args = kwargs['args']
+		line = args[0]
+
 		for matches, responses in self.data:
 			for match in matches:
-				if re.compile(match, re.I).search(line):
+				if match.search(line) is not None:
 					return random.choice(responses)
 
 

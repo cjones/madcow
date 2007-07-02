@@ -45,6 +45,11 @@ class MadcowProtocolError(MadcowError):
 	Problem with underlying protocol handling
 	"""
 
+class MadcowModuleError(MadcowError):
+	"""
+	Error occured processing extensions
+	"""
+
 class Madcow(object):
 	def __init__(self, config=None, dir=None, verbose=False):
 		self.config = config
@@ -80,49 +85,37 @@ class Madcow(object):
 	If there are any problems loading, it will skip them instead of crashing.
 	"""
 	def loadModules(self):
-		self.modules = {}
-
 		try: disabled = re.split('\s*[,;]\s*', self.config.modules.disabled)
 		except: disabled = []
 
-		if len(disabled) == 0: self.status('No modules are disabled')
-		else: self.status('The following modules will not be loaded: %s' % ', '.join(disabled))
+		files = os.walk(self.moduleDir).next()[2]
+		self.status('[MOD] * Reading modules from %s' % self.moduleDir)
 
-		for base, subdirs, files in os.walk(self.moduleDir):
-			self.status('*** Reading modules from %s' % base)
-			for file in files:
-				if file.endswith('.py') is False: continue
-				moduleName = file[:-3]
+		for file in files:
+			if file.endswith('.py') is False: continue
+			modName = file[:-3]
 
-				if moduleName in self.ignoreModules:
-					continue
+			if modName in self.ignoreModules: continue
 
-				if moduleName in disabled:
-					self.status('* Skipping %s because it is disabled in config' % moduleName)
-					continue
+			if modName in disabled:
+				self.status('[MOD] Skipping %s because it is disabled in config' % modName)
+				continue
 
+			try:
+				module = __import__('modules.' + modName, globals(), locals(), ['match'])
+				MatchClass = getattr(module, 'match')
+				obj = MatchClass(config=self.config, ns=self.ns, dir=self.dir)
 
-				try:
-					module = __import__('modules.%s' % moduleName)
-					exec 'obj = module.%s.match(config=self.config, ns=self.ns, dir=self.dir)' % moduleName
+				if obj.enabled is False: raise MadcowModuleError, 'disabled'
 
-					if obj is None: raise Exception, 'no match() class'
-					if obj.enabled is False: raise Exception, 'disabled'
+				if hasattr(obj, 'help') and obj.help is not None:
+					self.usageLines.append(obj.help)
 
-					try:
-						if obj.help is not None:
-							self.usageLines.append(obj.help)
+				self.status('[MOD] Loaded module %s' % modName)
+				self.modules[modName] = obj
 
-					except: pass
-
-					self.status('* Loaded module %s' % moduleName)
-					self.modules[moduleName] = obj
-
-				except Exception, e:
-					self.status("WARN: Couldn't load module %s: %s" % (moduleName, e))
-
-			# don't recurse
-			break
+			except Exception, e:
+				self.status("[MOD] WARN: Couldn't load module %s: %s" % (modName, e))
 
 
 	# checks if we're being addressed and if so, strips that out
@@ -185,14 +178,14 @@ class Madcow(object):
 			return
 
 		# display usage
-		if message.lower() == 'help':
+		if addressed is True and message.lower() == 'help':
 			output(self.usage())
 			return
 
 
 		### DYNAMIC MODULES ###
 
-		for moduleName, obj in self.modules.iteritems():
+		for modName, obj in self.modules.iteritems():
 			if obj.requireAddressing and addressed is not True: continue
 
 			try: matchGroups = obj.pattern.search(message).groups()
@@ -242,6 +235,11 @@ class Config(object):
 				elif isFalse.search(val): val = False
 				setattr(self, key, val)
 
+	def __getattr__(self, attr):
+		try: return getattr(self, attr)
+		except:
+			try: return getattr(self, attr.lower())
+			except: return None
 
 
 
@@ -249,7 +247,7 @@ class Config(object):
 Standard method of daemonizing on POSIX systems
 """
 def detach():
-	if os.name != 'posix': return
+	if os.name != 'posix': return False
 	if os.fork() > 0: sys.exit(0)
 	os.setsid()
 	if os.fork() > 0: sys.exit(0)
@@ -260,6 +258,7 @@ def detach():
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
+	return True
 
 
 """
@@ -298,7 +297,8 @@ def main(argv=None):
 		raise MadcowProtocolError, "couldn't load %s: %s" % (protocol, e)
 
 	# daemonize if requested (and on a posix system)
-	if config.main.detach is True or opts.detach is True: detach()
+	if config.main.detach is True or opts.detach is True:
+		if detach() is True: opts.verbose = False
 
 	# run bot
 	bot = ProtocolHandler(config=config, dir=dir, verbose=opts.verbose)
