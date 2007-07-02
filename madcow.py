@@ -30,26 +30,6 @@ import re
 import threading
 import time
 
-class MadcowError(Exception):
-	"""
-	Abstract base class for madcow runtime problems
-	"""
-	def __init__(self, error=None):
-		self.error = error
-
-	def __str__(self):
-		return self.error
-
-class MadcowProtocolError(MadcowError):
-	"""
-	Problem with underlying protocol handling
-	"""
-
-class MadcowModuleError(MadcowError):
-	"""
-	Error occured processing extensions
-	"""
-
 class Madcow(object):
 	def __init__(self, config=None, dir=None, verbose=False):
 		self.config = config
@@ -106,7 +86,7 @@ class Madcow(object):
 				MatchClass = getattr(module, 'match')
 				obj = MatchClass(config=self.config, ns=self.ns, dir=self.dir)
 
-				if obj.enabled is False: raise MadcowModuleError, 'disabled'
+				if obj.enabled is False: raise Exception, 'disabled'
 
 				if hasattr(obj, 'help') and obj.help is not None:
 					self.usageLines.append(obj.help)
@@ -291,16 +271,18 @@ def main(argv=None):
 	if opts.protocol is not None: protocol = opts.protocol
 	else: protocol = config.main.module
 
+	# dynamic load of protocol handler
 	try:
-		exec 'from %s import ProtocolHandler' % protocol
+		module = __import__(protocol, globals(), locals(), ['ProtocolHandler'])
+		ProtocolHandler = getattr(module, 'ProtocolHandler')
 	except Exception, e:
-		raise MadcowProtocolError, "couldn't load %s: %s" % (protocol, e)
+		print >> sys.stderr, "FATAL: Couldn't load protocol %s: %s" % (protocol, e)
+		return 1
 
-	# daemonize if requested (and on a posix system)
+	# daemonize if requested
 	if config.main.detach is True or opts.detach is True:
 		if detach() is True: opts.verbose = False
 
-	# run bot
 	bot = ProtocolHandler(config=config, dir=dir, verbose=opts.verbose)
 	bot.start()
 

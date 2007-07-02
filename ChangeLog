@@ -5,7 +5,6 @@
 * Clean up jesus module to not have footnotes
 * Stock module can now do mutual funds
 
-
 1.0.2: Sat Jun 30 22:32:09 PDT 2007
 
 * Refactor module API to expose more data to the extensions
