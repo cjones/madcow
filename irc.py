@@ -5,16 +5,15 @@ import irclib
 import time
 import re
 import sys
-from madcow import madcow
+from madcow import Madcow
 
 # set for LOTS of verbosity
 irclib.DEBUG = 0
 
-class OutputHandler(madcow):
-	def __init__(self, config):
-		self.config = config
+class ProtocolHandler(Madcow):
+	def __init__(self, config=None, dir=None, verbose=False):
 		self.allowThreading = True
-		madcow.__init__(self)
+		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
 
 		self.irc = irclib.IRC()
 		self.server = self.irc.server()

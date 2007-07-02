@@ -9,16 +9,15 @@ import silc
 import time
 import re
 
-class OutputHandler(madcow.madcow, silc.SilcClient):
-  def __init__(self, config):
-    self.config = config
-    madcow.madcow.__init__(self)
+class ProtocolHandler(madcow.Madcow, silc.SilcClient):
+  def __init__(self, config=None, dir=None, verbose=False):
+    madcow.Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
     
     keys = silc.create_key_pair("silc.pub", "silc.priv", passphrase="")
     nick = self.config.silcplugin.nick
     silc.SilcClient.__init__(self, keys, nick, nick, nick)
     
-    self.allowThreading = config.silcplugin.allowThreading
+    self.allowThreading = True
     self.channels = re.split('\s*[,;]\s*', self.config.silcplugin.channels)
   
   def botName(self):

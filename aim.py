@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 
-from madcow import madcow
+from madcow import Madcow
 import os
 import re
 from twisted.protocols import oscar
 from twisted.internet import protocol, reactor
 from modules.include import utils
 
-class OutputHandler(madcow):
-	def __init__(self, config):
-		self.config = config
+class ProtocolHandler(Madcow):
+	def __init__(self, config=None, dir=None, verbose=False):
 		self.allowThreading = False
-		madcow.__init__(self)
+		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
 		self.newline = re.compile('[\r\n]+')
 
 	def start(self):
@@ -20,7 +19,7 @@ class OutputHandler(madcow):
 			reactor, OSCARAuth, self.config.aim.username, self.config.aim.password, icq = 0
 		)
 		p.connectTCP(*server)
-		p.protocolClass.BOSClass._OutputHandler = self
+		p.protocolClass.BOSClass._ProtocolHandler = self
 		reactor.run()
 
 	def output(self, aim, nick, message):
@@ -38,14 +37,14 @@ class OSCARConnection(oscar.BOSConnection):
 
 	def gotBuddyList(self, l):
 		self.activateSSI()
-		self.setProfile(self._OutputHandler.config.aim.profile)
+		self.setProfile(self._ProtocolHandler.config.aim.profile)
 		self.setIdleTime(0)
 		self.clientReady()
 
 	def receiveMessage(self, user, multiparts, flags):
 		user = user.name
 		message = utils.stripHTML(multiparts[0][0])
-		bot = self._OutputHandler
+		bot = self._ProtocolHandler
 		callback = lambda m: bot.output(self, user, m)
 		bot.processMessage(message, user, 'AIM', True, callback)
 
