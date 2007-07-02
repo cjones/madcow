@@ -9,10 +9,6 @@ In no particular order..
 FIXME: (blatant bugs, broken stuff)
 XXX: (known shortcomings)
 
-*** config-related
-
-- need verbosity flags in config & cli
-
 *** irc module
 
 - identify with nickserv in irc module (need to test various protocols :/)
@@ -21,7 +17,6 @@ XXX: (known shortcomings)
 *** modules
 
 - change urban/bbcnew/dictionary match syntax for defintion number. can't look up "area 52" e.g.
-- grufti module *needs* boundary checking so substrings don't trigger
 - factoids and grufti *always* trigger, which is annoying sometimes. when addressed they should always trigger,
   but when not addressed, only triggering n% of the time would be ideal. or not at all. should be configurable
 - priority on modules and/or short-circuiting to prevent match chaining spam
@@ -33,13 +28,7 @@ XXX: (known shortcomings)
 
 *** base class
 
-- add some verbosity. right now you don't know what's going on until it gets in channel
-- too many modules sitting in the include directory because they aren't getting enough metadata from the bot
-  controller. this is a case of too much abstraction. modules should have access to this data whether they
-  decide to use it or not. the only thing that should be in the include directory are third party tools and the
-  util.py module that has helper functions
-- documentation on individual modules is lacking. they should be explained so users can enable/disable them
-  in config without being assaulted by potentially offensive or spammy stuff when deployed
+- add some verbosity. IRC is done, silc seems alright.. AIM needs logging.
 
 TODO: (feature requests)
 
