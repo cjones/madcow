@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}URL Index for {{ date }}{% endblock %}
+
+{% block sidebar %}
+
+{% include "sidebar.html" %}
+
+{% endblock %}
+
+{% block content %}
+
+
+{% include "navbar.html" %}
+
+<h3>{{ date }}</h3>
+
+<table border="0" cellspacing="0" cellpadding="0">
+  {% for url in urls %}
+    <tr>
+      <td>{{ url.stamp }}</td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      <td><a href="/author/{{ url.author.id }}">{{ url.author.name }}</a></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      <td nowrap><a href="{{ url.url }}" target="new">{{ url.turl }}</a></td>
+    </tr>
+  {% endfor %}
+</table>
+
+<hr />
+
+{% include "navbar.html" %}
+
+{% endblock %}
+

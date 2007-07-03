@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" type="text/css" />
+    <title>{% block title %}title{% endblock %}</title>
+  </head>
+  <body>
+    <div id="main">
+
+      <div id="topmenu">
+	{% block topmenu %}
+	{% endblock %}
+      </div>
+
+      <div id="header">
+        <span class="title">memebot<span class="darktitle">r</span>&nbsp;<font size="-1">beta</font></span><br/>
+      </div>
+
+      <div id="content">
+
+	<div id="breadcrumb">
+	  {% block sitenav %}
+	  {% endblock %}
+	</div>
+
+	{% block content %}
+	{% endblock %}
+
+	<div id="footer">
+	  &copy; 2007 Madcow Enterprises. All rights reserved.
+	</div>
+      </div>
+
+      <div id="lefty">
+	{% block sidebar %}
+	{% endblock %}
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

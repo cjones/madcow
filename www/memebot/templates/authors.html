@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}List of Authors{% endblock %}
+
+{% block sidebar %}
+  {% include "sidebar.html" %}
+{% endblock %}
+
+{% block content %}
+  <h3>List of Authors</h3>
+
+  <table border="0" cellspacing="2" cellpadding="0">
+    {% for author in authors %}
+      <tr>
+        <td width="50px">{{ author.1 }}</td>
+        <td><a href="/author/{{ author.0.id }}/">{{ author.0.name }}</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+
+{% endblock %}
+
+{% block sitenav %}
+  <a href="/">home</a> &gt; <a href="/author/">authors</a>{% if top %} &gt; top{% endif %}
+{% endblock %}
