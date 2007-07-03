@@ -61,7 +61,7 @@ class match(object):
 		channel.createTable(ifNotExists = True)
 
 		self.riffs = [
-			'memeriffs=OLD MEME ALERT!',
+			'OLD MEME ALERT!',
 			'omg, SO OLD!',
 			'Welcome to yesterday.',
 			'been there, done that.',
