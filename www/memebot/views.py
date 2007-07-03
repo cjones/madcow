@@ -35,7 +35,12 @@ def url(request, *args, **kwargs):
 	"""
 	Image filter
 	"""
-	toggle = '<a href="/url/%s/img/">Images Only</a>' % page
+	toggles = [
+		'<a href="/url/%s/img/">Images Only</a>' % page,
+		'<a href="/url/%s/youtube/">YouTube Only</a>' % page,
+	]
+
+	filter = None
 	if kwargs.has_key('img'):
 		urls = urls.filter(
 			Q(url__endswith='.jpg')  |
@@ -45,8 +50,13 @@ def url(request, *args, **kwargs):
 			Q(url__endswith='.png')
 		)
 
-		toggle = '<a href="/url/%s/">All Links</a>' % page
+		toggles = ['<a href="/url/%s/">All Links</a>' % page]
+		filter = 'img'
 
+	elif kwargs.has_key('youtube'):
+		urls = urls.filter(url__contains='youtube.com')
+		toggles = ['<a href="/url/%s/">All Links</a>' % page]
+		filter = 'youtube'
 
 
 	"""
@@ -64,6 +74,18 @@ def url(request, *args, **kwargs):
 	if page == 2:
 		newer = None
 
+	older = '/url/' + str(page + 1)
+
+	if filter is not None:
+		if older is not None:
+			older += '/%s' % filter
+
+		if newer is not None:
+			newer += '/%s' % filter
+
+		if today is not None:
+			today += '/%s' % filter
+
 	"""
 	Render content and return
 	"""
@@ -72,10 +94,10 @@ def url(request, *args, **kwargs):
 		'urls'	: urls,
 		'date'	: date,
 
-		'older'	: '/url/' + str(page + 1),
+		'older'	: older,
 		'today'	: today,
 		'newer'	: newer,
-		'toggle': toggle,
+		'toggles': toggles,
 	})
 	return HttpResponse(t.render(c))
 
@@ -114,7 +136,12 @@ def author(request, *args, **kwargs):
 
 	urls = author.url_set.order_by('-id')
 
-	toggle = '<a href="/author/%s/img/">Images Only</a>' % kwargs['id']
+	toggles = [
+		'<a href="/author/%s/img/">Images Only</a>' % kwargs['id'],
+		'<a href="/author/%s/youtube/">YouTube Only</a>' % kwargs['id'],
+	]
+
+	filter = None
 	if kwargs.has_key('img'):
 		urls = urls.filter(
 			Q(url__endswith='.jpg')  |
@@ -124,13 +151,20 @@ def author(request, *args, **kwargs):
 			Q(url__endswith='.png')
 		)
 
-		toggle = '<a href="/author/%s/">All Links</a>' % kwargs['id']
+		toggles = ['<a href="/author/%s/">All Links</a>' % kwargs['id']]
+		filter = 'img'
+
+	elif kwargs.has_key('youtube'):
+		urls = urls.filter(url__contains='youtube.com')
+		toggles = ['<a href="/author/%s/">All Links</a>' % kwargs['id']]
+		filter = 'youtube'
+
 
 	t = loader.get_template('author.html')
 	c = Context({
 		'author'	: author,
 		'urls'		: urls,
-		'toggle'	: toggle,
+		'toggles'	: toggles,
 	})
 
 	return HttpResponse(t.render(c))

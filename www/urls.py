@@ -10,11 +10,13 @@ urlpatterns = patterns('',
 	(r'^author/top/$',			'www.memebot.views.top'),
 	(r'^author/(?P<id>\d+)/$',		'www.memebot.views.author'),
 	(r'^author/(?P<id>\d+)/(?P<img>img)/$',	'www.memebot.views.author'),
+	(r'^author/(?P<id>\d+)/(?P<youtube>youtube)/$',	'www.memebot.views.author'),
 
 
 	# url list views
 	(r'^url/(?P<page>\d+)/$',		'www.memebot.views.url'),
 	(r'^url/(?P<page>\d+)/(?P<img>img)/$',	'www.memebot.views.url'),
+	(r'^url/(?P<page>\d+)/(?P<youtube>youtube)/$',	'www.memebot.views.url'),
 
 	# static content
 	(r'^static/(?P<path>.*)$',		'django.views.static.serve',

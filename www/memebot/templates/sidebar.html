@@ -2,7 +2,9 @@
   <a href="/author/top">Top 10 Authors</a>
   <a href="/author/">All Authors</a>
   <a href="http://goatse.cz/">Goatse</a>
-  {% if toggle %}{{ toggle }}{% endif %}
+  {% for toggle in toggles %}
+    {{ toggle }}
+  {% endfor %}
   <!--
   <a href="#">RSS Feed</a>
   <a href="#">MemeCheckr</a>
