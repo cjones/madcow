@@ -8,6 +8,8 @@
 # into your database.
 
 from django.db import models
+import urlparse
+import re
 
 class Author(models.Model):
 	name = models.TextField(unique=True)
@@ -20,6 +22,7 @@ class Author(models.Model):
 		return count
 
 	count = property(getCount)
+
 
 
 
@@ -72,6 +75,45 @@ class URL(models.Model):
 
 	turl = property(getTruncatedURL)
 	stamp = property(getTimeStamp)
+
+	def getSafe(self):
+		# XXX i'm sure there's a safe, easy way to do this, but
+		# it needed to be done asap since the site is live.
+		# this brutally removes any XSS crap or goatse redirects.
+		# .. bastards
+
+		uri = urlparse.urlparse(self.url)
+
+		badStuff = re.compile('["><]')
+
+		schema = badStuff.sub('', uri[0])
+		host = badStuff.sub('', uri[1])
+		path = badStuff.sub('', uri[2])
+		query = badStuff.sub('', uri[4])
+		frag = badStuff.sub('', uri[5])
+
+		if schema not in ['http', 'https']:
+			schema = 'http'
+
+		if path == '': path = '/'
+
+
+		newURL = '%s://%s%s' % (schema, host, path)
+
+		if len(query) > 0:
+			newURL += '?%s' % query
+
+		if len(frag) > 0:
+			newURL += '#%s' % frag
+
+		return newURL
+
+
+
+
+
+
+	safe = property(getSafe)
 
 
 	def __str__(self):

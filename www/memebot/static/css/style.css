@@ -4,6 +4,10 @@ body
 	margin: 0 auto;
 	background: #f4f4f4 url(images/bg.gif) top center repeat-y;
 }
+#search
+{
+	float: right;
+}
 #header
 {
 	vertical-align: top;
