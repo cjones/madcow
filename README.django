@@ -1,0 +1,5 @@
+REQUIREMENTS
+
+	A database of URLs.  This is populated from the memebot.py module.
+	Django .96 or higher.  This is the framework backend. (http://www.djangoproject.com/)
+
