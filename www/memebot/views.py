@@ -7,6 +7,8 @@ import os
 from django.core.cache import cache
 import re
 from django.db.models import Q
+from django.utils.html import escape
+from urllib import urlencode
 
 def root(request, *args, **kwargs):
 	return HttpResponseRedirect('/url/1')
@@ -168,6 +170,97 @@ def author(request, *args, **kwargs):
 	})
 
 	return HttpResponse(t.render(c))
+
+
+def search(request, *args, **kwargs):
+	t = loader.get_template('search_results.html')
+
+	resultsPerPage = 25
+	maxPages = 35
+
+	"""
+	if any part of this encountrs an exception, be
+	sure to return a friendly "no results found" page
+	"""
+	try:
+		term = request.GET['q']
+		if len(term) == 0: raise Exception, 'No query specified'
+
+		"""
+		To prevent unnecessary DB grinding, only calculate
+		the results of a particular query once every 5 minutes.
+		This allows the user to sift through pages of results
+		without executing the query again every time.
+		"""
+		cacheKey = 'search_' + term
+		results = cache.get(cacheKey)
+
+		if results is None:
+			results = URL.objects.filter(
+				Q(url__icontains=term) |
+				Q(clean__icontains=term) |
+				Q(author__name__icontains=term)
+				).order_by('-id')[:(resultsPerPage * maxPages)]
+
+			"""
+			Force evaluation and then cache it. Otherwise it
+			would just cache the QuerySet, which isn't helpful
+			"""
+			results = list(results)
+			cache.set(cacheKey, results, 300)
+
+
+		# what page does the user want? if unspecified, start at 1
+		if kwargs.has_key('page'): page = int(kwargs['page'])
+		else: page = 1
+
+		# calculate how many pages exist
+		resultSize = len(results)
+		pages = resultSize / resultsPerPage
+		if (resultSize % resultsPerPage): pages += 1
+
+		# boundary check on requested page
+		if page < 1: page = 1
+		if page > pages: page = pages
+
+		# calculate which part of the resultset to show
+		start = (page - 1) * resultsPerPage
+		end = start + resultsPerPage
+		if end > resultSize: end = resultSize
+		results = results[start:end]
+
+
+		# construct page navigation bar
+		if pages > 1:
+			navbar = []
+			for p in range(1, pages+1):
+				if p == page: link = '<b><u>%s</u></b>' % p
+				else: link = '<a href="/search/%s/?%s">%s</a>' % (p, urlencode({'q': term}), p)
+				navbar.append(link)
+
+			navbar = '&nbsp;'.join(navbar)
+		else:
+			navbar = None
+
+
+		"""
+		Render content and return
+		"""
+
+		c = Context({
+			'results':	results,
+			'pages':	pages,
+			'start':	(start + 1),
+			'end':		end,
+			'total':	resultSize,
+			'term':		term,
+			'navbar':	navbar,
+		})
+
+		return HttpResponse(t.render(c))
+
+	except Exception, e:
+		return HttpResponse(t.render(Context({ 'error' : e })))
 
 
 

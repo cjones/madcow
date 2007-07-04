@@ -13,16 +13,15 @@
 	{% endblock %}
       </div>
 
+      <div id="search">
+	<form action="/search/" method="GET">
+	  <input type="submit" value="search" class="search" onmouseover="this.className='search searchHover'" onmouseout="this.className='search'" />
+	  <input type="text" name="q" />
+	</form>
+      </div>
+
       <div id="header">
         <span class="title">memebot<span class="darktitle">r</span>&nbsp;<font size="-1">beta</font></span>
-	<!--
-	<div id="search">
-	  <form action="#" method="post">
-	    <input type="text" name="search" class="search" />
-	    <input name="search_button" type="submit" class="button" value="search" />
-	  </form>
-	</div>
-	-->
       </div>
 
       <div id="content">

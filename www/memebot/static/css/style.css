@@ -6,7 +6,13 @@ body
 }
 #search
 {
+	vertical-align: top;
 	float: right;
+    	text-align: right;
+	padding-right: 172px;
+	padding-top: 5px;
+	font-family: Verdana, Arial, sans-serif;
+	font-weight: bold;
 }
 #header
 {
@@ -209,3 +215,25 @@ li
 	list-style-type: none;
 	line-height: 160%;
 }
+input.search
+{
+	font-family: Verdana, Arial, sans-serif;
+	font-weight: bold;
+	font-size: 84%;
+	color: #050;
+	background-color:#fff;
+	border:1px solid;
+	border-top-color:#696;
+	border-left-color:#696;
+	border-right-color:#363;
+	border-bottom-color:#363;
+}
+
+input.searchHover
+{
+	border-top-color:#c63;
+	border-left-color:#c63;
+	border-right-color:#930;
+	border-bottom-color:#930;
+}
+

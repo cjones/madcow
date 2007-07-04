@@ -5,6 +5,9 @@ urlpatterns = patterns('',
 	# admin interface
 	(r'^admin/',				include('django.contrib.admin.urls')),
 
+	(r'^search/$',				'www.memebot.views.search'),
+	(r'^search/(?P<page>\d+)/$',		'www.memebot.views.search'),
+
 	# author views
 	(r'^author/$',				'www.memebot.views.authors'),
 	(r'^author/top/$',			'www.memebot.views.top'),
