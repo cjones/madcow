@@ -32,5 +32,6 @@ urlpatterns = patterns('',
 
 
 	# everything else redirects to root
+	(r'',					'www.memebot.views.url'),
 	(r'.*',					'www.memebot.views.root'),
 )

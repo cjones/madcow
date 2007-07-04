@@ -2,7 +2,8 @@
 import os
 import sys
 
-MADCOW_BASEDIR = os.path.abspath(os.path.dirname(sys.argv[0]) + '/../')
+#MADCOW_BASEDIR = os.path.abspath(os.path.dirname(sys.argv[0]) + '/../')
+MADCOW_BASEDIR = '/home/cjones/local/madcow'
 MADCOW_DATABASE = MADCOW_BASEDIR + '/db-madcow-memes'
 MADCOW_TEMPLATES = MADCOW_BASEDIR + '/www/memebot/templates/'
 MADCOW_STATIC = MADCOW_BASEDIR + '/www/memebot/static/'

@@ -21,7 +21,7 @@ def url(request, *args, **kwargs):
 	if kwargs.has_key('page'):
 		page = int(kwargs['page'])
 	else:
-		return HttpResponseRedirect('/url/1/')
+		page = 1
 
 	if page < 1 or page > 365:
 		return HttpResponseRedirect('/url/1/')
@@ -69,13 +69,8 @@ def url(request, *args, **kwargs):
 
 	if page == 1:
 		newer = None
-		today = None
 	else:
 		newer = '/url/' + str(page - 1)
-		today = '/url/1'
-
-	if page == 2:
-		newer = None
 
 	older = '/url/' + str(page + 1)
 
@@ -86,9 +81,6 @@ def url(request, *args, **kwargs):
 		if newer is not None:
 			newer += '/%s' % filter
 
-		if today is not None:
-			today += '/%s' % filter
-
 	"""
 	Render content and return
 	"""
@@ -98,7 +90,6 @@ def url(request, *args, **kwargs):
 		'date'	: date,
 
 		'older'	: older,
-		'today'	: today,
 		'newer'	: newer,
 		'toggles': toggles,
 	})
