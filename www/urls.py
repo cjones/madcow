@@ -25,6 +25,11 @@ urlpatterns = patterns('',
 	(r'^static/(?P<path>.*)$',		'django.views.static.serve',
 						{'document_root' : www.settings.MADCOW_STATIC }),
 
+	# memecheck
+	(r'^memecheck/$',			'www.memebot.views.memecheck'),
+	(r'^memecheck/(?P<result>result)/$',	'www.memebot.views.memecheck'),
+
+
 
 	# everything else redirects to root
 	(r'.*',					'www.memebot.views.root'),

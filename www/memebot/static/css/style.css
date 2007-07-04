@@ -237,3 +237,16 @@ input.searchHover
 	border-bottom-color:#930;
 }
 
+
+span.newmeme
+{
+	color: green;
+	font-weight: bold;
+	font-size: 110%;
+}
+span.oldmeme
+{
+	color: red;
+	font-weight: bold;
+	font-size: 110%;
+}

@@ -263,4 +263,25 @@ def search(request, *args, **kwargs):
 		return HttpResponse(t.render(Context({ 'error' : e })))
 
 
+def memecheck(request, *args, **kwargs):
+	try:
+		url = request.GET['url']
+		results = URL.objects.filter(url__iexact=url).order_by('-id')[:1]
+		if results.count() > 0:
+			result = results[0]
+			response = 'OLD MEME. First posted by %s on %s' % (result.author.name, result.posted)
+			response = '<span class="oldmeme">%s</span>' % response
+		else:
+			response = '<span class="newmeme">NEW MEME</span>'
 
+	except:
+		url = 'url'
+		response = None
+
+	t = loader.get_template('memecheck.html')
+	c = Context({
+		'url':		url,
+		'response':	response,
+	})
+
+	return HttpResponse(t.render(c))
