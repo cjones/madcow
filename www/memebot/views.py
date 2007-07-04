@@ -9,6 +9,7 @@ import re
 from django.db.models import Q
 from django.utils.html import escape
 from urllib import urlencode
+from urlparse import urlparse, urlunparse
 
 def root(request, *args, **kwargs):
 	return HttpResponseRedirect('/url/1')
@@ -266,7 +267,17 @@ def search(request, *args, **kwargs):
 def memecheck(request, *args, **kwargs):
 	try:
 		url = request.GET['url']
-		results = URL.objects.filter(url__iexact=url).order_by('-id')[:1]
+		if url.startswith('http://') is False:
+			url = 'http://' + url
+
+		uri = list(urlparse(url))
+		uri[1] = uri[1].lower()
+		if uri[2] == '': uri[2] = '/'
+		uri[5] = ''
+
+		url = urlunparse(uri)
+
+		results = URL.objects.filter(clean__iexact=url).order_by('-id')[:1]
 		if results.count() > 0:
 			result = results[0]
 			response = 'OLD MEME. First posted by %s on %s' % (result.author.name, result.posted)
@@ -284,7 +295,9 @@ def memecheck(request, *args, **kwargs):
 	except:
 		clean = None
 
-	bookmarklet = 'javascript:( function() { var url = \'http://memebot.gruntle.org/memecheck/?clean=1&url=\' + escape(window.location.href); var name = \'memecheck\'; var params = \'width=588,height=156,toolbar=0,status=1,location=0,scrollbars=0,menubar=0,resizable=0\'; window.open(url, name, params); })();'
+	#bookmarklet = 'javascript:( function() { var url = \'http://memebot.gruntle.org/memecheck/?clean=1&url=\' + escape(window.location.href); var name = \'memecheck\'; var params = \'width=588,height=156,toolbar=0,status=1,location=0,scrollbars=0,menubar=0,resizable=0\'; window.open(url, name, params); })();'
+
+	bookmarklet = 'javascript:( function() { var url = \'http://memebot.gruntle.org/memecheck/?clean=1&url=\' + escape(window.location.href); var params = \'width=588,height=156,toolbar=0,status=1,location=0,scrollbars=0,menubar=0,resizable=0\'; w = open(url, \'w\', params); setTimeout(\'w.focus()\', 0); })();'
 
 	toggles = [ '<a href="%s">Bookmarklet</a>' % bookmarklet ]
 
