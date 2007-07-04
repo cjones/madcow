@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Search results for {{ term|escape }}{% endblock %}
+
+{% block sidebar %}
+
+{% include "sidebar.html" %}
+
+{% endblock %}
+
+{% block content %}
+
+{% if results %}
+  <h3>{{ start }} - {{ end }} of {{ total }} results for '{{ term|escape }}'</h3>
+
+  <table border="0" cellspacing="0" cellpadding="0">
+    {% for url in results %}
+      <tr>
+	<td>{{ url.stamp }}</td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+	<td><a href="/author/{{ url.author.id }}">{{ url.author.name }}</a></td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+	<td nowrap><a href="{{ url.safe }}" target="new">{{ url.turl|escape }}</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <hr />
+
+{% if navbar %}{{ navbar }}{% endif %}
+
+{% else %}
+  {% if error %}
+    <h3>Error: {{ error|escape }}</h3>
+  {% else %}
+    <h3>No results found for '{{ term|escape }}'</h3>
+  {% endif %}
+{% endif %}
+
+{% endblock %}
+
+{% block sitenav %}
+  <a href="/">home</a> &gt; results
+{% endblock %}
