@@ -13,12 +13,14 @@
 	{% endblock %}
       </div>
 
+      {% if not clean %}
       <div id="search">
 	<form action="/search/" method="GET">
 	  <input type="submit" value="search" class="search" onmouseover="this.className='search searchHover'" onmouseout="this.className='search'" />
 	  <input type="text" name="q" />
 	</form>
       </div>
+      {% endif %}
 
       <div id="header">
         <span class="title">memebot<span class="darktitle">r</span>&nbsp;<font size="-1">beta</font></span>
@@ -26,10 +28,12 @@
 
       <div id="content">
 
+	{% if not clean %}
 	<div id="breadcrumb">
 	  {% block sitenav %}
 	  {% endblock %}
 	</div>
+	{% endif %}
 
 	{% block content %}
 	{% endblock %}
@@ -39,10 +43,12 @@
 	</div>
       </div>
 
+      {% if not clean %}
       <div id="lefty">
 	{% block sidebar %}
 	{% endblock %}
       </div>
+      {% endif %}
     </div>
 
   </div>

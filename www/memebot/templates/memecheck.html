@@ -27,6 +27,9 @@ function clickClear(thisField, defaultText) {
     <input type="text" name="url" value="{{ url }}" onclick="clickClear(this, defaultValue);" size="60" />
     &nbsp;&nbsp;&nbsp;
     <input type="submit" name="check" value="check" class="search" />
+    {% if clean %}
+      <input type="hidden" name="clean" value="1" />
+    {% endif %}
   </form>
 
 {% endblock %}

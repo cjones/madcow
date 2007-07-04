@@ -278,10 +278,22 @@ def memecheck(request, *args, **kwargs):
 		url = 'url'
 		response = None
 
+	try:
+		if int(request.GET['clean']) == 1: clean = 1
+		else: clean = None
+	except:
+		clean = None
+
+	bookmarklet = 'javascript:( function() { var url = \'http://memebot.gruntle.org/memecheck/?clean=1&url=\' + escape(window.location.href); var name = \'memecheck\'; var params = \'width=588,height=156,toolbar=0,status=1,location=0,scrollbars=0,menubar=0,resizable=0\'; window.open(url, name, params); })();'
+
+	toggles = [ '<a href="%s">Bookmarklet</a>' % bookmarklet ]
+
 	t = loader.get_template('memecheck.html')
 	c = Context({
 		'url':		url,
 		'response':	response,
+		'clean':	clean,
+		'toggles':	toggles,
 	})
 
 	return HttpResponse(t.render(c))
