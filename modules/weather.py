@@ -7,12 +7,13 @@ import sys
 import re
 import urllib
 import learn
+import os
 
 # class for this module
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('^(?:fc|forecast|weather)(?:\s+(.*)$)?')
+		self.pattern = re.compile('^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?
@@ -39,24 +40,31 @@ class match(object):
 	# function to generate a response
 	def response(self, *args, **kwargs):
 		nick = kwargs['nick']
-		args = kwargs['args']
+
+		try: arg = ' '.join(kwargs['args'][0].split())
+		except: arg = None
+
+		# if empty = lookup loc of 'nick'
+		# elif @foo = lookup loc of 'foo'
+		# else lookup query directly
+
+		lookup = query = None
+		if arg is None or arg == '':
+			lookup = nick
+		elif arg.startswith('@'):
+			lookup = arg[1:]
+		else:
+			query = arg
+
+		if lookup is not None:
+			l = learn.match(ns=self.ns, dir=self.dir)
+			query = l.lookup(lookup)
+
+			if query is None:
+				return "I don't know where %s lives, try: learn %s <location>" % (lookup, lookup)
+
 
 		try:
-			if args[0] is None:
-				query = learn.match(dir=self.dir, ns=self.ns).lookup(nick)
-				if not query:
-					return '%s: Teach me where you live: learn <nick> <location>' % nick
-			else:
-				query = ' '.join(args)
-				try: lookup = self.lookup.search(query).group(1)
-				except: lookup = None
-
-				if lookup:
-					query = learn.match().lookup(lookup)
-					if not query:
-						return '%s: I have no idea where %s lives, try: learn <nick> <location>' % (nick, lookup)
-
-
 			response = None
 
 			queryString = urllib.urlencode( { 'query' : query } )
