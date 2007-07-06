@@ -3,7 +3,7 @@ import www.settings
 
 urlpatterns = patterns('',
 	# admin interface
-	(r'^admin/',				include('django.contrib.admin.urls')),
+	#(r'^admin/',				include('django.contrib.admin.urls')),
 
 	# search form
 	(r'^search/$',				'www.memebot.views.search'),
