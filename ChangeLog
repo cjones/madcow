@@ -22,7 +22,7 @@
 * Fixed grufti from triggering on substring matches
 * Grufti module now precompiles regexes at loadtime
 
-1.0.4: TBA
+1.0.4: Thu Jul  5 19:21:38 PDT 2007
 
 * NEW: django frontend for memebot (see http://memebot.gruntle.org/ for ex.)
 * Fix bug with SILC private messages
