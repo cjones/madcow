@@ -1,3 +1,5 @@
+{% load custom_filters %}
+
 {% extends "base.html" %}
 
 {% block title %}URL Index{% endblock %}
@@ -10,14 +12,14 @@
 
 {% block content %}
 
-<h3>Memes posted by {{ author.name }}</h3>
+<h3>Memes posted by {{ author.name|escape }}</h3>
 
 {% for url in urls %}
-<a href="{{ url.url }}" target="_new">{{ url.turl }}</a><br />
+{{ url.url|safelink:90 }}
 {% endfor %}
 
 {% endblock %}
 
 {% block sitenav %}
-<a href="/">home</a> &gt; <a href="/author/">authors</a> &gt; <a href="#">{{ author.name }}</a>
+<a href="/">home</a> &gt; <a href="/author/">authors</a> &gt; <a href="#">{{ author.name|escape }}</a>
 {% endblock %}

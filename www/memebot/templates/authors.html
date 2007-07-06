@@ -13,7 +13,7 @@
     {% for author in authors %}
       <tr>
         <td width="50px">{{ author.1 }}</td>
-        <td><a href="/author/{{ author.0.id }}/">{{ author.0.name }}</a></td>
+        <td><a href="/author/{{ author.0.id }}/">{{ author.0.name|escape }}</a></td>
       </tr>
     {% endfor %}
   </table>

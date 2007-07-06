@@ -185,6 +185,7 @@ a:hover
 	font-family: Verdana, Arial, sans-serif;
 	line-height: 145%;
 	color: #607080;
+	overflow: hidden;
 }
 #content h3, h4
 {

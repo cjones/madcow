@@ -1,3 +1,5 @@
+{% load custom_filters %}
+
 {% extends "base.html" %}
 
 {% block title %}URL Index for {{ date }}{% endblock %}
@@ -22,7 +24,7 @@
       <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
       <td><a href="/author/{{ url.author.id }}">{{ url.author.name }}</a></td>
       <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-      <td nowrap><a href="{{ url.safe }}" target="new">{{ url.turl|escape }}</a></td>
+      <td nowrap>{{ url.url|safelink:60 }}</td>
     </tr>
   {% endfor %}
 </table>

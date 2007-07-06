@@ -11,6 +11,10 @@ from django.utils.html import escape
 from urllib import urlencode
 from urlparse import urlparse, urlunparse
 
+"""
+XXX This code could use some serious reworking..
+"""
+
 def root(request, *args, **kwargs):
 	return HttpResponseRedirect('/url/1')
 
@@ -285,8 +289,6 @@ def memecheck(request, *args, **kwargs):
 		else: clean = None
 	except:
 		clean = None
-
-	#bookmarklet = 'javascript:( function() { var url = \'http://memebot.gruntle.org/memecheck/?clean=1&url=\' + escape(window.location.href); var name = \'memecheck\'; var params = \'width=588,height=156,toolbar=0,status=1,location=0,scrollbars=0,menubar=0,resizable=0\'; window.open(url, name, params); })();'
 
 	bookmarklet = 'javascript:( function() { var url = \'http://memebot.gruntle.org/memecheck/?clean=1&url=\' + escape(window.location.href); var params = \'width=588,height=156,toolbar=0,status=1,location=0,scrollbars=0,menubar=0,resizable=0\'; w = open(url, \'w\', params); setTimeout(\'w.focus()\', 0); })();'
 
