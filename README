@@ -18,7 +18,7 @@ REQUIREMENTS
 	AIM  - twisted (http://twistedmatrix.com/trac/wiki/TwistedProjects)
 
 	madcow also comes with a suite of plugins that provide functionality.  Most
-	of tehse use the core Python library, however a few need third party libraries.
+	of these use the core Python library, however a few need third-party libraries.
 	If a plugin does not have the required components it will be disabled at runtime.
 
 	You can find a description of each plugin in madcow.ini-sample
