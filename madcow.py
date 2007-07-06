@@ -204,7 +204,7 @@ class Config(object):
 
 		else:
 			isInt = re.compile('^[0-9]+$')
-			isFloat = re.compile('^[0-9.]+$')
+			isFloat = re.compile('^\d+\.\d+$')
 			isTrue = re.compile('^\s*(true|yes|on|1)\s*$')
 			isFalse = re.compile('^\s*(false|no|off|0)\s*$')
 
