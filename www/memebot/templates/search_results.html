@@ -18,11 +18,11 @@
   <table border="0" cellspacing="0" cellpadding="0">
     {% for url in results %}
       <tr>
-	<td>{{ url.stamp }}</td>
+	<td nowrap>{{ url.datestamp }}</td>
 	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 	<td><a href="/author/{{ url.author.id }}">{{ url.author.name|escape }}</a></td>
 	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-	<td nowrap>{{ url.url|safelink:60 }}</td>
+	<td nowrap>{{ url.url|safelink:53 }}</td>
       </tr>
     {% endfor %}
   </table>

@@ -14,9 +14,15 @@
 
 <h3>Memes posted by {{ author.name|escape }}</h3>
 
-{% for url in urls %}
-{{ url.url|safelink:90 }}
-{% endfor %}
+<table border="0" cellspacing="0" cellpadding="0">
+  {% for url in urls %}
+    <tr>
+      <td nowrap>{{ url.datestamp }}</td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+      <td nowrap>{{ url.url|safelink:65 }}</td>
+    </tr>
+  {% endfor %}
+</table>
 
 {% endblock %}
 

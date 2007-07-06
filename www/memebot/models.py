@@ -45,9 +45,10 @@ class URL(models.Model):
 	posted = models.DateTimeField('date posted')
 
 	def getTimeStamp(self):
-		d = self.posted
-		time = d.time().isoformat()[:8]
-		return time
+		return self.posted.strftime('%T')
+
+	def getDateStamp(self):
+		return self.posted.strftime('%F %T')
 
 	def __str__(self):
 		return self.url
@@ -59,4 +60,5 @@ class URL(models.Model):
 		pass
 
 	stamp = property(getTimeStamp)
+	datestamp = property(getDateStamp)
 
