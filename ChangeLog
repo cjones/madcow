@@ -22,4 +22,10 @@
 * Fixed grufti from triggering on substring matches
 * Grufti module now precompiles regexes at loadtime
 
- 
+1.0.4: TBA
+
+* NEW: django frontend for memebot (see http://memebot.gruntle.org/ for ex.)
+* Fix bug with SILC private messages
+* Remove typo in memebot insult list
+* Improve weather.py module's logic to work with ambiguous serach results
+* Improve documentation
