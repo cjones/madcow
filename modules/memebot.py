@@ -48,12 +48,13 @@ class match(object):
 		self.requireAddressing = False			# True/False - require addressing?
 		self.thread = False				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?
-		self.help = 'score - get memescore'
+		self.help = 'score [name,range] - get memescore for name/range, empty for top10'
 
 		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
 		file = dir + '/db-%s-memes' % ns
 
 		self.matchURL = re.compile('(http://\S+)', re.I)
+		self.scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
 
 		sqlhub.processConnection = connectionForURI('sqlite://' + file)
 		url.createTable(ifNotExists = True)
@@ -86,9 +87,10 @@ class match(object):
 			a.pointsOld    * -2 + \
 			a.pointsCredit *  2
 
-	def top10(self):
+	def getScores(self):
 		scores = [(a.name, self.getScoreForAuthor(a)) for a in author.select()]
-		return sorted(scores, lambda x, y: cmp(y[1], x[1]))[:10]
+		scores = sorted(scores, lambda x, y: cmp(y[1], x[1]))
+		return scores
 
 
 	# function to generate a response
@@ -98,13 +100,44 @@ class match(object):
 		addressed = kwargs['addressed']
 		message = kwargs['args'][0]
 
-		if addressed is True and 'score' in message:
-			scores = []
-			for i, data in enumerate(self.top10()):
-				name, score = data
-				scores.append('#%s: %s (%s)' % (i + 1, name, score))
-			return ', '.join(scores)
-			
+		if addressed is True:
+			try:
+				x, y = self.scoreRequest.search(message).groups()
+				scores = self.getScores()
+				size = len(scores)
+
+				if x is None:
+					scores = scores[:10]
+					x = 1
+				elif x.isdigit() is True:
+					x = int(x)
+					if x == 0: x = 1
+					if x > size: x = size
+
+					if y is not None and y.isdigit() is True:
+						y = int(y)
+						if y > size: y = size
+						scores = scores[x-1:y]
+					else:
+						scores = [scores[x-1]]
+
+				else:
+					for i, data in enumerate(scores):
+						name, score = data
+						if name.lower() == x.lower():
+							scores = [scores[i]]
+							x = i+1
+							break
+
+				out = []
+				for i, data in enumerate(scores):
+					name, score = data
+					out.append('#%s: %s (%s)' % (i + x, name, score))
+				return ', '.join(out)
+				
+			except:
+				pass
+
 
 
 		match = self.matchURL.search(message)
@@ -147,7 +180,7 @@ class match(object):
 # this is just here so we can test the module from the commandline
 def main(argv = None):
 	if argv is None: argv = sys.argv[1:]
-	obj = match()
+	obj = match(ns='madcow')
 	print obj.response(nick='testUser', channel='#test', args=[argv[0]], addressed=True)
 
 	return 0
