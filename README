@@ -13,7 +13,7 @@ REQUIREMENTS
 	you will need a third-party library to handle the protocol.  Most of these are
 	available from your operating systems's default package/ports handler.
 
-	IRC  - python-irclib (http://python-irclib.sourceforge.net/)
+	IRC  - irc uses python-irclib, which ships with madcow.
 	SILC - pysilc (http://cheeseshop.python.org/pypi/pysilc/0.4)
 	AIM  - twisted (http://twistedmatrix.com/trac/wiki/TwistedProjects)
 
