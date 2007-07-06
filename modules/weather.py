@@ -25,7 +25,7 @@ class match(object):
 		self.help = self.help + '\nlearn <nick> <location> - permanently learn a nick\'s location'
 
 		self.lookup = re.compile('^@(\S+)')
-		self.resultType = re.compile('(Search Results|Current Conditions|There has been an error)')
+		self.resultType = re.compile('(Click on a column heading|Current Conditions|There has been an error)')
 		self.multipleResults = re.compile('<td class="sortC"><a href="([^>]+)">([^<]+)')
 		self.baseURL = 'http://www.wunderground.com'
 
@@ -36,6 +36,9 @@ class match(object):
 		self.humidity = re.compile('pwsvariable="humidity".*?><nobr><b>([0-9.]+%)</b></nobr></span></td>')
   		self.windSpeed = re.compile('<nobr><b>([0-9.]+)</b>&nbsp;mph</nobr>')
   		self.windDir = re.compile('[0-9.]+&deg;</span>\s*\(([NSEW]+)\)</td>')
+
+	def norm(self, text):
+		return ' '.join(text.split()).lower()
 
 	# function to generate a response
 	def response(self, *args, **kwargs):
@@ -77,12 +80,22 @@ class match(object):
 				else: type = 'There has been an error'
 
 				# found multiple items
-				if type == 'Search Results':
+				if type == 'Click on a column heading':
 					results = [(path, city) for path, city in self.multipleResults.findall(doc)]
 					if len(results) == 1:
 						url = self.basURL + results[0][0]
 					elif len(results) > 1:
-						response = 'I found multiple results: ' + '; '.join([city for path, city in results])
+						d = {}
+						for u, l in results:
+							d[self.norm(l)] = u
+
+						if len(d) == 1:
+							url = self.baseURL + d[list(d)[0]]
+
+						elif d.has_key(self.norm(query)):
+							url = self.baseURL + d[self.norm(query)]
+						else:
+							response = 'I found multiple results: ' + '; '.join([city for path, city in results])
 
 				# proper page
 				elif type == 'Current Conditions':
