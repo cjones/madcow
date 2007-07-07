@@ -36,3 +36,8 @@
 * Bugfix: Can now properly use IP addresses as hostnames
 * Add a flexible throttling module
 * Add throttling to memebot for URL postings to prevent gaming
+
+1.0.6: TBA
+
+* Fix all module regex's to only trigger from beginning of line to prevent the
+spam caused by chaining multiple keywords

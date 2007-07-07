@@ -12,7 +12,7 @@ from include import utils
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('(bash|qdb)(?:\s+(\S+))?', re.I)
+		self.pattern = re.compile('^\s*(bash|qdb)(?:\s+(\S+))?', re.I)
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?

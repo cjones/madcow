@@ -10,7 +10,7 @@ import urllib
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('(?:stocks?|quote)\s+([a-z0-9.-]+)', re.I)
+		self.pattern = re.compile('^\s*(?:stocks?|quote)\s+([a-z0-9.-]+)', re.I)
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = True				# True/False - wrap output?

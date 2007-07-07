@@ -12,7 +12,7 @@ from include import utils
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('artfart')	# regular expression that needs to be matched
+		self.pattern = re.compile('^\s*artfart')	# regular expression that needs to be matched
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?

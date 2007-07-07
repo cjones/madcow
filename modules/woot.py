@@ -26,7 +26,7 @@ class currency(float):
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('(?:woot)(?:\s+(\S+))?')
+		self.pattern = re.compile('^\s*woot(?:\s+(\S+))?')
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = True				# True/False - wrap output?

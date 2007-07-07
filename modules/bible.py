@@ -11,7 +11,7 @@ from include import utils
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('bible\s+(\S+\s+\d+:[0-9-]+)')
+		self.pattern = re.compile('^\s*bible\s+(\S+\s+\d+:[0-9-]+)')
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = True				# True/False - wrap output?

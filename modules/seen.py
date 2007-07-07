@@ -12,7 +12,7 @@ import os
 class match(object):
 	def __init__(self, dir=None, ns='default', config=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('(.+)')	# regular expression that needs to be matched
+		self.pattern = re.compile('^(.+)$')	# regular expression that needs to be matched
 		self.requireAddressing = False			# True/False - require addressing?
 		self.thread = False				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?

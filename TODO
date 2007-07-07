@@ -19,9 +19,6 @@ XXX: (known shortcomings)
 - change urban/bbcnew/dictionary match syntax for defintion number. can't look up "area 52" e.g.
 - factoids and grufti *always* trigger, which is annoying sometimes. when addressed they should always trigger,
   but when not addressed, only triggering n% of the time would be ideal. or not at all. should be configurable
-- priority on modules and/or short-circuiting to prevent match chaining spam
-- memebot is missing some features from the original: ability to request a specific score, ability to ignore
-  certain urls, the web backend (need to decide on django or turbogears..)
 - logging module?
 - consider some higher level admin duties such as auto-opping/kickban/etc. eggdrop module? would be nice to
   obsolete having multiple bots, although eggdrops are largely replaced by chanserv/nickserv

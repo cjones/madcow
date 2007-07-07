@@ -73,7 +73,7 @@ def slutrating(phrase):
 class match(object):
   def __init__(self, config=None, ns='default', dir=None):
     self.enabled = True
-    self.pattern = re.compile('slutcheck\s+(.+)')
+    self.pattern = re.compile('^\s*slutcheck\s+(.+)')
     self.requireAddressing = True
     self.thread = True
     self.wrap = False
