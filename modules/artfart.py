@@ -6,6 +6,7 @@ import sys
 import re
 import urllib
 import re
+import random
 from include import utils
 
 # class for this module
@@ -20,8 +21,7 @@ class match(object):
 
 		self.baseURL = 'http://www.asciiartfarts.com/'
 		self.randomURL = self.baseURL + 'random.cgi'
-		self.title = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>')
-		self.art = re.compile('<pre>(.*?)</pre>', re.DOTALL)
+		self.artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre>(.*?)</pre>', re.DOTALL)
 
 	# function to generate a response
 	def response(self, *args, **kwargs):
@@ -37,8 +37,9 @@ class match(object):
 
 		try:
 			doc = urllib.urlopen(url).read()
-			title = self.title.search(doc).group(1)
-			art = self.art.findall(doc)[1]
+			results = self.artfart.findall(doc)
+			result = random.choice(results)
+			title, art = result
 			return '>>> %s <<<\n%s' % (title, art)
 		except Exception, e:
 			print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
