@@ -20,7 +20,7 @@ class ThrottleStatus(object):
 		self.parent = parent
 		self.user = user
 		self.name = name
-		self.last = 0
+		self.last = self.now
 		self.count = 0
 		self.warned = False
 		self.throttled = False
