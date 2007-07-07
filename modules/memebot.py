@@ -10,6 +10,7 @@ import datetime
 from pysqlite2 import dbapi2 as sqlite
 from sqlobject import *
 import random
+from include.throttle import Throttle
 
 # object model
 class url(SQLObject):
@@ -55,6 +56,7 @@ class match(object):
 
 		self.matchURL = re.compile('(http://\S+)', re.I)
 		self.scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
+		self.throttle = Throttle()
 
 		sqlhub.processConnection = connectionForURI('sqlite://' + file)
 		url.createTable(ifNotExists = True)
@@ -142,6 +144,16 @@ class match(object):
 
 		match = self.matchURL.search(message)
 		if match is None: return
+
+		event = self.throttle.registerEvent(name='memebot', user=nick)
+		if event.isThrottled() is True:
+			if event.warn() is True:
+				return '%s: Stop abusing me plz.' % nick
+			else:
+				return
+
+
+
 		orig = match.group(1)
 		clean = self.cleanURL(orig)
 
