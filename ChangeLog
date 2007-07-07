@@ -29,3 +29,10 @@
 * Remove typo in memebot insult list
 * Improve weather.py module's logic to work with ambiguous serach results
 * Improve documentation
+
+1.0.5: Fri Jul  6 19:26:04 PDT 2007
+
+* Bundle python-irclib to make installation easier
+* Bugfix: Can now properly use IP addresses as hostnames
+* Add a flexible throttling module
+* Add throttling to memebot for URL postings to prevent gaming

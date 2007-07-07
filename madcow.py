@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ ='1.0.4'
+__version__ ='1.0.5'
 
 __copyright__ = """
 Copyright (C) 2007 Christopher Jones <cjones@insub.org>
