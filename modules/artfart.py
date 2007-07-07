@@ -12,23 +12,34 @@ from include import utils
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('^\s*artfart')	# regular expression that needs to be matched
+		self.pattern = re.compile(r'^\s*artfart(?:\s+(.+?))?\s*$', re.I)
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?
 		self.help = 'artfart - displays some offensive ascii art'
 
-		self.randomURL = 'http://www.asciiartfarts.com/random.cgi'
+		self.baseURL = 'http://www.asciiartfarts.com/'
+		self.randomURL = self.baseURL + 'random.cgi'
+		self.title = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>')
 		self.art = re.compile('<pre>(.*?)</pre>', re.DOTALL)
 
 	# function to generate a response
 	def response(self, *args, **kwargs):
 		nick = kwargs['nick']
-		args = kwargs['args']
+		query = kwargs['args'][0]
+		if query is None or query == '':
+			url = self.randomURL
+		else:
+			query = ' '.join(query.split())
+			query = query.replace(' ', '_')
+			query = urllib.quote(query) + '.html'
+			url = self.baseURL + query
 
 		try:
-			doc = urllib.urlopen(self.randomURL).read()
-			return utils.stripHTML(self.art.findall(doc)[1])
+			doc = urllib.urlopen(url).read()
+			title = self.title.search(doc).group(1)
+			art = self.art.findall(doc)[1]
+			return '>>> %s <<<\n%s' % (title, art)
 		except Exception, e:
 			print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 			return "%s: I had a problem with that, sorry." % nick
