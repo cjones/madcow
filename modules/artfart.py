@@ -40,7 +40,7 @@ class match(object):
 			results = self.artfart.findall(doc)
 			result = random.choice(results)
 			title, art = result
-			return '>>> %s <<<\n%s' % (title, art)
+			return '>>> %s <<<\n%s' % (title, utils.stripHTML(art))
 		except Exception, e:
 			print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 			return "%s: I had a problem with that, sorry." % nick
