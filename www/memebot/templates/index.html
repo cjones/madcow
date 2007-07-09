@@ -35,3 +35,9 @@
 
 {% endblock %}
 
+{% block sitenav %}
+{% ifnotequal page 1 %}
+<a href="/">today</a>
+{% endifnotequal %}
+{% endblock %}
+

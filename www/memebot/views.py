@@ -95,6 +95,7 @@ def url(request, *args, **kwargs):
 
 		'older'	: older,
 		'newer'	: newer,
+		'page'  : page,
 		'toggles': toggles,
 	})
 	return HttpResponse(t.render(c))
