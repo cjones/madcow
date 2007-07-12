@@ -10,7 +10,7 @@ import os
 import re
 from zipfile import ZipFile
 
-__version__ = '0.1'
+__version__ = '0.3'
 
 __copyright__ = """
 Copyright (C) 2007 Christopher Jones <cjones@insub.org>
@@ -85,6 +85,12 @@ class FigletFont(object):
 		try: self.data = fo.read()
 		finally: fo.close()
 
+	def getFonts(self):
+		return [font[:-4] for font in os.walk(self.dir).next()[2] if font.endswith('.flf')]
+		
+
+
+
 
 	"""
 	Parse loaded font data for the rendering engine to consume
@@ -154,8 +160,9 @@ class FigletFont(object):
 					line = data.pop(0)
 					if end is None:
 						end = self.reEndMarker.search(line).group(1)
+						end = re.compile(re.escape(end) + r'{1,2}$')
 
-					line = line.replace(end, '')
+					line = end.sub('', line)
 
 					if len(line) > width:
 						width = len(line)
@@ -174,6 +181,40 @@ class FigletFont(object):
 
 	def __str__(self):
 		return '<FigletFont object: %s>' % self.font
+
+
+"""
+Rendered figlet font
+"""
+class RenderedOutput(str):
+	def __init__(self, *args, **kwargs):
+		str.__init__(self, *args, **kwargs)
+
+		# translation map for reversing ascii art / -> \, etc.
+		self.__reverse_map__ = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !"#$%&\')(*+,-.\\0123456789:;>=<?@ABCDEFGHIJKLMNOPQRSTUVWXYZ]/[^_`abcdefghijklmnopqrstuvwxyz}|{~\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff'
+
+		# translation map for flipping ascii art ^ -> v, etc.
+		self.__flip_map__ = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !"#$%&\'()*+,-.\\0123456789:;<=>?@VBCDEFGHIJKLWNObQbSTUAMXYZ[/]v-`aPcdefghijklwnopqrstu^mxyz{|}~\x7f\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff'
+
+	def reverse(self):
+		out = []
+		for row in self.splitlines():
+			out.append(row.translate(self.__reverse_map__)[::-1])
+
+		return self.newFromList(out)
+
+	def flip(self):
+		out = []
+		for row in self.splitlines()[::-1]:
+			out.append(row.translate(self.__flip_map__))
+
+		return self.newFromList(out)
+
+
+	def newFromList(self, list):
+		return RenderedOutput('\n'.join(list) + '\n')
+
+
 
 
 
@@ -201,6 +242,13 @@ class ZippedFigletFont(FigletFont):
 
 		except Exception, e:
 			raise FontError, "couldn't open %s: %s" % (fontPath, e)
+
+	def getFonts(self):
+		if os.path.exists(self.zipfile) is False:
+			raise FontNotFound, "%s doesn't exist" % self.zipfile
+
+		z = ZipFile(self.zipfile, 'r')
+		return [font[6:-4] for font in z.namelist() if font.endswith('.flf')]
 
 
 
@@ -304,8 +352,6 @@ class FigletRenderingEngine(object):
 			self.prevCharWidth = self.curCharWidth
 			self.curCharWidth = self.base.Font.width[c]
 
-			if (self.base.Font.smushMode & (self.SM_SMUSH | self.SM_KERN)) == 0:
-				continue
 
 			"""
 			Calculate the amount of smushing we can do between this char and the last
@@ -337,56 +383,107 @@ class FigletRenderingEngine(object):
 					try: curLength = len(buffer[row])
 					except: curLength = 0
 
-
 					amt = charbd + curLength - 1 - linebd
 
-					if ch1 == '' or ch1 == ' ':
+				elif self.base.direction == 'right-to-left':
+					try:
+						charbd = len(curChar[row].rstrip()) - 1
+						if charbd < 0: charbd = 0
+						ch1 = curChar[row][charbd]
+					except:
+						charbd = 0
+						ch1 = ''
+
+					try:
+						linebd = len(buffer[row]) - len(buffer[row].lstrip())
+						ch2 = buffer[row][linebd]
+					except:
+						linebd = len(buffer[row])
+						ch2 = ''
+
+					amt = linebd + self.curCharWidth - 1 - charbd
+
+
+				if ch1 == '' or ch1 == ' ':
+					amt += 1
+				elif ch2 != '':
+					if self.smushChars(left=ch1, right=ch2) is not None:
 						amt += 1
-					elif ch2 != '':
-						if self.smushChars(left=ch1, right=ch2) is not None:
-							amt += 1
 
 
-					if amt < maxSmush:
-						maxSmush = amt
+				if amt < maxSmush:
+					maxSmush = amt
+
+			if (self.base.Font.smushMode & (self.SM_SMUSH | self.SM_KERN)) == 0:
+				maxSmush = 0
 
 
 			"""
 			Add a character to the buffer
+
+			Smushing/Kerning loop. Exceptions in this loop
+			are caused by index out of range errors which
+			indicate smushing should be skipped.
 			"""
+			templine = ''
 			for row in range(0, self.base.Font.height):
 
 				wBuffer = buffer[row] # row of previously added characters
 				wChar = curChar[row]  # row of character to add
 
-				"""
-				Smushing/Kerning loop. Exceptions in this loop
-				are caused by index out of range errors which
-				indicate smushing should be skipped.
-				"""
-				for i in range(0, maxSmush):
+				if self.base.direction == 'left-to-right':
+					for i in range(0, maxSmush):
 
-					try: left = wBuffer[len(wBuffer) - maxSmush + i]
-					except: left = ''
+						try: left = wBuffer[len(wBuffer) - maxSmush + i]
+						except: left = ''
 
-					right = wChar[i]
+						right = wChar[i]
 
-					smushed = self.smushChars(left=left, right=right)
+						smushed = self.smushChars(left=left, right=right)
 
-					try:
-						if smushed is not None:
-							l = list(wBuffer)
-							l[len(l)-maxSmush+i] = smushed
-							wBuffer = ''.join(l)
-					except: pass
+						try:
+							if smushed is not None:
+								l = list(wBuffer)
+								l[len(l)-maxSmush+i] = smushed
+								wBuffer = ''.join(l)
+						except: pass
 
-				buffer[row] = wBuffer + wChar[maxSmush:]
+					buffer[row] = wBuffer + wChar[maxSmush:]
+
+				elif self.base.direction == 'right-to-left':
+					templine = wChar
+					for i in range(0, maxSmush):
+						try: left = templine[self.curCharWidth - maxSmush + i]
+						except: left = ''
+
+						right = wBuffer[i]
+
+						smushed = self.smushChars(left=left, right=right)
+
+						try:
+							l = list(templine)
+							l[self.curCharWidth - maxSmush +i] = smushed
+							templine = ''.join(l)
+						except:
+							pass
+
+					templine = templine + wBuffer[maxSmush:]
+					buffer[row] = templine
+
+		# justify text
+		if self.base.justify == 'right':
+			for row in range(0, self.base.Font.height):
+				buffer[row] = (' ' * (self.base.width - len(buffer[row]) - 1)) + buffer[row]
+
+		elif self.base.justify == 'center':
+			for row in range(0, self.base.Font.height):
+				buffer[row] = (' ' * int((self.base.width - len(buffer[row])) / 2)) + buffer[row]
 
 
 		# return rendered ASCII with hardblanks replaced
-		buffer = '\n'.join(buffer)
+		buffer = '\n'.join(buffer) + '\n'
 		buffer = buffer.replace(self.base.Font.hardBlank, ' ')
-		return buffer
+		return RenderedOutput(buffer)
 
 
 
@@ -432,8 +529,6 @@ class Figlet(object):
 
 
 	def getDirection(self):
-		return 'left-to-right'
-
 		if self._direction == 'auto':
 			direction = self.Font.printDirection
 			if direction == 0:
@@ -464,6 +559,10 @@ class Figlet(object):
 	def renderText(self, text):
 		return self.engine.render(text)
 
+	def getFonts(self):
+		return self.Font.getFonts()
+
+
 
 def main():
 	dir = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -490,6 +589,12 @@ def main():
 	parser.add_option(	'-w', '--width', type='int', default=80, metavar='COLS',
 				help='set terminal width for wrapping/justification (default: %default)' )
 
+	parser.add_option(	'-r', '--reverse', action='store_true', default=False,
+				help='shows mirror image of output text' )
+
+	parser.add_option(	'-F', '--flip', action='store_true', default=False,
+				help='flips rendered output text over' )
+
 
 
 	opts, args = parser.parse_args()
@@ -505,7 +610,10 @@ def main():
 		justify=opts.justify, width=opts.width, zipfile=opts.zipfile,
 	)
 
-	print f.renderText(text)
+	r = f.renderText(text)
+	if opts.reverse is True: r = r.reverse()
+	if opts.flip is True: r = r.flip()
+	print r
 
 
 	return 0
