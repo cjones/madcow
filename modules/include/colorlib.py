@@ -160,7 +160,7 @@ class ColorLib(object):
 
 	rainbowStyles = rainbowmap.keys()
 
-	def rainbow(self, text=None, offset=None, style='rainbow'):
+	def rainbow(self, text=None, offset=None, style='rainbow', bg=None):
 		if text is None: return
 		if offset is None:
 			try: offset = self.rainbowOffset[style]
@@ -176,11 +176,7 @@ class ColorLib(object):
 			i = 0
 			for char in line:
 				color = colmap[(offset + i) % len(colmap)]
-				if char.isspace() is True:
-					output += char
-				else:
-					output += self.getColor(fg=color) + char + self.reset()
-
+				output += self.getColor(fg=color, bg=bg) + char + self.reset()
 				i += 1
 
 			offset += 1
