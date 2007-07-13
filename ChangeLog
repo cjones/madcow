@@ -37,7 +37,15 @@
 * Add a flexible throttling module
 * Add throttling to memebot for URL postings to prevent gaming
 
-1.0.6: TBA
+1.0.6: Thu Jul 12 22:37:03 PDT 2007
 
 * Fix all module regex's to only trigger from beginning of line to prevent the
 spam caused by chaining multiple keywords
+* Rename django settings file to a sample name so updates won't clobber it
+* add "today" link to memebot page when you navigate to older days
+# update AAF to show the title of the ascii art, as well as the option to
+supply a keyword to pull art from
+* add pyfiglet module to include directory - figlet font driver
+* add colorlib module to include directory - ansi/mirc colorizing library
+* add yourmom.py module :)
+* some cosmetic changes to silc output
