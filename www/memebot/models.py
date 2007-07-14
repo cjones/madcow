@@ -67,3 +67,12 @@ class Comments(models.Model):
 	author = models.ForeignKey(Author)
 	url = models.ForeignKey(URL)
 
+	def __str__(self):
+		return self.text
+
+	class Meta:
+		db_table = 'comments'
+
+	class Admin:
+		pass
+
