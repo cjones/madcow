@@ -62,3 +62,8 @@ class URL(models.Model):
 	stamp = property(getTimeStamp)
 	datestamp = property(getDateStamp)
 
+class Comments(models.Model):
+	text = models.TextField()
+	author = models.ForeignKey(Author)
+	url = models.ForeignKey(URL)
+

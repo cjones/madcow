@@ -20,6 +20,7 @@ class url(SQLObject):
 	channel = ForeignKey('channel')
 	citations = IntCol(default = 0)
 	posted = DateTimeCol(default = datetime.datetime.now)
+	comments = MultipleJoin('comments')
 
 	def truncated_url(self):
 		if (len(self.url) > 48):
@@ -32,6 +33,7 @@ class url(SQLObject):
 class author(SQLObject):
 	name = StringCol(alternateID = True)
 	urls = MultipleJoin('url')
+	comments = MultipleJoin('comments')
 	pointsNew = IntCol(default = 0)
 	pointsOld = IntCol(default = 0)
 	pointsCredit = IntCol(default = 0)
@@ -39,6 +41,12 @@ class author(SQLObject):
 class channel(SQLObject):
 	name = StringCol(alternateID = True)
 	urls = MultipleJoin('url')
+
+class comments(SQLObject):
+	text = StringCol()
+	author = ForeignKey('author')
+	url = ForeignKey('url')
+
 
 
 # class for this module
@@ -56,12 +64,14 @@ class match(object):
 
 		self.matchURL = re.compile('(http://\S+)', re.I)
 		self.scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
+		self.colonHeader = re.compile(r'^\s*(.*?)\s*:\s*$')
 		self.throttle = Throttle()
 
 		sqlhub.processConnection = connectionForURI('sqlite://' + file)
 		url.createTable(ifNotExists = True)
 		author.createTable(ifNotExists = True)
 		channel.createTable(ifNotExists = True)
+		comments.createTable(ifNotExists = True)
 
 		self.riffs = [
 			'OLD MEME ALERT!',
@@ -157,12 +167,22 @@ class match(object):
 		orig = match.group(1)
 		clean = self.cleanURL(orig)
 
+		comment1, comment2 = re.split(re.escape(orig), message)
+		try: comment1 = self.colonHeader.search(comment1).group(1)
+		except: pass
+
+		comment1 = comment1.strip()
+		comment2 = comment2.strip()
+
 		try: me = author.byName(nick)
 		except SQLObjectNotFound: me = author(name = nick)
 
 		try:
 			# old meme
 			old = url.byClean(clean)
+
+			if len(comment1) > 0: comments(url=old, text=comment1, author=me)
+			if len(comment2) > 0: comments(url=old, text=comment2, author=me)
 
 			# chew them out unless its my own
 			if old.author.name != nick:
@@ -178,7 +198,10 @@ class match(object):
 			try: c = channel.byName(chan)
 			except SQLObjectNotFound: c = channel(name = chan)
 
-			url(url = orig, clean = clean, author = me, channel = c)
+			urlid = url(url = orig, clean = clean, author = me, channel = c)
+
+			if len(comment1) > 0: comments(url=urlid, text=comment1, author=me)
+			if len(comment2) > 0: comments(url=urlid, text=comment2, author=me)
 
 			me.pointsNew = me.pointsNew + 1
 
