@@ -36,6 +36,7 @@ class match(object):
 		self.humidity = re.compile('pwsvariable="humidity".*?><nobr><b>([0-9.]+%)</b></nobr></span></td>')
   		self.windSpeed = re.compile('<nobr><b>([0-9.]+)</b>&nbsp;mph</nobr>')
   		self.windDir = re.compile('[0-9.]+&deg;</span>\s*\(([NSEW]+)\)</td>')
+		self.windDir2 = re.compile('<span [^>]+pwsvariable="winddir"[^>]+value="(.*?)">')
 
 	def norm(self, text):
 		return ' '.join(text.split()).lower()
@@ -119,6 +120,10 @@ class match(object):
 
 					try: windDir = self.windDir.search(doc).group(1)
 					except: windDir = None
+
+					if windDir is None:
+						try: windDir = self.windDir2.search(doc).group(1)
+						except: pass
 
 					output = []
 
