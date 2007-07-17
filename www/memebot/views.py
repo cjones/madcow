@@ -1,3 +1,4 @@
+from django.db import connection
 from django.http import HttpResponse, HttpResponseRedirect
 from www.memebot.models import *
 import www.settings
@@ -172,6 +173,7 @@ def author(request, *args, **kwargs):
 def search(request, *args, **kwargs):
 	t = loader.get_template('search_results.html')
 
+	# XXX magic numbers!
 	resultsPerPage = 25
 	maxPages = 35
 
@@ -193,11 +195,26 @@ def search(request, *args, **kwargs):
 		results = cache.get(cacheKey)
 
 		if results is None:
-			results = URL.objects.filter(
-				Q(url__icontains=term) |
-				Q(clean__icontains=term) |
-				Q(author__name__icontains=term)
-				).order_by('-id')[:(resultsPerPage * maxPages)]
+			# raw sql: because django orm won't do the left outer join we need ;p
+			cursor = connection.cursor()
+			eterm = '%%%s%%' % term
+
+			query = """
+				SELECT
+					url.id
+				FROM url
+				INNER JOIN author ON url.author_id = author.id
+				LEFT OUTER JOIN comments ON url.id = comments.url_id
+				WHERE 
+					url.url LIKE %s OR
+					url.clean LIKE %s OR
+					author.name LIKE %s OR
+					comments.text LIKE %s
+				ORDER BY url.id DESC LIMIT %s;
+			"""
+
+			cursor.execute(query, (eterm,eterm,eterm,eterm,(resultsPerPage * maxPages),))
+			results = URL.objects.filter(id__in=[i[0] for i in cursor.fetchall()])
 
 			"""
 			Force evaluation and then cache it. Otherwise it
