@@ -57,7 +57,7 @@ class Madcow(object):
 		pass
 
 	def botName(self):
-		pass
+		return 'madcow'
 
 	"""
 	Dynamic loading of module extensions. This looks for .py files in
@@ -98,93 +98,83 @@ class Madcow(object):
 				self.status("[MOD] WARN: Couldn't load module %s: %s" % (modName, e))
 
 
-	# checks if we're being addressed and if so, strips that out
-	def checkAddressing(self, message):
-		addressed = False
-		correction = False
-		feedback = False
+	# pre-processing filter that catches whether the bot is being addressed or not..
+	def checkAddressing(self, message=None, params={}):
+		params['addressed'] = False
+		params['correction'] = False
+		params['feedback'] = False
 		nick = self.botName()
 
 		# compile regex based on current nick
-		self.correction = re.compile('^\s*no,?\s*%s\s*[,:> -]+\s*(.+)' % nick, re.I)
-		self.addressed = re.compile('^\s*%s\s*[,:> -]+\s*(.+)' % nick, re.I)
-		self.feedback = re.compile('^\s*%s\s*\?+$' % nick, re.I)
+		self.correction = re.compile('^\s*no,?\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
+		self.addressed = re.compile('^\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
+		self.feedback = re.compile('^\s*%s\s*\?+$' % re.escape(nick), re.I)
 
 		# correction: "no, bot, foo is bar"
 		try:
 			message = self.correction.search(message).group(1)
-			correction = True
-			addressed = True
+			params['correction'] = True
+			params['addressed'] = True
 		except: pass
 
 		# bot ping: "bot?"
-		if self.feedback.search(message): feedback = True
+		if self.feedback.search(message):
+			params['feedback'] = True
 
 		# addressed
 		try:
 			message = self.addressed.search(message).group(1)
-			addressed = True
+			params['addressed'] = True
 		except: pass
 
-		return addressed, correction, feedback, message
+		return message, params
 
 	# returns our help data as a string
 	def usage(self):
 		return '\n'.join(self.usageLines)
 
-	def processThread(self, *args, **kwargs):
-		obj = args[0]
-		output = args[1]
-		nick = kwargs['nick']
-
-		response = obj.response(nick, **kwargs)
+	def processThread(self, **params):
+		response = params['module'].response(**params)
 		if response is not None:
 			self.outputLock.acquire()
-			try: output(response)
-			except: pass
+			self.output(message=response, params=params)
 			self.outputLock.release()
 
 
 	# actually process messages!
-	def processMessage(self, message, nick, channel, private, output):
-		addressed, correction, feedback, message = self.checkAddressing(message)
-		if private is True: addressed = True
+	def processMessage(self, message=None, params=None):
+		# XXX this should move to irc.py protocol handler.. i think
+		message, params = self.checkAddressing(message=message, params=params)
 
-		### BUILTIN METHODS ###
-
-		# user pinging bot
-		if feedback is True:
-			output('yes?')
+		if params.has_key('feedback') is True and params['feedback'] is True:
+			self.output(message='yes?', params=params)
 			return
 
-		# display usage
-		if addressed is True and message.lower() == 'help':
-			output(self.usage())
-			return
+		if params.has_key('addressed') is True and params['addressed'] is True:
+			if message.lower() == 'help':
+				self.output(message=self.usage(), params=params)
+				return
+
+		for module in self.modules.values():
+			if module.requireAddressing is True:
+				if params.has_key('addressed') is True and params['addressed'] is False:
+					continue
 
 
-		### DYNAMIC MODULES ###
-
-		for modName, obj in self.modules.iteritems():
-			if obj.requireAddressing and addressed is not True: continue
-
-			try: matchGroups = obj.pattern.search(message).groups()
+			try: matchGroups = module.pattern.search(message).groups()
 			except: continue
 
-			kwargs = {
-				'nick'		: nick,
-				'channel'	: channel,
-				'addressed'	: addressed,
-				'correction'	: correction,
-				'args'		: matchGroups,
-			}
+			kwargs = dict(params.items() + [
+				('args', matchGroups),
+				('module', module),
+			])
 
-			if self.allowThreading is True and obj.thread is True:
-				t = threading.Thread(target=self.processThread, args=(obj, output), kwargs=kwargs)
+			if self.allowThreading is True and module.thread is True:
+				t = threading.Thread(target=self.processThread, kwargs=kwargs)
 				t.start()
 			else:
-				response = obj.response(**kwargs)
-				if response is not None: output(response)
+				response = module.response(**kwargs)
+				if response is not None: self.output(message=response, params=kwargs)
 
 
 """

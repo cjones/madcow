@@ -15,7 +15,13 @@ class ProtocolHandler(Madcow):
 
 			if input.lower() == 'quit': break
 			if len(input) > 0:
-				self.processMessage(input, os.environ['USER'], 'cli', True, output)
+				params = dict([
+					('nick', os.environ['USER']),
+					('channel', 'cli'),
+					('sendTo', os.environ['USER']),
+					('private', True),
+				])
+				self.processMessage(message=input, params=params)
 
-	def output(self, message):
+	def output(self, message=None, params=None):
 		print '%s' % message

@@ -74,18 +74,21 @@ class ProtocolHandler(Madcow):
 				server.privmsg(event.target(), self.config.irc.rejoinReply)
 
 	# function to putput to IRC
-	def output(self, sendTo, message, wrap = False):
+	def output(self, message=None, params=None):
 		if message is None: return
 
-		if wrap is True:
-			lines = textwrap.wrap(message, self.config.irc.wrap)
-		elif wrap is False:
-			lines = []
-			for line in message.splitlines():
-				lines = lines + textwrap.wrap(line, 400)
+		if params.has_key('wrap') is True and params['wrap'] is True:
+			wrap = self.config.irc.wrap
+		else:
+			wrap = 400
 
-		for line in lines:
-			self.server.privmsg(sendTo, line)
+		output = []
+		for line in message.splitlines():
+			for wrapped in textwrap.wrap(line, wrap):
+				output.append(wrapped)
+
+		for line in output:
+			self.server.privmsg(params['sendTo'], line)
 
 
 	def on_privmsg(self, server, event):
@@ -100,5 +103,10 @@ class ProtocolHandler(Madcow):
 		message = event.arguments()[0]
 		nick = irclib.nm_to_n(event.source())
 		sendTo = private == True and nick or event.target()
-		output = lambda m: self.output(sendTo, m)
-		self.processMessage(message, nick, event.target(), private, output)
+		params = dict([
+			('nick', nick),
+			('channel', event.target()),
+			('sendTo', sendTo),
+			('private', private),
+		])
+		self.processMessage(message=message, params=params)
