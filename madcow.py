@@ -143,9 +143,6 @@ class Madcow(object):
 
 	# actually process messages!
 	def processMessage(self, message=None, params=None):
-		# XXX this should move to irc.py protocol handler.. i think
-		message, params = self.checkAddressing(message=message, params=params)
-
 		if params.has_key('feedback') is True and params['feedback'] is True:
 			self.output(message='yes?', params=params)
 			return
@@ -164,10 +161,9 @@ class Madcow(object):
 			try: matchGroups = module.pattern.search(message).groups()
 			except: continue
 
-			kwargs = dict(params.items() + [
-				('args', matchGroups),
-				('module', module),
-			])
+			kwargs = params
+			kwargs['args'] = matchGroups
+			kwargs['module'] = module
 
 			if self.allowThreading is True and module.thread is True:
 				t = threading.Thread(target=self.processThread, kwargs=kwargs)

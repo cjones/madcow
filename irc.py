@@ -6,6 +6,7 @@ import time
 import re
 import sys
 from madcow import Madcow
+from modules.include.colorlib import ColorLib
 
 # set for LOTS of verbosity
 irclib.DEBUG = 0
@@ -13,6 +14,7 @@ irclib.DEBUG = 0
 class ProtocolHandler(Madcow):
 	def __init__(self, config=None, dir=None, verbose=False):
 		self.allowThreading = True
+		self.colorlib = ColorLib(type='mirc')
 		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
 
 		self.irc = irclib.IRC()
@@ -77,6 +79,10 @@ class ProtocolHandler(Madcow):
 	def output(self, message=None, params=None):
 		if message is None: return
 
+		if params['colorize'] is True:
+			message = self.colorlib.rainbow(message)
+
+
 		if params.has_key('wrap') is True and params['wrap'] is True:
 			wrap = self.config.irc.wrap
 		else:
@@ -100,13 +106,20 @@ class ProtocolHandler(Madcow):
 		self.on_message(server, event, private = False)
 
 	def on_message(self, server, event, private):
-		message = event.arguments()[0]
 		nick = irclib.nm_to_n(event.source())
 		sendTo = private == True and nick or event.target()
-		params = dict([
-			('nick', nick),
-			('channel', event.target()),
-			('sendTo', sendTo),
-			('private', private),
-		])
+
+		params = {
+			'nick':		nick,
+			'channel':	event.target(),
+			'sendTo':	sendTo,
+			'private':	private,
+		}
+		message, params = self.checkAddressing(message=event.arguments()[0], params=params)
+		if message.startswith('^'):
+			message = message[1:]
+			params['colorize'] = True
+		else:
+			params['colorize'] = False
+
 		self.processMessage(message=message, params=params)

@@ -20,6 +20,8 @@ class ProtocolHandler(Madcow):
 					('channel', 'cli'),
 					('sendTo', os.environ['USER']),
 					('private', True),
+					('addressed', True),
+					('correction', False),
 				])
 				self.processMessage(message=input, params=params)
 
