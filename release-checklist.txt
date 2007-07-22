@@ -2,7 +2,7 @@
 # diff trunk from previous release and update ChangeLog
 # make a release tag:
 
-release="madcow-1.0.6"
+release="madcow-1.0.7"
 
 svn copy https://madcow.svn.sourceforge.net/svnroot/madcow/trunk https://madcow.svn.sourceforge.net/svnroot/madcow/tags/$release
 
@@ -12,11 +12,13 @@ tar cfjv ${release}.tar.bz2 $release
 
 # upload to anon ftp
 #
-# ftp upload.sourceforge.net
-# cd /incoming
-# put ${release}.tar.bz2
+echo "ftp upload.sourceforge.net"
+echo "cd /incoming"
+echo "put ${release}.tar.bz2"
+echo
 
 # activate release on SF.net:
-# http://sourceforge.net/project/admin/editpackages.php?group_id=199970
+echo "http://sourceforge.net/project/admin/editpackages.php?group_id=199970"
+echo
 
 
