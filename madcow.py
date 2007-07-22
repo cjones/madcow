@@ -30,6 +30,30 @@ import re
 import threading
 import time
 
+class Request(object):
+	def __init__(self, message=None):
+		self.message = message
+
+		"""
+		these are some attributes that various
+		plugins and modules may expect to be set, so
+		give them defaults
+		"""
+
+		self.nick = None
+		self.addressed = False
+		self.correction = False
+		self.channel = None
+		self.args = []
+
+	def __getattr__(self, attr):
+		return None
+
+	def getDict(self):
+		return self.__dict__
+
+	params = property(getDict)
+
 class Madcow(object):
 	def __init__(self, config=None, dir=None, verbose=False):
 		self.config = config
@@ -99,78 +123,73 @@ class Madcow(object):
 
 
 	# pre-processing filter that catches whether the bot is being addressed or not..
-	def checkAddressing(self, message=None, params={}):
-		params['addressed'] = False
-		params['correction'] = False
-		params['feedback'] = False
+	def checkAddressing(self, req):
 		nick = self.botName()
 
 		# compile regex based on current nick
-		self.correction = re.compile('^\s*no,?\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
-		self.addressed = re.compile('^\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
-		self.feedback = re.compile('^\s*%s\s*\?+$' % re.escape(nick), re.I)
+		self.reCorrection = re.compile('^\s*no,?\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
+		self.reAddressed = re.compile('^\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
+		self.reFeedback = re.compile('^\s*%s\s*\?+$' % re.escape(nick), re.I)
 
 		# correction: "no, bot, foo is bar"
 		try:
-			message = self.correction.search(message).group(1)
-			params['correction'] = True
-			params['addressed'] = True
+			req.message = self.reCorrection.search(req.message).group(1)
+			req.correction = True
+			req.addressed = True
 		except: pass
 
 		# bot ping: "bot?"
-		if self.feedback.search(message):
-			params['feedback'] = True
+		if self.reFeedback.search(req.message):
+			req.feedback = True
 
 		# addressed
 		try:
-			message = self.addressed.search(message).group(1)
-			params['addressed'] = True
+			req.message = self.reAddressed.search(req.message).group(1)
+			req.addressed = True
 		except: pass
 
-		return message, params
 
 	# returns our help data as a string
 	def usage(self):
 		return '\n'.join(self.usageLines)
 
-	def processThread(self, **params):
-		response = params['module'].response(**params)
-		if response is not None:
-			self.outputLock.acquire()
-			self.output(message=response, params=params)
-			self.outputLock.release()
-
 
 	# actually process messages!
-	def processMessage(self, message=None, params=None):
-		if params.has_key('feedback') is True and params['feedback'] is True:
-			self.output(message='yes?', params=params)
+	def processMessage(self, req):
+		if req.feedback is True:
+			self.output(message='yes?', req=req)
 			return
 
-		if params.has_key('addressed') is True and params['addressed'] is True:
-			if message.lower() == 'help':
-				self.output(message=self.usage(), params=params)
-				return
+		if req.addressed is True and req.message.lower() == 'help':
+			self.output(message=self.usage(), req=req)
+			return
 
 		for module in self.modules.values():
-			if module.requireAddressing is True:
-				if params.has_key('addressed') is True and params['addressed'] is False:
-					continue
+			if module.requireAddressing is True and req.addressed is False:
+				continue
 
-
-			try: matchGroups = module.pattern.search(message).groups()
+			try: matchGroups = module.pattern.search(req.message).groups()
 			except: continue
 
-			kwargs = params
+			kwargs = req.params
 			kwargs['args'] = matchGroups
 			kwargs['module'] = module
+			kwargs['req'] = req
 
 			if self.allowThreading is True and module.thread is True:
 				t = threading.Thread(target=self.processThread, kwargs=kwargs)
 				t.start()
 			else:
 				response = module.response(**kwargs)
-				if response is not None: self.output(message=response, params=kwargs)
+				if response is not None: self.output(message=response, req=req)
+
+
+	def processThread(self, **kwargs):
+		response = kwargs['module'].response(**kwargs)
+		if response is not None:
+			self.outputLock.acquire()
+			self.output(message=response, req=kwargs['req'])
+			self.outputLock.release()
 
 
 """

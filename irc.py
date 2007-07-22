@@ -5,7 +5,7 @@ import irclib
 import time
 import re
 import sys
-from madcow import Madcow
+from madcow import Madcow, Request
 from modules.include.colorlib import ColorLib
 
 # set for LOTS of verbosity
@@ -15,6 +15,7 @@ class ProtocolHandler(Madcow):
 	def __init__(self, config=None, dir=None, verbose=False):
 		self.allowThreading = True
 		self.colorlib = ColorLib(type='mirc')
+
 		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
 
 		self.irc = irclib.IRC()
@@ -76,14 +77,13 @@ class ProtocolHandler(Madcow):
 				server.privmsg(event.target(), self.config.irc.rejoinReply)
 
 	# function to putput to IRC
-	def output(self, message=None, params=None):
+	def output(self, message=None, req=None):
 		if message is None: return
 
-		if params['colorize'] is True:
+		if req.colorize is True:
 			message = self.colorlib.rainbow(message)
 
-
-		if params.has_key('wrap') is True and params['wrap'] is True:
+		if req.wrap is True:
 			wrap = self.config.irc.wrap
 		else:
 			wrap = 400
@@ -94,32 +94,39 @@ class ProtocolHandler(Madcow):
 				output.append(wrapped)
 
 		for line in output:
-			self.server.privmsg(params['sendTo'], line)
+			self.server.privmsg(req.sendTo, line)
 
 
 	def on_privmsg(self, server, event):
 		self.status('[IRC] PRIVMSG from %s: %s' % (event.source(), event.arguments()[0]))
-		self.on_message(server, event, private = True)
+		self.on_message(server, event, private=True)
 
 	def on_pubmsg(self, server, event):
 		self.status('[IRC] <%s/%s> %s' % (event.source(), event.target(), event.arguments()[0]))
-		self.on_message(server, event, private = False)
+		self.on_message(server, event, private=False)
 
 	def on_message(self, server, event, private):
-		nick = irclib.nm_to_n(event.source())
-		sendTo = private == True and nick or event.target()
+		req = Request(message=event.arguments()[0])
+		req.nick = irclib.nm_to_n(event.source())
+		req.channel = event.target()
+		req.private = private
 
-		params = {
-			'nick':		nick,
-			'channel':	event.target(),
-			'sendTo':	sendTo,
-			'private':	private,
-		}
-		message, params = self.checkAddressing(message=event.arguments()[0], params=params)
-		if message.startswith('^'):
-			message = message[1:]
-			params['colorize'] = True
+		if private is True:
+			req.sendTo = req.nick
 		else:
-			params['colorize'] = False
+			req.sendTo = req.channel
 
-		self.processMessage(message=message, params=params)
+		self.preProcess(req)
+		self.processMessage(req)
+
+	def preProcess(self, req):
+		self.checkAddressing(req)
+
+		if req.message.startswith('^'):
+			req.message = req.message[1:]
+			req.colorize = True
+		else:
+			req.colorize = False
+
+
+
