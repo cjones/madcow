@@ -7,7 +7,6 @@ Generate random figlet of the ultimate insult!
 import sys
 import re
 from include.pyfiglet import Figlet
-from include.colorlib import ColorLib
 import random
 
 # class for this module
@@ -22,7 +21,6 @@ class match(object):
 
 		zipfile = '%s/modules/include/fonts.zip' % dir
 		self.figlet = Figlet(zipfile=zipfile)
-		self.colorlib = ColorLib(type='mirc')
 
 		# pre-approved list of fonts to use
 		self.fonts = (
@@ -44,8 +42,6 @@ class match(object):
 		try:
 			self.figlet.setFont(font=random.choice(self.fonts))
 			text = self.figlet.renderText('your mom')
-			style = random.choice(self.colorlib.rainbowStyles)
-			text = self.colorlib.rainbow(text=text, style=style)
 			return text
 
 

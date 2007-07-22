@@ -8,7 +8,6 @@ import urllib
 import re
 import random
 from include import utils
-from include.colorlib import ColorLib
 
 # class for this module
 class match(object):
@@ -23,7 +22,6 @@ class match(object):
 		self.baseURL = 'http://www.asciiartfarts.com/'
 		self.randomURL = self.baseURL + 'random.cgi'
 		self.artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre>(.*?)</pre>', re.DOTALL)
-		self.colorlib = ColorLib(type='mirc')
 
 	# function to generate a response
 	def response(self, *args, **kwargs):
@@ -43,7 +41,6 @@ class match(object):
 			result = random.choice(results)
 			title, art = result
 			art = utils.stripHTML(art)
-			art = self.colorlib.rainbow(text=art)
 			return '>>> %s <<<\n%s' % (title, art)
 		except Exception, e:
 			print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
