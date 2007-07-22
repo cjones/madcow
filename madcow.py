@@ -171,7 +171,7 @@ class Madcow(object):
 			try: matchGroups = module.pattern.search(req.message).groups()
 			except: continue
 
-			# DON'T CHANGE THIS, IT IS DONE FOR A REASON (threadsafe on linux)
+			# DON'T CHANGE THIS, IT IS DONE FOR A REASON (threadsafe)
 			kwargs = dict(req.params.items() + [('args', matchGroups), ('module', module), ('req', req)])
 
 			if self.allowThreading is True and module.thread is True:
