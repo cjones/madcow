@@ -62,6 +62,8 @@ class Madcow(object):
 
 		self.ns = self.config.modules.dbnamespace
 		self.ignoreModules = [ '__init__', 'template' ]
+		self.ignoreModules.append('tac')       # moved to grufti framework in 1.0.7
+		self.ignoreModules.append('bullshitr') # moved to grufti framework in 1.0.7
 		self.moduleDir = self.dir + '/modules'
 		self.outputLock = threading.RLock()
 
