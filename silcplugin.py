@@ -8,10 +8,12 @@ import madcow
 import silc
 import time
 import re
+from modules.include.colorlib import ColorLib
 
 class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def __init__(self, config=None, dir=None, verbose=False):
     madcow.Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
+    self.colorlib = ColorLib(type='ansi')
 
     keys = silc.create_key_pair("silc.pub", "silc.priv", passphrase="")
     nick = self.config.silcplugin.nick
@@ -33,14 +35,36 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
       self.run_one()
       time.sleep(0.2)
 
-  def channel_message(self, sender, channel, flags, message):
-    output = lambda m: self.send_to_channel(channel, m)
-    response = self.processMessage(message, sender.nickname, channel.channel_name, False, output)
-
   def private_message(self, sender, flags, message):
-    output = lambda m: self.send_to_user(sender, m)
-    response = self.processMessage(message, sender.nickname, None, True, output)
+    req = madcow.Request(message=message)
+    req.nick = sender.nickname
+    req.channel = None
+    req.sendTo = sender
+    req.private = True
 
+    self.preProcess(req)
+    req.addressed = True # privmsg implies addressing
+    self.processMessage(req)
+
+  def channel_message(self, sender, channel, flags, message):
+    req = madcow.Request(message=message)
+    req.nick = sender.nickname
+    req.channel = channel
+    req.sendTo = channel
+    req.private = False
+
+    self.preProcess(req)
+    self.processMessage(req)
+
+  def preProcess(self, req):
+    self.checkAddressing(req)
+
+    if req.message.startswith('^'):
+      req.message = req.message[1:]
+      req.colorize = True
+    else:
+      req.colorize = False
+  
   # not much of a point recovering from a kick when the silc code just segfaults on you :/
   #def notify_kicked(self, kicked, reason, kicker, channel):
   #  print 'SILC: Notify (Kick):', kicked, reason, kicker, channel
@@ -55,6 +79,19 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
     if self.config.silcplugin.reconnect:
       time.sleep(self.config.silcplugin.reconnectWait)
       self.connect()
+
+  def output(self, req, message):
+    print "called: output(%s, %s, %s)" % (str(self), str(req), str(message))
+    
+    if not message: return
+    
+    if req.colorize:
+      message = self.colorlib.rainbow(message)
+    
+    if req.private:
+      self.send_to_user(req.sendTo, message)
+    else:
+      self.send_to_channel(req.sendTo, message)
 
   def send_to_channel(self, channel, message):
     for line in message.splitlines():
