@@ -77,7 +77,7 @@ class ProtocolHandler(Madcow):
 				server.privmsg(event.target(), self.config.irc.rejoinReply)
 
 	# function to putput to IRC
-	def output(self, message=None, req=None):
+	def output(self, message, req):
 		if message is None: return
 
 		if req.colorize is True:

@@ -11,7 +11,6 @@ class ProtocolHandler(Madcow):
 		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
 
 	def start(self, *args):
-		output = lambda m: self.output(m)
 		while True:
 			input = raw_input('>>> ').strip()
 
@@ -21,6 +20,7 @@ class ProtocolHandler(Madcow):
 				req.nick = os.environ['USER']
 				req.channel = 'cli'
 				req.private = True
+				req.addressed = True
 
 				self.checkAddressing(req)
 
@@ -30,7 +30,7 @@ class ProtocolHandler(Madcow):
 
 				self.processMessage(req)
 
-	def output(self, message=None, req=None):
+	def output(self, message, req):
 		if req.colorize is True:
 			message = self.colorlib.rainbow(message)
 

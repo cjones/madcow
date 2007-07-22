@@ -77,11 +77,11 @@ class Madcow(object):
 	def start(self):
 		pass
 
-	def output(self, message):
+	def output(self, message, req):
 		pass
 
 	def botName(self):
-		return 'madcow'
+		return 'unknown'
 
 	"""
 	Dynamic loading of module extensions. This looks for .py files in
