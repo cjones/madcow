@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
-from madcow import Madcow
+from madcow import Madcow, Request
 import os
 import re
 from twisted.protocols import oscar
 from twisted.internet import protocol, reactor
 from modules.include import utils
+from modules.include.colorlib import ColorLib
 
 class ProtocolHandler(Madcow):
 	def __init__(self, config=None, dir=None, verbose=False):
 		self.allowThreading = False
+		self.colorlib = ColorLib(type='html')
 		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
 		self.newline = re.compile('[\r\n]+')
 
@@ -22,9 +24,12 @@ class ProtocolHandler(Madcow):
 		p.protocolClass.BOSClass._ProtocolHandler = self
 		reactor.run()
 
-	def output(self, aim, nick, message):
+	def output(self, message=None, req=None):
+		if self.colorize is True:
+			message = self.colorlib.rainbow(message)
+
 		message = self.newline.sub('<br>', message)
-		aim.sendMessage(nick, message)
+		req.aim.sendMessage(req.nick, message)
 
 class OSCARConnection(oscar.BOSConnection):
 	capabilities = [oscar.CAP_CHAT]
@@ -42,6 +47,7 @@ class OSCARConnection(oscar.BOSConnection):
 		self.clientReady()
 
 	def receiveMessage(self, user, multiparts, flags):
+		# XXX oh god.. so broken right now =/ i wonder if anyone uses this
 		user = user.name
 		message = utils.stripHTML(multiparts[0][0])
 		bot = self._ProtocolHandler

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-from madcow import Madcow
+from madcow import Madcow, Request
 import os
+from modules.include.colorlib import ColorLib
 
 class ProtocolHandler(Madcow):
 	def __init__(self, config=None, dir=None, verbose=False):
 		self.allowThreading = False
+		self.colorlib = ColorLib(type='ansi')
 		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
 
 	def start(self, *args):
@@ -15,15 +17,21 @@ class ProtocolHandler(Madcow):
 
 			if input.lower() == 'quit': break
 			if len(input) > 0:
-				params = dict([
-					('nick', os.environ['USER']),
-					('channel', 'cli'),
-					('sendTo', os.environ['USER']),
-					('private', True),
-					('addressed', True),
-					('correction', False),
-				])
-				self.processMessage(message=input, params=params)
+				req = Request(message=input)
+				req.nick = os.environ['USER']
+				req.channel = 'cli'
+				req.private = True
 
-	def output(self, message=None, params=None):
-		print '%s' % message
+				self.checkAddressing(req)
+
+				if req.message.startswith('^'):
+					req.colorize = True
+					req.message = req.message[1:]
+
+				self.processMessage(req)
+
+	def output(self, message=None, req=None):
+		if req.colorize is True:
+			message = self.colorlib.rainbow(message)
+
+		print message
