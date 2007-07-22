@@ -13,6 +13,7 @@ class match(object):
 	reCommaDelim = re.compile('\s*,\s*')
 	rePipeDelim = re.compile('\s*\|\s*')
 	reToken = re.compile('({{\s*(.*?)\s*}})')
+	reIsRegex = re.compile('^/(.+)/$')
 
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
@@ -37,11 +38,18 @@ class match(object):
 				if len(responses) == 0: continue
 				matches = []
 				for match in self.reCommaDelim.split(matchString):
-					matches.append(re.compile(r'\b' + re.escape(match) + r'\b', re.I))
+					isRegex = self.reIsRegex.search(match)
+					if isRegex is not None:
+						regex = re.compile(isRegex.group(1), re.I)
+					else:
+						regex = re.compile(r'\b' + re.escape(match) + r'\b', re.I)
+
+					matches.append(regex)
 
 				self.data.append((matches, responses))
 
-		except:
+		except Exception, e:
+			print >> sys.stderr, 'aborting load of grufti: %s' % e
 			self.enabled = False
 
 	def parseTokens(self, response):
