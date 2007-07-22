@@ -81,8 +81,6 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
       self.connect()
 
   def output(self, req, message):
-    print "called: output(%s, %s, %s)" % (str(self), str(req), str(message))
-    
     if not message: return
     
     if req.colorize:
