@@ -7,6 +7,7 @@ import re
 import sys
 from madcow import Madcow, Request
 from modules.include.colorlib import ColorLib
+import random
 
 # set for LOTS of verbosity
 irclib.DEBUG = 0
@@ -81,7 +82,8 @@ class ProtocolHandler(Madcow):
 		if message is None: return
 
 		if req.colorize is True:
-			message = self.colorlib.rainbow(message)
+			style = random.choice(ColorLib.rainbowStyles)
+			message = self.colorlib.rainbow(message, style=style)
 
 		if req.wrap is True:
 			wrap = self.config.irc.wrap
