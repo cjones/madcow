@@ -1,51 +1,82 @@
 1.0.1: Sat Jun 30 17:39:08 PDT 2007
 
-* Updated TODO list
-* Get a rid of all the CVS Id tags
-* Clean up jesus module to not have footnotes
-* Stock module can now do mutual funds
+	* Updated TODO list
+	* Get a rid of all the CVS Id tags
+	* Clean up jesus module to not have footnotes
+	* Stock module can now do mutual funds
 
 1.0.2: Sat Jun 30 22:32:09 PDT 2007
 
-* Refactor module API to expose more data to the extensions
-* Move seen/factoids/memebot into standard extension API
-* Add namespace config for unique database files
-* Added some startup verbosity
-* Listed a description of all base modules in config
-* Allow modules to be disabled in config file
+	* Refactor module API to expose more data to the extensions
+	* Move seen/factoids/memebot into standard extension API
+	* Add namespace config for unique database files
+	* Added some startup verbosity
+	* Listed a description of all base modules in config
+	* Allow modules to be disabled in config file
 
 1.0.3: Sun Jul  1 19:27:09 PDT 2007
 
-* A bunch of necessary code cleanup to the module framework
-* Rewrote the Config class to be more efficient
-* Added -v flag for verbosity when executed in a console
-* Fixed grufti from triggering on substring matches
-* Grufti module now precompiles regexes at loadtime
+	* A bunch of necessary code cleanup to the module framework
+	* Rewrote the Config class to be more efficient
+	* Added -v flag for verbosity when executed in a console
+	* Fixed grufti from triggering on substring matches
+	* Grufti module now precompiles regexes at loadtime
 
 1.0.4: Thu Jul  5 19:21:38 PDT 2007
 
-* NEW: django frontend for memebot (see http://memebot.gruntle.org/ for ex.)
-* Fix bug with SILC private messages
-* Remove typo in memebot insult list
-* Improve weather.py module's logic to work with ambiguous serach results
-* Improve documentation
+	* NEW - django frontend for memebot (see http://memebot.gruntle.org/ for ex.)
+	* Fix bug with SILC private messages
+	* Remove typo in memebot insult list
+	* Improve weather.py module's logic to work with ambiguous serach results
+	* Improve documentation
 
 1.0.5: Fri Jul  6 19:26:04 PDT 2007
 
-* Bundle python-irclib to make installation easier
-* Bugfix: Can now properly use IP addresses as hostnames
-* Add a flexible throttling module
-* Add throttling to memebot for URL postings to prevent gaming
+	* Bundle python-irclib to make installation easier
+	* Bugfix - Can now properly use IP addresses as hostnames
+	* Add a flexible throttling module
+	* Add throttling to memebot for URL postings to prevent gaming
 
 1.0.6: Thu Jul 12 22:37:03 PDT 2007
 
-* Fix all module regex's to only trigger from beginning of line to prevent the
-spam caused by chaining multiple keywords
-* Rename django settings file to a sample name so updates won't clobber it
-* add "today" link to memebot page when you navigate to older days
-# update AAF to show the title of the ascii art, as well as the option to
-supply a keyword to pull art from
-* add pyfiglet module to include directory - figlet font driver
-* add colorlib module to include directory - ansi/mirc colorizing library
-* add yourmom.py module :)
-* some cosmetic changes to silc output
+	* Fix all module regex's to only trigger from beginning of line to prevent the
+	  spam caused by chaining multiple keywords
+	* Rename django settings file to a sample name so updates won't clobber it
+	* add "today" link to memebot page when you navigate to older days
+	* update AAF to show the title of the ascii art, as well as the option to
+	  supply a keyword to pull art from
+	* add pyfiglet module to include directory - figlet font driver
+	* add colorlib module to include directory - ansi/mirc colorizing library
+	* add yourmom.py module :)
+	* some cosmetic changes to silc output
+
+1.0.7: TBD
+
+	* memebot url catcher now sees and records commentary that goes with a
+	posted link, such as surrounding text.
+	* memebot frontend search now matches "comments"
+	* IRC, CLI, and SILC now can colorize output. appending a string with
+	^ will cause its output to use a random rainbow color.
+	* new -- jinx.py. sort of self-explanatory, catches people who say the
+	same thing simultaneously.
+	* grufti module can now have inline tokens which will choose a random
+	word/phrase from a list.
+	* grufti module can now use regular expression matches if the match
+	string is surrounded by // (like perl)
+	* ported the tac.py and bullshitr.py module to use grufti syntax
+	* added more complete grufti-responses.txt sample files -- the full
+	insub version, and a cleaner sample version with mostly simpsons and
+	zippy quotes.
+	* patched colorlib to not attempt coloring whitespace, which pushed
+	most ascii art to the RFC limit.
+	* rainbow offset will now properly roll over instead of growing
+	infinitely
+	* weather.py now shows wind speed/direction more reliably
+	* remove auto-color of yourmom.py and artfart.py, since it can now be
+	colorized on demand with the ^ filter.
+	* madcow core and protocol handlers further abstracted by removing all
+	protocol-depending required variables and passing around a Request
+	object which can have arbitrary attributes. These are made available
+	to the plugin modules as a dict, allowing for more advanced
+	protocol-dependent modules. This also allows pre-/post-processing
+	filters to be applied within the protocol module.
