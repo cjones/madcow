@@ -39,7 +39,7 @@ dbNamespace=madcow
 ;
 ; YOU'VE BEEN WARNED
 
-;disabled=artfart, bash, hugs, lifejournal, urban
+;disabled=artfart, bash, hugs, livejournal, urban
 
 ; MODULE DESCRIPTIONS:
 ;
@@ -49,7 +49,6 @@ dbNamespace=madcow
 ;bash		get a random IRC/IM quote from bash.org
 ;bbcnews	get news headlines from BBC RSS feed
 ;bible		get quotes from the bible based on book/chapter/verse
-;bullshitr	make fun of people who think web 2.0 has meaning
 ;calc		use google calculator to perform any arithmetic
 ;chp		BAY AREA ONLY - get california highway patrol incidents
 ;dictionary	look up a word or phrase on dictionary.com
@@ -58,6 +57,7 @@ dbNamespace=madcow
 ;google		i'm feeling lucky url for a specified search term
 ;grufti		grufti chatterbot module. allows automatic responsees for set phrases
 ;hugs		get a random confession from grouphug.us
+;jinx           catch people who say the same thing (almost) simultaneously
 ;learn		part of the weather module, learn where someone lives permanently
 ;livejournal	get latest livejournal entry (random or a specific user)
 ;memebot	track urls posted in channel, chastise people for posting old memes
@@ -65,7 +65,6 @@ dbNamespace=madcow
 ;seen		keep track of what people said in channel last
 ;slut		gives you a porno rating in % of a google search terms.
 ;stockquote	yahoo finance stock and mutual fund quotes
-;tac		get a random excuse for why the network is down
 ;terror		up-to-date information on our threat advisory according to DHS
 ;urban		look up a word or phrase in the urban dictionary
 ;weather	look up weather forecast for your area using wunderground
