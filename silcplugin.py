@@ -49,7 +49,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def channel_message(self, sender, channel, flags, message):
     req = madcow.Request(message=message)
     req.nick = sender.nickname
-    req.channel = channel
+    req.channel = channel.channel_name
     req.sendTo = channel
     req.private = False
 
