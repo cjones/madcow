@@ -13,7 +13,7 @@ from modules.include.colorlib import ColorLib
 class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def __init__(self, config=None, dir=None, verbose=False):
     madcow.Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
-    self.colorlib = ColorLib(type='ansi')
+    self.colorlib = ColorLib(type='mirc')
 
     keys = silc.create_key_pair("silc.pub", "silc.priv", passphrase="")
     nick = self.config.silcplugin.nick
