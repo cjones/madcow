@@ -151,10 +151,10 @@ class ColorLib(object):
 
 	rainbowmap = {
 		'rainbow':	'rryyggccbbmm',
-		'usa':		'rwb',
-		'gray':		'12',
-		'scale':	'w2C1C2',
-		'xmas':		'rg',
+		'usa':		'rrrwwwbbb',
+		'gray':		'111222',
+		'scale':	'ww22CC11CC22',
+		'xmas':		'rrgg',
 		'canada':	'ooowww',
 	}
 
