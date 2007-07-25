@@ -31,7 +31,7 @@ class match(object):
 		self.forget = re.compile('forget[:\-, ]+(.+)$', re.I)
 
 	def dbFile(self, type):
-		return self.dir + '/db-%s-factoids-%s' % (self.ns, type.lower())
+		return self.dir + '/data/db-%s-factoids-%s' % (self.ns, type.lower())
 
 	def get(self, type, key, val=None):
 		db = anydbm.open(self.dbFile(type), 'c', 0640)

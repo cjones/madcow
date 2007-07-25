@@ -19,7 +19,7 @@ class match(object):
 		self.help = 'seen <nick> - query bot about last time someone was seen speaking'
 
 		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-		self.file = dir + '/db-%s-seen' % ns
+		self.file = dir + '/data/db-%s-seen' % ns
 		self.seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)
 
 	def get(self, user):

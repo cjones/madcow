@@ -60,7 +60,7 @@ class match(object):
 		self.help = 'score [name,range] - get memescore for name/range, empty for top10'
 
 		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-		file = dir + '/db-%s-memes' % ns
+		file = dir + '/data/db-%s-memes' % ns
 
 		self.matchURL = re.compile('(http://\S+)', re.I)
 		self.scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)

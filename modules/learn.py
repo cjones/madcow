@@ -16,7 +16,7 @@ class match(object):
 		self.thread = False				# True/False - should bot spawn thread?
 		self.wrap = False				# True/False - wrap output?
 		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-		self.dbfile = dir + '/db-%s-locations' % ns
+		self.dbfile = dir + '/data/db-%s-locations' % ns
 
 	def lookup(self, nick):
 		db = anydbm.open(self.dbfile, 'c', 0640)
