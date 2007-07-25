@@ -97,7 +97,7 @@ class ColorLib(object):
 		return color
 
 
-	def getColor(self, fg=None, bg=None, type=None):
+	def getColor(self, fg=None, bg=None, type=None, nextChar=None):
 		if type is None: type = self.type
 		if fg is None and bg is None: return self.reset()
 		if fg is not None: fg = self.colorMap[self._normalizeColorName(fg)][type]
@@ -128,7 +128,15 @@ class ColorLib(object):
 			if bg is not None:
 				codes.append(bg)
 
-			return '\x03%s\x16\x16' % ','.join(codes)
+			out = '\x03%s' % ','.join(codes)
+			if nextChar is None:
+				out += '\x16\x16'
+			else:
+				nc = ord(nextChar)
+				if ((nc >= 48 and nc <= 57) or nc == 44):
+					out += '\x16\x16'
+
+			return out
 
 		elif type == 'html':
 			codes = []
@@ -151,7 +159,7 @@ class ColorLib(object):
 
 	rainbowmap = {
 		'rainbow':	'rryyggccbbmm',
-		'usa':		'rrrwwwbbb',
+		'usa':		'ooowwwBBB',
 		'gray':		'111222',
 		'scale':	'ww22CC11CC22',
 		'xmas':		'rrgg',
@@ -175,11 +183,16 @@ class ColorLib(object):
 		for line in text.splitlines():
 			i = 0
 			for char in line:
+				try:
+					nextChar = line[i + 1]
+				except:
+					nextChar = None
+
 				if colorWhitespace is False and char.isspace():
 					output += char
 				else:
 					color = colmap[(offset + i) % len(colmap)]
-					output += self.getColor(fg=color, bg=bg) + char + self.reset()
+					output += self.getColor(fg=color, bg=bg, nextChar=nextChar) + char + self.reset()
 
 				i += 1
 
