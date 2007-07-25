@@ -80,3 +80,11 @@
 	to the plugin modules as a dict, allowing for more advanced
 	protocol-dependent modules. This also allows pre-/post-processing
 	filters to be applied within the protocol module.
+
+1.0.8: Tue Jul 24 20:59:18 PDT 2007
+
+	* Re-arrange bot directory -- there is now a protocols, data, and
+	include directory, to keep the root from being too cluttered
+	* Use logging module which finer levels of verbosity
+	* Fix silc bug which causes madcow to crash on private messages
+	* Grufti response file removed keyword "test" -- oops!
