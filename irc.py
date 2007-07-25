@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import textwrap
-import irclib
+from modules.include import irclib
 import time
 import re
 import sys

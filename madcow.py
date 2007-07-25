@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-__version__ ='1.0.7'
-
+__version__ = '1.0.7'
+__author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = """
-Copyright (C) 2007 Christopher Jones <cjones@insub.org>
+Copyright (C) 2007 Christopher Jones <cjones@gruntle.org>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,8 +18,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
-
-(see LICENSE for full details)
 """
 
 import sys
@@ -252,6 +250,7 @@ Entry point to set up bot and run it
 def main(argv=None):
 	# where we are being run from
 	dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+	sys.path.append(dir)
 
 	# parse commandline options
 	parser = OptionParser(version=__version__)
@@ -278,7 +277,7 @@ def main(argv=None):
 
 	# dynamic load of protocol handler
 	try:
-		module = __import__(protocol, globals(), locals(), ['ProtocolHandler'])
+		module = __import__('protocols.' + protocol, globals(), locals(), ['ProtocolHandler'])
 		ProtocolHandler = getattr(module, 'ProtocolHandler')
 	except Exception, e:
 		print >> sys.stderr, "FATAL: Couldn't load protocol %s: %s" % (protocol, e)

@@ -33,4 +33,3 @@ TODO: (feature requests)
 - authentication for remote admin functions
 - option to create a FIFO unix file that you can pipe to to fist madcow.. maybe
 - chatroom support for aim/oscar module
-- color support ported from insub.pl for higher levels of obnoxiousness
