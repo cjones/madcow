@@ -27,6 +27,10 @@ from optparse import OptionParser
 import re
 import threading
 import time
+import logging
+from logging import DEBUG, INFO, WARN, ERROR, CRITICAL
+
+logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s')
 
 class Request(object):
 	def __init__(self, message=None):
@@ -53,10 +57,9 @@ class Request(object):
 	params = property(getDict)
 
 class Madcow(object):
-	def __init__(self, config=None, dir=None, verbose=False):
+	def __init__(self, config=None, dir=None):
 		self.config = config
 		self.dir = dir
-		self.verbose = verbose
 
 		self.ns = self.config.modules.dbnamespace
 		self.ignoreModules = [ '__init__', 'template' ]
@@ -70,9 +73,8 @@ class Madcow(object):
 		self.modules = {}
 		self.loadModules()
 
-	def status(self, msg=None):
-		if msg is not None and self.verbose is True:
-			print '[%s] %s' % (time.asctime(), msg.strip())
+	def status(self, msg=None, level=INFO):
+		logging.log(msg=msg, level=level)
 
 	def start(self):
 		pass
@@ -93,7 +95,7 @@ class Madcow(object):
 		except: disabled = []
 
 		files = os.walk(self.moduleDir).next()[2]
-		self.status('[MOD] * Reading modules from %s' % self.moduleDir)
+		self.status('[MOD] * Reading modules from %s' % self.moduleDir, INFO)
 
 		for file in files:
 			if file.endswith('.py') is False: continue
@@ -102,7 +104,7 @@ class Madcow(object):
 			if modName in self.ignoreModules: continue
 
 			if modName in disabled:
-				self.status('[MOD] Skipping %s because it is disabled in config' % modName)
+				self.status('[MOD] Skipping %s because it is disabled in config' % modName, WARN)
 				continue
 
 			try:
@@ -115,11 +117,11 @@ class Madcow(object):
 				if hasattr(obj, 'help') and obj.help is not None:
 					self.usageLines.append(obj.help)
 
-				self.status('[MOD] Loaded module %s' % modName)
+				self.status('[MOD] Loaded module %s' % modName, INFO)
 				self.modules[modName] = obj
 
 			except Exception, e:
-				self.status("[MOD] WARN: Couldn't load module %s: %s" % (modName, e))
+				self.status("[MOD] WARN: Couldn't load module %s: %s" % (modName, e), WARN)
 
 
 	# pre-processing filter that catches whether the bot is being addressed or not..
@@ -241,6 +243,7 @@ def detach():
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
+	logging.root.setLevel(CRITICAL)
 	return True
 
 
@@ -254,19 +257,20 @@ def main(argv=None):
 
 	# parse commandline options
 	parser = OptionParser(version=__version__)
-	parser.add_option(	'-c', '--config', default=dir + '/madcow.ini',
-				help='use FILE for config (default: %default)', metavar='FILE' )
-
-	parser.add_option(	'-d', '--detach', action='store_true', default=False,
-				help='detach when run (default: %default)' )
-
-	parser.add_option(	'-v', '--verbose', action='store_true', default=False,
-				help='turn on verbose output (default: %default)' )
-
-	parser.add_option(	'-p', '--protocol',
-				help='force the use of this output protocol' )
-
+	parser.add_option('-c', '--config', default=dir+'/madcow.ini', help='default: %default', metavar='FILE')
+	parser.add_option('-d', '--detach', action='store_true', default=False, help='detach when run')
+	parser.add_option('-p', '--protocol', help='force the use of this output protocol')
+	parser.add_option('-v', '--verbose', action='store_true', default=False, help='turn on verbose output')
+	parser.add_option('-D', '--debug', action='store_true', default=False, help='turn on debugging output')
 	opts, args = parser.parse_args()
+
+	if opts.debug is True:
+		logging.root.setLevel(DEBUG)
+	elif opts.verbose is True:
+		logging.root.setLevel(INFO)
+	else:
+		logging.root.setLevel(WARN)
+
 
 	# read config file
 	config = Config(file=opts.config)
@@ -285,9 +289,9 @@ def main(argv=None):
 
 	# daemonize if requested
 	if config.main.detach is True or opts.detach is True:
-		if detach() is True: opts.verbose = False
+		detach()
 
-	bot = ProtocolHandler(config=config, dir=dir, verbose=opts.verbose)
+	bot = ProtocolHandler(config=config, dir=dir)
 	bot.start()
 
 	return 0

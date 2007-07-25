@@ -1,13 +1,8 @@
 -----------------------------------------------------------------------------------------
 This is a list of known bugs, requested features, and potential improvements.
 Not everything here will necessarily be addressed. If you make any improvements
-to the bot, feel free to share patches with me by emailing them to cjones@insub.org.
-
-In no particular order..
+to the bot, feel free to share patches with me by emailing them to cjones@gruntle.org.
 -----------------------------------------------------------------------------------------
-
-FIXME: (blatant bugs, broken stuff)
-XXX: (known shortcomings)
 
 *** irc module
 
@@ -19,13 +14,8 @@ XXX: (known shortcomings)
 - change urban/bbcnew/dictionary match syntax for defintion number. can't look up "area 52" e.g.
 - factoids and grufti *always* trigger, which is annoying sometimes. when addressed they should always trigger,
   but when not addressed, only triggering n% of the time would be ideal. or not at all. should be configurable
-- logging module?
 - consider some higher level admin duties such as auto-opping/kickban/etc. eggdrop module? would be nice to
   obsolete having multiple bots, although eggdrops are largely replaced by chanserv/nickserv
-
-*** base class
-
-- add some verbosity. IRC is done, silc seems alright.. AIM needs logging.
 
 TODO: (feature requests)
 

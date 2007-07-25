@@ -8,16 +8,21 @@ import sys
 from madcow import Madcow, Request
 from include.colorlib import ColorLib
 import random
+from logging import DEBUG, INFO, WARN, ERROR, CRITICAL
+import logging
 
 # set for LOTS of verbosity
 irclib.DEBUG = 0
 
 class ProtocolHandler(Madcow):
-	def __init__(self, config=None, dir=None, verbose=False):
+	def __init__(self, config=None, dir=None):
 		self.allowThreading = True
 		self.colorlib = ColorLib(type='mirc')
 
-		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
+		Madcow.__init__(self, config=config, dir=dir)
+
+		if logging.root.level <= DEBUG:
+			irclib.DEBUG = 1
 
 		self.irc = irclib.IRC()
 		self.server = self.irc.server()
@@ -25,13 +30,13 @@ class ProtocolHandler(Madcow):
 		self.channels = re.split('\s*[,;]\s*', self.config.irc.channels)
 
 	def connect(self):
-		self.status('[IRC] * Connecting to %s:%s' % (self.config.irc.host, self.config.irc.port))
+		self.status('[IRC] * Connecting to %s:%s' % (self.config.irc.host, self.config.irc.port), INFO)
 		self.server.connect(self.config.irc.host, self.config.irc.port, self.config.irc.nick)
 
 	def start(self):
 		self.connect()
 		for event in self.events:
-			self.status('[IRC] * Registering event: %s' % event)
+			self.status('[IRC] * Registering event: %s' % event, INFO)
 			self.server.add_global_handler(event, getattr(self, 'on_' + event), 0)
 
 		self.irc.process_forever()
@@ -41,24 +46,24 @@ class ProtocolHandler(Madcow):
 
 	# welcome event triggers startup sequence
 	def on_welcome(self, server, event):
-		self.status('[IRC] * Connected')
+		self.status('[IRC] * Connected', INFO)
 
 		# TODO: identify with nickserv
 
 		# become an oper
 		if self.config.irc.oper is True:
-			self.status('[IRC] * Becoming an OPER')
+			self.status('[IRC] * Becoming an OPER', INFO)
 			self.server.oper(self.config.irc.operUser, self.config.irc.operPass)
 
 		# join all channels
 		for channel in self.channels:
-			self.status('[IRC] * Joining: %s' % channel)
+			self.status('[IRC] * Joining: %s' % channel, INFO)
 			self.server.join(channel)
 
 
 	# when losing connection, reconnect if configured to do so, otherwise exit
 	def on_disconnect(self, server, event):
-		self.status('[IRC] * Disconnected from server')
+		self.status('[IRC] * Disconnected from server', WARN)
 
 		if self.config.irc.reconnect is True:
 			if self.config.irc.reconnectWait > 0:
@@ -69,7 +74,7 @@ class ProtocolHandler(Madcow):
 
 	# when kicked, rejoin channel if configured to do so
 	def on_kick(self, server, event):
-		self.status('[IRC] * Kicked from %s by %s' % (event.arguments()[0], event.target()))
+		self.status('[IRC] * Kicked from %s by %s' % (event.arguments()[0], event.target()), WARN)
 		if event.arguments()[0].lower() == server.get_nickname().lower():
 			if self.config.irc.rejoin is True:
 				if self.config.irc.rejoinWait > 0:
@@ -100,11 +105,11 @@ class ProtocolHandler(Madcow):
 
 
 	def on_privmsg(self, server, event):
-		self.status('[IRC] PRIVMSG from %s: %s' % (event.source(), event.arguments()[0]))
+		self.status('[IRC] PRIVMSG from %s: %s' % (event.source(), event.arguments()[0]), INFO)
 		self.on_message(server, event, private=True)
 
 	def on_pubmsg(self, server, event):
-		self.status('[IRC] <%s/%s> %s' % (event.source(), event.target(), event.arguments()[0]))
+		self.status('[IRC] <%s/%s> %s' % (event.source(), event.target(), event.arguments()[0]), INFO)
 		self.on_message(server, event, private=False)
 
 	def on_message(self, server, event, private):

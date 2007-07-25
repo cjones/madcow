@@ -5,10 +5,10 @@ import os
 from include.colorlib import ColorLib
 
 class ProtocolHandler(Madcow):
-	def __init__(self, config=None, dir=None, verbose=False):
+	def __init__(self, config=None, dir=None):
 		self.allowThreading = False
 		self.colorlib = ColorLib(type='ansi')
-		Madcow.__init__(self, config=config, dir=dir, verbose=verbose)
+		Madcow.__init__(self, config=config, dir=dir)
 
 	def start(self, *args):
 		while True:
