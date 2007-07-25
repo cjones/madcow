@@ -8,6 +8,7 @@ svn copy https://madcow.svn.sourceforge.net/svnroot/madcow/trunk https://madcow.
 
 # export & make a bundle
 svn export https://madcow.svn.sourceforge.net/svnroot/madcow/tags/$release
+rm ${release}/release-checklist.txt
 tar cfjv ${release}.tar.bz2 $release
 
 # upload to anon ftp
