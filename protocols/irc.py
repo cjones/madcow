@@ -29,6 +29,16 @@ class ProtocolHandler(Madcow):
 		self.events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg']
 		self.channels = re.split('\s*[,;]\s*', self.config.irc.channels)
 
+	def log(self, chan, nick, msg):
+		line = '%s <%s> %s\n' % (time.strftime('%T'), nick, msg)
+		file = '%s/logs/%s-irc-%s-%s' % (self.dir, self.ns, chan, time.strftime('%F'))
+
+		try:
+			fi = open(file, 'a')
+			fi.write(line)
+		finally:
+			fi.close()
+
 	def connect(self):
 		self.status('[IRC] * Connecting to %s:%s' % (self.config.irc.host, self.config.irc.port), INFO)
 		self.server.connect(self.config.irc.host, self.config.irc.port, self.config.irc.nick)
@@ -110,6 +120,7 @@ class ProtocolHandler(Madcow):
 
 	def on_pubmsg(self, server, event):
 		self.status('[IRC] <%s/%s> %s' % (event.source(), event.target(), event.arguments()[0]), INFO)
+		self.log(event.target(), irclib.nm_to_n(event.source()), event.arguments()[0])
 		self.on_message(server, event, private=False)
 
 	def on_message(self, server, event, private):
