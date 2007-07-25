@@ -2,7 +2,7 @@
 
 from madcow import Madcow, Request
 import os
-from modules.include.colorlib import ColorLib
+from include.colorlib import ColorLib
 
 class ProtocolHandler(Madcow):
 	def __init__(self, config=None, dir=None, verbose=False):

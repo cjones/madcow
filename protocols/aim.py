@@ -5,7 +5,7 @@ import os
 import re
 from twisted.protocols import oscar
 from twisted.internet import protocol, reactor
-from modules.include import utils
+from include import utils
 
 class ProtocolHandler(Madcow):
 	def __init__(self, config=None, dir=None, verbose=False):

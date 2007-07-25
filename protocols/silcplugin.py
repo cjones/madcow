@@ -8,7 +8,7 @@ import madcow
 import silc
 import time
 import re
-from modules.include.colorlib import ColorLib
+from include.colorlib import ColorLib
 
 class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def __init__(self, config=None, dir=None, verbose=False):

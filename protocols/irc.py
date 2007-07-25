@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import textwrap
-from modules.include import irclib
+from include import irclib
 import time
 import re
 import sys
 from madcow import Madcow, Request
-from modules.include.colorlib import ColorLib
+from include.colorlib import ColorLib
 import random
 
 # set for LOTS of verbosity

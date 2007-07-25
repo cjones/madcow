@@ -19,7 +19,7 @@ class match(object):
 		self.wrap = False				# True/False - wrap output?
 		self.help = 'yourmom - random figlet of the ultimate insult'
 
-		zipfile = '%s/modules/include/fonts.zip' % dir
+		zipfile = '%s/include/fonts.zip' % dir
 		self.figlet = Figlet(zipfile=zipfile)
 
 		# pre-approved list of fonts to use
