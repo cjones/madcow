@@ -243,7 +243,6 @@ def detach():
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
-	logging.root.setLevel(CRITICAL)
 	return True
 
 
@@ -284,12 +283,13 @@ def main(argv=None):
 		module = __import__('protocols.' + protocol, globals(), locals(), ['ProtocolHandler'])
 		ProtocolHandler = getattr(module, 'ProtocolHandler')
 	except Exception, e:
-		print >> sys.stderr, "FATAL: Couldn't load protocol %s: %s" % (protocol, e)
+		logging.exception(e)
 		return 1
 
 	# daemonize if requested
 	if config.main.detach is True or opts.detach is True:
-		detach()
+		if detach() is True:
+			logging.shutdown()
 
 	bot = ProtocolHandler(config=config, dir=dir)
 	bot.start()
