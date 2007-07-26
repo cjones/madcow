@@ -96,9 +96,8 @@ class match(object):
       print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
       return '%s: Who?' % nick
 
-  def parseResultPage(self, doc=None):
-    return doc
-
+  # XXX this is pretty janky.. it mostly does what it's supposed to do
+  # but occasionally you get back garbage. :/
   def getSongLyrics(self, url):
     doc = urllib.urlopen(url).read()
 
