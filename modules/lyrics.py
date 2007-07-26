@@ -15,7 +15,9 @@ class match(object):
 	reRows = re.compile('<tr.*?>(.*?)</tr>', re.DOTALL)
 	reSongURL = re.compile('<a href="(.*?)" title="(.*?) lyrics">', re.DOTALL)
 	reLyrics = re.compile('<div id="content".*?>(.*?)</div>', re.DOTALL)
-	reLineBreak = re.compile('<br.*?>')
+	reNewLine = re.compile(r'[\r\n]+')
+	reDoubleBreak = re.compile('<br><br>')
+	reLineBreak = re.compile('<br>')
 
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
@@ -26,41 +28,38 @@ class match(object):
 		self.help = 'sing <artist/song> - grab random lyrics'
 
 	def response(self, *args, **kwargs):
-		nick = kwargs['nick']
-		query = '+'.join(kwargs['args'][0].split())
+		try:
+			nick = kwargs['nick']
+			query = '+'.join(kwargs['args'][0].split())
 
-		url = '%s/%s/%s/lyrics.html' % (match.baseURL, query[0], query)
-		doc = urllib.urlopen(url).read()
+			url = '%s/%s/%s/lyrics.html' % (match.baseURL, query[0], query)
+			doc = urllib.urlopen(url).read()
 
 
-		rows = [row for row in match.reRows.findall(match.reTables.findall(doc)[1]) if 'class="lyric"' in row]
-		songs = [row for row in rows if 'id="star"' in row]
+			rows = [row for row in match.reRows.findall(match.reTables.findall(doc)[1]) if 'class="lyric"' in row]
+			songs = [row for row in rows if 'id="star"' in row]
 
-		if len(songs) == 0:
-			songs = [row for row in rows if 'starZero' in row]
 			if len(songs) == 0:
-				raise Exception, 'no songs'
+				songs = [row for row in rows if 'starZero' in row]
+				if len(songs) == 0:
+					raise Exception, 'no songs'
 
-		url, song = match.reSongURL.search(random.choice(songs)).groups()
+			url, song = match.reSongURL.search(random.choice(songs)).groups()
 
-		doc = urllib.urlopen(url).read()
+			doc = urllib.urlopen(url).read()
 
-		lyrics = match.reLyrics.search(doc).group(1)
-		lyrics = match.reLineBreak.split(lyrics)
-
-		for line in lyrics:
-			print '*** %s' % line
-
-
-
-
+			lyrics = match.reLyrics.search(doc).group(1)
+			lyrics = match.reNewLine.sub('', lyrics)
+			blocks = match.reDoubleBreak.split(lyrics)
+			block = random.choice(blocks)
+			block = match.reLineBreak.sub(' // ', block)
+			block = '%s: %s' % (song, block)
+			return block
 
 
-		"""
 		except Exception, e:
 			print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-			return '%s: I failed to perform that lookup' % nick
-		"""
+			return '%s: Who?' % nick
 
 
 def main(argv = None):
