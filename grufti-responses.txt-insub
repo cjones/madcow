@@ -10,7 +10,7 @@
 :)
 %end
 
-%match sing hocico
+%match old sing hocico
 No one can stop you / you wanna be there in their smile / no way you can forget it / corroded feelings, fire in your heart.
 Pierce into the storm / there's fear in the answers / hearing a faint voice from the past / memories of pain.
 An evil force it's corroding all your actions / There's no hope it's reflected in blood shoot eyes.
@@ -19,24 +19,24 @@ Blazes rise your world's insane / deep inside your heart is still the pain pain 
 Let him burn! / I hear his crying / I see his body turning to ashes.
 %end
 
-%match sing something goth
+%match old sing something goth
 OOOH WHOOOOOA WHOOOOA THE PAIN OOOOOHHH *WAIL*
 I'm too depressed to sing. *sob*
 no.
 %end
 
-%match sing belafonte, sing harry belafonte
+%match old sing belafonte, old sing harry belafonte
 Work, work, work Senora/Work it all the time o/~
 Jump in the line, rock your body in time o/~
 DAY-O. DAY YAY YAY O. DAY LIGHT COME AND ME WANNA GO HOME o/~
 %end
 
-%match sing manilow, sing barry manilow
+%match old sing manilow, old sing barry manilow
 At the Copa, Copa Cabana... o|~
 HELL NO.
 %end
 
-%match sing faith no more, sing fnm
+%match old sing faith no more, old sing fnm
 You're perfect yes it's true but without me you're only you
 I SWALLOW, I SWALLOW, I SWALLOW, I SWALLOW
 Malnutrition, my submission, You're the master and I take it on my knees
@@ -46,11 +46,11 @@ Yes, the ecstasy, you can pray, you will never let it slip away
 And it's a dirty job but someone's got to do it!
 %end
 
-%match sing bork, sing swedish
+%match old sing bork, old sing swedish
 yorn desh born, der ritt de gitt der gue, orn desh, dee born desh, de umm bork bork bork!
 %end
 
-%match sing mr bungle, sing mr. bungle
+%match old sing mr bungle, old sing mr. bungle
 Squeeze me macaroni, slop your face with my bologna
 Knick knack paddywhack and give your dog a bone, baby
 EAR ARE RINGING. EARS. ARE. RINGING.
@@ -66,17 +66,17 @@ Slowly becoming part of the water, like a frog who never knows the jacuzzi's get
 How'd you know I was looking at you If you weren't looking at me?exit
 %end
 
-%match sing dm, sing depeche mode
+%match old sing dm, old sing depeche mode
 %end
 
-%match sing snoop, sing dogg, sing snoop dog, sing snoop doggy dawg, sing dawg
+%match old sing snoop, old sing dogg, old sing snoop dog, old sing snoop doggy dawg, old sing dawg
 S-N-double-O-P D-O-double-giz-ee
 Me and my partner, in my impala Poppin' on collars, tossin up dollars
 A truck on the side of us but who wanna fuck with us Bet a hundred dollars that they all wanna smoke with us
 I smoke an ounce and bounce at the same time It's off the limbo with Timbo, you motherfuckin bimbo
 %end
 
-%match sing laibach
+%match old sing laibach
 Ja! Ja! Ja! Ja! Gib mir ein leightbilt!!
 Alle... Gegen... Alle!!
 We're glad that it's over. We fought, and we lost. Every minute of the future... Is a memory of the past!!
@@ -88,38 +88,38 @@ It's the feeling... of the people... It's the feeling... OF THE LAND!!
 Pop music is for sheep, and we are wolves disguised as shepherds.
 %end
 
-%match sing garbage
+%match old sing garbage
 Bend me Break me anyway you need me, As long as I want you baby it's alright o|~
 %end
 
-%match sing noisex
+%match old sing noisex
 \bBOOM CHICK CHICK BANG BANG BANG BANG BOOM BOOM BOOM BOOM CHICKABOOMBOOMBOOM BOOM BOOM BANG BOOM
 %end
 
-%match sing duran duran, sing duran
+%match old sing duran duran, old sing duran
 So why don't you use it? Try not to bruise it Buy time don't lose it o|~
 First crystal tears, Fallen of snowflakes on your body, First time in years To drench you skin of lover's rosy stain, A chance to find the phoenix for the flame,  A chance to die o|~
 The sun slips down bedding heavy behind, The front of your dress all shadowy lined, And the droning engine throbs in time with your beating heart o|~
 %end
 
-%match sing sp, sing skinny puppy, sing puppy
+%match old sing sp, old sing skinny puppy, old sing puppy
 Experiments with groans of pain It’s all preferred that no one blames The terror in an animal screams In cages our future The answer’s insane... o|~
 %end
 
-%match sing covenant
+%match old sing covenant
 Put us on display for everyone to see/We write the words for all to understand/though I get my kicks its slowly wasting me/Don't try to be an artist I try to be a man o/~
 %end
 
-%match sing kmfdm
+%match old sing kmfdm
 What does KMFDM stand for?
 Kill Mother Fucking Depeche Mode!
 %end
 
-%match sing mdfmk
+%match old sing mdfmk
 More Deustchmarks For Mister Konietzko.
 %end
 
-%match sing And One, sing &1
+%match old sing And One, old sing &1
 Computer! Maschine! Panzermensch!
 Do the Technoman!
 If I could save the love I found/Every move and every sounds/To get you closer o/~
