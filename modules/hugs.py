@@ -11,7 +11,7 @@ from include import utils
 class match(object):
 	def __init__(self, config=None, ns='default', dir=None):
 		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('^\s*hugs')	# regular expression that needs to be matched
+		self.pattern = re.compile('^\s*hugs(?:\s+(\d+))?')	# regular expression that needs to be matched
 		self.requireAddressing = True			# True/False - require addressing?
 		self.thread = True				# True/False - should bot spawn thread?
 		self.wrap = True				# True/False - wrap output?
@@ -24,7 +24,12 @@ class match(object):
 		nick = kwargs['nick']
 		args = kwargs['args']
 		try:
-			doc = urllib.urlopen('http://grouphug.us/random').read()
+			if args[0] is not None:
+				url = 'http://grouphug.us/confessions/' + args[0]
+			else:
+				url = 'http://grouphug.us/random'
+
+			doc = urllib.urlopen(url).read()
 
 			conf = self.confs.findall(doc)[0]
 			conf = utils.stripHTML(conf)
