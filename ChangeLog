@@ -88,3 +88,14 @@
 	* Use logging module which finer levels of verbosity
 	* Fix silc bug which causes madcow to crash on private messages
 	* Grufti response file removed keyword "test" -- oops!
+
+1.0.9: Thu Jul 26 00:35:28 PDT 2007
+
+	* small protocol change to mIRC colors to use less bytes when coloring
+	large amounts of text
+	* USA rainbow colors brighter
+	* IRC module now logs public chatter to logs/ directory
+	* NEW - lyrics module looks up random lyrics for a band and spams
+	channel
+	* hugs.py module can now take an optional confessionID to retreive
+	instead of just a random hug
