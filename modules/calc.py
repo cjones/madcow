@@ -6,6 +6,7 @@ import sys
 import re
 import urllib
 import urllib2
+from include import utils
 
 # class for this module
 class MatchObject(object):
@@ -43,7 +44,11 @@ class MatchObject(object):
             if self.test.search(doc):
                 match = self.match.search(doc)
                 if match:
-                    return '%s: %s' % (nick, self.strip.sub('', match.group(1)))
+                    # utils.stripHTML
+                    res = match.group(1)
+                    res = self.strip.sub('', res)
+                    res = utils.stripHTML(res)
+                    return '%s: %s' % (nick, res)
 
             return '%s: No results, check your syntax at http://www.google.com/help/calculator.html' % nick
 
