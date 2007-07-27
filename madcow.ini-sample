@@ -12,6 +12,7 @@
 ;module=silcplugin
 module=irc
 detach=no
+log=yes
 
 [modules]
 ; if you wish to run multiple bots from the same directory
