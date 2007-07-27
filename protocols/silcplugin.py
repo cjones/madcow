@@ -83,7 +83,9 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
 
   def output(self, req, message):
     if not message: return
-    
+
+    message = message.decode("ascii", "ignore") # remove unprintables
+
     if req.colorize:
       message = self.colorlib.rainbow(message)
     
