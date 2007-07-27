@@ -93,7 +93,13 @@ class IRCProtocol(Madcow):
 
     # function to putput to IRC
     def output(self, message, req):
-        if message is None: return
+        if message is None:
+            return
+
+        # IRC really doesn't like null characters
+        message = message.replace('\x00', '')
+        if len(message) == 0:
+            return
 
         if req.colorize is True:
             style = random.choice(ColorLib.rainbowStyles)
@@ -130,6 +136,7 @@ class IRCProtocol(Madcow):
 
         if private is True:
             req.sendTo = req.nick
+            req.addressed = True
         else:
             req.sendTo = req.channel
 
