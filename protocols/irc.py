@@ -6,7 +6,6 @@ import sys
 from madcow import Madcow, Request
 from include.colorlib import ColorLib
 import random
-from logging import DEBUG, INFO, WARN, ERROR, CRITICAL
 import logging
 
 
@@ -18,7 +17,7 @@ class IRCProtocol(Madcow):
 
         Madcow.__init__(self, config=config, dir=dir)
 
-        if logging.root.level <= DEBUG:
+        if logging.root.level <= logging.DEBUG:
             irclib.DEBUG = 1
         else:
             irclib.DEBUG = 0
@@ -28,24 +27,14 @@ class IRCProtocol(Madcow):
         self.events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg']
         self.channels = re.split('\s*[,;]\s*', self.config.irc.channels)
 
-    def log(self, chan, nick, msg):
-        line = '%s <%s> %s\n' % (time.strftime('%T'), nick, msg)
-        file = '%s/logs/%s-irc-%s-%s' % (self.dir, self.ns, chan, time.strftime('%F'))
-
-        try:
-            fi = open(file, 'a')
-            fi.write(line)
-        finally:
-            fi.close()
-
     def connect(self):
-        self.status('[IRC] * Connecting to %s:%s' % (self.config.irc.host, self.config.irc.port), INFO)
+        logging.info('[IRC] * Connecting to %s:%s' % (self.config.irc.host, self.config.irc.port))
         self.server.connect(self.config.irc.host, self.config.irc.port, self.config.irc.nick)
 
     def start(self):
         self.connect()
         for event in self.events:
-            self.status('[IRC] * Registering event: %s' % event, INFO)
+            logging.info('[IRC] * Registering event: %s' % event)
             self.server.add_global_handler(event, getattr(self, 'on_' + event), 0)
 
         self.irc.process_forever()
@@ -55,24 +44,23 @@ class IRCProtocol(Madcow):
 
     # welcome event triggers startup sequence
     def on_welcome(self, server, event):
-        self.status('[IRC] * Connected', INFO)
+        logging.info('[IRC] * Connected')
 
         # TODO: identify with nickserv
 
         # become an oper
         if self.config.irc.oper is True:
-            self.status('[IRC] * Becoming an OPER', INFO)
+            logging.info('[IRC] * Becoming an OPER')
             self.server.oper(self.config.irc.operUser, self.config.irc.operPass)
 
         # join all channels
         for channel in self.channels:
-            self.status('[IRC] * Joining: %s' % channel, INFO)
+            logging.info('[IRC] * Joining: %s' % channel)
             self.server.join(channel)
-
 
     # when losing connection, reconnect if configured to do so, otherwise exit
     def on_disconnect(self, server, event):
-        self.status('[IRC] * Disconnected from server', WARN)
+        logging.warn('[IRC] * Disconnected from server')
 
         if self.config.irc.reconnect is True:
             if self.config.irc.reconnectWait > 0:
@@ -83,7 +71,7 @@ class IRCProtocol(Madcow):
 
     # when kicked, rejoin channel if configured to do so
     def on_kick(self, server, event):
-        self.status('[IRC] * Kicked from %s by %s' % (event.arguments()[0], event.target()), WARN)
+        logging.warn('[IRC] * Kicked from %s by %s' % (event.arguments()[0], event.target()))
         if event.arguments()[0].lower() == server.get_nickname().lower():
             if self.config.irc.rejoin is True:
                 if self.config.irc.rejoinWait > 0:
@@ -118,14 +106,12 @@ class IRCProtocol(Madcow):
         for line in output:
             self.server.privmsg(req.sendTo, line)
 
-
     def on_privmsg(self, server, event):
-        self.status('[IRC] PRIVMSG from %s: %s' % (event.source(), event.arguments()[0]), INFO)
+        logging.info('[IRC] PRIVMSG from %s: %s' % (event.source(), event.arguments()[0]))
         self.on_message(server, event, private=True)
 
     def on_pubmsg(self, server, event):
-        self.status('[IRC] <%s/%s> %s' % (event.source(), event.target(), event.arguments()[0]), INFO)
-        self.log(event.target(), irclib.nm_to_n(event.source()), event.arguments()[0])
+        logging.info('[IRC] <%s/%s> %s' % (event.source(), event.target(), event.arguments()[0]))
         self.on_message(server, event, private=False)
 
     def on_message(self, server, event, private):

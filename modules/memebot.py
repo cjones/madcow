@@ -57,7 +57,7 @@ class MatchObject(object):
         self.requireAddressing = False            # True/False - require addressing?
         self.thread = False                # True/False - should bot spawn thread?
         self.wrap = False                # True/False - wrap output?
-        self.help = 'score [name,range] - get memescore for name/range, empty for top10'
+        self.help = 'score [name,range] - get memescore, empty for top10'
 
         if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
         file = dir + '/data/db-%s-memes' % ns

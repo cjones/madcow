@@ -4,7 +4,7 @@ import re
 from twisted.protocols import oscar
 from twisted.internet import protocol, reactor
 from include import utils
-from logging import DEBUG, INFO, WARN, ERROR, CRITICAL
+import logging
 
 
 class AIMProtocol(Madcow):
@@ -15,13 +15,13 @@ class AIMProtocol(Madcow):
         self.newline = re.compile('[\r\n]+')
 
     def start(self):
-        self.status('[AIM] Logging into aol.com', INFO)
+        logging.info('[AIM] Logging into aol.com')
         server = ('login.oscar.aol.com', 5190)
         p = protocol.ClientCreator(
             reactor, OSCARAuth, self.config.aim.username, self.config.aim.password, icq = 0
         )
         p.connectTCP(*server)
-        self.status('[AIM] Connected')
+        logging.info('[AIM] Connected')
 
         p.protocolClass.BOSClass._ProtocolHandler = self
         reactor.run()
@@ -36,7 +36,7 @@ class OSCARConnection(oscar.BOSConnection):
     capabilities = [oscar.CAP_CHAT]
 
     def initDone(self):
-        self._ProtocolHandler.status('[AIM] Initialization finished', INFO)
+        logging.info('[AIM] Initialization finished')
         self.requestSelfInfo().addCallback(self.gotSelfInfo)
         self.requestSSI().addCallback(self.gotBuddyList)
 
@@ -44,7 +44,7 @@ class OSCARConnection(oscar.BOSConnection):
         self.name = user.name
 
     def gotBuddyList(self, l):
-        self._ProtocolHandler.status('[AIM] Retreiving buddy list', INFO)
+        logging.info('[AIM] Retreiving buddy list')
         self.activateSSI()
         self.setProfile(self._ProtocolHandler.config.aim.profile)
         self.setIdleTime(0)
@@ -59,7 +59,7 @@ class OSCARConnection(oscar.BOSConnection):
         req.aim = self
 
         handler = self._ProtocolHandler
-        handler.status('[AIM] <%s> %s' % (req.nick, req.message), INFO)
+        logging.info('[AIM] <%s> %s' % (req.nick, req.message))
         handler.checkAddressing(req)
         handler.processMessage(req)
 

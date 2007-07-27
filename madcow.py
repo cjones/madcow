@@ -28,7 +28,6 @@ import re
 import threading
 import time
 import logging
-from logging import DEBUG, INFO, WARN, ERROR, CRITICAL
 
 
 class Request(object):
@@ -72,9 +71,6 @@ class Madcow(object):
         self.modules = {}
         self.loadModules()
 
-    def status(self, msg=None, level=INFO):
-        logging.log(msg=msg, level=level)
-
     def start(self):
         pass
 
@@ -96,7 +92,7 @@ class Madcow(object):
             disabled = []
 
         files = os.walk(self.moduleDir).next()[2]
-        self.status('[MOD] * Reading modules from %s' % self.moduleDir, INFO)
+        logging.info('[MOD] * Reading modules from %s' % self.moduleDir)
 
         for file in files:
             if file.endswith('.py') is False:
@@ -107,7 +103,7 @@ class Madcow(object):
                 continue
 
             if modName in disabled:
-                self.status('[MOD] Skipping %s because it is disabled in config' % modName, WARN)
+                logging.warn('[MOD] Skipping %s because it is disabled in config' % modName)
                 continue
 
             try:
@@ -121,11 +117,11 @@ class Madcow(object):
                 if hasattr(obj, 'help') and obj.help is not None:
                     self.usageLines += obj.help.splitlines()
 
-                self.status('[MOD] Loaded module %s' % modName, INFO)
+                logging.info('[MOD] Loaded module %s' % modName)
                 self.modules[modName] = obj
 
             except Exception, e:
-                self.status("[MOD] WARN: Couldn't load module %s: %s" % (modName, e), WARN)
+                logging.warn("[MOD] WARN: Couldn't load module %s: %s" % (modName, e))
 
     def checkAddressing(self, req):
         """
@@ -157,6 +153,19 @@ class Madcow(object):
         except:
             pass
 
+    def log(self, req):
+        """
+        Logs public chatter
+        """
+        line = '%s <%s> %s\n' % (time.strftime('%T'), req.nick, req.message)
+        file = '%s/logs/%s-irc-%s-%s' % (self.dir, self.ns, self.channel, time.strftime('%F'))
+
+        try:
+            fi = open(file, 'a')
+            fi.write(line)
+        finally:
+            fi.close()
+
     def usage(self):
         """
         Returns help data as a string
@@ -167,6 +176,9 @@ class Madcow(object):
         """
         Process requests
         """
+        if self.config.log is True and req.private is False:
+            self.log(req)
+
         if req.feedback is True:
             self.output('yes?', req)
             return
@@ -282,11 +294,11 @@ def main():
     opts, args = parser.parse_args()
 
     # logging facility
-    logging.basicConfig(level=WARN, format='[%(asctime)s] %(levelname)s: %(message)s')
+    logging.basicConfig(level=logging.WARN, format='[%(asctime)s] %(levelname)s: %(message)s')
     if opts.debug:
-        logging.root.setLevel(DEBUG)
+        logging.root.setLevel(logging.DEBUG)
     elif opts.verbose:
-        logging.root.setLevel(INFO)
+        logging.root.setLevel(logging.INFO)
 
     # read config file
     config = Config(file=opts.config)

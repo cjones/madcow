@@ -9,7 +9,7 @@ import silc
 import time
 import re
 from include.colorlib import ColorLib
-from logging import DEBUG, INFO, WARN, ERROR, CRITICAL
+import logging
 
 class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def __init__(self, config=None, dir=None):
@@ -27,7 +27,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
     return self.config.silcplugin.nick
 
   def connect(self):
-    self.status("connecting to %s:%s" % (self.config.silcplugin.host, self.config.silcplugin.port), INFO)
+    logging.info("connecting to %s:%s" % (self.config.silcplugin.host, self.config.silcplugin.port))
     self.connect_to_server(self.config.silcplugin.host, self.config.silcplugin.port)
 
   def start(self):
@@ -71,12 +71,12 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   #  print 'SILC: Notify (Kick):', kicked, reason, kicker, channel
 
   def connected(self):
-    self.status("* Connected", INFO)
+    logging.info("* Connected")
     for channel in self.channels:
       self.command_call("JOIN %s" % channel)
 
   def disconnected(self, msg):
-    self.status("* Disconnected: %s" % msg, WARN)
+    logging.warn("* Disconnected: %s" % msg)
     if self.config.silcplugin.reconnect:
       time.sleep(self.config.silcplugin.reconnectWait)
       self.connect()
