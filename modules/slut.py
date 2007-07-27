@@ -70,7 +70,7 @@ def slutrating(phrase):
   return None
 
 # class for this module
-class match(object):
+class MatchObject(object):
   def __init__(self, config=None, ns='default', dir=None):
     self.enabled = True
     self.pattern = re.compile('^\s*slutcheck\s+(.+)')
@@ -99,7 +99,7 @@ class match(object):
 # this is just here so we can test the module from the commandline
 def main(argv = None):
   if argv is None: argv = sys.argv[1:]
-  obj = match()
+  obj = MatchObject()
   print obj.response(nick='testUser', args=argv)
   
   return 0

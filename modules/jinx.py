@@ -56,7 +56,7 @@ class ChatLog(object):
     return s
 
 # class for this module
-class match(object):
+class MatchObject(object):
   def __init__(self, config=None, ns='default', dir=None):
     self.enabled = True       # True/False - enabled?
     self.pattern = re.compile('^(.*)$') # regular expression that needs to be matched

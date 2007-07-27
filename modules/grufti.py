@@ -8,79 +8,79 @@ import os
 import random
 
 # class for this module
-class match(object):
-	reMatchBlocks = re.compile('%match\s+(.*?)%end', re.DOTALL)
-	reCommaDelim = re.compile('\s*,\s*')
-	rePipeDelim = re.compile('\s*\|\s*')
-	reToken = re.compile('({{\s*(.*?)\s*}})')
-	reIsRegex = re.compile('^/(.+)/$')
+class MatchObject(object):
+    reMatchBlocks = re.compile('%match\s+(.*?)%end', re.DOTALL)
+    reCommaDelim = re.compile('\s*,\s*')
+    rePipeDelim = re.compile('\s*\|\s*')
+    reToken = re.compile('({{\s*(.*?)\s*}})')
+    reIsRegex = re.compile('^/(.+)/$')
 
-	def __init__(self, config=None, ns='default', dir=None):
-		self.enabled = True				# True/False - enabled?
-		self.pattern = re.compile('^(.+)$')	# regular expression that needs to be matched
-		self.requireAddressing = False			# True/False - require addressing?
-		self.thread = False				# True/False - should bot spawn thread?
-		self.wrap = False				# True/False - wrap output?
+    def __init__(self, config=None, ns='default', dir=None):
+        self.enabled = True                # True/False - enabled?
+        self.pattern = re.compile('^(.+)$')    # regular expression that needs to be matched
+        self.requireAddressing = False            # True/False - require addressing?
+        self.thread = False                # True/False - should bot spawn thread?
+        self.wrap = False                # True/False - wrap output?
 
-		self.data = []
+        self.data = []
 
-		if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-		file = dir + '/grufti-responses.txt'
+        if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+        file = dir + '/grufti-responses.txt'
 
-		try:
-			fi = open(file)
-			doc = fi.read()
-			fi.close()
+        try:
+            fi = open(file)
+            doc = fi.read()
+            fi.close()
 
-			for block in self.reMatchBlocks.findall(doc):
-				responses = block.splitlines()
-				matchString = responses.pop(0)
-				if len(responses) == 0: continue
-				matches = []
-				for match in self.reCommaDelim.split(matchString):
-					isRegex = self.reIsRegex.search(match)
-					if isRegex is not None:
-						regex = re.compile(isRegex.group(1), re.I)
-					else:
-						regex = re.compile(r'\b' + re.escape(match) + r'\b', re.I)
+            for block in self.reMatchBlocks.findall(doc):
+                responses = block.splitlines()
+                matchString = responses.pop(0)
+                if len(responses) == 0: continue
+                matches = []
+                for match in self.reCommaDelim.split(matchString):
+                    isRegex = self.reIsRegex.search(match)
+                    if isRegex is not None:
+                        regex = re.compile(isRegex.group(1), re.I)
+                    else:
+                        regex = re.compile(r'\b' + re.escape(match) + r'\b', re.I)
 
-					matches.append(regex)
+                    matches.append(regex)
 
-				self.data.append((matches, responses))
+                self.data.append((matches, responses))
 
-		except Exception, e:
-			print >> sys.stderr, 'aborting load of grufti: %s' % e
-			self.enabled = False
+        except Exception, e:
+            print >> sys.stderr, 'aborting load of grufti: %s' % e
+            self.enabled = False
 
-	def parseTokens(self, response):
-		output = response
-		for token, wordString in self.reToken.findall(response):
-			word = random.choice(self.rePipeDelim.split(wordString))
-			output = re.sub(re.escape(token), word, output, 1)
+    def parseTokens(self, response):
+        output = response
+        for token, wordString in self.reToken.findall(response):
+            word = random.choice(self.rePipeDelim.split(wordString))
+            output = re.sub(re.escape(token), word, output, 1)
 
-		return output
+        return output
 
-	# function to generate a response
-	def response(self, *args, **kwargs):
-		try:
-			nick = kwargs['nick']
-			args = kwargs['args']
+    # function to generate a response
+    def response(self, *args, **kwargs):
+        try:
+            nick = kwargs['nick']
+            args = kwargs['args']
 
-			for matches, responses in self.data:
-				for match in matches:
-					if match.search(args[0]) is not None:
-						return self.parseTokens(random.choice(responses))
+            for matches, responses in self.data:
+                for match in matches:
+                    if match.search(args[0]) is not None:
+                        return self.parseTokens(random.choice(responses))
 
-		except Exception, e:
-			print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+        except Exception, e:
+            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 
 
 # this is just here so we can test the module from the commandline
 def main(argv = None):
-	if argv is None: argv = sys.argv[1:]
-	obj = match(dir = '..')
-	print obj.response(nick='testUser', args=argv)
+    if argv is None: argv = sys.argv[1:]
+    obj = MatchObject(dir = '..')
+    print obj.response(nick='testUser', args=argv)
 
-	return 0
+    return 0
 
 if __name__ == '__main__': sys.exit(main())

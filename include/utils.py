@@ -13,21 +13,21 @@ re_tags = re.compile('<[^>]+>')
 re_newlines = re.compile('[\r\n]+')
 
 def stripHTML(data = None):
-	data = re_tags.sub('', data)
-	data = xml.sax.saxutils.unescape(data)
-	data = re_nbsp.sub('', data)
-	data = re_br.sub('\n', data)
-	data = re_middot.sub('-', data)
-	data = re_quot.sub("'", data)
-	data = re_newlines.sub('\n', data)
-	return data
+    data = re_tags.sub('', data)
+    data = xml.sax.saxutils.unescape(data)
+    data = re_nbsp.sub('', data)
+    data = re_br.sub('\n', data)
+    data = re_middot.sub('-', data)
+    data = re_quot.sub("'", data)
+    data = re_newlines.sub('\n', data)
+    return data
 
 re_highascii = re.compile('([\x80-\xff])')
 
 def isUTF8(data = None, threshold = .25):
-	if (float(len(re_highascii.findall(data))) / float(len(data))) > threshold:
-		return True
-	else:
-		return False
+    if (float(len(re_highascii.findall(data))) / float(len(data))) > threshold:
+        return True
+    else:
+        return False
 
 

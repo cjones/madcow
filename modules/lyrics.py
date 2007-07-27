@@ -10,7 +10,7 @@ import random
 import urllib, urllib2, cookielib
 
 
-class match(object):
+class MatchObject(object):
 
     baseURL = 'http://www.lyricsfreak.com/'
 
@@ -132,7 +132,7 @@ class match(object):
 
 
 def main():
-    print match().response(nick='testUser', args=[' '.join(sys.argv[1:])])
+    print MatchObject().response(nick='testUser', args=[' '.join(sys.argv[1:])])
     return 0
 
 if __name__ == '__main__':
