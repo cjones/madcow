@@ -158,7 +158,7 @@ class Madcow(object):
         Logs public chatter
         """
         line = '%s <%s> %s\n' % (time.strftime('%T'), req.nick, req.message)
-        file = '%s/logs/%s-irc-%s-%s' % (self.dir, self.ns, self.channel, time.strftime('%F'))
+        file = '%s/logs/%s-irc-%s-%s' % (self.dir, self.ns, req.channel, time.strftime('%F'))
 
         try:
             fi = open(file, 'a')
@@ -176,7 +176,7 @@ class Madcow(object):
         """
         Process requests
         """
-        if self.config.log is True and req.private is False:
+        if self.config.main.log is True and req.private is False:
             self.log(req)
 
         if req.feedback is True:
