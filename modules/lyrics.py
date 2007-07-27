@@ -1,120 +1,139 @@
 #!/usr/bin/env python
 
 """
-Get lyrics
+Get lyrics from http://www.lyricsfreak.com/
 """
 
 import sys
 import re
-import urllib
 import random
-import cookielib, urllib, urllib2
+import urllib, urllib2, cookielib
+
 
 class match(object):
-  baseURL = 'http://www.lyricsfreak.com'
-  reTables = re.compile('<table.*?>(.*?)</table>', re.DOTALL)
-  reRows = re.compile('<tr.*?>(.*?)</tr>', re.DOTALL)
-  reSongURL = re.compile('<a href="(.*?)" title="(.*?) lyrics">', re.DOTALL)
-  reLyrics = re.compile('<div id="content".*?>(.*?)</div>', re.DOTALL)
-  reNewLine = re.compile(r'[\r\n]+')
-  reDoubleBreak = re.compile('<br><br>')
-  reLineBreak = re.compile('<br>')
-  reSearchSongURL = re.compile('<a href="(.*?)"><b.*?</b>(.*?) - (.*?)</a>', re.DOTALL)
 
-  def __init__(self, config=None, ns='default', dir=None):
-    self.enabled = True        # True/False - enabled?
-    self.pattern = re.compile('^\s*sing\s+(.+)$')  # regular expression that needs to be matched
-    self.requireAddressing = True      # True/False - require addressing?
-    self.thread = True        # True/False - should bot spawn thread?
-    self.wrap = False        # True/False - wrap output?
-    self.help = 'sing [song] <artist/song> - grab random lyrics'
+    baseURL = 'http://www.lyricsfreak.com/'
 
-    cj = cookielib.CookieJar()
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    opener.addheaders = [('User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)')]
-    self.opener = opener
+    reTables = re.compile('<table.*?>(.*?)</table>', re.DOTALL)
+    reRows = re.compile('<tr.*?>(.*?)</tr>', re.DOTALL)
+    reSongLink = re.compile('href="(.*?)".*?>.*?</b>(.*?)</a>')
+    reArtistDelim = re.compile('\s*-\s*')
+    reLyrics = re.compile('<div id="content".*?>(.*?)</div>', re.DOTALL)
+    reVerseBreak = re.compile('\s*<br>\s*<br>\s*')
+    reLineBreak = re.compile('\s*<br>\s*')
 
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
+        self.pattern = re.compile(r'^\s*sing\s+(.+)$')
+        self.requireAddressing = True
+        self.thread = True
+        self.wrap = False
+        self.help = 'sing (<artist> | song <song> [by <artist>]) [full] - get lyrics'
 
-  def response(self, *args, **kwargs):
-    nick = kwargs['nick']
-    query = kwargs['args'][0].lower().split()
+        # build opener
+        cj = cookielib.CookieJar()
+        ch = urllib2.HTTPCookieProcessor(cj)
+        opener = urllib2.build_opener(ch)
+        opener.addheaders = [('User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)')]
+        self.opener = opener
 
-    try:
-      if query[0] == 'song':
-        query = query[1:]
-
-        if 'by' in query:
-          i = query.index('by')
-	  query, artistFilter = query[:i], query[i+1:]
-	  artistFilter = map(re.escape, artistFilter)
-	  artistFilter = '\\s+'.join(artistFilter)
-	  artistFilter = re.compile(artistFilter, re.I)
+    def request(self, url, opts=None, referer=None):
+        if opts is not None:
+            req = urllib2.Request(url, urllib.urlencode(opts))
         else:
-          artistFilter = None
+            req = urllib2.Request(url)
 
-        url = match.baseURL + '/search.php'
-        query = ' '.join(query)
-        opts = {
-          'type': 'title',
-          'q': query,
-          'sa.x': 21,
-          'sa.y': 20,
-          'sa': 'Search',
-        }
-        req = urllib2.Request(url, urllib.urlencode(opts))
-        req.add_header('Referer', url)
-        doc = self.opener.open(req).read()
-        rows = [r for r in match.reRows.findall(match.reTables.findall(doc)[1]) if 'class="lyric"' in r]
+        if referer is not None:
+            req.add_header('Referer', referer)
 
-        songs = {}
-        for row in rows:
-          url, artist, song = match.reSearchSongURL.search(row).groups()
-          if artistFilter is None:
-            songs[url] = song
-	  elif artistFilter.search(artist) is not None:
-	    songs[url] = song
+        res = self.opener.open(req)
+        data = res.read()
+        return data
 
-        url = random.choice(songs.keys())
-        song = songs[url]
-      else:
-        query = '+'.join(query)
-        url = '%s/%s/%s/lyrics.html' % (match.baseURL, query[0], query)
-        doc = urllib.urlopen(url).read()
-        rows = [r for r in match.reRows.findall(match.reTables.findall(doc)[1]) if 'class="lyric"' in r]
-        songs = [row for row in rows if 'id="star"' in row]
+    def response(self, **kwargs):
+        try:
+            query = kwargs['args'][0].lower().split()
 
-        if len(songs) == 0:
-          songs = [row for row in rows if 'starZero' in row]
-          if len(songs) == 0:
-            raise Exception('no songs')
+            if query[-1] == 'full':
+                query = query[:-1]
+                full = True
+            else:
+                full = False
 
-        url, song = match.reSongURL.search(random.choice(songs)).groups()
+            if query[0] == 'song':
+                query = query[1:]
+                type = 'song'
 
-      return '%s: %s' % (song, self.getSongLyrics(url))
+                if 'by' in query:
+                    i = query.index('by')
+                    query, artist = query[:i], query[i+1:]
+                else:
+                    artist = None
 
-    except Exception, e:
-      print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-      return '%s: Who?' % nick
+                query = ' '.join(query)
+                url = match.baseURL + 'search.php'
+                opts = {'type': 'title', 'q': query, 'sa.x': 21, 'sa.y': 20, 'sa': 'Search'}
+                page = self.request(url, opts=opts, referer=url)
 
-  # XXX this is pretty janky.. it mostly does what it's supposed to do
-  # but occasionally you get back garbage. :/
-  def getSongLyrics(self, url):
-    doc = urllib.urlopen(url).read()
+            else:
+                artist = None
+                query = '+'.join(query)
+                url = match.baseURL + '%s/%s/lyrics.html' % (query[0], query)
+                page = self.request(url, referer=match.baseURL)
 
-    lyrics = match.reLyrics.search(doc).group(1)
-    lyrics = match.reNewLine.sub('', lyrics)
-    blocks = match.reDoubleBreak.split(lyrics)
-    block = random.choice(blocks)
-    block = match.reLineBreak.sub(' // ', block)
+            tables = match.reTables.findall(page)
+            table = tables[1]
+            rows = [row for row in match.reRows.findall(table) if 'class="lyric"' in row]
 
-    return block
+            songs = []
+            for row in rows:
+                url, title = match.reSongLink.search(row).groups()
+                songs.append((url, title))
+
+            if artist is not None:
+                artist = map(re.escape, artist)
+                artist = '\\s+'.join(artist)
+                artist = re.compile(artist, re.I)
+
+                filtered = []
+                for url, title in songs:
+                    songArtist, songName = match.reArtistDelim.split(title, 1)
+                    if artist.search(songArtist):
+                        filtered.append((url, title))
+
+                songs = filtered
+
+            if not songs:
+                raise Exception, 'No results'
+
+            url, title = random.choice(songs)
+            page = self.request(url)
+            lyrics = match.reLyrics.search(page).group(1)
+            lyrics = lyrics.replace('\n', '')
+
+            if full is False:
+                verses = match.reVerseBreak.split(lyrics)
+                lyrics = random.choice(verses)
+
+            lyrics = match.reLineBreak.split(lyrics)
+            for i, line in enumerate(lyrics):
+                if len(line) == 0:
+                    line = '//'
+                elif line[-1].isalpha():
+                    line += '.'
+                lyrics[i] = line
+
+            lyrics = ' '.join(lyrics)
+            return '%s: %s' % (title, lyrics)
+
+        except Exception, e:
+            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            return '%s: Problem with that: %s' % (kwargs['nick'], e)
 
 
-def main(argv = None):
-  if argv is None: argv = sys.argv[1:]
-  obj = match()
-  print obj.response(nick='testUser', args=argv)
+def main():
+    print match().response(nick='testUser', args=[' '.join(sys.argv[1:])])
+    return 0
 
-  return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    sys.exit(main())
