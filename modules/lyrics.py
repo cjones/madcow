@@ -71,23 +71,23 @@ class MatchObject(object):
                     artist = None
 
                 query = ' '.join(query)
-                url = match.baseURL + 'search.php'
+                url = MatchObject.baseURL + 'search.php'
                 opts = {'type': 'title', 'q': query, 'sa.x': 21, 'sa.y': 20, 'sa': 'Search'}
                 page = self.request(url, opts=opts, referer=url)
 
             else:
                 artist = None
                 query = '+'.join(query)
-                url = match.baseURL + '%s/%s/lyrics.html' % (query[0], query)
-                page = self.request(url, referer=match.baseURL)
+                url = MatchObject.baseURL + '%s/%s/lyrics.html' % (query[0], query)
+                page = self.request(url, referer=MatchObject.baseURL)
 
-            tables = match.reTables.findall(page)
+            tables = MatchObject.reTables.findall(page)
             table = tables[1]
-            rows = [row for row in match.reRows.findall(table) if 'class="lyric"' in row]
+            rows = [row for row in MatchObject.reRows.findall(table) if 'class="lyric"' in row]
 
             songs = []
             for row in rows:
-                url, title = match.reSongLink.search(row).groups()
+                url, title = MatchObject.reSongLink.search(row).groups()
                 songs.append((url, title))
 
             if artist is not None:
@@ -97,7 +97,7 @@ class MatchObject(object):
 
                 filtered = []
                 for url, title in songs:
-                    songArtist, songName = match.reArtistDelim.split(title, 1)
+                    songArtist, songName = MatchObject.reArtistDelim.split(title, 1)
                     if artist.search(songArtist):
                         filtered.append((url, title))
 
@@ -108,14 +108,14 @@ class MatchObject(object):
 
             url, title = random.choice(songs)
             page = self.request(url)
-            lyrics = match.reLyrics.search(page).group(1)
+            lyrics = MatchObject.reLyrics.search(page).group(1)
             lyrics = lyrics.replace('\n', '')
 
             if full is False:
-                verses = match.reVerseBreak.split(lyrics)
+                verses = MatchObject.reVerseBreak.split(lyrics)
                 lyrics = random.choice(verses)
 
-            lyrics = match.reLineBreak.split(lyrics)
+            lyrics = MatchObject.reLineBreak.split(lyrics)
             for i, line in enumerate(lyrics):
                 if len(line) == 0:
                     line = '//'
