@@ -16,7 +16,9 @@ def someRoutineInvokedByUser(user):
 import time
 import logging
 
+
 class ThrottleStatus(object):
+
     def __init__(self, user=None, name=None, parent=None):
         self.parent = parent
         self.user = user
@@ -26,10 +28,8 @@ class ThrottleStatus(object):
         self.warned = False
         self.throttled = False
 
-
     def getNow(self):
         return int(time.time())
-
 
     def getDelta(self):
         return self.now - self.last
@@ -55,17 +55,16 @@ class ThrottleStatus(object):
             self.warned = True
             return True
 
-
     delta = property(getDelta)
     now = property(getNow)
 
 
 class ThrottleEvent(object):
+
     def __init__(self, name=None, parent=None):
         self.name = name
         self.parent = parent
         self.cache = {}
-
 
     def status(self, user=None):
         if self.cache.has_key(user):
@@ -78,6 +77,7 @@ class ThrottleEvent(object):
 
 
 class Throttle(object):
+
     def __init__(self, enabled=True, count=3, threshold=2, reduction=10, ignore=300):
         self.enabled = enabled
         self.count = count
@@ -85,7 +85,6 @@ class Throttle(object):
         self.reduction = reduction
         self.ignore = ignore
         self.cache = {}
-
 
     def event(self, name=None):
         if self.cache.has_key(name):
@@ -96,12 +95,10 @@ class Throttle(object):
         self.cache[name] = event
         return event
 
-
     def status(self, name=None, user=None):
         event = self.event(name)
         status = event.status(user)
         return status
-
 
     def registerEvent(self, name=None, user=None):
         status = self.status(name=name.lower(), user=user.lower())
@@ -119,4 +116,3 @@ class Throttle(object):
             if status.count < 0: status.count = 0
 
         return status
-
