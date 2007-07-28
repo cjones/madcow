@@ -1,81 +1,88 @@
-; core bot settings. please only have one module directive.
-; this will tell the bot which protocol to use. you must then
-; scroll down and edit the appropriate config section.
-; 
-; setting detach to true will cause the bot to always run
-; as a daemon (if you are on a posix system such is unix).
-; you can get the same behavior by specifying -d on the commandline
-
 [main]
+;
+; specify protocol module to use. you can override this with the -p
+; switch when run from the commandline
+;
+module=irc
 ;module=cli
 ;module=aim
 ;module=silcplugin
-module=irc
+;
+; whether to daemonize when run (POSIX only). you can force the bot to
+; detach by specifying -d on the commandline.
+;
 detach=no
+;
+; setting this to yes will log public chatter in the logs directory
+; (IRC and SILC)
+;
 log=yes
 
 [modules]
-; if you wish to run multiple bots from the same directory
-; you should give them a unique namespace. this is used to
-; name the db files something unique. if you do not change this,
-; then multiple bots will share the same backend data store.
-; this may be what you want. but probably not.
-
+; if you wish to run multiple bots from the same directory you should
+; give them a unique namespace. this is used to name the db files
+; something unique. if you do not change this, then multiple bots will
+; share the same backend data store.  this may be what you want. but
+; probably not.
+;
 dbNamespace=madcow
-
+;
 ; by default, all modules that come with madcow are enabled. you can
 ; disable any you wish by adding them to the "disabled" option below,
-; separated by commas. below this is a list and brief description of 
+; separated by commas. below this is a list and brief description of
 ; each module. most of these are probably fine as they don't do anything
 ; without being invoked directly by addressing the bot.
-;
+; 
 ; ********** WARNING *************
-; some of these produce OFFENSIVE output. if you are using this on a work
-; server or in a family environment, you are encouraged to review
-; what these modules do before putting it up. In particular: 
-; artfart, bash, hugs, lifejournal, and urban all pull 
-; content from the web which may be inappropriate for your environment.
-; For your convenience, there is a line that disables these potentially
-; offensive modules. Uncomment it if you are unsure.
+; some of these produce OFFENSIVE output. if you are using this on a
+; work server or in a family environment, you are encouraged to review
+; what these modules do before putting it up. In particular: artfart,
+; bash, hugs, lifejournal, and urban all pull content from the web which
+; may be inappropriate for your environment.  For your convenience,
+; there is a line that disables these potentially offensive modules.
+; Uncomment it if you are unsure.
 ;
 ; YOU'VE BEEN WARNED
-
+;
+; XXX
 ;disabled=artfart, bash, hugs, livejournal, urban
-
+;
 ; MODULE DESCRIPTIONS:
 ;
-;area		look up city/state for US area codes
-;artfart	get a random offensive ascii art
-;babel		use altavista babelfish to translate languages
-;bash		get a random IRC/IM quote from bash.org
-;bbcnews	get news headlines from BBC RSS feed
-;bible		get quotes from the bible based on book/chapter/verse
-;calc		use google calculator to perform any arithmetic
-;chp		BAY AREA ONLY - get california highway patrol incidents
-;dictionary	look up a word or phrase on dictionary.com
-;doomsday	find out how close we are to destruction with thebulletin
-;factoids	infobot work-a-like to remember factoids said in channel
-;google		i'm feeling lucky url for a specified search term
-;grufti		grufti chatterbot module. allows automatic responsees for set phrases
-;hugs		get a random confession from grouphug.us
+;area           look up city/state for US area codes
+;artfart        get a random offensive ascii art
+;babel          use altavista babelfish to translate languages
+;bash           get a random IRC/IM quote from bash.org
+;bbcnews        get news headlines from BBC RSS feed
+;bible          get quotes from the bible based on book/chapter/verse
+;bullshitr      make fun of people who think web 2.0 has meaning
+;calc           use google calculator to perform any arithmetic
+;chp            BAY AREA ONLY - get california highway patrol incidents
+;dictionary     look up a word or phrase on dictionary.com
+;doomsday       how close we are to destruction from thebulletin
+;factoids       infobot work-a-like to remember factoids said in channel
+;google         i'm feeling lucky url for a specified search term
+;grufti         grufti chatterbot module for match/responses
+;hugs           get a random confession from grouphug.us
 ;jinx           catch people who say the same thing (almost) simultaneously
-;learn		part of the weather module, learn where someone lives permanently
-;livejournal	get latest livejournal entry (random or a specific user)
-;memebot	track urls posted in channel, chastise people for posting old memes
-;nslookup	look up forward/reverse dns
-;seen		keep track of what people said in channel last
-;slut		gives you a porno rating in % of a google search terms.
-;stockquote	yahoo finance stock and mutual fund quotes
-;terror		up-to-date information on our threat advisory according to DHS
-;urban		look up a word or phrase in the urban dictionary
-;weather	look up weather forecast for your area using wunderground
-;webtender	look up mixing instructions for any drink on webtender
-;woot		get the latest offer from woot.com
+;learn          part of the weather module, learns where someone lives
+;livejournal    get latest livejournal entry (random or a specific user)
+;lyrics         get lyrics for a song/artist
+;memebot        track urls posted in channel, insult reposters
+;nslookup       look up forward/reverse dns
+;seen           keep track of what people said in channel last
+;slut           gives you a porno rating in % of a google search terms.
+;stockquote     yahoo finance stock and mutual fund quotes
+;terror         up-to-date threat level advisory according to DHS
+;urban          look up a word or phrase in the urban dictionary
+;weather        look up weather forecast for your area using wunderground
+;webtender      look up mixing instructions for any drink on webtender
+;woot           get the latest offer from woot.com
+;yourmom        the ultimate insult -- in figlet
 
 
 ; connection settings for IRC plugin. should be fairly obvious
 ; channels is a comma-delimited list of channels to join
-
 [irc]
 host=localhost
 port=6667
@@ -93,12 +100,11 @@ operPass=
 ; a limitation and your bot WILL get dropped for sending raw
 ; messages that exceed it. 400 is a good number if you are
 ; against wrapping
-wrapSize=78
+wrapSize=400
 
-;
+
 ; settings for AIM plugin. you need to register a screenname 
 ; with AOL beforehand and plug it in here.  see aim.com
-;
 [aim]
 username=
 password=
@@ -109,6 +115,6 @@ profile=
 nick=madcow
 channels=#madcow
 host=localhost
-port=
+port=706
 reconnect=yes
 reconnectWait=3
