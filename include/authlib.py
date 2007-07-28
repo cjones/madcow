@@ -1,6 +1,5 @@
 """Generic passwd file authentication library"""
 
-import sys
 import random
 import sha
 import base64
