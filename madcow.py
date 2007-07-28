@@ -54,6 +54,7 @@ class Madcow(object):
     """
     Core bot handler
     """
+    reDelim = re.compile(r'\s*[,;]\s*')
 
     def __init__(self, config=None, dir=None):
         self.config = config
@@ -65,6 +66,12 @@ class Madcow(object):
         self.ignoreModules.append('bullshitr') # moved to grufti framework in 1.0.7
         self.moduleDir = self.dir + '/modules'
         self.outputLock = threading.RLock()
+
+        if self.config.main.ignorelist is not None:
+            self.ignoreList = [nick.lower() for nick in Madcow.reDelim.split(self.config.main.ignorelist)]
+            logging.info('Ignoring nicks: %s' % ', '.join(self.ignoreList))
+        else:
+            self.ignoreList = []
 
         # dynamically generated content
         self.usageLines = []
@@ -178,6 +185,10 @@ class Madcow(object):
         """
         if self.config.main.log is True and req.private is False:
             self.log(req)
+
+        if req.nick.lower() in self.ignoreList:
+            logging.info('Ignored "%s" from %s' % (req.message, req.nick))
+            return
 
         if req.feedback is True:
             self.output('yes?', req)

@@ -25,7 +25,11 @@ class IRCProtocol(Madcow):
         self.irc = irclib.IRC()
         self.server = self.irc.server()
         self.events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg']
-        self.channels = re.split('\s*[,;]\s*', self.config.irc.channels)
+
+        if self.config.irc.channels is not None:
+            self.channels = Madcow.reDelim.split(self.config.irc.channels)
+        else:
+            self.channels = []
 
     def connect(self):
         logging.info('[IRC] * Connecting to %s:%s' % (self.config.irc.host, self.config.irc.port))
