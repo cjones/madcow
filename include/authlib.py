@@ -7,6 +7,7 @@ import re
 
 __version__ = '0.1'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
+__license__ = 'GPL'
 __copyright__ = """
 Copyright (C) 2007 Christopher Jones <cjones@gruntle.org>
 
