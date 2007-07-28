@@ -1,0 +1,64 @@
+HISTORY
+
+    The Grufti module is so-named after a popular IRC bot mostly used
+    for its expressive match/response ability.  Grufti allowed users to
+    add their own responses to the bot which were stored in a primitive
+    data format.
+
+    While the Madcow implementation does not support user-contributed
+    matches directly, this will possibly be added when a more robust
+    user/password system is implemented.
+
+WHY
+
+    Because I ran a Grufti bot for years and it had accumulated a
+    massive amount of responses.  Instead of coding a new system from
+    scratch and using the old match database as a starting point, I
+    figured I'd just write a module that can read the original format.
+
+SYNTAX
+
+    The syntax is simple. grufti-responses.txt is a plain text file with
+    an arbitrary amount of match/response blocks. They begin with a
+    %match object which describes a comma-delimited list of matches,
+    followed by any number of possible responses.  If there is more than
+    one, it chooses one at random.  A block is finished with %end by
+    itself on a line.
+
+    In addition to this, grufti.py has a few enhancements I added:
+
+    REGULAR EXPRESSIONS
+
+        A match object is normally a word or phrase, and a "boundary"
+        character is implicit.  This means that substrings will not
+        cause it to trigger. For example if you have a match string of
+        'hi', you will see the following behavior:
+
+        MATCHES         STRING
+        yes             hi.
+        yes             hi, bob.
+        no              shingle.
+
+        However, if you wish to have more control over the match
+        trigger, you may specify a regular expression by enclosing it in
+        forward-slashes (like perl).  For example:
+
+        %match /(hi|hello|sup)/
+
+        Note that this will also match substrings.  Be careful to add \b
+        around your word/phrase when using regex syntax if you do not
+        want it to match substrings.
+
+    IN-LINE RANDOM WORD/PHRASE
+
+        You can specify random words/phrases within a response line with
+        a {{ ... }} block, seperated by |'s.  Example:
+
+        %match hello
+        {{ hello | hi | heya | sup }}!
+        leave me alone.
+        %end
+
+        In this example, if the bot sees the word "hello" it will
+        respond with a random iteration of: leave me alone., hello!,
+        hi!, heya!, sup!
