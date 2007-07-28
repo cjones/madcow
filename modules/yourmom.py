@@ -8,15 +8,17 @@ import sys
 import re
 from include.pyfiglet import Figlet
 import random
+import os
 
-# class for this module
+
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
-        self.pattern = re.compile('^\s*yourmom\s*$')    # regular expression that needs to be matched
-        self.requireAddressing = True            # True/False - require addressing?
-        self.thread = False                # True/False - should bot spawn thread?
-        self.wrap = False                # True/False - wrap output?
+
+    def __init__(self, config=None, ns='madcow', dir='..'):
+        self.enabled = True
+        self.pattern = re.compile('^\s*yourmom\s*$')
+        self.requireAddressing = True
+        self.thread = False
+        self.wrap = False
         self.help = 'yourmom - random figlet of the ultimate insult'
 
         zipfile = '%s/include/fonts.zip' % dir
@@ -36,26 +38,17 @@ class MatchObject(object):
             'standard', 'straight', 'twopoint'
         )
 
-
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         try:
             self.figlet.setFont(font=random.choice(self.fonts))
             text = self.figlet.renderText('your mom')
             return text
-
 
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return '%s: your mom :(' % nick
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject(dir='..')
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'])
+    sys.exit(0)

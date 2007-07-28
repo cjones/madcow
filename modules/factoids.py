@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-# This implements the infobot factoid database work-a-like
+"""
+This implements the infobot factoid database work-a-like
+"""
 
 import sys
 import re
@@ -8,16 +10,18 @@ import os
 import anydbm
 import random
 
-# class for this module
-class MatchObject(object):
-    def __init__(self, dir=None, ns='default', config=None):
-        self.enabled = True                # True/False - enabled?
-        self.pattern = re.compile('^(.+)$')    # regular expression that needs to be matched
-        self.requireAddressing = False            # True/False - require addressing?
-        self.thread = False                # True/False - should bot spawn thread?
-        self.wrap = False                # True/False - wrap output?
 
-        if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
+class MatchObject(object):
+
+    def __init__(self, dir=None, ns='madcow', config=None):
+        self.enabled = True
+        self.pattern = re.compile('^(.+)$')
+        self.requireAddressing = False
+        self.thread = False
+        self.wrap = False
+
+        if dir is None:
+            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
         self.dir = dir
         self.ns = ns
 
@@ -45,8 +49,6 @@ class MatchObject(object):
 
         return val
 
-
-
     def set(self, type, key, val):
         db = anydbm.open(self.dbFile(type), 'c', 0640)
         db[key.lower()] = val
@@ -67,7 +69,7 @@ class MatchObject(object):
         else:
             return True
 
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
         addressed = kwargs['addressed']
         correction = kwargs['correction']
@@ -180,15 +182,10 @@ class MatchObject(object):
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
 
-    a = argv[0] == 'True' and True or False
-    c = argv[1] == 'True' and True or False
-    obj = MatchObject()
-    print obj.response(nick='testUser', addressed=a, correction=c, args=[argv[2]])
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    args = sys.argv[1:]
+    a = args[0] == 'True' and True or False
+    c = args[1] == 'True' and True or False
+    print MatchObject().response(nick=os.environ['USER'], addressed=a, correction=c, args=[args[2]])
+    sys.exit(0)

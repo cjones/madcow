@@ -57,7 +57,7 @@ class ChatLog(object):
 
 # class for this module
 class MatchObject(object):
-  def __init__(self, config=None, ns='default', dir=None):
+  def __init__(self, config=None, ns='madcow', dir=None):
     self.enabled = True       # True/False - enabled?
     self.pattern = re.compile('^(.*)$') # regular expression that needs to be matched
     self.requireAddressing = False     # True/False - require addressing?
@@ -67,7 +67,7 @@ class MatchObject(object):
     self.log = ChatLog()
     
   # function to generate a response
-  def response(self, *args, **kwargs):
+  def response(self, **kwargs):
     nick = kwargs['nick']
     args = kwargs['args']
     line = args[0]

@@ -42,7 +42,7 @@ class MatchObject(object):
         self.wrap = False
         self.help = None
 
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         """
         This function should return a response to the query or None.
         """
@@ -56,9 +56,6 @@ class MatchObject(object):
             return '%s: problem with query: %s' % (nick, e)
 
 
-def main():
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
-    return 0
-
 if __name__ == '__main__':
-    sys.exit(main())
+    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)

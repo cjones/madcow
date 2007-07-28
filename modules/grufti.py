@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
-# Implement Grufti trigger/response spam
+"""
+Implement Grufti trigger/response spam
+"""
 
 import sys
 import re
 import os
 import random
 
-# class for this module
+
 class MatchObject(object):
     reMatchBlocks = re.compile('%match\s+(.*?)%end', re.DOTALL)
     reCommaDelim = re.compile('\s*,\s*')
@@ -15,16 +17,17 @@ class MatchObject(object):
     reToken = re.compile('({{\s*(.*?)\s*}})')
     reIsRegex = re.compile('^/(.+)/$')
 
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
-        self.pattern = re.compile('^(.+)$')    # regular expression that needs to be matched
-        self.requireAddressing = False            # True/False - require addressing?
-        self.thread = False                # True/False - should bot spawn thread?
-        self.wrap = False                # True/False - wrap output?
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
+        self.pattern = re.compile('^(.+)$')
+        self.requireAddressing = False
+        self.thread = False
+        self.wrap = False
 
         self.data = []
 
-        if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+        if dir is None:
+            dir = os.path.abspath(os.path.dirname(sys.argv[0]))
         file = dir + '/grufti-responses.txt'
 
         try:
@@ -60,8 +63,7 @@ class MatchObject(object):
 
         return output
 
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         try:
             nick = kwargs['nick']
             args = kwargs['args']
@@ -75,12 +77,6 @@ class MatchObject(object):
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject(dir = '..')
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject(dir='..').response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)

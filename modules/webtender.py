@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 
-# Look up drink mixing ingredients
+"""
+Look up drink mixing ingredients
+"""
 
 import sys
 import re
 import urllib
 from include import utils
+import os
 
-# class for this module
+
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
-        self.pattern = re.compile('^\s*drinks?\s+(.+)')    # regular expression that needs to be matched
-        self.requireAddressing = True            # True/False - require addressing?
-        self.thread = True                # True/False - should bot spawn thread?
-        self.wrap = True                # True/False - wrap output?
+
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
+        self.pattern = re.compile('^\s*drinks?\s+(.+)')
+        self.requireAddressing = True
+        self.thread = True
+        self.wrap = True
         self.help = 'drinks <drink name> - look up mixing instructions'
 
         self.baseURL = 'http://www.webtender.com'
@@ -24,14 +28,14 @@ class MatchObject(object):
         self.ingredients = re.compile('<LI>(.*?CLASS=ingr.+)')
         self.instructions = re.compile('<H3>Mixing instructions:</H3>.*?<P>(.*?)</P>', re.DOTALL)
 
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
         args = kwargs['args']
-        url = self.baseURL + '/cgi-bin/search?' + urllib.urlencode(
-                {    'verbose'    : 'on',
-                    'name'        : args[0],    }
-                )
+        url = self.baseURL + '/cgi-bin/search?' + urllib.urlencode({
+            'verbose': 'on',
+            'name': args[0],
+        })
+
         try:
             doc = urllib.urlopen(url).read()
             drink = self.drink.search(doc).group(1)
@@ -51,13 +55,6 @@ class MatchObject(object):
             return "%s: Something ungood happened looking that up, sry" % nick
 
 
-
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject()
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)

@@ -1,26 +1,29 @@
 #!/usr/bin/env python
 
-# Look up a definition in the Urban Dictionary
+"""
+Look up a definition in the Urban Dictionary
+"""
 
 import sys
 import re
 import SOAPpy
+import os
 
-# class for this module
+
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
-        self.pattern = re.compile('^\s*urban\s+(.+)')    # regular expression that needs to be matched
-        self.requireAddressing = True            # True/False - require addressing?
-        self.thread = True                # True/False - should bot spawn thread?
-        self.wrap = True                # True/False - wrap output?
+
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
+        self.pattern = re.compile('^\s*urban\s+(.+)')
+        self.requireAddressing = True
+        self.thread = True
+        self.wrap = True
         self.help = 'urban <phrase> - look up a word/phrase on urban dictionary'
 
         self.key = 'a979884b386f8b7ea781754892f08d12'
         self.server = SOAPpy.SOAPProxy("http://api.urbandictionary.com/soap")
 
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
         args = kwargs['args']
 
@@ -46,17 +49,12 @@ class MatchObject(object):
             item = items[i - 1]
             response = '%s: [%s/%s] %s - Example: %s' % (nick, i, max, item.definition, item.example)
             return response.encode("utf-8")
+
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return "%s: Serious problems: %s" % (nick, e)
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject()
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)

@@ -131,9 +131,7 @@ class MatchObject(object):
             return '%s: Problem with that: %s' % (kwargs['nick'], e)
 
 
-def main():
-    print MatchObject().response(nick='testUser', args=[' '.join(sys.argv[1:])])
-    return 0
-
 if __name__ == '__main__':
-    sys.exit(main())
+    print MatchObject().response(nick='testUser', args=[' '.join(sys.argv[1:])])
+    sys.exit(0)
+

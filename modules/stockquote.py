@@ -1,29 +1,33 @@
 #!/usr/bin/env python
 
-# Get stock quote
+"""
+Get stock quote
+"""
 
 import sys
 import re
 import urllib
+import os
 
-# class for this module
+
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
+
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
         self.pattern = re.compile('^\s*(?:stocks?|quote)\s+([a-z0-9.-]+)', re.I)
-        self.requireAddressing = True            # True/False - require addressing?
-        self.thread = True                # True/False - should bot spawn thread?
-        self.wrap = True                # True/False - wrap output?
+        self.requireAddressing = True
+        self.thread = True
+        self.wrap = True
         self.help = 'quote <symbol> - get latest stock quote'
 
         self.company = re.compile('<td height="30" class="ygtb"><b>(.*?)</b>')
         self.lastTrade = re.compile('(Last Trade|Net Asset Value):</td><td class="yfnc_tabledata1"><big><b>(.*?)</b>')
         self.change = re.compile('Change:</td><td class="yfnc_tabledata1">(?:<img.*?alt="(.*?)">)? <b.*?>(.*?)</b>')
 
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
         args = kwargs['args']
+
         try:
             doc = urllib.urlopen('http://finance.yahoo.com/q?s=' + args[0]).read()
             company = self.company.search(doc).group(1)
@@ -37,17 +41,12 @@ class MatchObject(object):
                 change = None
 
             return '%s: %s - %s: %s, Change = %s' % (nick, company, tag, lastTrade, change)
+
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return "%s: Couldn't look that up, guess the market crashed." % nick
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject()
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)

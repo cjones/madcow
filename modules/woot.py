@@ -10,37 +10,26 @@ import urllib
 import string
 from include import rssparser
 from include import utils
+import os
 
-class currency(float):
-    def __init__(self,amount):
-        self.amount = amount
-    def __str__(self):
-        temp = "%.2f" % self.amount
-        profile = compile(r"(\d)(\d\d\d[.,])")
-        while 1:
-            temp, count = subn(profile,r"\1,\2",temp)
-            if not count: break
-        return temp
 
-# class for this module
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
+
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
         self.pattern = re.compile('^\s*woot(?:\s+(\S+))?')
-        self.requireAddressing = True            # True/False - require addressing?
-        self.thread = True                # True/False - should bot spawn thread?
-        self.wrap = True                # True/False - wrap output?
+        self.requireAddressing = True
+        self.thread = True
+        self.wrap = True
         self.help = 'woot - get latest offer from woot.com'
 
         self.baseURL = 'http://woot.com'
         self.max = 200
     
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
-        args = kwargs['args']
+
         try:
-    
             url = self.baseURL + '/Blog/Rss.aspx'
             feed = rssparser.parse(url)
 
@@ -63,17 +52,12 @@ class MatchObject(object):
             longdescription = longdescription[:self.max] + ' ...'
 
             return '%s: %s\n[%s]\n%s' % (offer, price, page, longdescription)
+
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return "%s: Couldn't load the page woot returned D:" % nick
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject()
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)

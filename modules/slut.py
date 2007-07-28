@@ -71,7 +71,7 @@ def slutrating(phrase):
 
 # class for this module
 class MatchObject(object):
-  def __init__(self, config=None, ns='default', dir=None):
+  def __init__(self, config=None, ns='madcow', dir=None):
     self.enabled = True
     self.pattern = re.compile('^\s*slutcheck\s+(.+)')
     self.requireAddressing = True
@@ -80,7 +80,7 @@ class MatchObject(object):
     self.help = "slutcheck <phrase> - see how slutty the phrase is"
   
   # function to generate a response
-  def response(self, *args, **kwargs):
+  def response(self, **kwargs):
     nick = kwargs['nick']
     args = kwargs['args']
     try:

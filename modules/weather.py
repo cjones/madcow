@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-# Get a weather report from wunderground
-
+"""
+Get a weather report from wunderground
+"""
 
 import sys
 import re
@@ -9,20 +10,22 @@ import urllib
 import learn
 import os
 
-# class for this module
+
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
+
+    def __init__(self, config=None, ns='madcow', dir=None):
         self.enabled = True                # True/False - enabled?
         self.pattern = re.compile('^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
         self.requireAddressing = True            # True/False - require addressing?
         self.thread = True                # True/False - should bot spawn thread?
         self.wrap = False                # True/False - wrap output?
         self.ns = ns
-        if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
+        if dir is None:
+            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
         self.dir = dir
         self.help = 'fc <location> - look up forecast for location'
-        self.help = self.help + '\nfc @nick - lookup forecast for this nick\'s location'
-        self.help = self.help + '\nlearn <nick> <location> - permanently learn a nick\'s location'
+        self.help += '\nfc @nick - lookup forecast for this nick\'s location'
+        self.help += '\nlearn <nick> <location> - permanently learn a nick\'s location'
 
         self.lookup = re.compile('^@(\S+)')
         self.resultType = re.compile('(Click on a column heading|Current Conditions|There has been an error)')
@@ -41,8 +44,7 @@ class MatchObject(object):
     def norm(self, text):
         return ' '.join(text.split()).lower()
 
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
 
         try: arg = ' '.join(kwargs['args'][0].split())
@@ -66,7 +68,6 @@ class MatchObject(object):
 
             if query is None:
                 return "I don't know where %s lives, try: learn %s <location>" % (lookup, lookup)
-
 
         try:
             response = None
@@ -151,17 +152,12 @@ class MatchObject(object):
                 if response: break
             
             return '%s: %s' % (nick, response)
+
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return '%s: There is no weather there' % nick
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject()
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)

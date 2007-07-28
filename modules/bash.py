@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 
-# Interface for getting really stupid IRC quotes
+"""
+Interface for getting really stupid IRC quotes
+"""
 
 import sys
 import re
 import urllib
 import random
 from include import utils
+import os
 
-# class for this module
+
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
+
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
         self.pattern = re.compile('^\s*(bash|qdb)(?:\s+(\S+))?', re.I)
-        self.requireAddressing = True            # True/False - require addressing?
-        self.thread = True                # True/False - should bot spawn thread?
-        self.wrap = False                # True/False - wrap output?
+        self.requireAddressing = True
+        self.thread = True
+        self.wrap = False
         self.help = '<bash|qdb> [#|query] - get stupid IRC quotes, or random'
 
         self.sources = {
@@ -36,8 +40,7 @@ class MatchObject(object):
         self.num = re.compile('num')
         self.query = re.compile('query')
 
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
         args = kwargs['args']
 
@@ -79,12 +82,6 @@ class MatchObject(object):
             return '%s: Having some issues, make some stupid quotes yourself' % nick
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject()
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
+    sys.exit(0)

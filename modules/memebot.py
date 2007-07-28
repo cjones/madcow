@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-# Watch URLs in channel, punish people for living under a rock
+"""
+Watch URLs in channel, punish people for living under a rock
+"""
 
 import sys
 import re
@@ -12,7 +14,7 @@ from sqlobject import *
 import random
 from include.throttle import Throttle
 
-# object model
+
 class url(SQLObject):
     url = StringCol(alternateID = True)
     clean = StringCol(alternateID = True)
@@ -30,6 +32,7 @@ class url(SQLObject):
 
     turl = property(truncated_url)
 
+
 class author(SQLObject):
     name = StringCol(alternateID = True)
     urls = MultipleJoin('url')
@@ -38,9 +41,11 @@ class author(SQLObject):
     pointsOld = IntCol(default = 0)
     pointsCredit = IntCol(default = 0)
 
+
 class channel(SQLObject):
     name = StringCol(alternateID = True)
     urls = MultipleJoin('url')
+
 
 class comments(SQLObject):
     text = StringCol()
@@ -48,18 +53,18 @@ class comments(SQLObject):
     url = ForeignKey('url')
 
 
-
-# class for this module
 class MatchObject(object):
-    def __init__(self, ns='default', config=None, dir=None):
-        self.enabled = True                # True/False - enabled?
-        self.pattern = re.compile('^(.+)$')    # regular expression that needs to be matched
-        self.requireAddressing = False            # True/False - require addressing?
-        self.thread = False                # True/False - should bot spawn thread?
-        self.wrap = False                # True/False - wrap output?
+
+    def __init__(self, ns='madcow', config=None, dir=None):
+        self.enabled = True
+        self.pattern = re.compile('^(.+)$')
+        self.requireAddressing = False
+        self.thread = False
+        self.wrap = False
         self.help = 'score [name,range] - get memescore, empty for top10'
 
-        if dir is None: dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
+        if dir is None:
+            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
         file = dir + '/data/db-%s-memes' % ns
 
         self.matchURL = re.compile('(http://\S+)', re.I)
@@ -85,7 +90,6 @@ class MatchObject(object):
             'that was funny the first time i saw it.',
         ]
 
-
     def cleanURL(self, url):
         uri = list(urlparse.urlparse(url))
         uri[1] = uri[1].lower()
@@ -93,7 +97,6 @@ class MatchObject(object):
         uri[5] = ''
         return urlparse.urlunparse(uri)
 
-    # XXX magic numbers, move to config
     def getScoreForAuthor(self, a):
         return    a.pointsNew    *  1 + \
             a.pointsOld    * -2 + \
@@ -104,9 +107,7 @@ class MatchObject(object):
         scores = sorted(scores, lambda x, y: cmp(y[1], x[1]))
         return scores
 
-
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick'].lower()
         chan = kwargs['channel']
         addressed = kwargs['addressed']
@@ -150,8 +151,6 @@ class MatchObject(object):
             except:
                 pass
 
-
-
         match = self.matchURL.search(message)
         if match is None: return
 
@@ -161,8 +160,6 @@ class MatchObject(object):
                 return '%s: Stop abusing me plz.' % nick
             else:
                 return
-
-
 
         orig = match.group(1)
         clean = self.cleanURL(orig)
@@ -209,15 +206,3 @@ class MatchObject(object):
             print >> sys.stderr, 'error: %s' % e
 
         return
-
-
-
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject(ns='madcow')
-    print obj.response(nick='testUser', channel='#test', args=[argv[0]], addressed=True)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())

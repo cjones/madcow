@@ -11,6 +11,7 @@ import os
 
 
 class MatchObject(object):
+
     reTranslated = re.compile('<td bgcolor=white class=s><div style=padding:10px;>(.*?)</div></t')
     languages = {
         'chinese-simp': 'zh',
@@ -70,10 +71,6 @@ class MatchObject(object):
             return "%s: I couldn't make that translation for some reason :/" % nick
 
 
-def main():
-    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
-
-    return 0
-
 if __name__ == '__main__':
-    sys.exit(main())
+    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
+    sys.exit(0)

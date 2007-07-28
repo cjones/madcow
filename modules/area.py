@@ -1,27 +1,30 @@
 #!/usr/bin/env python
 
-# This module looks up area codes and returns the most likely city
+"""
+This module looks up area codes and returns the most likely city
+"""
 
 import sys
 import re
 import urllib2
 import cookielib
+import os
 
-# class for this module
+
 class MatchObject(object):
-    def __init__(self, config=None, ns='default', dir=None):
-        self.enabled = True                # True/False - enabled?
+
+    def __init__(self, config=None, ns='madcow', dir=None):
+        self.enabled = True
         self.pattern = re.compile('^\s*area(?:\s+code)?\s+(\d+)')
-        self.requireAddressing = True            # True/False - require addressing?
-        self.thread = True                # True/False - should bot spawn thread?
-        self.wrap = True                # True/False - wrap output?
+        self.requireAddressing = True
+        self.thread = True
+        self.wrap = True
         self.help = 'area <areacode> - what city does it belong to'
 
         self.baseURL = 'http://www.melissadata.com/lookups/phonelocation.asp'
         self.match = re.compile("<tr><td><A[^>]+>(.*?)</a></td><td>(.*?)</td><td align=center>\d+</td></tr>")
 
-    # function to generate a response
-    def response(self, *args, **kwargs):
+    def response(self, **kwargs):
         nick = kwargs['nick']
         args = kwargs['args']
 
@@ -42,12 +45,6 @@ class MatchObject(object):
             return "%s: I couldn't look that up for some reason.  D:" % nick
 
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-    if argv is None: argv = sys.argv[1:]
-    obj = MatchObject()
-    print obj.response(nick='testUser', args=argv)
-
-    return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    sys.exit(0)
