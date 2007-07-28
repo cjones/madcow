@@ -2,6 +2,7 @@
     * change order of changelog :)
     * bbcnews when called without an argument will show headline
     * normalize the syntax/style of all the modules
+    * add ignore list functionality
 
 1.1.0: Fri Jul 27 14:07:06 PDT 2007
     * a whole bunch of much-needed code cleanup and minor bugfixes.

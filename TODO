@@ -25,7 +25,6 @@ emailing them to cjones@gruntle.org.
 
 TODO: (feature requests)
 
-- ignore list for other bots that might get in a spam war
 - authentication for remote admin functions
 - option to create a FIFO unix file that you can pipe to to fist
   madcow.. maybe
