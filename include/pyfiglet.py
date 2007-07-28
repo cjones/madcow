@@ -5,15 +5,15 @@ Python FIGlet adaption
 """
 
 import sys
-from optparse import OptionParser
 import os
 import re
 from zipfile import ZipFile
+from optparse import OptionParser
 
-__version__ = '0.3'
-
+__version__ = '0.5'
+__author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = """
-Copyright (C) 2007 Christopher Jones <cjones@insub.org>
+Copyright (C) 2007 Christopher Jones <cjones@gruntle.org>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -30,6 +30,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
+
 class FigletError(Exception):
     def __init__(self, error):
         self.error = error
@@ -37,10 +38,12 @@ class FigletError(Exception):
     def __str__(self):
         return self.error
 
+
 class FontNotFound(FigletError):
     """
     Raised when a font can't be located
     """
+
 
 class FontError(FigletError):
     """
@@ -48,11 +51,12 @@ class FontError(FigletError):
     """
 
 
-"""
-This class represents the currently loaded font, including
-meta-data about how it should be displayed by default
-"""
 class FigletFont(object):
+    """
+    This class represents the currently loaded font, including
+    meta-data about how it should be displayed by default
+    """
+
     def __init__(self, dir='.', font='standard'):
         self.dir = dir
         self.font = font
@@ -68,11 +72,11 @@ class FigletFont(object):
         self.readFontFile()
         self.loadFont()
 
-    """
-    Load font file into memory. This can be overriden with
-    a superclass to create different font sources.
-    """
     def readFontFile(self):
+        """
+        Load font file into memory. This can be overriden with
+        a superclass to create different font sources.
+        """
         fontPath = '%s/%s.flf' % (self.dir, self.font)
         if os.path.exists(fontPath) is False:
             raise FontNotFound, "%s doesn't exist" % fontPath
@@ -87,19 +91,13 @@ class FigletFont(object):
 
     def getFonts(self):
         return [font[:-4] for font in os.walk(self.dir).next()[2] if font.endswith('.flf')]
-        
 
-
-
-
-    """
-    Parse loaded font data for the rendering engine to consume
-    """
     def loadFont(self):
+        """
+        Parse loaded font data for the rendering engine to consume
+        """
         try:
-            """
-            Parse first line of file, the header
-            """
+            # Parse first line of file, the header
             data = self.data.splitlines()
 
             header = data.pop(0)
@@ -121,10 +119,8 @@ class FigletFont(object):
             if len(header) > 7: fullLayout = int(header[7])
             if len(header) > 8: codeTagCount = int(header[8])
 
-            """
-            if the new layout style isn't available,
-            convert old layout style. backwards compatability
-            """
+            # if the new layout style isn't available,
+            # convert old layout style. backwards compatability
             if fullLayout is None:
                 if oldLayout == 0:
                     fullLayout = 64
@@ -133,29 +129,22 @@ class FigletFont(object):
                 else:
                     fullLayout = (oldLayout & 31) | 128
 
-
-
-            """
-            Some header information is stored for later, the rendering
-            engine needs to know this stuff.
-            """
+            # Some header information is stored for later, the rendering
+            # engine needs to know this stuff.
             self.height = height
             self.hardBlank = hardBlank
             self.printDirection = printDirection
             self.smushMode = fullLayout
 
-            """
-            Strip out comment lines
-            """
+            # Strip out comment lines
             for i in range(0, commentLines):
                 self.comment += data.pop(0)
 
-            """
-            Load characters
-            """
+            # Load characters
             for i in range(32, 127):
                 end = None
                 width = 0
+                chars = []
                 for j in range(0, height):
                     line = data.pop(0)
                     if end is None:
@@ -164,29 +153,25 @@ class FigletFont(object):
 
                     line = end.sub('', line)
 
-                    if len(line) > width:
-                        width = len(line)
+                    if len(line) > width: width = len(line)
+                    chars.append(line)
 
-                    if self.chars.has_key(i) is False:
-                        self.chars[i] = []
-
-                    self.chars[i].append(line)
-
-                self.width[i] = width
-
+                if ''.join(chars) != '':
+                    self.chars[i] = chars
+                    self.width[i] = width
 
         except Exception, e:
             raise FontError, 'problem parsing %s font: %s' % (self.font, e)
-
 
     def __str__(self):
         return '<FigletFont object: %s>' % self.font
 
 
-"""
-Rendered figlet font
-"""
-class RenderedOutput(str):
+class FigletString(str):
+    """
+    Rendered figlet font
+    """
+
     def __init__(self, *args, **kwargs):
         str.__init__(self, *args, **kwargs)
 
@@ -210,18 +195,15 @@ class RenderedOutput(str):
 
         return self.newFromList(out)
 
-
     def newFromList(self, list):
-        return RenderedOutput('\n'.join(list) + '\n')
+        return FigletString('\n'.join(list) + '\n')
 
 
-
-
-
-"""
-Use this Font class if it exists inside of a zipfile.
-"""
 class ZippedFigletFont(FigletFont):
+    """
+    Use this Font class if it exists inside of a zipfile.
+    """
+
     def __init__(self, dir='.', font='standard', zipfile='fonts.zip'):
         self.zipfile = zipfile
         FigletFont.__init__(self, dir=dir, font=font)
@@ -251,12 +233,12 @@ class ZippedFigletFont(FigletFont):
         return [font[6:-4] for font in z.namelist() if font.endswith('.flf')]
 
 
-
-"""
-This class handles the rendering of a FigletFont,
-including smushing/kerning/justification/direction
-"""
 class FigletRenderingEngine(object):
+    """
+    This class handles the rendering of a FigletFont,
+    including smushing/kerning/justification/direction
+    """
+
     def __init__(self, base=None):
         self.base = base
 
@@ -271,12 +253,12 @@ class FigletRenderingEngine(object):
         self.SM_SMUSH = 128
 
 
-    """
-    Given 2 characters which represent the edges rendered figlet
-    fonts where they would touch, see if they can be smushed together.
-    Returns None if this cannot or should not be done.
-    """
     def smushChars(self, left='', right=''):
+        """
+        Given 2 characters which represent the edges rendered figlet
+        fonts where they would touch, see if they can be smushed together.
+        Returns None if this cannot or should not be done.
+        """
         if left.isspace() is True: return right
         if right.isspace() is True: return left
 
@@ -292,11 +274,9 @@ class FigletRenderingEngine(object):
             if left == self.base.Font.hardBlank: return right
             if right == self.base.Font.hardBlank: return left
 
-            """
-            Ensures that the dominant (foreground)
-            fig-character for overlapping is the latter in the
-            user's text, not necessarily the rightmost character.
-            """
+            # Ensures that the dominant (foreground)
+            # fig-character for overlapping is the latter in the
+            # user's text, not necessarily the rightmost character.
             if self.base.direction == 'right-to-left': return left
             else: return right
 
@@ -338,139 +318,96 @@ class FigletRenderingEngine(object):
 
         return
 
+    def smushAmount(self, left=None, right=None, buffer=[], curChar=[]):
+        """
+        Calculate the amount of smushing we can do between this char and the last
+        If this is the first char it will throw a series of exceptions which
+        are caught and cause appropriate values to be set for later.
 
+        This differs from C figlet which will just get bogus values from
+        memory and then discard them after.
+        """
+        if (self.base.Font.smushMode & (self.SM_SMUSH | self.SM_KERN)) == 0: return 0
 
-    """
-    Render an ASCII text string in figlet
-    """
+        maxSmush = self.curCharWidth
+        for row in range(0, self.base.Font.height):
+            lineLeft = buffer[row]
+            lineRight = curChar[row]
+            if self.base.direction == 'right-to-left':
+                lineLeft, lineRight = lineRight, lineLeft
+
+            try:
+                linebd = len(lineLeft.rstrip()) - 1
+                if linebd < 0: linebd = 0
+                ch1 = lineLeft[linebd]
+            except:
+                linebd = 0
+                ch1 = ''
+
+            try:
+                charbd = len(lineRight) - len(lineRight.lstrip())
+                ch2 = lineRight[charbd]
+            except:
+                charbd = len(lineRight)
+                ch2 = ''
+
+            amt = charbd + len(lineLeft) - 1 - linebd
+
+            if ch1 == '' or ch1 == ' ':
+                amt += 1
+            elif ch2 != '' and self.smushChars(left=ch1, right=ch2) is not None:
+                amt += 1
+
+            if amt < maxSmush:
+                maxSmush = amt
+
+        return maxSmush
+
     def render(self, text):
-        self.curCharWidth = 0
-        buffer = ['' for i in range(0, self.base.Font.height)]
+        """
+        Render an ASCII text string in figlet
+        """
+        self.curCharWidth = self.prevCharWidth = 0
+        buffer = []
 
         for c in map(ord, list(text)):
+            if self.base.Font.chars.has_key(c) is False: continue
             curChar = self.base.Font.chars[c]
-            self.prevCharWidth = self.curCharWidth
             self.curCharWidth = self.base.Font.width[c]
+            if len(buffer) == 0: buffer = ['' for i in range(self.base.Font.height)]
+            maxSmush = self.smushAmount(buffer=buffer, curChar=curChar)
 
-
-            """
-            Calculate the amount of smushing we can do between this char and the last
-            If this is the first char it will throw a series of exceptions which
-            are caught and cause appropriate values to be set for later.
-
-            This differs from C figlet which will just get bogus values from
-            memory and then discard them after.
-            """
-            maxSmush = self.curCharWidth
+            # Add a character to the buffer and do smushing/kerning
             for row in range(0, self.base.Font.height):
-                if self.base.direction == 'left-to-right':
-                    try:
-                        linebd = len(buffer[row].rstrip()) - 1
-                        if linebd < 0: linebd = 0
-                        ch1 = buffer[row][linebd]
-                    except:
-                        linebd = 0
-                        ch1 = ''
+                addLeft = buffer[row]
+                addRight = curChar[row]
+
+                if self.base.direction == 'right-to-left':
+                    addLeft, addRight = addRight, addLeft
+
+                for i in range(0, maxSmush):
+
+                    try: left = addLeft[len(addLeft) - maxSmush + i]
+                    except: left = ''
+
+                    right = addRight[i]
+
+                    smushed = self.smushChars(left=left, right=right)
 
                     try:
-                        charbd = len(curChar[row]) - len(curChar[row].lstrip())
-                        ch2 = curChar[row][charbd]
+                        l = list(addLeft)
+                        l[len(l)-maxSmush+i] = smushed
+                        addLeft = ''.join(l)
                     except:
-                        charbd = len(curChar[row])
-                        ch2 = ''
-                        
+                        pass
 
-                    try: curLength = len(buffer[row])
-                    except: curLength = 0
+                buffer[row] = addLeft + addRight[maxSmush:]
 
-                    amt = charbd + curLength - 1 - linebd
-
-                elif self.base.direction == 'right-to-left':
-                    try:
-                        charbd = len(curChar[row].rstrip()) - 1
-                        if charbd < 0: charbd = 0
-                        ch1 = curChar[row][charbd]
-                    except:
-                        charbd = 0
-                        ch1 = ''
-
-                    try:
-                        linebd = len(buffer[row]) - len(buffer[row].lstrip())
-                        ch2 = buffer[row][linebd]
-                    except:
-                        linebd = len(buffer[row])
-                        ch2 = ''
-
-                    amt = linebd + self.curCharWidth - 1 - charbd
+            self.prevCharWidth = self.curCharWidth
 
 
-                if ch1 == '' or ch1 == ' ':
-                    amt += 1
-                elif ch2 != '':
-                    if self.smushChars(left=ch1, right=ch2) is not None:
-                        amt += 1
-
-
-                if amt < maxSmush:
-                    maxSmush = amt
-
-            if (self.base.Font.smushMode & (self.SM_SMUSH | self.SM_KERN)) == 0:
-                maxSmush = 0
-
-
-            """
-            Add a character to the buffer
-
-            Smushing/Kerning loop. Exceptions in this loop
-            are caused by index out of range errors which
-            indicate smushing should be skipped.
-            """
-            templine = ''
-            for row in range(0, self.base.Font.height):
-
-                wBuffer = buffer[row] # row of previously added characters
-                wChar = curChar[row]  # row of character to add
-
-                if self.base.direction == 'left-to-right':
-                    for i in range(0, maxSmush):
-
-                        try: left = wBuffer[len(wBuffer) - maxSmush + i]
-                        except: left = ''
-
-                        right = wChar[i]
-
-                        smushed = self.smushChars(left=left, right=right)
-
-                        try:
-                            if smushed is not None:
-                                l = list(wBuffer)
-                                l[len(l)-maxSmush+i] = smushed
-                                wBuffer = ''.join(l)
-                        except: pass
-
-                    buffer[row] = wBuffer + wChar[maxSmush:]
-
-                elif self.base.direction == 'right-to-left':
-                    templine = wChar
-                    for i in range(0, maxSmush):
-                        try: left = templine[self.curCharWidth - maxSmush + i]
-                        except: left = ''
-
-                        right = wBuffer[i]
-
-                        smushed = self.smushChars(left=left, right=right)
-
-                        try:
-                            l = list(templine)
-                            l[self.curCharWidth - maxSmush +i] = smushed
-                            templine = ''.join(l)
-                        except:
-                            pass
-
-                    templine = templine + wBuffer[maxSmush:]
-                    buffer[row] = templine
-
-        # justify text
+        # Justify text. This does not use str.rjust/str.center
+        # specifically because the output would not match FIGlet
         if self.base.justify == 'right':
             for row in range(0, self.base.Font.height):
                 buffer[row] = (' ' * (self.base.width - len(buffer[row]) - 1)) + buffer[row]
@@ -479,18 +416,18 @@ class FigletRenderingEngine(object):
             for row in range(0, self.base.Font.height):
                 buffer[row] = (' ' * int((self.base.width - len(buffer[row])) / 2)) + buffer[row]
 
-
         # return rendered ASCII with hardblanks replaced
         buffer = '\n'.join(buffer) + '\n'
         buffer = buffer.replace(self.base.Font.hardBlank, ' ')
-        return RenderedOutput(buffer)
+
+        return FigletString(buffer)
 
 
-
-"""
-Main figlet class.
-"""
 class Figlet(object):
+    """
+    Main figlet class.
+    """
+
     def __init__(self, dir=None, zipfile=None, font='standard', direction='auto', justify='auto', width=80):
         self.dir = dir
         self.font = font
@@ -501,7 +438,6 @@ class Figlet(object):
         self.setFont()
         self.engine = FigletRenderingEngine(base=self)
 
-
     def setFont(self, **kwargs):
         if kwargs.has_key('dir'):
             self.dir = kwargs['dir']
@@ -511,7 +447,6 @@ class Figlet(object):
 
         if kwargs.has_key('zipfile'):
             self.zipfile = kwargs['zipfile']
-
 
         Font = None
         if self.zipfile is not None:
@@ -526,7 +461,6 @@ class Figlet(object):
             raise FontNotFound, "Couldn't load font %s: Not found" % self.font
 
         self.Font = Font
-
 
     def getDirection(self):
         if self._direction == 'auto':
@@ -555,48 +489,31 @@ class Figlet(object):
 
     justify = property(getJustify)
 
-    # wrapper method to engine
     def renderText(self, text):
+        # wrapper method to engine
         return self.engine.render(text)
 
     def getFonts(self):
         return self.Font.getFonts()
 
 
-
 def main():
     dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
     parser = OptionParser(version=__version__, usage='%prog [options] text..')
-
-    parser.add_option(    '-f', '--font', default='standard',
-                help='font to render with (default: %default)', metavar='FONT' )
-
-    parser.add_option(    '-d', '--fontdir', default=None,
-                help='location of font files', metavar='DIR' )
-
-    parser.add_option(    '-z', '--zipfile', default=dir+'/fonts.zip',
-                help='specify a zipfile to use instead of a directory of fonts' )
-
-    parser.add_option(    '-D', '--direction', type='choice', choices=('auto', 'left-to-right', 'right-to-left'),
-                default='auto', metavar='DIRECTION',
-                help='set direction text will be formatted in (default: %default)' )
-
-    parser.add_option(    '-j', '--justify', type='choice', choices=('auto', 'left', 'center', 'right'),
-                default='auto', metavar='SIDE',
-                help='set justification, defaults to print direction' )
-
-    parser.add_option(    '-w', '--width', type='int', default=80, metavar='COLS',
-                help='set terminal width for wrapping/justification (default: %default)' )
-
-    parser.add_option(    '-r', '--reverse', action='store_true', default=False,
-                help='shows mirror image of output text' )
-
-    parser.add_option(    '-F', '--flip', action='store_true', default=False,
-                help='flips rendered output text over' )
-
-
-
+    parser.add_option('-f', '--font', default='standard',
+            help='font to render with (default: %default)', metavar='FONT')
+    parser.add_option('-d', '--fontdir', default=None, help='location of font files', metavar='DIR')
+    parser.add_option('-z', '--zipfile', default=dir+'/fonts.zip',
+            help='specify a zipfile to use instead of a directory of fonts')
+    parser.add_option('-D', '--direction', type='choice', choices=('auto', 'left-to-right', 'right-to-left'),
+            default='auto', metavar='DIRECTION', help='set direction text will be formatted in (default: %default)')
+    parser.add_option('-j', '--justify', type='choice', choices=('auto', 'left', 'center', 'right'), default='auto',
+            metavar='SIDE', help='set justification, defaults to print direction')
+    parser.add_option('-w', '--width', type='int', default=80, metavar='COLS',
+            help='set terminal width for wrapping/justification (default: %default)' )
+    parser.add_option('-r', '--reverse', action='store_true', default=False, help='shows mirror image of output text')
+    parser.add_option('-F', '--flip', action='store_true', default=False, help='flips rendered output text over')
     opts, args = parser.parse_args()
 
     if len(args) == 0:
@@ -615,7 +532,7 @@ def main():
     if opts.flip is True: r = r.flip()
     print r
 
-
     return 0
 
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    sys.exit(main())
