@@ -4,6 +4,7 @@ import random
 import sha
 import base64
 import re
+import os
 
 __version__ = '0.1'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
@@ -107,6 +108,7 @@ class AuthLib(object):
             for line in data:
                 fi.write(line + '\n')
             fi.close()
+            os.chmod(self.file, 0640)
         except Exception, e:
             raise AuthLibError, "couldn't write %s: %s" % (self.file, e)
 
