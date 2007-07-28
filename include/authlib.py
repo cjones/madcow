@@ -1,4 +1,4 @@
-"""This library handles user authentication in Madcow"""
+"""Generic passwd file authentication library"""
 
 import sys
 import random
