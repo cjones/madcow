@@ -15,7 +15,7 @@ class MatchObject(object):
 
     def __init__(self, config=None, ns='madcow', dir=None):
         self.enabled = True
-        self.pattern = re.compile('^\s*bbcnews\s+(.*)')
+        self.pattern = re.compile('^\s*bbcnews(?:\s+(.+))?')
         self.requireAddressing = True
         self.thread = True
         self.wrap = True
