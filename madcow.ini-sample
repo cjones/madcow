@@ -86,6 +86,11 @@ dbNamespace=madcow
 ;woot           get the latest offer from woot.com
 ;yourmom        the ultimate insult -- in figlet
 
+; admin module
+[admin]
+enabled=yes
+allowRegistration=yes
+defaultFlags=a
 
 ; connection settings for IRC plugin. should be fairly obvious
 ; channels is a comma-delimited list of channels to join

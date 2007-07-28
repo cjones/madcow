@@ -4,17 +4,13 @@
 Plugin for admin functionality which requires authentication
 
 TODO:
-- default flags in config
 - user checking (don't let someone reregister)
 - ability to change password
-- flag in config to enable/disable the ability to register at all
-- welcome message in config
 - user/host identity passed in from protocol handlers (n!u@h, e.g.)
 - authlib can raise user not found vs. password incorrect errors
 - some kind of timeout for failed password attempts
 - authlib can has default password policy
-- TTL on being logged in? meh.. should log out people if they
-  disconnect though.
+- TTL on being logged in? meh.. should log out people if they disconnect though.
 """
 
 import sys
@@ -26,6 +22,14 @@ from include.authlib import AuthLib
 _reRegister = re.compile('^\s*register\s+(\S+)\s*$', re.I)
 _reAuth = re.compile('^\s*(?:log[io]n|auth)\s+(\S+)\s*$', re.I)
 _reFist = re.compile('^\s*fist\s+(\S+)\s+(.+)$', re.I)
+_reHelp = re.compile('^\s*admin\s+help\s*$', re.I)
+_reLogout = re.compile('^\s*log(?:out|off)\s*$', re.I)
+
+_usage =  'admin help - this screen\n'
+_usage += 'register <pass> - register with bot\n'
+_usage += 'login <pass> - login to bot\n'
+_usage += 'fist <chan> <msg> - make bot say something in channel\n'
+_usage += 'logout - log out of bot'
 
 
 class User(object):
@@ -40,7 +44,10 @@ class User(object):
         return 'a' in self.flags
 
     def isRegistered(self):
-        return True
+        if 'a' in self.flags or 'r' in self.flags:
+            return True
+        else:
+            return False
 
     def __str__(self):
         return '<User %s>' % self.user
@@ -67,6 +74,9 @@ class MatchObject(object):
         self.authlib = AuthLib('%s/data/db-%s-passwd' % (self.dir, self.ns))
         self.users = {}
 
+        if self.config.admin.enabled is not True:
+            self.enabled = False
+
     def response(self, **kwargs):
         if kwargs['private'] is not True:
             return
@@ -89,10 +99,20 @@ class MatchObject(object):
         except:
             pass
 
+        # don't pass this point unless we are logged in
         try:
             user = self.users[nick]
         except:
             return
+
+        # logout
+        if _reLogout.search(command):
+            del self.users[nick]
+            return 'You are now logged out.'
+
+        # help
+        if _reHelp.search(command):
+            return _usage
 
         # admin functions
         if user.isAdmin():
@@ -105,20 +125,25 @@ class MatchObject(object):
             except:
                 pass
 
+
     def registerUser(self, user, passwd):
-        self.authlib.add_user(user, passwd, 'r')
-        return "LOLZ, you're registered! grats. try logging in now"
+        if self.config.admin.allowRegistration is True:
+            flags = self.config.admin.defaultFlags
+            if flags is None:
+                flags = 'r'
+
+            self.authlib.add_user(user, passwd, flags)
+            return "You are now registered, try logging in: login <pass>"
+        else:
+            return "Registration is disabled."
 
     def authenticateUser(self, user, passwd):
-        if self.users.has_key(user):
-            return 'You are already logged in.'
-
         status = self.authlib.verify_user(user, passwd)
 
         if status is False:
-            return 'Nice try.. calling FBI'
+            return 'Nice try.. notifying FBI'
         else:
             self.users[user] = User(user, self.authlib.get_user_data(user))
-            return 'WELCOME. You can now.. do nothing special.'
+            return 'You are now logged in. Message me "admin help" for help'
 
 
