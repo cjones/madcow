@@ -44,8 +44,7 @@ dbNamespace=madcow
 ;
 ; YOU'VE BEEN WARNED
 ;
-; XXX
-;disabled=artfart, bash, hugs, livejournal, urban
+;disabled=artfart, bash, hugs, livejournal, urban, yourmom
 ;
 ; MODULE DESCRIPTIONS:
 ;
