@@ -1,57 +1,27 @@
-1.0.1: Sat Jun 30 17:39:08 PDT 2007
+1.1.1: Fri Jul 27 17:45:40 PDT 2007
+    * change order of changelog :)
 
-    * Updated TODO list
-    * Get a rid of all the CVS Id tags
-    * Clean up jesus module to not have footnotes
-    * Stock module can now do mutual funds
+1.1.0: Fri Jul 27 14:07:06 PDT 2007
+    * a whole bunch of much-needed code cleanup and minor bugfixes.
 
-1.0.2: Sat Jun 30 22:32:09 PDT 2007
+1.0.9: Thu Jul 26 00:35:28 PDT 2007
+    * small protocol change to mIRC colors to use less bytes when coloring
+    large amounts of text
+    * USA rainbow colors brighter
+    * IRC module now logs public chatter to logs/ directory
+    * NEW - lyrics module looks up random lyrics for a band and spams
+    channel
+    * hugs.py module can now take an optional confessionID to retreive
+    instead of just a random hug
 
-    * Refactor module API to expose more data to the extensions
-    * Move seen/factoids/memebot into standard extension API
-    * Add namespace config for unique database files
-    * Added some startup verbosity
-    * Listed a description of all base modules in config
-    * Allow modules to be disabled in config file
-
-1.0.3: Sun Jul  1 19:27:09 PDT 2007
-
-    * A bunch of necessary code cleanup to the module framework
-    * Rewrote the Config class to be more efficient
-    * Added -v flag for verbosity when executed in a console
-    * Fixed grufti from triggering on substring matches
-    * Grufti module now precompiles regexes at loadtime
-
-1.0.4: Thu Jul  5 19:21:38 PDT 2007
-
-    * NEW - django frontend for memebot (see http://memebot.gruntle.org/ for ex.)
-    * Fix bug with SILC private messages
-    * Remove typo in memebot insult list
-    * Improve weather.py module's logic to work with ambiguous serach results
-    * Improve documentation
-
-1.0.5: Fri Jul  6 19:26:04 PDT 2007
-
-    * Bundle python-irclib to make installation easier
-    * Bugfix - Can now properly use IP addresses as hostnames
-    * Add a flexible throttling module
-    * Add throttling to memebot for URL postings to prevent gaming
-
-1.0.6: Thu Jul 12 22:37:03 PDT 2007
-
-    * Fix all module regex's to only trigger from beginning of line to prevent the
-      spam caused by chaining multiple keywords
-    * Rename django settings file to a sample name so updates won't clobber it
-    * add "today" link to memebot page when you navigate to older days
-    * update AAF to show the title of the ascii art, as well as the option to
-      supply a keyword to pull art from
-    * add pyfiglet module to include directory - figlet font driver
-    * add colorlib module to include directory - ansi/mirc colorizing library
-    * add yourmom.py module :)
-    * some cosmetic changes to silc output
+1.0.8: Tue Jul 24 20:59:18 PDT 2007
+    * Re-arrange bot directory -- there is now a protocols, data, and
+    include directory, to keep the root from being too cluttered
+    * Use logging module which finer levels of verbosity
+    * Fix silc bug which causes madcow to crash on private messages
+    * Grufti response file removed keyword "test" -- oops!
 
 1.0.7: Sat Jul 21 23:08:58 PDT 2007
-
     * memebot url catcher now sees and records commentary that goes with a
     posted link, such as surrounding text.
     * memebot frontend search now matches "comments"
@@ -81,25 +51,48 @@
     protocol-dependent modules. This also allows pre-/post-processing
     filters to be applied within the protocol module.
 
-1.0.8: Tue Jul 24 20:59:18 PDT 2007
+1.0.6: Thu Jul 12 22:37:03 PDT 2007
+    * Fix all module regex's to only trigger from beginning of line to prevent the
+      spam caused by chaining multiple keywords
+    * Rename django settings file to a sample name so updates won't clobber it
+    * add "today" link to memebot page when you navigate to older days
+    * update AAF to show the title of the ascii art, as well as the option to
+      supply a keyword to pull art from
+    * add pyfiglet module to include directory - figlet font driver
+    * add colorlib module to include directory - ansi/mirc colorizing library
+    * add yourmom.py module :)
+    * some cosmetic changes to silc output
 
-    * Re-arrange bot directory -- there is now a protocols, data, and
-    include directory, to keep the root from being too cluttered
-    * Use logging module which finer levels of verbosity
-    * Fix silc bug which causes madcow to crash on private messages
-    * Grufti response file removed keyword "test" -- oops!
+1.0.5: Fri Jul  6 19:26:04 PDT 2007
+    * Bundle python-irclib to make installation easier
+    * Bugfix - Can now properly use IP addresses as hostnames
+    * Add a flexible throttling module
+    * Add throttling to memebot for URL postings to prevent gaming
 
-1.0.9: Thu Jul 26 00:35:28 PDT 2007
+1.0.4: Thu Jul  5 19:21:38 PDT 2007
+    * NEW - django frontend for memebot (see http://memebot.gruntle.org/ for ex.)
+    * Fix bug with SILC private messages
+    * Remove typo in memebot insult list
+    * Improve weather.py module's logic to work with ambiguous serach results
+    * Improve documentation
 
-    * small protocol change to mIRC colors to use less bytes when coloring
-    large amounts of text
-    * USA rainbow colors brighter
-    * IRC module now logs public chatter to logs/ directory
-    * NEW - lyrics module looks up random lyrics for a band and spams
-    channel
-    * hugs.py module can now take an optional confessionID to retreive
-    instead of just a random hug
+1.0.3: Sun Jul  1 19:27:09 PDT 2007
+    * A bunch of necessary code cleanup to the module framework
+    * Rewrote the Config class to be more efficient
+    * Added -v flag for verbosity when executed in a console
+    * Fixed grufti from triggering on substring matches
+    * Grufti module now precompiles regexes at loadtime
 
-1.1.0: Fri Jul 27 14:07:06 PDT 2007
+1.0.2: Sat Jun 30 22:32:09 PDT 2007
+    * Refactor module API to expose more data to the extensions
+    * Move seen/factoids/memebot into standard extension API
+    * Add namespace config for unique database files
+    * Added some startup verbosity
+    * Listed a description of all base modules in config
+    * Allow modules to be disabled in config file
 
-    * a whole bunch of much-needed code cleanup and minor bugfixes.
+1.0.1: Sat Jun 30 17:39:08 PDT 2007
+    * Updated TODO list
+    * Get a rid of all the CVS Id tags
+    * Clean up jesus module to not have footnotes
+    * Stock module can now do mutual funds
