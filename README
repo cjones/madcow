@@ -1,127 +1,135 @@
+SYNOPSIS
 
-Madcow is an extensible IRC/SILC/AIM bot written in Python. It is fully
-customizable and has a simple API for creating modules that extend its
-functionality. Madocw ships with modules that emulate classic Infobot behavior
-and much more.
-
+    Madcow is an extensible IRC/SILC/AIM bot written in Python. It is
+    fully customizable and has a simple API for creating modules that
+    extend its functionality. Madocw ships with modules that emulate
+    classic Infobot behavior and much more.
 
 REQUIREMENTS
 
-	* python 2.4 or higher
+    * python 2.4 or higher
 
-	Madcow can use a variety of protocol formats.  Depending on which you choose,
-	you will need a third-party library to handle the protocol.  Most of these are
-	available from your operating systems's default package/ports handler.
+    Madcow can use a variety of protocol formats.  Depending on which
+    you choose, you will need a third-party library to handle the
+    protocol.  Most of these are available from your operating systems's
+    default package/ports handler.
 
-	IRC  - irc uses python-irclib, which ships with madcow.
-	SILC - pysilc (http://cheeseshop.python.org/pypi/pysilc/0.4)
-	AIM  - twisted (http://twistedmatrix.com/trac/wiki/TwistedProjects)
+    IRC  - irc uses python-irclib, which ships with madcow.
+    SILC - pysilc (http://cheeseshop.python.org/pypi/pysilc/0.4)
+    AIM  - twisted (http://twistedmatrix.com/trac/wiki/TwistedProjects)
 
-	madcow also comes with a suite of plugins that provide functionality.  Most
-	of these use the core Python library, however a few need third-party libraries.
-	If a plugin does not have the required components it will be disabled at runtime.
+    Madcow also comes with a suite of plugins that provide
+    functionality.  Most of these use the core Python library, however a
+    few need third-party libraries.  If a plugin does not have the
+    required components it will be disabled at runtime.  You can find a
+    description of each plugin in madcow.ini-sample
 
-	You can find a description of each plugin in madcow.ini-sample
-
-	urban.py: requires SOAPpy
-	memebot.py: requeires sqlobject, pysqlite
-
+    urban.py: requires SOAPpy
+    memebot.py: requeires sqlobject, pysqlite
 
 WEB FRONTEND FOR MEMEBOT
 
-	The builtin module memebot.py will track URLs posted to various channels. If
-	you wish, you can enable a web frontend to display these links.  An example
-	can be found here: http://memebot.gruntle.org/
+    The builtin module memebot.py will track URLs posted to various
+    channels. If you wish, you can enable a web frontend to display
+    these links.  An example can be found here:
+    http://memebot.gruntle.org/
 
-	Please see README.django for full instructions on enabling this.
-
+    Please see README.django for full instructions on enabling this.
 
 BASIC USAGE
 
-	Copy madcow.ini-sample to madcow.ini, edit options, and run:
+    Copy madcow.ini-sample to madcow.ini, edit options, and run:
 
-	$ ./madcow.py
+    $ ./madcow.py
 
-	By default, the bot will use IRC. If you wish to use SILC or AIM, uncomment
-	the appropriate line in madcow.ini. You can also specify a config file to
-	use on the command line (./madcow.py --help for full list of options).
+    By default, the bot will use IRC. If you wish to use SILC or AIM,
+    uncomment the appropriate line in madcow.ini. You can also specify a
+    config file to use on the command line (./madcow.py --help for full
+    list of options).
 
-	If you use this script to run multiple bots, you may wish to change the
-	"dbNamespace" directive in config. This will keep your database files separate
-	for each bot. If you do not change this, they will share the same data.
+    If you use this script to run multiple bots, you may wish to change
+    the "dbNamespace" directive in config. This will keep your database
+    files separate for each bot. If you do not change this, they will
+    share the same data.
 
-	If you wish to test the bots behavior before deploying, run:
+    If you wish to test the bots behavior before deploying, run:
 
-	$ ./madcow.py -p cli
+    $ ./madcow.py -p cli
 
-	NOTE: When deployed in a public chat channel (such as IRC or SILC), the
-	bot will only respond to most queries when it is addressed. This consists
-	of appending the bot's given nickname in the commandline.  For example:
+    NOTE: When deployed in a public chat channel (such as IRC or SILC),
+    the bot will only respond to most queries when it is addressed. This
+    consists of appending the bot's given nickname in the commandline.
+    For example:
 
-	madcow: quote aapl
-	madcow - translate from english to german: this beer is really good
+    madcow: quote aapl
+    madcow - translate from english to german: this beer is really good
 
-	If you wish to enable the "grufti response" module, you must copy
-	grufti-responses.txt-sample to grufti-responses.txt.  This is a database
-	of hard-coded match/response directives. It will choose a random reply
-	whenever it sees a match. It does not need to be addressed.  By default
-	the matchfile comes with a set of Zippy quotes.  You can delete these and
-	add your own.
-
+    If you wish to enable the "grufti response" module, you must copy
+    grufti-responses.txt-sample to grufti-responses.txt.  This is a
+    database of hard-coded match/response directives. It will choose a
+    random reply whenever it sees a match. It does not need to be
+    addressed.  By default the matchfile comes with a set of Zippy and
+    Simpsons quotes.  You can delete these and add your own if you wish,
+    or just symlink the provided response file.  See README.grufti for
+    more detail on the syntax and advanced features.
 
 WRITING EXTENSIONS
 
-	In the modules/ dir, copy template.py to your new module.
-	Edit the various options in the match() class and make the
-	response() function return desired output.  See existing modules
-	for example usage. The file must end in .py and exist in the modules
-	subdirectory to load.
+    In the modules/ dir, copy template.py to your new module.  Edit the
+    various options in the MatchObject() class and make the response()
+    function return desired output.  See existing modules for example
+    usage. The file must end in .py and exist in the modules
+    subdirectory to load.
 
-	If you write something cool and want to share, send it to cjones@insub.org.
-
+    If you write something cool and want to share, send it to
+    cjones@gruntle.org.
 
 WRITING OUTPUT PLUGINS
 
-	If you wish to write support for a different protocol, this is done
-	by making a new file with the name of the protocol you wish to support,
-	and giving it a class called OutputHandler.  It *must* subclass madcow.MadCow.
+    If you wish to write support for a different protocol, this is done
+    by making a new file with the name of the protocol you wish to
+    support inside the protocols directory, and giving it a class called
+    OutputHandler.  It *must* subclass madcow.MadCow.
 
-	The new class must have a start() method defined and the __init__ method 
-	must accept certain parameters. Please see existing protocols for an example.
-	Currently we have: cli.py, irc.py, silc.py and aim.py.
+    The new class must have a start() method defined and the __init__
+    method must accept certain parameters. Please see existing protocols
+    for an example.  Currently we have: cli.py, irc.py, silc.py and
+    aim.py.
 
-	If you are developing for a new protocol you may request assistance from me
-	at cjones@insub.org.
-
+    If you are developing for a new protocol you may request assistance
+    from me at cjones@insub.org.
 
 LICENSE
 
-	Copyright (C) 2007 Christopher Jones <cjones@insub.org>
+    Copyright (C) 2007 Christopher Jones <cjones@insub.org>
 
-	This program is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License
-	as published by the Free Software Foundation; either version 2
-	of the License, or (at your option) any later version.
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
-
-	(see LICENSE for full details)
-
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+    02110-1301, USA
 
 CONTRIBUTORS
 
-	This release has module contributions from the following people:
+    This release has module contributions from the following people:
 
-	- toast: silcplugin, slutcheck
-	- twid: woot
-	- killfile: bbcnews
+    - toast: silcplugin, slutcheck, jinx
+    - twid: woot
+    - killfile: bbcnews
 
-	Additionally, Mark Pilgrim's rssparser.py is included in its unmodified
-	form per the GPL.
+    Some third-party tools have been included for convenience, such as
+    Mark Pilgrim's RSS parser and Joel Rosdahl's irclib.
+
+CONTACT
+
+    You may reach me by e-mail at cjones@gruntle.org or AIM as
+    seejayunderscore.
