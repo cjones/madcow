@@ -7,7 +7,7 @@ This fuction is designed to serach the BBC News website and report the number on
 import sys
 import re
 import urllib
-from include import rssparser
+from include import rssparser, utils
 import os
 
 
@@ -44,8 +44,8 @@ class MatchObject(object):
             doc = urllib.urlopen(url).read()            
             feed = rssparser.parse(url)
             rurl = feed['items'][res]['link']
-            rtitle = feed['items'][res]['title']
-            rsum = feed['items'][res]['description']
+            rtitle = utils.stripHTML(feed['items'][res]['title'])
+            rsum = utils.stripHTML(feed['items'][res]['description'])
             
             
             return rurl + "\r" + rtitle + "\r" + rsum + "\r"
