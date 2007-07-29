@@ -109,6 +109,10 @@ class Madcow(object):
             if modName in self.ignoreModules:
                 continue
 
+            if modName == 'admin' and self.config.main.module not in ['irc', 'silcplugin']:
+                logging.warn('[MOD] Disabling admin module: for IRC or SILC only')
+                continue
+
             if modName in disabled:
                 logging.warn('[MOD] Skipping %s because it is disabled in config' % modName)
                 continue
@@ -317,6 +321,7 @@ def main():
     # load specified protocol
     if opts.protocol:
         protocol = opts.protocol
+        config.main.module = protocol
     else:
         protocol = config.main.module
 
