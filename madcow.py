@@ -109,7 +109,7 @@ class Madcow(object):
             if modName in self.ignoreModules:
                 continue
 
-            if modName == 'admin' and self.config.main.module not in ['irc', 'silcplugin']:
+            if modName == 'ircadmin' and self.config.main.module not in ['irc', 'silcplugin']:
                 logging.warn('[MOD] Disabling admin module: for IRC or SILC only')
                 continue
 

@@ -90,7 +90,13 @@ dbNamespace=madcow
 [admin]
 enabled=yes
 allowRegistration=yes
-defaultFlags=a
+;
+; default flags for new users
+;
+; a = admin
+; r = registered
+;
+defaultFlags=r
 
 ; connection settings for IRC plugin. should be fairly obvious
 ; channels is a comma-delimited list of channels to join
