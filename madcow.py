@@ -76,6 +76,7 @@ class Madcow(object):
         # dynamically generated content
         self.usageLines = []
         self.modules = {}
+        self.admin = {}
         self.loadModules()
 
     def start(self):
@@ -130,6 +131,14 @@ class Madcow(object):
 
                 logging.info('[MOD] Loaded module %s' % modName)
                 self.modules[modName] = obj
+
+                try:
+                    Admin = getattr(module, 'Admin')
+                    obj = Admin()
+                    logging.info('[MOD] Registering Admin functions for %s' % modName)
+                    self.admin[modName] = obj
+                except:
+                    pass
 
             except Exception, e:
                 logging.warn("[MOD] WARN: Couldn't load module %s: %s" % (modName, e))

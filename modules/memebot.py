@@ -53,6 +53,10 @@ class comments(SQLObject):
     url = ForeignKey('url')
 
 
+class Admin(object):
+    pass
+
+
 class MatchObject(object):
 
     def __init__(self, ns='madcow', config=None, dir=None):
