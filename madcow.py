@@ -28,6 +28,7 @@ import re
 import threading
 import time
 import logging
+from include.authlib import AuthLib
 
 
 class Request(object):
@@ -50,6 +51,123 @@ class Request(object):
         return None
 
 
+class User(object):
+    """This class represents a logged in user"""
+
+    def __init__(self, user, flags):
+        self.user = user
+        self.flags = flags
+        self.loggedIn = int(time.time())
+
+    def isAdmin(self):
+        return 'a' in self.flags
+
+    def isRegistered(self):
+        if 'a' in self.flags or 'r' in self.flags:
+            return True
+        else:
+            return False
+
+    def __str__(self):
+        return '<User %s>' % self.user
+
+    def __repr__(self):
+        return str(self)
+
+
+class Admin(object):
+    """Class to handle admin interface"""
+
+    _reRegister = re.compile('^\s*register\s+(\S+)\s*$', re.I)
+    _reAuth = re.compile('^\s*(?:log[io]n|auth)\s+(\S+)\s*$', re.I)
+    _reFist = re.compile('^\s*fist\s+(\S+)\s+(.+)$', re.I)
+    _reHelp = re.compile('^\s*admin\s+help\s*$', re.I)
+    _reLogout = re.compile('^\s*log(?:out|off)\s*$', re.I)
+
+    _usage =  'admin help - this screen\n'
+    _usage += 'register <pass> - register with bot\n'
+    _usage += 'login <pass> - login to bot\n'
+    _usage += 'fist <chan> <msg> - make bot say something in channel\n'
+    _usage += 'logout - log out of bot'
+
+    def __init__(self, config, ns, dir):
+        self.ns = ns
+        self.dir = dir
+        self.config = config
+
+        self.authlib = AuthLib('%s/data/db-%s-passwd' % (self.dir, self.ns))
+        self.users = {}
+        self.modules = {}
+
+    def parse(self, req):
+        if self.config.admin.enabled is not True:
+            return
+
+        nick = req.nick
+        command = req.message
+        response = None
+
+        # register
+        try:
+            passwd = Admin._reRegister.search(command).group(1)
+            return self.registerUser(nick, passwd)
+        except:
+            pass
+
+        # log in
+        try:
+            passwd = Admin._reAuth.search(command).group(1)
+            return self.authenticateUser(nick, passwd)
+        except:
+            pass
+
+        # don't pass this point unless we are logged in
+        try:
+            user = self.users[nick]
+        except:
+            return
+
+        # logout
+        if Admin._reLogout.search(command):
+            del self.users[nick]
+            return 'You are now logged out.'
+
+        # help
+        if Admin._reHelp.search(command):
+            return Admin._usage
+
+        # admin functions
+        if user.isAdmin():
+
+            # be the puppetmaster
+            try:
+                channel, message = Admin._reFist.search(command).groups()
+                req.sendTo = channel
+                return message
+            except:
+                pass
+
+    def registerUser(self, user, passwd):
+        if self.config.admin.allowRegistration is True:
+            flags = self.config.admin.defaultFlags
+            if flags is None:
+                flags = 'r'
+
+            self.authlib.add_user(user, passwd, flags)
+            return "You are now registered, try logging in: login <pass>"
+        else:
+            return "Registration is disabled."
+
+    def authenticateUser(self, user, passwd):
+        status = self.authlib.verify_user(user, passwd)
+
+        if status is False:
+            return 'Nice try.. notifying FBI'
+        else:
+            self.users[user] = User(user, self.authlib.get_user_data(user))
+            return 'You are now logged in. Message me "admin help" for help'
+
+
 class Madcow(object):
     """
     Core bot handler
@@ -64,6 +182,7 @@ class Madcow(object):
         self.ignoreModules = [ '__init__', 'template' ]
         self.ignoreModules.append('tac')       # moved to grufti framework in 1.0.7
         self.ignoreModules.append('bullshitr') # moved to grufti framework in 1.0.7
+        self.ignoreModules.append('ircadmin')  # moved to core bot
         self.moduleDir = self.dir + '/modules'
         self.outputLock = threading.RLock()
 
@@ -73,10 +192,11 @@ class Madcow(object):
         else:
             self.ignoreList = []
 
+        self.admin = Admin(config=self.config, ns=self.ns, dir=self.dir)
+
         # dynamically generated content
         self.usageLines = []
         self.modules = {}
-        self.admin = {}
         self.loadModules()
 
     def start(self):
@@ -136,7 +256,7 @@ class Madcow(object):
                     Admin = getattr(module, 'Admin')
                     obj = Admin()
                     logging.info('[MOD] Registering Admin functions for %s' % modName)
-                    self.admin[modName] = obj
+                    self.admin.modules[modName] = obj
                 except:
                     pass
 
@@ -210,6 +330,13 @@ class Madcow(object):
         if req.addressed is True and req.message.lower() == 'help':
             self.output(self.usage(), req)
             return
+
+        # pass through admin
+        if req.private is True:
+            response = self.admin.parse(req)
+            if response is not None:
+                self.output(response, req)
+                return
 
         for module in self.modules.values():
             if module.requireAddressing and not req.addressed:
