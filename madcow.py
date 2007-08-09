@@ -90,17 +90,15 @@ class Admin(object):
     _usage += 'fist <chan> <msg> - make bot say something in channel\n'
     _usage += 'logout - log out of bot'
 
-    def __init__(self, config, ns, dir):
-        self.ns = ns
-        self.dir = dir
-        self.config = config
-
-        self.authlib = AuthLib('%s/data/db-%s-passwd' % (self.dir, self.ns))
+    def __init__(self, bot):
+        self.bot = bot
+        self.authlib = AuthLib('%s/data/db-%s-passwd' % (bot.dir, bot.ns))
         self.users = {}
         self.modules = {}
+        self.usageLines = Admin._usage.splitlines()
 
     def parse(self, req):
-        if self.config.admin.enabled is not True:
+        if self.bot.config.admin.enabled is not True:
             return
 
         nick = req.nick
@@ -134,7 +132,7 @@ class Admin(object):
 
         # help
         if Admin._reHelp.search(command):
-            return Admin._usage
+            return '\n'.join(self.usageLines)
 
         # admin functions
         if user.isAdmin():
@@ -148,8 +146,8 @@ class Admin(object):
                 pass
 
     def registerUser(self, user, passwd):
-        if self.config.admin.allowRegistration is True:
-            flags = self.config.admin.defaultFlags
+        if self.bot.config.admin.allowRegistration is True:
+            flags = self.bot.config.admin.defaultFlags
             if flags is None:
                 flags = 'r'
 
@@ -192,7 +190,7 @@ class Madcow(object):
         else:
             self.ignoreList = []
 
-        self.admin = Admin(config=self.config, ns=self.ns, dir=self.dir)
+        self.admin = Admin(self)
 
         # dynamically generated content
         self.usageLines = []
