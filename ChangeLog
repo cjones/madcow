@@ -6,6 +6,8 @@
     * add ignore list functionality
     * upgrade pyfiglet and pycolorlib extensions
     * add grufti documentation
+    * FIXED broken modules define, lyrics
+    * FIXED totally broken mirc color implementation
 
 1.1.0: Fri Jul 27 14:07:06 PDT 2007
     * a whole bunch of much-needed code cleanup and minor bugfixes.
