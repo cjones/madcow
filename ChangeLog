@@ -1,4 +1,4 @@
-1.1.1: Mon Aug 13 15:30:36 PDT 2007
+1.1.1: Mon Oct 15 20:12:17 PDT 2007
     * add authentication system for simple admin functions
     * change order of changelog :)
     * bbcnews when called without an argument will show headline
