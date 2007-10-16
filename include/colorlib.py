@@ -113,7 +113,7 @@ class ColorLib(object):
             raise UnknownColor, 'known colors: %s' % ', '.self.colors
         return color
 
-    def getColor(self, fg=None, bg=None, type=None, nextChar=None):
+    def getColor(self, fg=None, bg=None, type=None, char=None):
         if type is None: type = self.type
         if fg is None and bg is None: return self.reset()
         if fg is not None: fg = self.colorMap[self._normalizeColorName(fg)][type]
@@ -145,12 +145,8 @@ class ColorLib(object):
                 codes.append(bg)
 
             out = '\x03%s' % ','.join(codes)
-            if nextChar is None:
+            if char.isdigit():
                 out += '\x16\x16'
-            else:
-                nc = ord(nextChar)
-                if ((nc >= 48 and nc <= 57) or nc == 44):
-                    out += '\x16\x16'
 
             return out
 
@@ -187,16 +183,11 @@ class ColorLib(object):
         for line in text.splitlines():
             i = 0
             for char in line:
-                try:
-                    nextChar = line[i + 1]
-                except:
-                    nextChar = None
-
                 if colorWhitespace is False and char.isspace():
                     output += char
                 else:
                     color = colmap[(offset + i) % len(colmap)]
-                    output += self.getColor(fg=color, bg=bg, nextChar=nextChar) + char + self.reset()
+                    output += self.getColor(fg=color, bg=bg, char=char) + char
 
                 i += 1
 
