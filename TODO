@@ -5,6 +5,11 @@ make any improvements to the bot, feel free to share patches with me by
 emailing them to cjones@gruntle.org.
 ------------------------------------------------------------------------
 
+*** broken modules
+
+- sing
+- colors don't terminate properly
+
 *** irc module
 
 - identify with nickserv in irc module

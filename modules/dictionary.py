@@ -21,11 +21,9 @@ class MatchObject(object):
         self.wrap = True
         self.help = 'define <word/phrase> [#] - get a definition from merriam-webster'
 
-        self.defLineA = re.compile('<div class="word_definition">(.*?)</div>', re.DOTALL)
-        self.defLineB = re.compile('^(<b>.+)$', re.MULTILINE)
-        self.newline = re.compile('<br>')
-        self.hasJS = re.compile('javascript')
-        self.header = re.compile('^.*?:\s+')
+        self.re_defs = re.compile(r'<div class="defs">(.*?)</div>', re.DOTALL)
+        self.re_def_break = re.compile(r'<span class="sense_break"/>')
+        self.header = re.compile('^\s*\d+\w?\s*:\xa0\s*')
 
     def response(self, **kwargs):
         nick = kwargs['nick']
@@ -40,12 +38,15 @@ class MatchObject(object):
 
             url = 'http://www.m-w.com/dictionary/' + word
             doc = urllib.urlopen(url).read()
-            doc = self.defLineA.search(doc).group(1)
-            doc = self.defLineB.search(doc).group(1)
-            defs = [utils.stripHTML(d) for d in self.newline.split(doc)]
+            defs = self.re_defs.search(doc).group(1)
+            defs = self.re_def_break.split(defs)
+            defs.pop(0)
+            defs = [utils.stripHTML(d) for d in defs]
             defs = [self.header.sub('', definition) for definition in defs]
 
-            if num > len(defs): num = 1
+            if num > len(defs):
+                num = 1
+
             return '%s: [%s/%s] %s' % (nick, num, len(defs), defs[num - 1])
 
         except Exception, e:
