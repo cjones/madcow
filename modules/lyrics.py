@@ -8,6 +8,7 @@ import sys
 import re
 import random
 import urllib, urllib2, cookielib
+from include import utils
 
 
 class MatchObject(object):
@@ -18,9 +19,10 @@ class MatchObject(object):
     reRows = re.compile('<tr.*?>(.*?)</tr>', re.DOTALL)
     reSongLink = re.compile('href="(.*?)".*?>.*?</b>(.*?)</a>')
     reArtistDelim = re.compile('\s*-\s*')
-    reLyrics = re.compile('<div id="content".*?>(.*?)</div>', re.DOTALL)
+    reLyrics = re.compile('<div id="content".*?>.*?<div.*?>.*?</div>(.*?)</div>', re.DOTALL)
     reVerseBreak = re.compile('\s*<br>\s*<br>\s*')
     reLineBreak = re.compile('\s*<br>\s*')
+    reGetArtist = re.compile(r'<title>(.*?)\s+\|')
 
     def __init__(self, config=None, ns='madcow', dir=None):
         self.enabled = True
@@ -124,7 +126,17 @@ class MatchObject(object):
                 lyrics[i] = line
 
             lyrics = ' '.join(lyrics)
-            return '%s: %s' % (title, lyrics)
+
+            try:
+                artist = MatchObject.reGetArtist.search(page).group(1)
+                if artist.lower() not in title.lower():
+                    title = '%s - %s' % (artist, title)
+            except:
+                pass
+
+            result = '%s: %s' % (title, lyrics)
+            result = utils.stripHTML(result)
+            return result
 
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)

@@ -5,10 +5,6 @@ make any improvements to the bot, feel free to share patches with me by
 emailing them to cjones@gruntle.org.
 ------------------------------------------------------------------------
 
-*** broken modules
-
-- sing
-- colors don't terminate properly
 
 *** irc module
 
@@ -34,4 +30,5 @@ TODO: (feature requests)
 - option to create a FIFO unix file that you can pipe to to fist
   madcow.. maybe
 - chatroom support for aim/oscar module
+- colors don't terminate properly
 
