@@ -22,8 +22,9 @@ class MatchObject(object):
         self.help = 'define <word/phrase> [#] - get a definition from merriam-webster'
 
         self.re_defs = re.compile(r'<div class="defs">(.*?)</div>', re.DOTALL)
+        self.re_newline = re.compile(r'[\r\n]+')
         self.re_def_break = re.compile(r'<span class="sense_break"/>')
-        self.header = re.compile('^\s*\d+\w?\s*:\xa0\s*')
+        self.header = re.compile('^.*?:\xa0')
 
     def response(self, **kwargs):
         nick = kwargs['nick']
@@ -39,8 +40,10 @@ class MatchObject(object):
             url = 'http://www.m-w.com/dictionary/' + word
             doc = urllib.urlopen(url).read()
             defs = self.re_defs.search(doc).group(1)
+            defs = self.re_newline.sub('', defs)
             defs = self.re_def_break.split(defs)
-            defs.pop(0)
+            if len(defs) > 1:
+                defs.pop(0)
             defs = [utils.stripHTML(d) for d in defs]
             defs = [self.header.sub('', definition) for definition in defs]
 
