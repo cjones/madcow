@@ -8,6 +8,7 @@ import os
 import cookielib
 import urllib, urllib2
 from include import utils
+from include.BeautifulSoup import BeautifulSoup
 
 
 class WikiPedia(object):
@@ -41,6 +42,12 @@ class WikiPedia(object):
         req.add_header('Referer', WikiPedia.BASEURL)
         data = self.opener.open(req).read()
         try:
+            soup = BeautifulSoup(data)
+            [table.extract() for table in soup.findAll('table')]
+            [span.extract() for span in soup.findAll('span', attrs={
+                'id': 'coordinates'})]
+
+            data = str(soup)
             self.title = WikiPedia.parse_title.search(data).group(1)
             content = WikiPedia.content.search(data).group(1)
             content = WikiPedia.dablink.sub(' ', content)
