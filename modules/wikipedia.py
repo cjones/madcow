@@ -94,7 +94,7 @@ class MatchObject(object):
         args = kwargs['args']
 
         try:
-            wp = WikiPedia(query=args, opener=self.opener)
+            wp = WikiPedia(query=args[0], opener=self.opener)
             return wp.summary
 
         except Exception, e:
