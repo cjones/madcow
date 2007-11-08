@@ -1,5 +1,9 @@
+#!/usr/bin/env python
+
 """Library to parse WikiPedia pages"""
 
+import sys
+from optparse import OptionParser
 from BeautifulSoup import BeautifulSoup
 import urllib, urllib2, cookielib
 import re
@@ -16,6 +20,8 @@ class WikiParser(object):
     BASEURL = 'http://en.wikipedia.org/'
     ADVERT = ' - Wikipedia, the free encyclopedia'
     SUMMARY_SIZE = 400
+    ERROR = 'No page with that title exists'
+    SAMPLE_SIZE = 16 * 1024
 
     # precompiled regex's
     UTF8 = re.compile(r'[\x80-\xff]')
@@ -41,7 +47,7 @@ class WikiParser(object):
         req = urllib2.Request(url, urllib.urlencode(opts))
         req.add_header('Referer', WikiParser.BASEURL)
         res = opener.open(req)
-        page = res.read()
+        page = res.read(WikiParser.SAMPLE_SIZE)
 
         # remove high ascii from final page, this is going out to IRC
         page = WikiParser.UTF8.sub('', page)
@@ -90,12 +96,34 @@ class WikiParser(object):
         content = content.strip()                         # strip whitespace
         self.content = content
 
+        # search error
+        if self.title == 'Search' and WikiParser.ERROR in self.content:
+            self.summary = 'No results found for "%s"' % self.query
+            return
+
         # generate summary by adding as many sentences as possible before limit
         summary = '%s -' % self.title
         for sentence in WikiParser.SENTENCE.findall(self.content):
             if len(summary) + 1 + len(sentence) > WikiParser.SUMMARY_SIZE:
                 break
             summary += ' %s' % sentence
+
         self.summary = summary
 
+    def __str__(self):
+        return '<WikiParser %s>' % self.query
 
+    __repr__ = __str__
+
+
+def main():
+    op = OptionParser(version=__version__, usage='%prog [query]')
+    opts, args = op.parse_args()
+
+    wp = WikiParser(query=args)
+    print wp.summary
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
