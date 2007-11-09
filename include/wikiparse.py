@@ -7,8 +7,9 @@ from optparse import OptionParser
 from BeautifulSoup import BeautifulSoup
 import urllib, urllib2, cookielib
 import re
+import os
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
 __license__ = 'GPL'
 
@@ -48,6 +49,7 @@ class WikiParser(object):
         req.add_header('Referer', WikiParser.BASEURL)
         res = opener.open(req)
         page = res.read(WikiParser.SAMPLE_SIZE)
+        self.doc = page
 
         # remove high ascii from final page, this is going out to IRC
         page = WikiParser.UTF8.sub('', page)
@@ -57,6 +59,25 @@ class WikiParser(object):
 
         # extract title
         self.title = soup.title.string.replace(WikiParser.ADVERT, '')
+
+        # check if this is a disambiguation page, if so construct special page
+        # XXX there isn't a consistent style guide, so we just try to do the
+        # most common format (ordered list of links). if this fails, return
+        # a friendly failure for now
+        if soup.find('div', attrs={'id': 'disambig'}):
+            try:
+                summary = '%s (Disambiguation) - ' % self.title
+                for link in soup.find('ul').findAll('a'):
+                    title = str(link['title']).strip()
+                    if len(summary) + len(title) + 2 > WikiParser.SUMMARY_SIZE:
+                        break
+                    if not summary.endswith(' '):
+                        summary += ', '
+                    summary += title
+                self.summary = summary
+            except:
+                self.summary = 'Fancy, unsupported disambiguation page!'
+            return
 
         # remove all tabular data/sidebars
         for table in soup.findAll('table'):
@@ -109,6 +130,7 @@ class WikiParser(object):
             summary += ' %s' % sentence
 
         self.summary = summary
+        self.soup = soup
 
     def __str__(self):
         return '<WikiParser %s>' % self.query
@@ -116,14 +138,18 @@ class WikiParser(object):
     __repr__ = __str__
 
 
-def main():
-    op = OptionParser(version=__version__, usage='%prog [query]')
-    opts, args = op.parse_args()
-
-    wp = WikiParser(query=args)
-    print wp.summary
-
-    return 0
+def test(query, test_file='test.html'):
+    wp = WikiParser(query=query)
+    if os.path.exists(test_file):
+        os.remove(test_file)
+    fi = open(test_file, 'wb')
+    try:
+        fi.write(str(wp.soup))
+    finally:
+        fi.close()
+    print 'wrote %s' % test_file
 
 if __name__ == '__main__':
-    sys.exit(main())
+    op = OptionParser(version=__version__, usage='%prog [query]')
+    print WikiParser(op.parse_args()[1]).summary
+    sys.exit(0)
