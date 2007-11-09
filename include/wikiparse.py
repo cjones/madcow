@@ -32,6 +32,7 @@ class WikiParser(object):
     PARENS = re.compile(r'\(.*?\)', re.DOTALL)
     WHITESPACE = re.compile(r'[ \t\r\n]+')
     SENTENCE = re.compile(r'(.*?\.)\s+', re.DOTALL)
+    NBSP_ENTITY = re.compile(r'&#160;')
 
     def __init__(self, query):
         if isinstance(query, (list, tuple)):
@@ -50,6 +51,11 @@ class WikiParser(object):
         res = opener.open(req)
         page = res.read(WikiParser.SAMPLE_SIZE)
         self.doc = page
+
+        # XXX: &#160; entitie's confused SGMLParser on some systems that
+        # seem to have broken unicode support. just convert these to spaces
+        # for less brokenness
+        page = WikiParser.NBSP_ENTITY.sub(' ', page)
 
         # remove high ascii from final page, this is going out to IRC
         page = WikiParser.UTF8.sub('', page)
