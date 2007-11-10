@@ -1,28 +1,24 @@
-#!/usr/bin/env python
-
 """Library to parse WikiPedia pages"""
 
-import sys
-from optparse import OptionParser
 from BeautifulSoup import BeautifulSoup
 import urllib, urllib2, cookielib
 import re
-import os
 import utils
 
 __version__ = '0.3'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
+__author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 
 
 class WikiParser(object):
     """Class that represents a WikiPedia page"""
+
     # constants
     AGENT = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
     BASEURL = 'http://en.wikipedia.org/'
     ADVERT = ' - Wikipedia, the free encyclopedia'
-    SUMMARY_SIZE = 400
     ERROR = 'No page with that title exists'
+    SUMMARY_SIZE = 400
     SAMPLE_SIZE = 32 * 1024
 
     # precompiled regex's
@@ -51,11 +47,10 @@ class WikiParser(object):
         req.add_header('Referer', WikiParser.BASEURL)
         res = opener.open(req)
         page = res.read(WikiParser.SAMPLE_SIZE)
-        self.doc = page
 
-        # XXX: &#160; entitie's confused SGMLParser on some systems that
+        # XXX: &#160; entities confused SGMLParser on some systems that
         # seem to have broken unicode support. just convert these to spaces
-        # for less brokenness
+        # for less brokeness
         page = WikiParser.NBSP_ENTITY.sub(' ', page)
 
         # remove high ascii from final page, this is going out to IRC
@@ -123,41 +118,16 @@ class WikiParser(object):
         content = WikiParser.WHITESPACE.sub(' ', content) # compress whitespace
         content = WikiParser.FIX_PUNC.sub(r'\1', content) # fix punctuation
         content = content.strip()                         # strip whitespace
-        self.content = content
 
         # search error
-        if self.title == 'Search' and WikiParser.ERROR in self.content:
+        if self.title == 'Search' and WikiParser.ERROR in content:
             self.summary = 'No results found for "%s"' % self.query
             return
 
         # generate summary by adding as many sentences as possible before limit
         summary = '%s -' % self.title
-        for sentence in WikiParser.SENTENCE.findall(self.content):
+        for sentence in WikiParser.SENTENCE.findall(content):
             if len(summary) + 1 + len(sentence) > WikiParser.SUMMARY_SIZE:
                 break
             summary += ' %s' % sentence
-
         self.summary = summary
-        self.soup = soup
-
-    def __str__(self):
-        return '<WikiParser %s>' % self.query
-
-    __repr__ = __str__
-
-
-def test(query, test_file='test.html'):
-    wp = WikiParser(query=query)
-    if os.path.exists(test_file):
-        os.remove(test_file)
-    fi = open(test_file, 'wb')
-    try:
-        fi.write(str(wp.soup))
-    finally:
-        fi.close()
-    print 'wrote %s' % test_file
-
-if __name__ == '__main__':
-    op = OptionParser(version=__version__, usage='%prog [query]')
-    print WikiParser(op.parse_args()[1]).summary
-    sys.exit(0)
