@@ -8,8 +8,9 @@ from BeautifulSoup import BeautifulSoup
 import urllib, urllib2, cookielib
 import re
 import os
+import utils
 
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
 __license__ = 'GPL'
 
@@ -22,17 +23,17 @@ class WikiParser(object):
     ADVERT = ' - Wikipedia, the free encyclopedia'
     SUMMARY_SIZE = 400
     ERROR = 'No page with that title exists'
-    SAMPLE_SIZE = 16 * 1024
+    SAMPLE_SIZE = 32 * 1024
 
     # precompiled regex's
     UTF8 = re.compile(r'[\x80-\xff]')
-    MARKUP = re.compile(r'<.*?>', re.DOTALL)
     CITATIONS = re.compile(r'\[.*?\]', re.DOTALL)
     AUDIO = re.compile(r'audiolink', re.I)
     PARENS = re.compile(r'\(.*?\)', re.DOTALL)
     WHITESPACE = re.compile(r'[ \t\r\n]+')
     SENTENCE = re.compile(r'(.*?\.)\s+', re.DOTALL)
     NBSP_ENTITY = re.compile(r'&#160;')
+    FIX_PUNC = re.compile(r'\s+([,;:])')
 
     def __init__(self, query):
         if isinstance(query, (list, tuple)):
@@ -116,10 +117,11 @@ class WikiParser(object):
         content = ' '.join(content)
 
         # clean up rendered text
-        content = WikiParser.MARKUP.sub('', content)      # strip HTML
+        content = utils.stripHTML(content)                # strip markup
         content = WikiParser.CITATIONS.sub('', content)   # remove citations
         content = WikiParser.PARENS.sub('', content)      # remove parenthesis
         content = WikiParser.WHITESPACE.sub(' ', content) # compress whitespace
+        content = WikiParser.FIX_PUNC.sub(r'\1', content) # fix punctuation
         content = content.strip()                         # strip whitespace
         self.content = content
 
