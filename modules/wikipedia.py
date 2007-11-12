@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """Plugin to return summary from WikiPedia"""
 
 import re
@@ -137,3 +139,7 @@ class MatchObject(object):
         except Exception, e:
             return '%s: problem with query: %s' % (kwargs['nick'], e)
 
+if __name__ == '__main__':
+    import os, sys
+    print MatchObject().response(args=sys.argv[1:], nick=os.environ['USER'])
+    sys.exit(0)
