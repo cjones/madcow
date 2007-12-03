@@ -32,8 +32,8 @@ class MatchObject(object):
         self.multipleResults = re.compile('<td class="sortC"><a href="([^>]+)">([^<]+)')
         self.baseURL = 'http://www.wunderground.com'
 
-        self.tempF = re.compile('<nobr><b>([0-9.]+)</b>&nbsp;&#176;F</nobr>')
-        self.tempC = re.compile('<nobr><b>([0-9.]+)</b>&nbsp;&#176;C</nobr>')
+        self.tempF = re.compile('<nobr><b>(-?[0-9.]+)</b>&nbsp;&#176;F</nobr>')
+        self.tempC = re.compile('<nobr><b>(-?[0-9.]+)</b>&nbsp;&#176;C</nobr>')
         self.skies = re.compile('<div id="b" style="font-size: 14px;">(.*?)</div>')
         self.cityName = re.compile('<h1>(.*?)</h1>')
         self.humidity = re.compile('pwsvariable="humidity".*?><nobr><b>([0-9.]+%)</b></nobr></span></td>')
