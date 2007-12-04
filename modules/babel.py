@@ -12,7 +12,7 @@ import os
 
 class MatchObject(object):
 
-    reTranslated = re.compile('<td bgcolor=white class=s><div style=padding:10px;>(.*?)</div></t')
+    reTranslated = re.compile('<td bgcolor=white class=s><div style=padding:10px;>(.*?)</div></t', re.DOTALL)
     languages = {
         'chinese-simp': 'zh',
         'chinese-trad': 'zt',
