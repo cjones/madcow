@@ -39,7 +39,7 @@ class MatchObject(object):
                 'random'    : 'http://www.chiliahedron.com/xkcdb/?random',
                 'bynum'        : 'http://www.chiliahedron.com/xkcdb/?num',
                 'search'    : 'http://www.chiliahedron.com/xkcdb/?search=query&show=100',
-                'entries'    : re.compile('<div class="quote_output">(.*?)</div>', re.DOTALL),
+                'entries'    : re.compile('<div class="quote_output">\s*(.*?)</div>', re.DOTALL),
             },
         }
 
