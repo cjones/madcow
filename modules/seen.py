@@ -26,12 +26,16 @@ class MatchObject(object):
         self.file = dir + '/data/db-%s-seen' % ns
         self.seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)
 
+    def dbm(self):
+        return anydbm.open(self.file, 'c', 0640)
+
     def get(self, user):
         user = user.lower()
-        db = anydbm.open(self.file, 'c', 0640)
+        db = self.dbm()
 
         try:
             packed = db[user]
+            db.close()
             channel, last, message = packed.split('/', 2)
 
             seconds = int(time.time() - float(last))
@@ -55,7 +59,7 @@ class MatchObject(object):
 
     def set(self, nick, channel, message):
         packed = '%s/%s/%s' % (channel, time.time(), message)
-        db = anydbm.open(self.file, 'c', 0640)
+        db = self.dbm()
         db[nick.lower()] = packed
         db.close()
 

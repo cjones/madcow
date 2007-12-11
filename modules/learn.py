@@ -28,7 +28,8 @@ class MatchObject(object):
         return dbfile
 
     def dbm(self, db):
-        return anydbm.open(self.dbfile(db), 'c', 0640)
+        dbfile = self.dbfile(db)
+        return anydbm.open(dbfile, 'c', 0640)
 
     def get_db(self, db):
         dbm = self.dbm(db)

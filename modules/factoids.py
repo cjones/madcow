@@ -34,11 +34,15 @@ class MatchObject(object):
         self.isor  = re.compile('^\s*\|')
         self.forget = re.compile('forget[:\-, ]+(.+)$', re.I)
 
-    def dbFile(self, type):
-        return self.dir + '/data/db-%s-factoids-%s' % (self.ns, type.lower())
+    def dbFile(self, db_type):
+        return self.dir + '/data/db-%s-factoids-%s' % (self.ns, db_type.lower())
 
-    def get(self, type, key, val=None):
-        db = anydbm.open(self.dbFile(type), 'c', 0640)
+    def dbm(self, db_type):
+        db_file = self.dbFile(db_type)
+        return anydbm.open(db_file, 'c', 0640)
+
+    def get(self, db_type, key, val=None):
+        db = self.dbm(db_type)
 
         try:
             key = key.lower()
@@ -49,16 +53,16 @@ class MatchObject(object):
 
         return val
 
-    def set(self, type, key, val):
-        db = anydbm.open(self.dbFile(type), 'c', 0640)
+    def set(self, db_type, key, val):
+        db = self.dbm(db_type)
         db[key.lower()] = val
         db.close()
         return None
 
     def unset(self, key):
         forgot = 0
-        for type in ['is', 'are']:
-            db = anydbm.open(self.dbFile(type), 'c', 0640)
+        for db_type in ['is', 'are']:
+            db = self.dbm(db_type)
             if db.has_key(key.lower()):
                 del db[key.lower()]
                 forgot += 1
@@ -105,7 +109,7 @@ class MatchObject(object):
             # split up phrase by is/are seperator
             isare = self.isare.search(message)
             if isare is not None:
-                key, type, val = isare.groups()
+                key, db_type, val = isare.groups()
 
                 # the ispart is actually a query
                 if self.query.search(key):
@@ -115,7 +119,7 @@ class MatchObject(object):
 
             elif question is True:
                 key = message
-                type = 'is'
+                db_type = 'is'
                 question = True
             else:
                 return
@@ -127,16 +131,16 @@ class MatchObject(object):
 
                 if val_is is None and val_are is None:
                     val = None
-                elif val_is is not None and type == 'is':
+                elif val_is is not None and db_type == 'is':
                     val = val_is
-                elif val_are is not None and type == 'are':
+                elif val_are is not None and db_type == 'are':
                     val = val_are
                 elif val_is is not None:
                     val = val_is
-                    type = 'is'
+                    db_type = 'is'
                 elif val_are is not None:
                     val = val_are
-                    type = 'are'
+                    db_type = 'are'
 
                 if val is None:
                     if addressed is True:
@@ -150,7 +154,7 @@ class MatchObject(object):
                     if reply is not None:
                         return reply.group(1)
                     else:
-                        response = '%s %s %s' % (key, type, val)
+                        response = '%s %s %s' % (key, db_type, val)
                         if addressed:
                             response = '%s: %s' % (nick, response)
                         return response
@@ -165,7 +169,7 @@ class MatchObject(object):
                     also = False
 
                 # see if it's already set
-                setVal = self.get(type, key)
+                setVal = self.get(db_type, key)
 
                 if ((setVal is not None) and (also is True)):
                     if self.isor.search(val):
@@ -173,10 +177,10 @@ class MatchObject(object):
                     else:
                         val = '%s or %s' % (setVal, val)
                 elif ((setVal is not None) and (correction is False)):
-                    if addressed: return '%s: But %s %s %s' % (nick, key, type, setVal)
+                    if addressed: return '%s: But %s %s %s' % (nick, key, db_type, setVal)
                     else: return
 
-                self.set(type, key, val)
+                self.set(db_type, key, val)
                 if addressed: return 'OK, %s' % nick
 
         except Exception, e:
