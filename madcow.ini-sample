@@ -142,3 +142,6 @@ server=localhost
 sender=madcow@gruntle.org
 user=
 password=
+
+[server]
+port=5000

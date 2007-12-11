@@ -29,7 +29,8 @@ import threading
 import time
 import logging
 from include.authlib import AuthLib
-
+import SocketServer
+import select
 
 class Request(object):
     """
@@ -166,6 +167,56 @@ class Admin(object):
             return 'You are now logged in. Message me "admin help" for help'
 
 
+class ServiceHandler(SocketServer.BaseRequestHandler):
+
+    re_from = re.compile(r'^from:\s*(.+?)\s*$', re.I)
+    re_to = re.compile(r'^to:\s*(#\S+)\s*$', re.I)
+    re_message = re.compile(r'^message:\s*(.+?)\s*$', re.I)
+
+    def setup(self):
+        logging.info('connection from %s' % repr(self.client_address))
+
+    def handle(self):
+        data = ''
+        while True:
+            read = self.request.recv(1024)
+            if len(read) == 0:
+                break
+            data += read
+        logging.info('got payload: %s' % repr(data))
+
+        sent_from = send_to = message = None
+        for line in data.splitlines():
+            try:
+                sent_from = ServiceHandler.re_from.search(line).group(1)
+            except:
+                pass
+
+            try:
+                send_to = ServiceHandler.re_to.search(line).group(1)
+            except:
+                pass
+
+            try:
+                message = ServiceHandler.re_message.search(line).group(1)
+            except:
+                pass
+
+        if sent_from is None or send_to is None or message is None:
+            logging.warn('invalid payload')
+            return
+
+        req = Request()
+        req.colorize = False
+        req.wrap = False
+        req.sendTo = send_to
+        output = 'message from %s: %s' % (sent_from, message)
+        self.server.madcow.output(output, req)
+
+    def finish(self):
+        logging.info('connection closed by %s' % repr(self.client_address))
+
+
 class Madcow(object):
     """
     Core bot handler
@@ -196,6 +247,18 @@ class Madcow(object):
         self.usageLines = []
         self.modules = {}
         self.loadModules()
+
+        # start local service for handling requests
+        threading.Thread(target=self.startService).start()
+
+    def startService(self, *args, **kwargs):
+        addr = ('', self.config.server.port)
+        server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
+        server.daemon_threads = True
+        server.madcow = self
+        while True:
+            if select.select([server.socket], [], [], 0.25)[0]:
+                server.handle_request()
 
     def start(self):
         pass
