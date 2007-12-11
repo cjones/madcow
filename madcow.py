@@ -207,7 +207,8 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
             return
 
         # see if we can reverse lookup sender
-        for user, email in self.server.madcow.modules['learn'].get_db('email'):
+        db = self.server.madcow.modules['learn'].get_db('email')
+        for user, email in db.items():
             if sent_from == email:
                 sent_from = user
                 break
