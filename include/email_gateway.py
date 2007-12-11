@@ -5,30 +5,54 @@
 import sys
 import re
 import socket
+import email
+import mimetypes
 
 def main():
+    send_to = '#hugs'
     payload = sys.stdin.read()
 
-    re_sent_from = re.compile(r'^from:\s*(.+?)\s*$', re.I)
-    sent_from = 'anonymous'
-    send_to = '#hugs'
-    body = []
-    reading_body = False
-    for line in payload.splitlines():
-        try:
-            sent_from = re_sent_from.search(line).group(1)
-        except:
-            pass
+    tags = re.compile(r'<[^>]+>')
+    br = re.compile(r'<br[^>]*>')
 
-        if reading_body:
-            body.append(line)
+    msg = email.message_from_string(payload)
+    print msg['from']
+    plain = html = None
+    for part in msg.walk():
+        if part.get_content_maintype() == 'multipart':
+            continue
+        filename = part.get_filename()
+        mime_type = part.get_content_type()
+        body = part.get_payload(decode=True)
 
-        if len(line) == 0:
-            reading_body = True
+        if mime_type == 'text/plain':
+            plain = body
+
+        if mime_type == 'text/html':
+            html = body
+
+    plain = None
+    if plain:
+        doc = plain
+    elif html:
+        html = br.sub('\n', html)
+        html = tags.sub('', html)
+        doc = html
+    else:
+        doc = 'no message'
+
+    nosig = []
+    for line in doc.splitlines():
+        line = line.strip()
+        if not len(line):
+            continue
+        if line.strip() == '--':
+            break
+        nosig.append(line)
 
     output = 'to: %s\n' % send_to
-    output += 'from: %s\n' % sent_from
-    output += 'message: %s' % ' '.join(body)
+    output += 'from: %s\n' % msg['from']
+    output += 'message: %s' % ' '.join(nosig)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', 5000))
