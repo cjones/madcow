@@ -27,8 +27,19 @@ class MatchObject(object):
         dbfile = '%s/data/db-%s-%s' % (self.dir, self.ns, db)
         return dbfile
 
+    def dbm(self, db):
+        return anydbm.open(self.dbfile(db), 'c', 0640)
+
+    def get_db(self, db):
+        dbm = self.dbm(db)
+        db = {}
+        for key in dbm.keys():
+            db[key] = dbm[key]
+        dbm.close()
+        return db
+
     def lookup(self, db, key):
-        dbm = anydbm.open(self.dbfile(db), 'c', 0640)
+        dbm = self.dbm(db)
         try:
             val = dbm[key.lower()]
         except:
@@ -37,7 +48,7 @@ class MatchObject(object):
         return val
 
     def set(self, db, key, val):
-        dbm = anydbm.open(self.dbfile(db), 'c', 0640)
+        dbm = self.dbm(db)
         dbm[key.lower()] = val
         dbm.close()
 

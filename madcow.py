@@ -206,6 +206,12 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
             logging.warn('invalid payload')
             return
 
+        # see if we can reverse lookup sender
+        for user, email in self.server.madcow.modules['learn'].get_db('email'):
+            if sent_from == email:
+                sent_from = user
+                break
+
         req = Request()
         req.colorize = False
         req.wrap = False
