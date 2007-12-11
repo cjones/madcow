@@ -421,12 +421,22 @@ class Madcow(object):
             if self.allowThreading and module.thread:
                 threading.Thread(target=self.processThread, kwargs=kwargs).start()
             else:
-                response = module.response(**kwargs)
+                try:
+                    response = module.response(**kwargs)
+                except Exception, e:
+                    logging.warn('UNCAUGHT EXCEPTION')
+                    logging.exception(e)
+                    response = 'YOU BROKE MADCOW: %s' % str(e)
                 if response is not None and len(response) > 0:
                     self.output(response, req)
 
     def processThread(self, **kwargs):
-        response = kwargs['module'].response(**kwargs)
+        try:
+            response = kwargs['module'].response(**kwargs)
+        except Exception, e:
+            logging.warn('UNCAUGHT EXCEPTION')
+            logging.exception(e)
+            response = 'YOU BROKE MADCOW: %s' % str(e)
         if response is not None and len(response) > 0:
             self.outputLock.acquire()
             self.output(response, kwargs['req'])
