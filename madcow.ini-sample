@@ -135,3 +135,10 @@ host=localhost
 port=706
 reconnect=yes
 reconnectWait=3
+
+; smtp settings for summon module
+[smtp]
+server=localhost
+sender=madcow@gruntle.org
+user=
+password=

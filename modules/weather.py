@@ -9,7 +9,7 @@ import re
 import urllib
 import learn
 import os
-
+from learn import MatchObject as Learn
 
 class MatchObject(object):
 
@@ -23,9 +23,9 @@ class MatchObject(object):
         if dir is None:
             dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
         self.dir = dir
+        self.learn = Learn(ns=self.ns, dir=self.dir)
         self.help = 'fc <location> - look up forecast for location'
         self.help += '\nfc @nick - lookup forecast for this nick\'s location'
-        self.help += '\nlearn <nick> <location> - permanently learn a nick\'s location'
 
         self.lookup = re.compile('^@(\S+)')
         self.resultType = re.compile('(Click on a column heading|Current Conditions|There has been an error)')
@@ -63,8 +63,7 @@ class MatchObject(object):
             query = arg
 
         if lookup is not None:
-            l = learn.MatchObject(ns=self.ns, dir=self.dir)
-            query = l.lookup(lookup)
+            query = self.learn.lookup('location', lookup)
 
             if query is None:
                 return "I don't know where %s lives, try: learn %s <location>" % (lookup, lookup)

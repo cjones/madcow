@@ -9,41 +9,43 @@ import re
 import anydbm
 import os
 
-
 class MatchObject(object):
 
     def __init__(self, config=None, ns='madcow', dir=None):
         self.enabled = True
-        self.pattern = re.compile('^\s*learn\s+(\S+)\s+(.+)')
+        self.pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$')
         self.requireAddressing = True
         self.thread = False
         self.wrap = False
         if dir is None:
             dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-        self.dbfile = dir + '/data/db-%s-locations' % ns
+        self.dir = dir
+        self.ns = ns
+        self.help = 'set <location|email> <nick> <val> - set db attribs'
 
-    def lookup(self, nick):
-        db = anydbm.open(self.dbfile, 'c', 0640)
-        try: location = db[nick.lower()]
-        except: location = None
-        db.close()
-        return location
+    def dbfile(self, db):
+        dbfile = '%s/data/db-%s-%s' % (self.dir, self.ns, db)
+        return dbfile
 
-    def set(self, nick, location):
-        db = anydbm.open(self.dbfile, 'c', 0640)
-        db[nick.lower()] = location
-        db.close()
+    def lookup(self, db, key):
+        dbm = anydbm.open(self.dbfile(db), 'c', 0640)
+        try:
+            val = dbm[key.lower()]
+        except:
+            val = None
+        dbm.close()
+        return val
+
+    def set(self, db, key, val):
+        dbm = anydbm.open(self.dbfile(db), 'c', 0640)
+        dbm[key.lower()] = val
+        dbm.close()
 
     def response(self, **kwargs):
         nick = kwargs['nick']
-        args = kwargs['args']
-
-        if len(args) == 1:
-            return self.lookup(args[0])
-        else:
-            self.set(args[0], args[1])
-            return '%s: I learned that %s is in %s' % (nick, args[0], args[1])
-
+        db, key, val = kwargs['args']
+        self.set(db, key, val)
+        return '%s: set %s\'s %s to %s' % (nick, key, db, val)
 
 if __name__ == '__main__':
     print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
