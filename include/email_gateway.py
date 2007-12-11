@@ -12,17 +12,22 @@ def main():
     send_to = '#hugs'
     payload = sys.stdin.read()
 
-    #import time
-    #filename = '/tmp/email-%s.txt' % int(time.time())
-    #fi = open(filename, 'wb')
-    #fi.write(payload)
-    #fi.close()
+    #"""
+    import time
+    filename = '/tmp/email-%s.txt' % int(time.time())
+    fi = open(filename, 'wb')
+    fi.write(payload)
+    fi.close()
+    #"""
 
     tags = re.compile(r'<[^>]+>')
     br = re.compile(r'<br[^>]*>')
+    quoted = re.compile(
+            r'^(---+)\s*(original|forwarded)\s+(message|email)\s*\1', re.I)
+    is_header = re.compile(r'^\S+:\s*.+$', re.I)
+    telus_spam = 'This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.'
 
     msg = email.message_from_string(payload)
-    print msg['from']
     plain = html = None
     for part in msg.walk():
         if part.get_content_maintype() == 'multipart':
@@ -50,17 +55,36 @@ def main():
         doc = 'no message'
 
     nosig = []
+    reading_quoted = False
     for line in doc.splitlines():
         line = line.strip()
+        #print '>>> %s' % repr(line)
         if not len(line):
             continue
-        if line.strip() == '--':
+        if line.startswith('>'):
+            continue
+        if quoted.search(line):
+            reading_quoted = True
+            continue
+        if reading_quoted:
+            if is_header.search(line):
+                continue
+            else:
+                reading_quoted = False
+        if line == '--':
             break
         nosig.append(line)
 
+    message = ' '.join(nosig)
+
+    if telus_spam in message:
+        message = message.replace(telus_spam, '')
+
+    message = message.strip()
+
     output = 'to: %s\n' % send_to
     output += 'from: %s\n' % msg['from']
-    output += 'message: %s' % ' '.join(nosig)
+    output += 'message: %s' % message
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', 5000))
