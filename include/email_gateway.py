@@ -12,6 +12,12 @@ def main():
     send_to = '#hugs'
     payload = sys.stdin.read()
 
+    #import time
+    #filename = '/tmp/email-%s.txt' % int(time.time())
+    #fi = open(filename, 'wb')
+    #fi.write(payload)
+    #fi.close()
+
     tags = re.compile(r'<[^>]+>')
     br = re.compile(r'<br[^>]*>')
 
@@ -31,12 +37,14 @@ def main():
         if mime_type == 'text/html':
             html = body
 
-    plain = None
     if plain:
         doc = plain
     elif html:
         html = br.sub('\n', html)
         html = tags.sub('', html)
+        html = html.replace('&lt;', '<')
+        html = html.replace('&gt;', '>')
+        html = html.replace('&nbsp;', ' ')
         doc = html
     else:
         doc = 'no message'
