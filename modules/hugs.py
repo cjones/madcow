@@ -9,6 +9,8 @@ import re
 import urllib, urllib2, cookielib
 from include import utils
 import os
+from include.BeautifulSoup import BeautifulSoup
+import random
 
 AGENT = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 
@@ -22,8 +24,6 @@ class MatchObject(object):
         self.wrap = True
         self.help = 'hugs - random confession'
 
-        self.confs = re.compile('<p>(.*?)</p>', re.I + re.DOTALL)
-
         # build opener to mimic browser
         cj = cookielib.CookieJar()
         ch = urllib2.HTTPCookieProcessor(cj)
@@ -32,21 +32,30 @@ class MatchObject(object):
         self.opener = opener
 
     def response(self, **kwargs):
-        nick = kwargs['nick']
-        args = kwargs['args']
-
         try:
+            nick = kwargs['nick']
+            args = kwargs['args']
+
             if args[0] is not None:
-                url = 'http://grouphug.us/confessions/' + args[0]
+                url = 'http://beta.grouphug.us/confessions/' + args[0]
             else:
-                url = 'http://grouphug.us/random'
+                url = 'http://beta.grouphug.us/random'
+
+            url = 'http://beta.grouphug.us/random'
 
             # load page
             req = urllib2.Request(url)
             res = self.opener.open(req)
             doc = res.read()
 
-            conf = self.confs.findall(doc)[0]
+            soup = BeautifulSoup(doc)
+            confs = soup.findAll('div', attrs={'class': 'content'})[3:]
+            conf = random.choice(confs)
+            content = []
+            for p in conf.findAll('p'):
+                content.append(str(p))
+            conf = ' '.join(content)
+
             conf = utils.stripHTML(conf)
             conf = conf.strip()
 
