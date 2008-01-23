@@ -68,6 +68,18 @@ class IranWar(object):
             return 'UNKNOWN'
 
 
+class IraqWar(object):
+    __url__ = 'http://areweatwarwithiraq.com/rss.xml'
+
+    def war(self):
+        try:
+            rss = rssparser.parse(IraqWar.__url__)
+            return rss['items'].pop(0)['title']
+        except Exception, e:
+            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            return 'UNKNOWN'
+
+
 class MatchObject(object):
 
     def __init__(self, *args, **kwargs):
@@ -81,11 +93,13 @@ class MatchObject(object):
         self.terror = Terror(ua=self.ua)
         self.doom = DoomsDay(ua=self.ua)
         self.iran = IranWar()
+        self.iraq = IraqWar()
 
     def response(self, **kwargs):
         try:
-            return 'Terror: %s, DoomsDay: %s, IranWar: %s' % (
-                    self.terror.level(), self.doom.time(), self.iran.war())
+            return 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s' % (
+                    self.terror.level(), self.doom.time(), self.iran.war(),
+                    self.iraq.war())
         except Exception, e:
             return '%s: problem with query: %s' % (kwargs['nick'], e)
 
