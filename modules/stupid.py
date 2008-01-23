@@ -11,6 +11,7 @@ from include import utils
 # constants
 AGENT = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 BASEURL = 'http://stupidfilter.org/'
+UTF8 = re.compile(r'[\x80-\xff]')
 
 class MatchObject(object):
 
@@ -38,8 +39,7 @@ class MatchObject(object):
         page = res.read()
 
         # remove high ascii since this is going to IRC
-        #page = NBSP_ENTITY.sub(' ', page)
-        #page = UTF8.sub('', page)
+        page = UTF8.sub('', page)
 
         # create BeautifulSoup document tree
         soup = BeautifulSoup(page)
