@@ -426,7 +426,8 @@ class Madcow(object):
                 except Exception, e:
                     logging.warn('UNCAUGHT EXCEPTION')
                     logging.exception(e)
-                    response = 'YOU BROKE MADCOW: %s' % str(e)
+                    response = None
+                    #response = 'YOU BROKE MADCOW: %s' % str(e)
                 if response is not None and len(response) > 0:
                     self.output(response, req)
 
@@ -436,7 +437,8 @@ class Madcow(object):
         except Exception, e:
             logging.warn('UNCAUGHT EXCEPTION')
             logging.exception(e)
-            response = 'YOU BROKE MADCOW: %s' % str(e)
+            response = None
+            #response = 'YOU BROKE MADCOW: %s' % str(e)
         if response is not None and len(response) > 0:
             self.outputLock.acquire()
             self.output(response, kwargs['req'])

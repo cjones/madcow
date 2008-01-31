@@ -13,6 +13,7 @@ AGENT = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 BASEURL = 'http://en.wikipedia.org/'
 ADVERT = ' - Wikipedia, the free encyclopedia'
 ERROR = 'No page with that title exists'
+ERROR2 = 'For more information about searching Wikipedia'
 SUMMARY_SIZE = 400
 SAMPLE_SIZE = 32 * 1024
 
@@ -122,7 +123,7 @@ class MatchObject(object):
         content = content.strip()              # strip lead/traili whitespace
 
         # search error
-        if title == 'Search' and ERROR in content:
+        if title == 'Search' and (ERROR in content or ERROR2 in content):
             return 'No results found for "%s"' % query
 
         # generate summary by adding as many sentences as possible before limit
