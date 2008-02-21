@@ -16,11 +16,11 @@ class MatchObject(object):
 
     def __init__(self, config=None, ns='madcow', dir=None):
         self.enabled = True
-        self.pattern = re.compile('^\s*(bash|qdb|xkcdb)(?:\s+(\S+))?', re.I)
+        self.pattern = re.compile('^\s*(bash|qdb|xkcdb|limerick)(?:\s+(\S+))?', re.I)
         self.requireAddressing = True
         self.thread = True
         self.wrap = False
-        self.help = '<bash|qdb|xkcdb> [#|query] - get stupid IRC quotes, or random'
+        self.help = '<bash|qdb|xkcdb|limerick> [#|query] - get stupid IRC quotes, or random'
 
         self.sources = {
             'bash'    : {
@@ -40,6 +40,12 @@ class MatchObject(object):
                 'bynum'        : 'http://www.chiliahedron.com/xkcdb/?num',
                 'search'    : 'http://www.chiliahedron.com/xkcdb/?search=query&show=100',
                 'entries'    : re.compile('<div class="quote_output">\s*(.*?)</div>', re.DOTALL),
+            },
+            'limerick'    : {
+                'random'    : 'http://www.limerickdb.com/?random',
+                'bynum'        : 'http://www.limerickdb.com/?num',
+                'search'    : 'http://www.limerickdb.com/?search=query&number=100',
+                'entries'    : re.compile('<div class="quote_output">\s*(.*?)\s*</div>', re.DOTALL),
             },
         }
 
