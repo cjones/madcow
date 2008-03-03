@@ -22,7 +22,6 @@ class Weather(object):
     _base_url = 'http://www.wunderground.com/'
     _search_url = urljoin(_base_url, '/cgi-bin/findweather/getForecast')
     _rss_link = {'type': 'application/rss+xml'}
-    _advert = 'Weather Underground RSS Feed for '
 
     def __init__(self):
         self.ua = UserAgent()
@@ -33,8 +32,7 @@ class Weather(object):
         soup = BeautifulSoup(page)
         rss_url = soup.find('link', attrs=Weather._rss_link)['href']
         rss = rssparser.parse(rss_url)
-        title = rss['channel']['description']
-        title = title.replace(Weather._advert, '')
+        title = str(soup.find('h1').string).strip()
         conditions = stripHTML(rss['items'][0]['description'])
         return '%s: %s' % (title, conditions)
 
