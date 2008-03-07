@@ -9,7 +9,7 @@ import sys
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['UserAgent']
+__all__ = ['UserAgent', 'Base']
 __agent__ = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
@@ -56,7 +56,20 @@ entityMap = {
     8249: '<', 8250: '>', 8364: '$', 8482: '(tm)',
 }
 
-class UserAgent(object):
+class Base(object):
+
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    def __str__(self):
+        return '<%s %s>' % (self.__class__.__name__, repr(self.__dict__))
+
+    __repr__ = __str__
+
+
+class UserAgent(Base):
     __blocksize__ = 16 * 1024
 
     def __init__(self):

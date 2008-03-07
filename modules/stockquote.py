@@ -1,52 +1,80 @@
 #!/usr/bin/env python
 
-"""
-Get stock quote
-"""
+"""Get stock quote from yahoo ticker"""
 
 import sys
 import re
-import urllib
 import os
+from include.utils import Base, UserAgent, stripHTML
+from urlparse import urljoin
+from include.BeautifulSoup import BeautifulSoup
+import random
+
+__version__ = '0.2'
+__author__ = 'cj_ <cjones@gruntle.org>'
+__license__ = 'GPL'
+_namespace = 'madcow'
+_dir = '..'
+
+class Yahoo(Base):
+    _quote_url = 'http://finance.yahoo.com/q?s=SYMBOL'
+
+    def __init__(self):
+        self.ua = UserAgent()
+
+    def get_quote(self, symbol):
+        url = Yahoo._quote_url.replace('SYMBOL', symbol)
+        page = self.ua.fetch(url)
+        soup = BeautifulSoup(page)
+        company = ' '.join([str(item) for item in soup.find('h1').contents])
+        company = stripHTML(company)
+        table = soup.find('table', attrs={'id': 'table1'})
+        rows = table.findAll('tr')
+        data = []
+        for row in rows:
+            key, val = row.findAll('td')
+            key = str(key.contents[0])
+            if key == 'Change:':
+                img = val.find('img')
+                alt = str(img['alt'])
+                val = alt + stripHTML(str(val.contents[0]))
+            elif key == 'Ask:':
+                continue
+            else:
+                val = stripHTML(str(val.contents[0]))
+
+            data.append('%s %s' % (key, val))
+
+        return '%s - ' % company + ', '.join(data)
 
 
-class MatchObject(object):
+class MatchObject(Base):
 
-    def __init__(self, config=None, ns='madcow', dir=None):
+    def __init__(self, config=None, ns=_namespace, dir=_dir):
+        self.config = config
+        self.ns = ns
+        self.dir = dir
         self.enabled = True
         self.pattern = re.compile('^\s*(?:stocks?|quote)\s+([a-z0-9.-]+)', re.I)
         self.requireAddressing = True
         self.thread = True
         self.wrap = True
         self.help = 'quote <symbol> - get latest stock quote'
-
-        self.company = re.compile('<td height="30" class="ygtb"><b>(.*?)</b>')
-        self.lastTrade = re.compile('(Last Trade|Net Asset Value):</td><td class="yfnc_tabledata1"><big><b>(.*?)</b>')
-        self.change = re.compile('Change:</td><td class="yfnc_tabledata1">(?:<img.*?alt="(.*?)">)? <b.*?>(.*?)</b>')
+        self.yahoo = Yahoo()
 
     def response(self, **kwargs):
         nick = kwargs['nick']
-        args = kwargs['args']
+        query = kwargs['args'][0]
 
         try:
-            doc = urllib.urlopen('http://finance.yahoo.com/q?s=' + args[0]).read()
-            company = self.company.search(doc).group(1)
-            tag, lastTrade = self.lastTrade.search(doc).groups()
-            change = self.change.search(doc)
-            dir = change.group(1)
-            change = change.group(2)
-            if dir is not None:
-                change = '%s %s' % (dir.lower(), change)
-            else:
-                change = None
-
-            return '%s: %s - %s: %s, Change = %s' % (nick, company, tag, lastTrade, change)
-
+            return self.yahoo.get_quote(query)
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-            return "%s: Couldn't look that up, guess the market crashed." % nick
+            return '%s: problem with query: %s' % (nick, e)
 
 
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
+    mo = MatchObject()
+    nick = os.environ['USER']
+    args = ' '.join(sys.argv[1:])
+    print mo.response(nick=nick, args=[args])
     sys.exit(0)

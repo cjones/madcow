@@ -1,149 +1,135 @@
 #!/usr/bin/env python
 
-"""
-Get lyrics from http://www.lyricsfreak.com/
-"""
+"""Get lyrics from http://www.lyricsfreak.com/"""
 
 import sys
 import re
+import os
+from include.utils import Base, UserAgent, stripHTML
+from urlparse import urljoin
+from include.BeautifulSoup import BeautifulSoup
 import random
-import urllib, urllib2, cookielib
-from include import utils
+
+__version__ = '0.2'
+__author__ = 'cj_ <cjones@gruntle.org>'
+__license__ = 'GPL'
+_namespace = 'madcow'
+_dir = '..'
+
+class Lyrics(Base):
+    _baseurl = 'http://www.lyricsfreak.com/'
+    _search = urljoin(_baseurl, '/search.php')
+    _artist_songs = urljoin(_baseurl, '/SECTION/ARTIST/lyrics.html')
+    _opts = {'type': 'title', 'sa.x': 21, 'sa.y': 20, 'sa': 'Search', 'q': ''}
+    _re_by = re.compile(r'\s*by\s*')
+    _re_dash = re.compile(r'\s*-\s*')
+    _links = {'title': re.compile(r'lyrics')}
+
+    def __init__(self):
+        self.ua = UserAgent()
+
+    def get_lyrics(self, query):
+        # full lyrics or random verse?
+        if query[-1] == 'full':
+            full = True
+            query = query[:-1]
+        else:
+            full = False
+
+        song_url = None
+
+        # request for a specific song
+        if query[0] == 'song':
+            query = query[1:]
+
+            if 'by' in query:
+                song, artist = Lyrics._re_by.split(' '.join(query))
+            else:
+                song = query
+                artist = None
+
+            url = Lyrics._search
+            opts = Lyrics._opts
+            opts['q'] = song
+
+            page = self.ua.fetch(url=url, opts=opts)
+            soup = BeautifulSoup(page)
+
+            for cell in soup.findAll('td', attrs={'class': 'lyric'}):
+                link = cell.find('a')
+                link.find('b').extract()
+                cell_title = str(link.contents[0])
+                cell_artist, cell_title = Lyrics._re_dash.split(cell_title)
+                if artist is None or cell_artist.lower() == artist:
+                    song_url = str(link['href'])
+                    break
+
+        # request for a random song from an artist
+        else:
+            url = Lyrics._artist_songs
+            url = url.replace('SECTION', query[0][0])
+            url = url.replace('ARTIST', '+'.join(query))
+            page = self.ua.fetch(url)
+            soup = BeautifulSoup(page)
+            songs = []
+            for cell in soup.findAll('td', attrs={'class': 'lyric'}):
+                link = cell.find('a')
+                link.find('b').extract()
+                cell_title = str(link.contents[0])
+                songs.append(str(link['href']))
+
+            if songs:
+                song_url = random.choice(songs)
+
+        if song_url:
+            page = self.ua.fetch(song_url)
+            soup = BeautifulSoup(page)
+            links = soup.findAll('a', attrs=Lyrics._links)
+            artist = str(links[2].contents[0])
+            song = str(links[3].contents[0])
+            [br.extract() for br in soup.findAll('br')]
+            [ul.extract() for ul in soup.findAll('ul')]
+            cursor = soup.find('script', attrs={'src': '/media/agent.js'})
+            lyrics = ['%s by %s:' % (song, artist)]
+            while True:
+                cursor = cursor.next
+                line = str(cursor).strip()
+                if len(line) == 0 or '<ul' in line:
+                    break
+                lyrics.append(line)
+            return '\n'.join(lyrics)
+        else:
+            return "Couldn't find a match for that query"
 
 
-class MatchObject(object):
+class MatchObject(Base):
 
-    baseURL = 'http://www.lyricsfreak.com/'
-
-    reTables = re.compile('<table.*?>(.*?)</table>', re.DOTALL)
-    reRows = re.compile('<tr.*?>(.*?)</tr>', re.DOTALL)
-    reSongLink = re.compile('href="(.*?)".*?>.*?</b>(.*?)</a>')
-    reArtistDelim = re.compile('\s*-\s*')
-    reLyrics = re.compile('<div id="content".*?>.*?<div.*?>.*?</div>(.*?)</div>', re.DOTALL)
-    reVerseBreak = re.compile('\s*<br>\s*<br>\s*')
-    reLineBreak = re.compile('\s*<br>\s*')
-    reGetArtist = re.compile(r'<title>(.*?)\s+\|')
-
-    def __init__(self, config=None, ns='madcow', dir=None):
+    def __init__(self, config=None, ns=_namespace, dir=_dir):
+        self.config = config
+        self.ns = ns
+        self.dir = dir
         self.enabled = True
         self.pattern = re.compile(r'^\s*sing\s+(.+)$')
         self.requireAddressing = True
         self.thread = True
         self.wrap = False
-        self.help = 'sing (<artist> | song <song> [by <artist>]) [full] - get lyrics'
-
-        # build opener
-        cj = cookielib.CookieJar()
-        ch = urllib2.HTTPCookieProcessor(cj)
-        opener = urllib2.build_opener(ch)
-        opener.addheaders = [('User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)')]
-        self.opener = opener
-
-    def request(self, url, opts=None, referer=None):
-        if opts is not None:
-            req = urllib2.Request(url, urllib.urlencode(opts))
-        else:
-            req = urllib2.Request(url)
-
-        if referer is not None:
-            req.add_header('Referer', referer)
-
-        res = self.opener.open(req)
-        data = res.read()
-        return data
+        self.help = 'sing (<artist>|song <song> [by <artist>]) [full] - lyrics'
+        self.lyrics = Lyrics()
 
     def response(self, **kwargs):
+        nick = kwargs['nick']
+        query = kwargs['args'][0].lower().split()
+        return self.lyrics.get_lyrics(query)
+
         try:
-            query = kwargs['args'][0].lower().split()
-
-            if query[-1] == 'full':
-                query = query[:-1]
-                full = True
-            else:
-                full = False
-
-            if query[0] == 'song':
-                query = query[1:]
-                type = 'song'
-
-                if 'by' in query:
-                    i = query.index('by')
-                    query, artist = query[:i], query[i+1:]
-                else:
-                    artist = None
-
-                query = ' '.join(query)
-                url = MatchObject.baseURL + 'search.php'
-                opts = {'type': 'title', 'q': query, 'sa.x': 21, 'sa.y': 20, 'sa': 'Search'}
-                page = self.request(url, opts=opts, referer=url)
-
-            else:
-                artist = None
-                query = '+'.join(query)
-                url = MatchObject.baseURL + '%s/%s/lyrics.html' % (query[0], query)
-                page = self.request(url, referer=MatchObject.baseURL)
-
-            tables = MatchObject.reTables.findall(page)
-            table = tables[1]
-            rows = [row for row in MatchObject.reRows.findall(table) if 'class="lyric"' in row]
-
-            songs = []
-            for row in rows:
-                url, title = MatchObject.reSongLink.search(row).groups()
-                songs.append((url, title))
-
-            if artist is not None:
-                artist = map(re.escape, artist)
-                artist = '\\s+'.join(artist)
-                artist = re.compile(artist, re.I)
-
-                filtered = []
-                for url, title in songs:
-                    songArtist, songName = MatchObject.reArtistDelim.split(title, 1)
-                    if artist.search(songArtist):
-                        filtered.append((url, title))
-
-                songs = filtered
-
-            if not songs:
-                raise Exception, 'No results'
-
-            url, title = random.choice(songs)
-            page = self.request(url)
-            lyrics = MatchObject.reLyrics.search(page).group(1)
-            lyrics = lyrics.replace('\n', '')
-
-            if full is False:
-                verses = MatchObject.reVerseBreak.split(lyrics)
-                lyrics = random.choice(verses)
-
-            lyrics = MatchObject.reLineBreak.split(lyrics)
-            for i, line in enumerate(lyrics):
-                if len(line) == 0:
-                    line = '//'
-                elif line[-1].isalpha():
-                    line += '.'
-                lyrics[i] = line
-
-            lyrics = ' '.join(lyrics)
-
-            try:
-                artist = MatchObject.reGetArtist.search(page).group(1)
-                if artist.lower() not in title.lower():
-                    title = '%s - %s' % (artist, title)
-            except:
-                pass
-
-            result = '%s: %s' % (title, lyrics)
-            result = utils.stripHTML(result)
-            return result
-
+            return self.lyrics.get_lyrics(query)
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-            return '%s: Problem with that: %s' % (kwargs['nick'], e)
+            return '%s: problem with query: %s' % (nick, e)
 
 
 if __name__ == '__main__':
-    print MatchObject().response(nick='testUser', args=[' '.join(sys.argv[1:])])
+    mo = MatchObject()
+    nick = os.environ['USER']
+    args = ' '.join(sys.argv[1:])
+    print mo.response(nick=nick, args=[args])
     sys.exit(0)
-
