@@ -28,7 +28,8 @@ class Yahoo(Base):
         soup = BeautifulSoup(page)
         company = ' '.join([str(item) for item in soup.find('h1').contents])
         company = stripHTML(company)
-        table = soup.find('table', attrs={'id': 'table1'})
+        tables = soup.findAll('table')
+        table = tables[0]
         rows = table.findAll('tr')
         data = []
         for row in rows:
@@ -55,7 +56,7 @@ class MatchObject(Base):
         self.ns = ns
         self.dir = dir
         self.enabled = True
-        self.pattern = re.compile('^\s*(?:stocks?|quote)\s+([a-z0-9.-]+)', re.I)
+        self.pattern = re.compile('^\s*(?:stocks?|quote)\s+(\S+)', re.I)
         self.requireAddressing = True
         self.thread = True
         self.wrap = True
@@ -69,7 +70,7 @@ class MatchObject(Base):
         try:
             return self.yahoo.get_quote(query)
         except Exception, e:
-            return '%s: problem with query: %s' % (nick, e)
+            return "Symbol not found, market may have crashed"
 
 
 if __name__ == '__main__':
