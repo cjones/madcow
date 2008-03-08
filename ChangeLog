@@ -1,3 +1,35 @@
+1.1.4: Sat Mar  8 15:30:24 PST 2008
+    * remove wikiparse library
+    * add email parsing script for summon tie-in
+    * add Base and UserAgent classes
+    * add service for madcow to feed it public messages
+    * add top-level exception handler to avoid crashing bot
+    * add [smtp] and [server] sections to bot config
+    * roll terror and doomsday module into war module + new features
+    * don't use reserved keyword in factoid module!
+    * full rewrite of weather module to use BeautifulSoup parser,
+      read wundergrounds RSS feed, and color-code temperature ranges
+    * rewrite "learn" module to save generic key/values. now let's you
+      set email (for summon) and location (for weather)
+    * full rewrite of lyrics module to use BeautifulSoup parsing, updated
+      for HTML changes to lyricsfreak
+    * updated translation module for HTML changes to altavista babelfish
+    * updated hugs module for new HTML and use BeautifulSoup module
+    * updated bash module to include xkcdb and limerickdb (thanks to toast)
+    * add conservapedia module for the crazy right-wing version of reality.
+      now madcow is fair and balanced.
+    * fix broken stockquote module, total rewrite. now handles stock indexes,
+      calculates % change, and color codes up/down with red or green
+    * add stupid.py, gets a random quote from the database of stupid things
+      said on the internet
+    * fix google.py to handle some cases where it wasn't redirecting when
+      the referer url wasn't set. make sure safesearch is turned off as well.
+    * add summon module. this allows you to send a page to someone's SMS email
+      gateway, if they set their email address with 'set email <user> <email>'
+    * 
+
+
+
 1.1.3: Sat Nov 10 03:35:34 PST 2007
     * Various fixes to WikiPedia module's output
 

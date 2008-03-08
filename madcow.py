@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = """
 Copyright (C) 2007 Christopher Jones <cjones@gruntle.org>
