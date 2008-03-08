@@ -39,6 +39,7 @@ class Weather(object):
             table = soup.find('table', attrs={'class': 'boxB full'})
             rows = table.findAll('tr')
             results = []
+            match = None
             for row in rows:
                 cells = row.findAll('td', attrs={'class': 'sortC'})
                 for cell in cells:
@@ -48,7 +49,16 @@ class Weather(object):
                     city = str(link.contents[0])
                     href = urljoin(Weather._base_url, str(link['href']))
                     results.append(city)
-            return 'Multiple results found: %s' % ', '.join(results)
+                    if city.lower() == location.lower():
+                        match = urljoin(Weather._base_url, href)
+                        break
+                if match:
+                    break
+            if match:
+                page = self.ua.fetch(url=match)
+                soup = BeautifulSoup(page)
+            else:
+                return 'Multiple results found: %s' % ', '.join(results)
 
         rss_url = soup.find('link', attrs=Weather._rss_link)['href']
         rss = rssparser.parse(rss_url)
