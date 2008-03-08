@@ -50,8 +50,8 @@ class Yahoo(Base):
             else:
                 val = stripHTML(str(val.contents[0]))
 
+            val = val.replace(',', '')
             if Yahoo._isfloat.search(val):
-                val = val.replace(',', '')
                 val = float(val)
 
             data[key] = val
@@ -85,7 +85,7 @@ class Yahoo(Base):
                 val = '%.2f' % val
             output.append('%s %s' % (key, val))
 
-        return '%s - ' % company + ', '.join(output)
+        return '%s - ' % company + ' | '.join(output)
 
 
 class MatchObject(Base):
