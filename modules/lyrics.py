@@ -24,6 +24,11 @@ class Lyrics(Base):
     _re_by = re.compile(r'\s*by\s*')
     _re_dash = re.compile(r'\s*-\s*')
     _links = {'title': re.compile(r'lyrics')}
+    _newline = re.compile(r'[\r\n]+')
+    _break = re.compile(r'<br(?:\s+/)?\s*>', re.I + re.DOTALL)
+    _leadbreak = re.compile(r'^(?:<br(?:\s+/)?\s*>\s*)+', re.I + re.DOTALL)
+    _endbreak = re.compile(r'(?:<br(?:\s+/)?\s*>\s*)+$', re.I + re.DOTALL)
+    _whitespace = re.compile(r'\s+')
 
     def __init__(self):
         self.ua = UserAgent()
@@ -84,20 +89,37 @@ class Lyrics(Base):
         if song_url:
             page = self.ua.fetch(song_url)
             soup = BeautifulSoup(page)
-            links = soup.findAll('a', attrs=Lyrics._links)
-            artist = str(links[2].contents[0])
-            song = str(links[3].contents[0])
-            [br.extract() for br in soup.findAll('br')]
-            [ul.extract() for ul in soup.findAll('ul')]
-            cursor = soup.find('script', attrs={'src': '/media/agent.js'})
-            lyrics = ['%s by %s:' % (song, artist)]
+            content = soup.find('div', attrs={'id': 'content'})
+            [div.extract() for div in content.findAll('div')]
+            [link.extract() for link in content.findAll('a')]
+            [script.extract() for script in content.findAll('script')]
+            lines = [str(line) for line in content.contents]
+            data = ''.join(lines)
+            data = Lyrics._newline.sub('', data)
+            data = Lyrics._leadbreak.sub('', data)
+            data = Lyrics._endbreak.sub('', data)
+            lines = Lyrics._break.split(data)
+            verses = []
             while True:
-                cursor = cursor.next
-                line = str(cursor).strip()
-                if len(line) == 0 or '<ul' in line:
+                try:
+                    i = lines.index('')
+                    verse, lines = lines[:i], lines[i+1:]
+                    verses.append(verse)
+                except ValueError:
+                    verses.append(lines)
                     break
-                lyrics.append(line)
-            return '\n'.join(lyrics)
+
+            for i, verse in enumerate(verses):
+                verse = ' / '.join(verse)
+                verse = Lyrics._whitespace.sub(' ', verse)
+                verses[i] = verse
+
+
+            if full:
+                return '\n'.join(verses)
+            else:
+                return random.choice(verses)
+
         else:
             return "Couldn't find a match for that query"
 
