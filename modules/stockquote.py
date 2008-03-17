@@ -59,7 +59,7 @@ class Yahoo(Base):
             if key == 'Last Trade:' or key == 'Index Value:':
                 current_value = val
 
-            elif key == 'Open:':
+            elif key == 'Prev Close:':
                 open_value = val
 
         # see if we can calculate percentage
