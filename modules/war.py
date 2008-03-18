@@ -4,19 +4,19 @@
 
 import urllib, urllib2, cookielib
 import re
-from include import utils
 from include import rssparser
+from include.utils import Base, UserAgent, stripHTML
+from include.BeautifulSoup import BeautifulSoup
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['MatchObject']
-__agent__ = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
+__format__ = 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s'
 
-class Terror(object):
-    __url__ = 'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
-    __re_level__ = re.compile(r'<THREAT_ADVISORY CONDITION="(\w+)" />')
-    __color_map__ = {
+class Terror(Base):
+    _url = 'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
+    _re_level = re.compile(r'<THREAT_ADVISORY CONDITION="(\w+)" />')
+    _color_map = {
         'severe': 5,
         'high': 4,
         'elevated': 8,
@@ -24,63 +24,82 @@ class Terror(object):
         'low': 9,
     }
 
-    def __init__(self, ua=None):
+    def __init__(self, ua):
         self.ua = ua
 
     def level(self):
         try:
-            doc = self.ua.fetch(Terror.__url__)
-            level = Terror.__re_level__.search(doc).group(1)
-            color = Terror.__color_map__[level.lower()]
+            doc = self.ua.fetch(Terror._url)
+            level = Terror._re_level.search(doc).group(1)
+            color = Terror._color_map[level.lower()]
             return '\x03%s,1\x16\x16%s\x0f' % (color, level)
-
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return 'UNKNOWN'
 
 
-class DoomsDay(object):
-    __url__ = 'http://www.thebulletin.org/minutes-to-midnight/'
-    __re_time__ = re.compile(r'href="/minutes-to-midnight/">(.*?)</a>')
+class DoomsDay(Base):
+    _url = 'http://www.thebulletin.org/minutes-to-midnight/'
+    _re_time = re.compile(r'href="/minutes-to-midnight/">(.*?)</a>')
 
-    def __init__(self, ua=None):
+    def __init__(self, ua):
         self.ua = ua
 
     def time(self):
         try:
-            doc = self.ua.fetch(DoomsDay.__url__)
-            time = DoomsDay.__re_time__.search(doc).group(1)
+            doc = self.ua.fetch(DoomsDay._url)
+            time = DoomsDay._re_time.search(doc).group(1)
             return time
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return 'UNKNOWN'
 
 
-class IranWar(object):
-    __url__ = 'http://www.areweatwarwithiran.com/rss.xml'
+class IranWar(Base):
+    _url = 'http://www.areweatwarwithiran.com/rss.xml'
 
     def war(self):
         try:
-            rss = rssparser.parse(IranWar.__url__)
+            rss = rssparser.parse(IranWar._url)
             return rss['items'].pop(0)['title']
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return 'UNKNOWN'
 
 
-class IraqWar(object):
-    __url__ = 'http://areweatwarwithiraq.com/rss.xml'
+class IraqWar(Base):
+    _war_url = 'http://areweatwarwithiraq.com/rss.xml'
+    _bodycount_url = 'http://www.iraqbodycount.org/'
+    _re_whitespace = re.compile(r'\s+')
+
+    def __init__(self, ua):
+        self.ua = ua
 
     def war(self):
         try:
-            rss = rssparser.parse(IraqWar.__url__)
+            rss = rssparser.parse(IraqWar._war_url)
             return rss['items'].pop(0)['title']
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return 'UNKNOWN'
 
+    def bodycount(self):
+        try:
+            doc = self.ua.fetch(IraqWar._bodycount_url)
+            soup = BeautifulSoup(doc)
+            data = soup.find('td', attrs={'class': 'main-num'})
+            data = data.find('a')
+            data = str(data.contents[0])
+            data = stripHTML(data)
+            data = IraqWar._re_whitespace.sub(' ', data)
+            data = data.strip()
+            return data
+        except Exception, e:
+            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            return 'UNKNOWN'
 
-class MatchObject(object):
+
+class MatchObject(Base):
 
     def __init__(self, *args, **kwargs):
         self.enabled = True
@@ -89,17 +108,16 @@ class MatchObject(object):
         self.thread = True
         self.wrap = False
         self.help = 'terror - NEVAR FORGET'
-        self.ua = utils.UserAgent()
+        self.ua = UserAgent()
         self.terror = Terror(ua=self.ua)
         self.doom = DoomsDay(ua=self.ua)
         self.iran = IranWar()
-        self.iraq = IraqWar()
+        self.iraq = IraqWar(ua=self.ua)
 
     def response(self, **kwargs):
         try:
-            return 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s' % (
-                    self.terror.level(), self.doom.time(), self.iran.war(),
-                    self.iraq.war())
+            return __format__ % (self.terror.level(), self.doom.time(),
+                    self.iran.war(), self.iraq.war(), self.iraq.bodycount())
         except Exception, e:
             return '%s: problem with query: %s' % (kwargs['nick'], e)
 
