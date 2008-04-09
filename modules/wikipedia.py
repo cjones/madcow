@@ -11,6 +11,7 @@ from include import utils
 # constants
 AGENT = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 BASEURL = 'http://en.wikipedia.org/'
+RANDOM = BASEURL + 'wiki/Special:Random'
 ADVERT = ' - Wikipedia, the free encyclopedia'
 ERROR = 'For more information about searching Wikipedia'
 SUMMARY_SIZE = 400
@@ -48,8 +49,12 @@ class MatchObject(object):
             query = ' '.join(query)
 
         # load page
-        opts = {'search': query, 'go': 'Go'}
-        url = BASEURL + 'wiki/Special:Search'
+        if query == 'random':
+            opts = {}
+            url = RANDOM
+        else:
+            opts = {'search': query, 'go': 'Go'}
+            url = BASEURL + 'wiki/Special:Search'
         req = urllib2.Request(url, urllib.urlencode(opts))
         req.add_header('Referer', BASEURL)
         res = self.opener.open(req)

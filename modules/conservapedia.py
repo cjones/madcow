@@ -11,8 +11,9 @@ from include import utils
 # constants
 AGENT = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 BASEURL = 'http://www.conservapedia.com/'
+RANDOM = BASEURL + 'Special:Random'
 ADVERT = ' - Conservapedia'
-ERROR = 'No page with that title exists'
+ERROR = 'For more information about searching Wikipedia'
 SUMMARY_SIZE = 400
 SAMPLE_SIZE = 32 * 1024
 
@@ -48,8 +49,12 @@ class MatchObject(object):
             query = ' '.join(query)
 
         # load page
-        opts = {'search': query, 'go': 'Go'}
-        url = BASEURL + 'wiki/Special:Search'
+        if query == 'random':
+            opts = {}
+            url = RANDOM
+        else:
+            opts = {'search': query, 'go': 'Go'}
+            url = BASEURL + 'wiki/Special:Search'
         req = urllib2.Request(url, urllib.urlencode(opts))
         req.add_header('Referer', BASEURL)
         res = self.opener.open(req)
@@ -122,7 +127,7 @@ class MatchObject(object):
         content = content.strip()              # strip lead/traili whitespace
 
         # search error
-        if title == 'Search' and ERROR in content:
+        if title == 'Search results':
             return 'No results found for "%s"' % query
 
         # generate summary by adding as many sentences as possible before limit
