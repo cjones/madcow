@@ -9,11 +9,14 @@ import re
 import anydbm
 import os
 
+__allowed__ = ['location', 'email', 'karma']
+
 class MatchObject(object):
+    pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
 
     def __init__(self, config=None, ns='madcow', dir=None):
         self.enabled = True
-        self.pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$')
+        self.pattern = MatchObject.pattern
         self.requireAddressing = True
         self.thread = False
         self.wrap = False
@@ -56,6 +59,8 @@ class MatchObject(object):
     def response(self, **kwargs):
         nick = kwargs['nick']
         db, key, val = kwargs['args']
+        if db not in __allowed__:
+            return '%s: unknown database' % nick
         self.set(db, key, val)
         return '%s: set %s\'s %s to %s' % (nick, key, db, val)
 
