@@ -48,6 +48,35 @@ class Wiki(Base):
         self.ua = UserAgent()
 
     def get_summary(self, query):
+        soup, title = self.get_soup(query)
+
+        # massage into plain text by concatenating paragraphs
+        content = []
+        for para in soup.findAll('p'):
+            content.append(str(para))
+        content = ' '.join(content)
+
+        # clean up rendered text
+        content = stripHTML(content)                 # strip markup
+        content = Wiki._citations.sub('', content)   # remove citations
+        content = Wiki._parens.sub('', content)      # remove parentheticals
+        content = Wiki._whitespace.sub(' ', content) # compress whitespace
+        content = Wiki._fix_punc.sub(r'\1', content) # fix punctuation
+        content = content.strip()                    # strip whitespace
+
+        # search error
+        if title == self.error:
+            return 'No results found for "%s"' % query
+
+        # generate summary by adding as many sentences as possible before limit
+        summary = '%s -' % title
+        for sentence in Wiki._sentence.findall(content):
+            if len(summary) + 1 + len(sentence) > self.summary_size:
+                break
+            summary += ' %s' % sentence
+        return summary
+
+    def get_soup(self, query):
         if isinstance(query, (list, tuple)):
             query = ' '.join(query)
 
@@ -113,29 +142,5 @@ class Wiki(Base):
         for span in soup.findAll('span', attrs={'class': Wiki._audio}):
             span.extract()
 
-        # massage into plain text by concatenating paragraphs
-        content = []
-        for para in soup.findAll('p'):
-            content.append(str(para))
-        content = ' '.join(content)
-
-        # clean up rendered text
-        content = stripHTML(content)                 # strip markup
-        content = Wiki._citations.sub('', content)   # remove citations
-        content = Wiki._parens.sub('', content)      # remove parentheticals
-        content = Wiki._whitespace.sub(' ', content) # compress whitespace
-        content = Wiki._fix_punc.sub(r'\1', content) # fix punctuation
-        content = content.strip()                    # strip whitespace
-
-        # search error
-        if title == self.error:
-            return 'No results found for "%s"' % query
-
-        # generate summary by adding as many sentences as possible before limit
-        summary = '%s -' % title
-        for sentence in Wiki._sentence.findall(content):
-            if len(summary) + 1 + len(sentence) > self.summary_size:
-                break
-            summary += ' %s' % sentence
-        return summary
+        return soup, title
 
