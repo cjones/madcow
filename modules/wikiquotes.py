@@ -7,11 +7,9 @@ from include.utils import stripHTML
 import re
 import random
 
-_pattern = re.compile(r'^\s*wikiquote\s*(?:\s+(.*?)\s*)?$', re.I)
+_pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
 _base_url = 'http://en.wikiquote.org/'
 _advert = ' - Wikiquote'
-_summary_size = Wiki._summary_size
-_sample_size = Wiki._sample_size
 _linebreak = re.compile(r'[\r\n]+')
 _whitespace = re.compile(r'\s{2,}')
 _author = 'random'
@@ -26,8 +24,7 @@ class MatchObject(object):
         self.thread = True
         self.wrap = False
         self.help = 'wikiquote - get random quote from wikiquotes'
-        self.wiki = Wiki(base_url=_base_url, advert=_advert,
-                summary_size=_summary_size, sample_size=_sample_size)
+        self.wiki = Wiki(base_url=_base_url, advert=_advert)
 
     def get_random_quote(self, author=_author, max=_max):
         for i in range(0, max):
@@ -50,6 +47,8 @@ class MatchObject(object):
 
     def _get_random_quote(self, author=_author):
         soup, title = self.wiki.get_soup(author)
+        if title == Wiki._error:
+            return "Couldn't find quotes for that.."
         content = soup.find('div', attrs={'id': 'bodyContent'})
         uls = content.findAll('ul', recursive=False)
         quotes = []
@@ -68,7 +67,7 @@ class MatchObject(object):
 
     def response(self, **kwargs):
         try:
-            author = ' '.join(kwargs['args'])
+            author = kwargs['args'][0]
             if author:
                 max = 1
             else:
