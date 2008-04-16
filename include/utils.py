@@ -78,7 +78,8 @@ class UserAgent(Base):
         self.opener = urllib2.build_opener(self.ch)
         self.opener.addheaders = [('User-Agent', __agent__)]
 
-    def fetch(self, url, referer=None, opts={}, method='GET', save=None):
+    def fetch(self, url, referer=None, opts={}, method='GET', save=None,
+            sample_size=None):
         try:
             payload = urllib.urlencode(opts)
             method = method.lower()
@@ -103,7 +104,10 @@ class UserAgent(Base):
                 finally:
                     fi.close()
             else:
-                return res.read()
+                if sample_size is not None:
+                    return res.read(sample_size)
+                else:
+                    return res.read()
         except Exception, e:
             sys.stderr.write("couldn't load page %s: %s\n" % (url, e))
         return ''
