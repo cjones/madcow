@@ -51,6 +51,24 @@ class Wiki(Base):
     def get_summary(self, query):
         soup, title = self.get_soup(query)
 
+        # check if this is a disambiguation page, if so construct special page
+        # there isn't a consistent style guide, so we just try to do the
+        # most common format (ordered list of links). if this fails, return
+        # a friendly failure for now
+        if soup.find('div', attrs={'id': 'disambig'}):
+            try:
+                summary = '%s (Disambiguation) - ' % title
+                for link in soup.find('ul').findAll('a'):
+                    title = str(link['title']).strip()
+                    if len(summary) + len(title) + 2 > self.summary_size:
+                        break
+                    if not summary.endswith(' '):
+                        summary += ', '
+                    summary += title
+            except:
+                summary = 'Fancy, unsupported disambiguation page!'
+            return summary
+
         # massage into plain text by concatenating paragraphs
         content = []
         for para in soup.findAll('p'):
@@ -101,24 +119,6 @@ class Wiki(Base):
 
         # extract title minus WP advert
         title = soup.title.string.replace(self.advert, '')
-
-        # check if this is a disambiguation page, if so construct special page
-        # there isn't a consistent style guide, so we just try to do the
-        # most common format (ordered list of links). if this fails, return
-        # a friendly failure for now
-        if soup.find('div', attrs={'id': 'disambig'}):
-            try:
-                summary = '%s (Disambiguation) - ' % title
-                for link in soup.find('ul').findAll('a'):
-                    title = str(link['title']).strip()
-                    if len(summary) + len(title) + 2 > self.summary_size:
-                        break
-                    if not summary.endswith(' '):
-                        summary += ', '
-                    summary += title
-            except:
-                summary = 'Fancy, unsupported disambiguation page!'
-            return summary
 
         # remove all tabular data/sidebars
         for table in soup.findAll('table'):
