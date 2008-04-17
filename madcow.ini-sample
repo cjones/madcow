@@ -143,5 +143,11 @@ sender=madcow@gruntle.org
 user=
 password=
 
+; listener port for message injection (email gateway, etc)
 [server]
 port=5000
+
+; output channel for periodic scripts
+[periodic]
+channel=#madcow
+

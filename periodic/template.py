@@ -7,9 +7,8 @@ class PeriodicEvent(Base):
     def __init__(self, madcow):
         self.madcow = madcow
         self.enabled = True
-        self.frequency = 60
-        self.output = '#test'
+        self.frequency = 60 # in seconds
+        self.output = madcow.config.periodic.channel
 
     def process(self):
-        pass
-
+        """This is called by madcow, should return a string or None"""
