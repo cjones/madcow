@@ -99,6 +99,15 @@ WRITING OUTPUT PLUGINS
     If you are developing for a new protocol you may request assistance
     from me at cjones@insub.org.
 
+WRITING PLUGINS THAT RUN PERIODICALLY
+
+    You can write a module that, instead of being triggered by chatter in
+    channel, is invoked on a schedule. For example, if you want a module
+    that checks a website every 5 minutes for an update then notifies the
+    channel. These go in the 'periodic' directory, and you should use the
+    template.py in that directory. The process() function of the
+    PeriodicEvent class should return a string or None (for no response).
+
 LICENSE
 
     Copyright (C) 2007 Christopher Jones <cjones@insub.org>
