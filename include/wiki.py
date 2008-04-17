@@ -25,6 +25,7 @@ class Wiki(Base):
     _sample_size = 32 * 1024
 
     # precompiled regex
+    _dash = '\xe2\x80\x94' # wikipedia people love their unicode :(
     _utf8 = re.compile(r'[\x80-\xff]')
     _citations = re.compile(r'\[.*?\]', re.DOTALL)
     _audio = re.compile(r'audiolink', re.I)
@@ -92,6 +93,7 @@ class Wiki(Base):
 
         # remove high ascii since this is going to IRC
         page = Wiki._nbsp_entity.sub(' ', page)
+        page = page.replace(Wiki._dash, ' -- ')
         page = Wiki._utf8.sub('', page)
 
         # create BeautifulSoup document tree
