@@ -228,7 +228,7 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
 class PeriodicEvents(Base):
     """Class to manage modules which are periodically executed"""
     _re_delim = re.compile(r'\s*[,;]\s*')
-    _ignore_modules = ['__init__']
+    _ignore_modules = ['__init__', 'template']
 
     def __init__(self, madcow):
         self.madcow = madcow
