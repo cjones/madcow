@@ -29,6 +29,7 @@ import threading
 import time
 import logging
 from include.authlib import AuthLib
+from include.utils import Base
 import SocketServer
 import select
 
@@ -224,6 +225,65 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
         logging.info('connection closed by %s' % repr(self.client_address))
 
 
+class PeriodicEvents(Base):
+    """Class to manage modules which are periodically executed"""
+    _re_delim = re.compile(r'\s*[,;]\s*')
+    _ignore_modules = ['__init__']
+
+    def __init__(self, madcow):
+        self.madcow = madcow
+        self.dir = os.path.join(madcow.dir, 'periodic')
+        self.modules = {}
+        self.load_modules()
+
+    def load_modules(self):
+        """Load modules to be periodically executed"""
+        try:
+            disabled = self._re_delim.split(self.madcow.config.periodic.disabled)
+        except:
+            disabled = []
+
+        filenames = os.walk(self.dir).next()[2]
+        logging.info('[MOD] * Reading periodic modules from %s' % self.dir)
+
+        for filename in filenames:
+            if not filename.endswith('.py'):
+                continue
+            mod_name = filename[:-3]
+            if mod_name in PeriodicEvents._ignore_modules:
+                continue
+            if mod_name in disabled:
+                logging.warn('[MOD] Skipping %s because it is disabled in config' % mod_name)
+                continue
+            try:
+                module = __import__('periodic.' + mod_name, globals(), locals(), ['PeriodicEvent'])
+                PeriodicEvent = getattr(module, 'PeriodicEvent')
+                obj = PeriodicEvent(madcow=self.madcow)
+                if obj.enabled is False:
+                    raise Exception, 'disabled'
+                logging.info('[MOD] Loaded periodic module %s' % mod_name)
+                self.modules[mod_name] = {'last_run': time.time(), 'obj': obj}
+            except Exception, e:
+                logging.warn("[MOD] WARN: Couldn't load module %s: %s" % (mod_name, e))
+
+    def process_queue(self):
+        now = time.time()
+        for mod_name, mod_data in self.modules.items():
+            obj = mod_data['obj']
+            if (now - mod_data['last_run']) > obj.frequency:
+                self.modules[mod_name]['last_run'] = now
+                try:
+                    response = obj.process()
+                    if response is not None and len(response):
+                        req = Request()
+                        req.colorize = False
+                        req.wrap = False
+                        req.sendTo = obj.output
+                        self.madcow.output(response, req)
+                except:
+                    pass
+
+
 class Madcow(object):
     """
     Core bot handler
@@ -249,6 +309,7 @@ class Madcow(object):
             self.ignoreList = []
 
         self.admin = Admin(self)
+        self.periodic = PeriodicEvents(madcow=self)
 
         # dynamically generated content
         self.usageLines = []
@@ -266,6 +327,7 @@ class Madcow(object):
         while True:
             if select.select([server.socket], [], [], 0.25)[0]:
                 server.handle_request()
+            self.periodic.process_queue()
 
     def start(self):
         pass
