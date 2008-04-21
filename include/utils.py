@@ -5,11 +5,12 @@
 import re
 import urllib, urllib2, cookielib
 import sys
+from time import time as unix_time
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['UserAgent', 'Base']
+__all__ = ['UserAgent', 'Base', 'cache']
 __agent__ = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
@@ -60,8 +61,7 @@ class Base(object):
 
     def __init__(self, *args, **kwargs):
         self.args = args
-        for key, val in kwargs.items():
-            setattr(self, key, val)
+        self.__dict__.update(kwargs)
 
     def __str__(self):
         return '<%s %s>' % (self.__class__.__name__, repr(self.__dict__))
@@ -111,6 +111,35 @@ class UserAgent(Base):
         except Exception, e:
             sys.stderr.write("couldn't load page %s: %s\n" % (url, e))
         return ''
+
+
+class cache:
+    """Decorator for caching return values"""
+    _timeout = 3600
+
+    def __init__(self, timeout=_timeout):
+        self.timeout = timeout
+        self.cached = {}
+
+    def __call__(self, function):
+
+        def callback(*args, **kwargs):
+            now = unix_time()
+
+            # expire cache values that have aged beyond timeout
+            for key, item in self.cached.items():
+                if (now - item['created']) > self.timeout:
+                    del self.cached[key]
+
+            # run wrapped function if there is no cached data
+            if not self.cached.has_key(args):
+                value = function(*args, **kwargs)
+                self.cached[args] = {'created': now, 'value': value}
+
+            # return
+            return self.cached[args]['value']
+
+        return callback
 
 
 def stripHTML(data=None):
