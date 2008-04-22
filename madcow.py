@@ -616,7 +616,11 @@ def main():
         detach()
 
     # run bot
-    ProtocolHandler(config=config, dir=dir).start()
+    try:
+        ProtocolHandler(config=config, dir=dir).start()
+    finally:
+        for thread in threading.enumerate():
+            thread._Thread__stop()
 
     return 0
 
