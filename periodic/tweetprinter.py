@@ -20,6 +20,7 @@ class PeriodicEvent(Base):
     self.frequency = madcow.config.twitter.updatefreq
     self.output = madcow.config.periodic.channel
     self.__updatelast()
+    self.seenids = set()
   
   def __updatelast(self):
     """Updates timestamp of last update."""
@@ -39,6 +40,10 @@ class PeriodicEvent(Base):
     lines = []
     
     for t in tweets:
+      if t.id in self.seenids:
+        continue
+      else:
+        self.seenids.add(t.id)
       line = "tweet from %s: %s" % (t.user.screen_name, t.text)
       lines.append(line)
     
