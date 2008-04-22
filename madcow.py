@@ -1,25 +1,5 @@
 #!/usr/bin/env python
 
-__version__ = '1.1.4'
-__author__ = 'Christopher Jones <cjones@gruntle.org>'
-__copyright__ = """
-Copyright (C) 2007 Christopher Jones <cjones@gruntle.org>
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
-"""
-
 import sys
 import os
 from ConfigParser import ConfigParser
@@ -33,13 +13,17 @@ from include.utils import Base
 import SocketServer
 import select
 
-class Request(object):
-    """
-    Generic object passed in from protocol handlers for processing
-    """
+__version__ = '1.1.4'
+__author__ = 'Christopher Jones <cjones@gruntle.org>'
+__copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
+__license__ = 'GPL'
+_logformat = '[%(asctime)s] %(levelname)s: %(message)s'
+_loglevel = logging.WARN
+
+class Request(Base):
+    """Generic object passed in from protocol handlers for processing"""
 
     def __init__(self, message=None):
-
         self.message = message
 
         # required attributes get a default
@@ -53,7 +37,7 @@ class Request(object):
         return None
 
 
-class User(object):
+class User(Base):
     """This class represents a logged in user"""
 
     def __init__(self, user, flags):
@@ -70,14 +54,8 @@ class User(object):
         else:
             return False
 
-    def __str__(self):
-        return '<User %s>' % self.user
 
-    def __repr__(self):
-        return str(self)
-
-
-class Admin(object):
+class Admin(Base):
     """Class to handle admin interface"""
 
     _reRegister = re.compile('^\s*register\s+(\S+)\s*$', re.I)
@@ -169,7 +147,9 @@ class Admin(object):
 
 
 class ServiceHandler(SocketServer.BaseRequestHandler):
+    """This class handles the listener service for message injection"""
 
+    # pre-compiled regex
     re_from = re.compile(r'^from:\s*(.+?)\s*$', re.I)
     re_to = re.compile(r'^to:\s*(#\S+)\s*$', re.I)
     re_message = re.compile(r'^message:\s*(.+?)\s*$', re.I)
@@ -239,7 +219,8 @@ class PeriodicEvents(Base):
     def load_modules(self):
         """Load modules to be periodically executed"""
         try:
-            disabled = self._re_delim.split(self.madcow.config.periodic.disabled)
+            disabled = self.madcow.config.periodic.disabled
+            disabled = self._re_delim.split(disabled)
         except:
             disabled = []
 
@@ -253,10 +234,11 @@ class PeriodicEvents(Base):
             if mod_name in PeriodicEvents._ignore_modules:
                 continue
             if mod_name in disabled:
-                logging.warn('[MOD] Skipping %s because it is disabled in config' % mod_name)
+                logging.warn('[MOD] %s is disabled in config' % mod_name)
                 continue
             try:
-                module = __import__('periodic.' + mod_name, globals(), locals(), ['PeriodicEvent'])
+                module = __import__('periodic.' + mod_name, globals(),
+                        locals(), ['PeriodicEvent'])
                 PeriodicEvent = getattr(module, 'PeriodicEvent')
                 obj = PeriodicEvent(madcow=self.madcow)
                 if obj.enabled is False:
@@ -264,7 +246,7 @@ class PeriodicEvents(Base):
                 logging.info('[MOD] Loaded periodic module %s' % mod_name)
                 self.modules[mod_name] = {'last_run': time.time(), 'obj': obj}
             except Exception, e:
-                logging.warn("[MOD] WARN: Couldn't load module %s: %s" % (mod_name, e))
+                logging.warn("[MOD] Couldn't load %s: %s" % (mod_name, e))
 
     def process_queue(self):
         now = time.time()
@@ -284,10 +266,8 @@ class PeriodicEvents(Base):
                     pass
 
 
-class Madcow(object):
-    """
-    Core bot handler
-    """
+class Madcow(Base):
+    """Core bot handler"""
     reDelim = re.compile(r'\s*[,;]\s*')
 
     def __init__(self, config=None, dir=None):
@@ -296,14 +276,13 @@ class Madcow(object):
 
         self.ns = self.config.modules.dbnamespace
         self.ignoreModules = [ '__init__', 'template' ]
-        self.ignoreModules.append('tac')       # moved to grufti framework in 1.0.7
-        self.ignoreModules.append('bullshitr') # moved to grufti framework in 1.0.7
-        self.ignoreModules.append('ircadmin')  # moved to core bot
-        self.moduleDir = self.dir + '/modules'
+        self.moduleDir = os.path.join(self.dir, 'modules')
         self.outputLock = threading.RLock()
 
         if self.config.main.ignorelist is not None:
-            self.ignoreList = [nick.lower() for nick in Madcow.reDelim.split(self.config.main.ignorelist)]
+            self.ignoreList = self.config.main.ignorelist
+            self.ignoreList = self.reDelim.split(self.ignoreList)
+            self.ignoreList = [nick.lower() for nick in self.ignoreList]
             logging.info('Ignoring nicks: %s' % ', '.join(self.ignoreList))
         else:
             self.ignoreList = []
@@ -342,7 +321,7 @@ class Madcow(object):
         """
         Dynamic loading of module extensions. This looks for .py files in
         The module directory. They must be well-formed (based on template.py).
-        If there are any problems loading, it will skip them instead of crashing.
+        If there are any problems loading, it will skip them.
         """
         try:
             disabled = re.split('\s*[,;]\s*', self.config.modules.disabled)
@@ -360,16 +339,13 @@ class Madcow(object):
             if modName in self.ignoreModules:
                 continue
 
-            if modName == 'ircadmin' and self.config.main.module not in ['irc', 'silcplugin']:
-                logging.warn('[MOD] Disabling admin module: for IRC or SILC only')
-                continue
-
             if modName in disabled:
-                logging.warn('[MOD] Skipping %s because it is disabled in config' % modName)
+                logging.warn('[MOD] %s is disabled in config' % modName)
                 continue
 
             try:
-                module = __import__('modules.' + modName, globals(), locals(), ['MatchObject'])
+                module = __import__('modules.' + modName, globals(), locals(),
+                        ['MatchObject'])
                 MatchObject = getattr(module, 'MatchObject')
                 obj = MatchObject(config=self.config, ns=self.ns, dir=self.dir)
 
@@ -385,23 +361,23 @@ class Madcow(object):
                 try:
                     Admin = getattr(module, 'Admin')
                     obj = Admin()
-                    logging.info('[MOD] Registering Admin functions for %s' % modName)
+                    logging.info('[MOD] Registering Admin: %s' % modName)
                     self.admin.modules[modName] = obj
                 except:
                     pass
 
             except Exception, e:
-                logging.warn("[MOD] WARN: Couldn't load module %s: %s" % (modName, e))
+                logging.warn("[MOD] Couldn't load module %s: %s" % (modName, e))
 
     def checkAddressing(self, req):
-        """
-        Pre-processing filter that catches whether the bot is being addressed or not
-        """
+        """Is bot being addressed?"""
         nick = self.botName()
 
         # compile regex based on current nick
-        self.reCorrection = re.compile('^\s*no,?\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
-        self.reAddressed = re.compile('^\s*%s\s*[,:> -]+\s*(.+)' % re.escape(nick), re.I)
+        self.reCorrection = re.compile('^\s*no,?\s*%s\s*[,:> -]+\s*(.+)' % 
+                re.escape(nick), re.I)
+        self.reAddressed = re.compile('^\s*%s\s*[,:> -]+\s*(.+)' %
+                re.escape(nick), re.I)
         self.reFeedback = re.compile('^\s*%s\s*\?+$' % re.escape(nick), re.I)
 
         # correction: "no, bot, foo is bar"
@@ -424,28 +400,23 @@ class Madcow(object):
             pass
 
     def log(self, req):
-        """
-        Logs public chatter
-        """
+        """Logs public chatter"""
         line = '%s <%s> %s\n' % (time.strftime('%T'), req.nick, req.message)
-        file = '%s/logs/%s-irc-%s-%s' % (self.dir, self.ns, req.channel, time.strftime('%F'))
+        path = os.path.join(self.dir, 'logs', '%s-irc-%s-%s' % (self.ns,
+            req.channel, time.strftime('%F')))
 
+        fi = open(path, 'a')
         try:
-            fi = open(file, 'a')
             fi.write(line)
         finally:
             fi.close()
 
     def usage(self):
-        """
-        Returns help data as a string
-        """
+        """Returns help data as a string"""
         return '\n'.join(self.usageLines)
 
     def processMessage(self, req):
-        """
-        Process requests
-        """
+        """Process requests"""
         if self.config.main.log is True and req.private is False:
             self.log(req)
 
@@ -478,10 +449,12 @@ class Madcow(object):
                 continue
 
             # make new dict explictly for thread safety
-            kwargs = dict(req.__dict__.items() + [('args', args), ('module', module), ('req', req)])
+            kwargs = dict(req.__dict__.items() + [('args', args),
+                ('module', module), ('req', req)])
 
             if self.allowThreading and module.thread:
-                threading.Thread(target=self.processThread, kwargs=kwargs).start()
+                threading.Thread(target=self.processThread,
+                        kwargs=kwargs).start()
             else:
                 try:
                     response = module.response(**kwargs)
@@ -489,7 +462,6 @@ class Madcow(object):
                     logging.warn('UNCAUGHT EXCEPTION')
                     logging.exception(e)
                     response = None
-                    #response = 'YOU BROKE MADCOW: %s' % str(e)
                 if response is not None and len(response) > 0:
                     self.output(response, req)
 
@@ -500,14 +472,13 @@ class Madcow(object):
             logging.warn('UNCAUGHT EXCEPTION')
             logging.exception(e)
             response = None
-            #response = 'YOU BROKE MADCOW: %s' % str(e)
         if response is not None and len(response) > 0:
             self.outputLock.acquire()
             self.output(response, kwargs['req'])
             self.outputLock.release()
 
 
-class Config(object):
+class Config(Base):
     """
     Class to handle configuration directives. Usage is: config.module.attribute
     module maps to the headers in the configuration file. It automatically
@@ -552,9 +523,7 @@ class Config(object):
 
 
 def detach():
-    """
-    Daemonize on POSIX system
-    """
+    """Daemonize on POSIX system"""
     if os.name != 'posix': return
     if os.fork() > 0: sys.exit(0)
     os.setsid()
@@ -569,9 +538,7 @@ def detach():
     logging.shutdown()
 
 def main():
-    """
-    Entry point to set up bot and run it
-    """
+    """Entry point to set up bot and run it"""
 
     # where we are being run from
     dir = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -579,19 +546,21 @@ def main():
 
     # parse commandline options
     parser = OptionParser(version=__version__)
-    parser.add_option('-c', '--config', default=dir+'/madcow.ini', help='default: %default', metavar='FILE')
-    parser.add_option('-d', '--detach', action='store_true', default=False, help='detach when run')
-    parser.add_option('-p', '--protocol', help='force the use of this output protocol')
-    parser.add_option('-v', '--verbose', action='store_true', default=False, help='turn on verbose output')
-    parser.add_option('-D', '--debug', action='store_true', default=False, help='turn on debugging output')
+    parser.add_option('-c', '--config', default=dir+'/madcow.ini',
+            help='default: %default', metavar='FILE')
+    parser.add_option('-d', '--detach', action='store_true', default=False,
+            help='detach when run')
+    parser.add_option('-p', '--protocol',
+            help='force the use of this output protocol')
+    parser.add_option('-v', '--verbose', dest='loglevel', default=_loglevel,
+            action='store_const', const=logging.INFO,
+            help='turn on verbose output')
+    parser.add_option('-D', '--debug', dest='loglevel', action='store_const',
+            const=logging.DEBUG, help='turn on debugging output')
     opts, args = parser.parse_args()
 
-    # logging facility
-    logging.basicConfig(level=logging.WARN, format='[%(asctime)s] %(levelname)s: %(message)s')
-    if opts.debug:
-        logging.root.setLevel(logging.DEBUG)
-    elif opts.verbose:
-        logging.root.setLevel(logging.INFO)
+    # init logging facility
+    logging.basicConfig(level=opts.loglevel, format=_logformat)
 
     # read config file
     config = Config(file=opts.config)
@@ -605,7 +574,8 @@ def main():
 
     # dynamic load protocol handler
     try:
-        module = __import__('protocols.' + protocol, globals(), locals(), ['ProtocolHandler'])
+        module = __import__('protocols.' + protocol, globals(), locals(),
+                ['ProtocolHandler'])
         ProtocolHandler = getattr(module, 'ProtocolHandler')
     except Exception, e:
         logging.exception(e)
@@ -615,7 +585,7 @@ def main():
     if config.main.detach or opts.detach:
         detach()
 
-    # run bot
+    # run bot & shut down threads when done
     try:
         ProtocolHandler(config=config, dir=dir).start()
     finally:
