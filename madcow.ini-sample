@@ -151,3 +151,8 @@ port=5000
 [periodic]
 channel=#madcow
 
+; twitter settings
+;[twitter]
+;updatefreq=120  ; in seconds
+;username=twitterbotaccount
+;password=twitterbotpassword
