@@ -32,9 +32,9 @@ class PeriodicEvent(Base):
       tweets = twitter.Api().GetFriendsTimeline(user=self.madcow.config.twitter.username, since=self.lastupdate)
     except Exception,e:
       print str(e)
-      return None
-    finally:
       self.__updatelast()
+      return None
+    self.__updatelast()
     
     lines = []
     
