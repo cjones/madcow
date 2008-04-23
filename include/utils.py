@@ -142,28 +142,42 @@ class cache:
         return callback
 
 
-class throttle:
+class throttle(Base):
     """Decorator for throttling requests to prevent abuse/spamming"""
+
+    # defaults
     _threshold = 1
     _period = 60
+    _key = 'global'
 
-    def __init__(self, threshold=_threshold, period=_period):
+    # store state here, shared between instances
+    __state = {}
+
+    def __init__(self, threshold=_threshold, period=_period, key=_key):
         self.threshold = threshold
         self.period = period
+        self.key = key
+        self.__state.setdefault(key, {})
         self._reset()
 
+    def get_state(self):
+        return self.__state[self.key]
+
+    state = property(get_state)
+
     def _reset(self):
-        self.count = 0
-        self.start = unix_time()
+        self.state['count'] = 0
+        self.state['first_event'] = unix_time()
 
     def __call__(self, function):
 
         def callback(*args, **kwargs):
-            if (unix_time() - self.start) > self.period:
+            r = repr(self.__state)
+            if (unix_time() - self.state['first_event']) > self.period:
                 self._reset()
-            if self.count >= self.threshold:
+            if self.state['count'] >= self.threshold:
                 return
-            self.count += 1
+            self.state['count'] += 1
             return function(*args, **kwargs)
 
         return callback
