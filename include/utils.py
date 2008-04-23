@@ -142,6 +142,33 @@ class cache:
         return callback
 
 
+class throttle:
+    """Decorator for throttling requests to prevent abuse/spamming"""
+    _threshold = 1
+    _period = 60
+
+    def __init__(self, threshold=_threshold, period=_period):
+        self.threshold = threshold
+        self.period = period
+        self._reset()
+
+    def _reset(self):
+        self.count = 0
+        self.start = unix_time()
+
+    def __call__(self, function):
+
+        def callback(*args, **kwargs):
+            if (unix_time() - self.start) > self.period:
+                self._reset()
+            if self.count >= self.threshold:
+                return
+            self.count += 1
+            return function(*args, **kwargs)
+
+        return callback
+
+
 def stripHTML(data=None):
     if data is None:
         return
