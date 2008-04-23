@@ -39,12 +39,12 @@ class PeriodicEvent(Base):
     
     lines = []
     
-    for t in tweets:
+    for t in reversed(tweets):
       if t.id in self.seenids:
         continue
       else:
         self.seenids.add(t.id)
-      line = "tweet from %s: %s" % (t.user.screen_name, t.text)
+      line = ">> tweet from %s: %s <<" % (t.user.screen_name, t.text)
       lines.append(line)
     
     if lines:
