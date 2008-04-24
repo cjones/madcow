@@ -8,7 +8,8 @@ import math
 
 class MatchObject(object):
     _allow = '-?(?:[0-9.]+j?|pi|e)'
-    _regex = '^\s*roll\s+(%s)d(%s)\s*$' % (_allow, _allow)
+    _regex = '^\s*roll\s+(%s?)d(%s)\s*$' % (_allow, _allow)
+    _color_map = {'red': 5, 'yellow': 7, 'green': 3}
 
     def __init__(self, *args, **kwargs):
         self.enabled = True
@@ -17,7 +18,6 @@ class MatchObject(object):
         self.thread = False
         self.wrap = True
         self.help = 'roll [<numdice>d<sides>] - roll die of the specified size'
-        random.seed()
 
     def roll(self, min, max):
         if isinstance((min * max), (float, complex)):
@@ -25,38 +25,36 @@ class MatchObject(object):
         else:
             return random.randint(min, max)
 
+    def normalize(self, val):
+        try:
+            val = val.lower()
+            if val == 'pi':
+                val = math.pi
+            elif val == 'e':
+                val = math.e
+            elif val.endswith('j'):
+                val = complex(val)
+            elif '.' in val:
+                val = float(val)
+            else:
+                val = int(val)
+        except:
+            val = 1
+        return val
+
+    def colorize(self, text, color):
+        color_code = self._color_map[color]
+        return '\x03%d\x16\x16%s\x0f' % (color_code, text)
+
     def response(self, **kwargs):
         nick = kwargs['nick']
         args = kwargs['args']
 
-        num_dice = args[0].lower()
-        if num_dice == 'pi':
-            num_dice = math.pi
-        elif num_dice == 'e':
-            num_dice = math.e
-        elif num_dice.endswith('j'):
-            num_dice = complex(num_dice)
-        elif '.' in num_dice:
-            num_dice = float(num_dice)
-        else:
-            num_dice = int(num_dice)
+        num_dice = self.normalize(args[0])
+        sides = self.normalize(args[1])
 
-        sides = args[1].lower()
-        if sides == 'pi':
-            sides = math.pi
-        elif sides == 'e':
-            sides = math.e
-        elif sides.endswith('j'):
-            sides = complex(sides)
-        elif '.' in sides:
-            sides = float(sides)
-        else:
-            sides = int(sides)
-
-        if sides == 0:
-            return 'ZERO SIDED DIE MAKES UNIVERSE EXPLODE'
-        if num_dice == 0:
-            return 'ROLLING DICE 0 TIMES MEANS YOU DIE'
+        if sides == 0 or num_dice == 0:
+            return 'GOOD JOB, UNIVERSE %s' % self.colorize('EXPLODES', 'red')
 
         min = num_dice
         max = num_dice * sides
@@ -65,11 +63,11 @@ class MatchObject(object):
 
         try:
             if saving_throw >= save_versus:
-                result = '\x033\x16\x16LIVES\x0f'
+                result = self.colorize('LIVES', 'green')
             else:
-                result = '\x035\x16\x16DIES\x0f'
+                result = self.colorize('DIES', 'red')
         except:
-            result = '\x037\x16\x16IS IN LIMBO\x0f'
+            result = self.colorize('IS TOO COMPLEX', 'yellow')
 
         return '%s rolls %s, needs %s, %s %s' % (nick, saving_throw,
                 save_versus, nick, result)
