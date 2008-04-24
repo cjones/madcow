@@ -324,10 +324,12 @@ class Madcow(Base):
         The module directory. They must be well-formed (based on template.py).
         If there are any problems loading, it will skip them.
         """
-        try:
-            disabled = re.split('\s*[,;]\s*', self.config.modules.disabled)
-        except:
-            disabled = []
+        disabled = []
+        for mod_name, enabled in self.config.modules.__dict__.items():
+            if mod_name == 'dbNamespace':
+                continue
+            if not enabled:
+                disabled.append(mod_name)
 
         files = os.walk(self.moduleDir).next()[2]
         logging.info('[MOD] * Reading modules from %s' % self.moduleDir)

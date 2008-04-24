@@ -34,57 +34,42 @@ log=yes
 ;
 dbNamespace=madcow
 ;
-; by default, all modules that come with madcow are enabled. you can
-; disable any you wish by adding them to the "disabled" option below,
-; separated by commas. below this is a list and brief description of
-; each module. most of these are probably fine as they don't do anything
-; without being invoked directly by addressing the bot.
-; 
-; ********** WARNING *************
-; some of these produce OFFENSIVE output. if you are using this on a
-; work server or in a family environment, you are encouraged to review
-; what these modules do before putting it up. In particular: artfart,
-; bash, hugs, lifejournal, and urban all pull content from the web which
-; may be inappropriate for your environment.  For your convenience,
-; there is a line that disables these potentially offensive modules.
-; Uncomment it if you are unsure.
-;
-; YOU'VE BEEN WARNED
-;
-;disabled=artfart, bash, hugs, livejournal, urban, yourmom
-;
-; MODULE DESCRIPTIONS:
-;
-;area           look up city/state for US area codes
-;artfart        get a random offensive ascii art
-;babel          use altavista babelfish to translate languages
-;bash           get a random IRC/IM quote from bash.org
-;bbcnews        get news headlines from BBC RSS feed
-;bible          get quotes from the bible based on book/chapter/verse
-;bullshitr      make fun of people who think web 2.0 has meaning
-;calc           use google calculator to perform any arithmetic
-;chp            BAY AREA ONLY - get california highway patrol incidents
-;dictionary     look up a word or phrase on dictionary.com
-;doomsday       how close we are to destruction from thebulletin
-;factoids       infobot work-a-like to remember factoids said in channel
-;google         i'm feeling lucky url for a specified search term
-;grufti         grufti chatterbot module for match/responses
-;hugs           get a random confession from grouphug.us
-;jinx           catch people who say the same thing (almost) simultaneously
-;learn          part of the weather module, learns where someone lives
-;livejournal    get latest livejournal entry (random or a specific user)
-;lyrics         get lyrics for a song/artist
-;memebot        track urls posted in channel, insult reposters
-;nslookup       look up forward/reverse dns
-;seen           keep track of what people said in channel last
-;slut           gives you a porno rating in % of a google search terms.
-;stockquote     yahoo finance stock and mutual fund quotes
-;terror         up-to-date threat level advisory according to DHS
-;urban          look up a word or phrase in the urban dictionary
-;weather        look up weather forecast for your area using wunderground
-;webtender      look up mixing instructions for any drink on webtender
-;woot           get the latest offer from woot.com
-;yourmom        the ultimate insult -- in figlet
+; what modules are enabled (yes/no)
+area=yes                ; look up area codes
+artfart=yes             ; random ascii art
+babel=yes               ; language translations
+bash=yes                ; bash quotes
+bbcnews=yes             ; bbc news headlines
+bible=yes               ; jesus quotes
+calc=yes                ; google calculator
+chp=yes                 ; california real-time traffic reports
+conservapedia=yes       ; look up inaccurate conservative information
+dictionary=yes          ; definition of words
+factoids=yes            ; makes madcow remember stuff from chatter
+google=yes              ; i'm feeling lucky query
+grufti=yes              ; random response triggeres, like grufti bot
+hugs=yes                ; random group hug confession
+jinx=yes                ; someone owes you a coke for being unoriginal
+karma=yes               ; keep track of karma (nick++, nick--)
+learn=yes               ; used for various modules to cache per-user data
+livejournal=yes         ; random livejournal entry
+lyrics=yes              ; look up song lyrics
+memebot=yes             ; track urls and lay smackdown on old memes
+nslookup=yes            ; look up ip of hostnames
+roll=yes                ; roll ad&d dice
+seen=yes                ; keep track of last thing everyone in channel said
+slut=yes                ; how slutty is the phrase?
+stockquote=yes          ; get yahoo stock quotes
+stupid=yes              ; random quote from stupid-project
+summon=yes              ; summon users (send email/sms)
+urban=yes               ; look up word/phrase on urban dictionary
+war=yes                 ; current war status
+weather=yes             ; look up weather from wunderground
+webtender=yes           ; how to make drinks
+wikipedia=yes           ; look up summary from wikipedia
+wikiquotes=yes          ; look up quotes from wikiquotes
+woot=yes                ; latest woot offer
+yourmom=yes             ; yourmom ascii art
 
 ; admin module
 [admin]
