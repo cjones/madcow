@@ -263,8 +263,8 @@ class PeriodicEvents(Base):
                         req.sendTo = obj.output
                         self.madcow.output(response, req)
                 except Exception, e:
-                    log.warn('UNCAUGHT EXCEPTION IN %s' % mod_name)
-                    log.exception(e)
+                    logging.warn('UNCAUGHT EXCEPTION IN %s' % mod_name)
+                    logging.exception(e)
 
 
 class Madcow(Base):
