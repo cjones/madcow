@@ -9,6 +9,7 @@
 """Prints tweets to the channel."""
 
 from include.utils import Base
+from include.utils import stripHTML
 from include import twitter
 import time
 
@@ -17,35 +18,37 @@ class PeriodicEvent(Base):
   def __init__(self, madcow):
     self.madcow = madcow
     self.enabled = True
-    self.frequency = madcow.config.twitter.updatefreq
+    #self.frequency = madcow.config.twitter.updatefreq
+    self.frequency = 60
     self.output = madcow.config.periodic.channel
     self.__updatelast()
-    self.seenids = set()
   
   def __updatelast(self):
     """Updates timestamp of last update."""
-    self.lastupdate = time.strftime("%a, %d %b %Y %X GMT", time.gmtime())
+    self.lastupdate = time.gmtime()
+
+  def __get_update_str(self):
+    return time.strftime("%a, %d %b %Y %X GMT", self.lastupdate)
 
   def process(self):
     """This is called by madcow, should return a string or None"""
-    print "checking for new tweets... last update is %s" % self.lastupdate
     try:
-      tweets = twitter.Api().GetFriendsTimeline(user=self.madcow.config.twitter.username, since=self.lastupdate)
+      tweets = twitter.Api().GetFriendsTimeline(user=self.madcow.config.twitter.username, since=self.__get_update_str())
     except Exception,e:
       print str(e)
-      self.__updatelast()
       return None
-    self.__updatelast()
     
     lines = []
     
     for t in reversed(tweets):
-      if t.id in self.seenids:
+      if time.localtime(t.GetCreatedAtInSeconds()) < self.lastupdate: # twitter fails sometimes, so we do our own filter..
+        print "ignoring old tweet with timestamp %s (TWITTER SUCKS)" % t.created_at
         continue
-      else:
-        self.seenids.add(t.id)
-      line = ">> tweet from %s: %s <<" % (t.user.screen_name, t.text)
+      
+      line = ">> tweet from %s: %s <<" % (t.user.screen_name, stripHTML(t.text))
       lines.append(line)
+    
+    self.__updatelast()
     
     if lines:
       return "\n".join(lines)
