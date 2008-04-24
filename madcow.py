@@ -262,8 +262,9 @@ class PeriodicEvents(Base):
                         req.wrap = False
                         req.sendTo = obj.output
                         self.madcow.output(response, req)
-                except:
-                    pass
+                except Exception, e:
+                    log.warn('UNCAUGHT EXCEPTION IN %s' % mod_name)
+                    log.exception(e)
 
 
 class Madcow(Base):
