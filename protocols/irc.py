@@ -8,7 +8,6 @@ from include.colorlib import ColorLib
 import random
 import logging
 
-
 class IRCProtocol(Madcow):
 
     def __init__(self, config=None, dir=None):
@@ -32,14 +31,17 @@ class IRCProtocol(Madcow):
             self.channels = []
 
     def connect(self):
-        logging.info('[IRC] * Connecting to %s:%s' % (self.config.irc.host, self.config.irc.port))
-        self.server.connect(self.config.irc.host, self.config.irc.port, self.config.irc.nick)
+        logging.info('[IRC] * Connecting to %s:%s' % (self.config.irc.host,
+            self.config.irc.port))
+        self.server.connect(self.config.irc.host, self.config.irc.port,
+                self.config.irc.nick)
 
     def start(self):
         self.connect()
         for event in self.events:
             logging.info('[IRC] * Registering event: %s' % event)
-            self.server.add_global_handler(event, getattr(self, 'on_' + event), 0)
+            self.server.add_global_handler(event,
+                    getattr(self, 'on_' + event), 0)
 
         self.irc.process_forever()
 
@@ -75,7 +77,8 @@ class IRCProtocol(Madcow):
 
     # when kicked, rejoin channel if configured to do so
     def on_kick(self, server, event):
-        logging.warn('[IRC] * Kicked from %s by %s' % (event.arguments()[0], event.target()))
+        logging.warn('[IRC] * Kicked from %s by %s' % (event.arguments()[0],
+            event.target()))
         if event.arguments()[0].lower() == server.get_nickname().lower():
             if self.config.irc.rejoin is True:
                 if self.config.irc.rejoinWait > 0:
@@ -111,11 +114,13 @@ class IRCProtocol(Madcow):
             self.server.privmsg(req.sendTo, line)
 
     def on_privmsg(self, server, event):
-        logging.info('[IRC] PRIVMSG from %s: %s' % (event.source(), event.arguments()[0]))
+        logging.info('[IRC] PRIVMSG from %s: %s' % (event.source(),
+            event.arguments()[0]))
         self.on_message(server, event, private=True)
 
     def on_pubmsg(self, server, event):
-        logging.info('[IRC] <%s/%s> %s' % (event.source(), event.target(), event.arguments()[0]))
+        logging.info('[IRC] <%s/%s> %s' % (event.source(), event.target(),
+            event.arguments()[0]))
         self.on_message(server, event, private=False)
 
     def on_message(self, server, event, private):
