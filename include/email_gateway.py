@@ -28,6 +28,7 @@ def main():
     # regexes for parsing
     tags = re.compile(r'<[^>]+>')
     br = re.compile(r'<br[^>]*>')
+    # ------Original Message------
     quoted = re.compile(r'^(---+)\s*(original|forwarded)\s+(message|email)\s*\1', re.I)
     is_header = re.compile(r'^\S+:\s*.+$', re.I)
     telus_spam = 'This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.'
@@ -74,10 +75,13 @@ def main():
             reading_quoted = True
             continue
         if reading_quoted:
+            continue
+            """
             if is_header.search(line):
                 continue
             else:
                 reading_quoted = False
+            """
         if line == '--':
             break
         nosig.append(line)
