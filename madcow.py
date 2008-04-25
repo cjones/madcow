@@ -18,7 +18,7 @@ __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
-_loglevel = log.WARN
+_loglevel = log.INFO
 
 class Request(Base):
     """Generic object passed in from protocol handlers for processing"""
@@ -582,11 +582,11 @@ def main():
             help='detach when run')
     parser.add_option('-p', '--protocol',
             help='force the use of this output protocol')
-    parser.add_option('-v', '--verbose', dest='loglevel', default=_loglevel,
-            action='store_const', const=log.INFO,
-            help='turn on verbose output')
-    parser.add_option('-D', '--debug', dest='loglevel', action='store_const',
-            const=log.DEBUG, help='turn on debugging output')
+    parser.add_option('-D', '--debug', dest='loglevel', default=_loglevel,
+            action='store_const', const=log.DEBUG,
+            help='turn on debugging output (SPAMMY)')
+    parser.add_option('-q', '--quiet', dest='loglevel', action='store_const',
+            const=log.WARN, help='only show errors')
     opts, args = parser.parse_args()
 
     # read config file
