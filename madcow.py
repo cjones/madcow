@@ -7,7 +7,7 @@ from optparse import OptionParser
 import re
 import threading
 import time
-import logging
+import logging as log
 from include.authlib import AuthLib
 from include.utils import Base
 import SocketServer
@@ -18,7 +18,7 @@ __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
-_loglevel = logging.WARN
+_loglevel = log.WARN
 
 class Request(Base):
     """Generic object passed in from protocol handlers for processing"""
@@ -155,7 +155,7 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
     re_message = re.compile(r'^message:\s*(.+?)\s*$', re.I)
 
     def setup(self):
-        logging.info('connection from %s' % repr(self.client_address))
+        log.info('connection from %s' % repr(self.client_address))
 
     def handle(self):
         data = ''
@@ -164,7 +164,7 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
             if len(read) == 0:
                 break
             data += read
-        logging.info('got payload: %s' % repr(data))
+        log.info('got payload: %s' % repr(data))
 
         sent_from = send_to = message = None
         for line in data.splitlines():
@@ -184,7 +184,7 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
                 pass
 
         if sent_from is None or send_to is None or message is None:
-            logging.warn('invalid payload')
+            log.warn('invalid payload')
             return
 
         # see if we can reverse lookup sender
@@ -202,7 +202,7 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
         self.server.madcow.output(output, req)
 
     def finish(self):
-        logging.info('connection closed by %s' % repr(self.client_address))
+        log.info('connection closed by %s' % repr(self.client_address))
 
 
 class PeriodicEvents(Base):
@@ -220,7 +220,7 @@ class PeriodicEvents(Base):
     def load_modules(self):
         """Load modules to be periodically executed"""
         filenames = os.walk(self.dir).next()[2]
-        logging.info('[MOD] * Reading periodic modules from %s' % self.dir)
+        log.info('[MOD] * Reading periodic modules from %s' % self.dir)
 
         for filename in filenames:
             if not filename.endswith('.py'):
@@ -235,10 +235,10 @@ class PeriodicEvents(Base):
                 obj = PeriodicEvent(madcow=self.madcow)
                 if not obj.enabled:
                     raise Exception, 'disabled'
-                logging.info('[MOD] Loaded periodic module %s' % mod_name)
+                log.info('[MOD] Loaded periodic module %s' % mod_name)
                 self.modules[mod_name] = {'last_run': time.time(), 'obj': obj}
             except Exception, e:
-                logging.warn("[MOD] Couldn't load %s: %s" % (mod_name, e))
+                log.warn("[MOD] Couldn't load %s: %s" % (mod_name, e))
 
     def start(self):
         while True:
@@ -268,8 +268,8 @@ class PeriodicEvents(Base):
                 self.madcow.output(response, req)
                 self.madcow.outputLock.release()
         except Exception, e:
-            logging.warn('UNCAUGHT EXCEPTION IN %s' % kwargs['mod_name'])
-            logging.exception(e)
+            log.warn('UNCAUGHT EXCEPTION IN %s' % kwargs['mod_name'])
+            log.exception(e)
 
 
 class Madcow(Base):
@@ -289,7 +289,7 @@ class Madcow(Base):
             self.ignoreList = self.config.main.ignorelist
             self.ignoreList = self.reDelim.split(self.ignoreList)
             self.ignoreList = [nick.lower() for nick in self.ignoreList]
-            logging.info('Ignoring nicks: %s' % ', '.join(self.ignoreList))
+            log.info('Ignoring nicks: %s' % ', '.join(self.ignoreList))
         else:
             self.ignoreList = []
 
@@ -341,7 +341,7 @@ class Madcow(Base):
                 disabled.append(mod_name)
 
         files = os.walk(self.moduleDir).next()[2]
-        logging.info('[MOD] * Reading modules from %s' % self.moduleDir)
+        log.info('[MOD] * Reading modules from %s' % self.moduleDir)
 
         for file in files:
             if file.endswith('.py') is False:
@@ -352,7 +352,7 @@ class Madcow(Base):
                 continue
 
             if modName in disabled:
-                logging.warn('[MOD] %s is disabled in config' % modName)
+                log.warn('[MOD] %s is disabled in config' % modName)
                 continue
 
             try:
@@ -367,19 +367,19 @@ class Madcow(Base):
                 if hasattr(obj, 'help') and obj.help is not None:
                     self.usageLines += obj.help.splitlines()
 
-                logging.info('[MOD] Loaded module %s' % modName)
+                log.info('[MOD] Loaded module %s' % modName)
                 self.modules[modName] = obj
 
                 try:
                     Admin = getattr(module, 'Admin')
                     obj = Admin()
-                    logging.info('[MOD] Registering Admin: %s' % modName)
+                    log.info('[MOD] Registering Admin: %s' % modName)
                     self.admin.modules[modName] = obj
                 except:
                     pass
 
             except Exception, e:
-                logging.warn("[MOD] Couldn't load module %s: %s" % (modName, e))
+                log.warn("[MOD] Couldn't load module %s: %s" % (modName, e))
 
     def checkAddressing(self, req):
         """Is bot being addressed?"""
@@ -433,7 +433,7 @@ class Madcow(Base):
             self.log(req)
 
         if req.nick.lower() in self.ignoreList:
-            logging.info('Ignored "%s" from %s' % (req.message, req.nick))
+            log.info('Ignored "%s" from %s' % (req.message, req.nick))
             return
 
         if req.feedback is True:
@@ -471,8 +471,8 @@ class Madcow(Base):
                 try:
                     response = module.response(**kwargs)
                 except Exception, e:
-                    logging.warn('UNCAUGHT EXCEPTION')
-                    logging.exception(e)
+                    log.warn('UNCAUGHT EXCEPTION')
+                    log.exception(e)
                     response = None
                 if response is not None and len(response) > 0:
                     self.output(response, req)
@@ -481,8 +481,8 @@ class Madcow(Base):
         try:
             response = kwargs['module'].response(**kwargs)
         except Exception, e:
-            logging.warn('UNCAUGHT EXCEPTION')
-            logging.exception(e)
+            log.warn('UNCAUGHT EXCEPTION')
+            log.exception(e)
             response = None
         if response is not None and len(response) > 0:
             self.outputLock.acquire()
@@ -536,18 +536,36 @@ class Config(Base):
 
 def detach():
     """Daemonize on POSIX system"""
-    if os.name != 'posix': return
-    if os.fork() > 0: sys.exit(0)
+    if os.name != 'posix':
+        return
+    stop_logging('StreamHandler') # kind of pointless if we're daemonized
+    if os.fork() != 0:
+        sys.exit(0)
     os.setsid()
-    if os.fork() > 0: sys.exit(0)
-    for fd in sys.stdout, sys.stderr: fd.flush()
+    if os.fork() != 0:
+        sys.exit(0)
+    for fd in sys.stdout, sys.stderr:
+        fd.flush()
     si = file('/dev/null', 'r')
     so = file('/dev/null', 'a+')
     se = file('/dev/null', 'a+', 0)
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
     os.dup2(se.fileno(), sys.stderr.fileno())
-    logging.shutdown()
+    log.info('madcow is launched as a daemon')
+
+def stop_logging(handler_name):
+    """
+    Stops a specified logging handler by name (e.g. StreamHandler), why
+    there's no way to do this in the logging class I do not know.
+    """
+    logger = log.getLogger('')
+    for handler in logger.handlers:
+        if handler.__class__.__name__ == handler_name:
+            handler.flush()
+            handler.close()
+            logger.removeHandler(handler)
+    log.info('stopped logging to console')
 
 def main():
     """Entry point to set up bot and run it"""
@@ -565,17 +583,30 @@ def main():
     parser.add_option('-p', '--protocol',
             help='force the use of this output protocol')
     parser.add_option('-v', '--verbose', dest='loglevel', default=_loglevel,
-            action='store_const', const=logging.INFO,
+            action='store_const', const=log.INFO,
             help='turn on verbose output')
     parser.add_option('-D', '--debug', dest='loglevel', action='store_const',
-            const=logging.DEBUG, help='turn on debugging output')
+            const=log.DEBUG, help='turn on debugging output')
     opts, args = parser.parse_args()
-
-    # init logging facility
-    logging.basicConfig(level=opts.loglevel, format=_logformat)
 
     # read config file
     config = Config(file=opts.config)
+
+    # init log facility
+    log.basicConfig(level=opts.loglevel, format=_logformat)
+
+    # if specified, log to file as well
+    try:
+        logfile = config.main.logfile
+        if logfile is not None and len(logfile):
+            handler = log.FileHandler(filename=logfile)
+            handler.setLevel(opts.loglevel)
+            formatter = log.Formatter(_logformat)
+            handler.setFormatter(formatter)
+            log.getLogger('').addHandler(handler)
+    except Exception, e:
+        log.warn('unable to log to file: %s' % e)
+        log.exception(e)
 
     # load specified protocol
     if opts.protocol:
@@ -590,7 +621,7 @@ def main():
                 ['ProtocolHandler'])
         ProtocolHandler = getattr(module, 'ProtocolHandler')
     except Exception, e:
-        logging.exception(e)
+        log.exception(e)
         return 1
 
     # daemonize if requested

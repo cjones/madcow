@@ -24,6 +24,8 @@ log=yes
 ;
 ;ignoreList=somebot, abusiveGuy
 ;
+; set this to log console output to a file in madcow base directory
+logfile=madcow.log
 
 [modules]
 ; if you wish to run multiple bots from the same directory you should

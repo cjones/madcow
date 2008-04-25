@@ -14,8 +14,7 @@ def someRoutineInvokedByUser(user):
 """
 
 import time
-import logging
-
+import logging as log
 
 class ThrottleStatus(object):
 
@@ -51,7 +50,7 @@ class ThrottleStatus(object):
         if self.warned is True:
             return False
         else:
-            logging.info('Throttling user %s for %s' % (self.user, self.name))
+            log.info('Throttling user %s for %s' % (self.user, self.name))
             self.warned = True
             return True
 
