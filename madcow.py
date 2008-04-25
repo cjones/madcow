@@ -209,6 +209,7 @@ class PeriodicEvents(Base):
     """Class to manage modules which are periodically executed"""
     _re_delim = re.compile(r'\s*[,;]\s*')
     _ignore_modules = ['__init__', 'template']
+    _process_frequency = 0.50
 
     def __init__(self, madcow):
         self.madcow = madcow
@@ -239,23 +240,36 @@ class PeriodicEvents(Base):
             except Exception, e:
                 logging.warn("[MOD] Couldn't load %s: %s" % (mod_name, e))
 
+    def start(self):
+        while True:
+            self.process_queue()
+            time.sleep(self._process_frequency)
+
     def process_queue(self):
         now = time.time()
         for mod_name, mod_data in self.modules.items():
             obj = mod_data['obj']
-            if (now - mod_data['last_run']) > obj.frequency:
-                self.modules[mod_name]['last_run'] = now
-                try:
-                    response = obj.process()
-                    if response is not None and len(response):
-                        req = Request()
-                        req.colorize = False
-                        req.wrap = False
-                        req.sendTo = obj.output
-                        self.madcow.output(response, req)
-                except Exception, e:
-                    logging.warn('UNCAUGHT EXCEPTION IN %s' % mod_name)
-                    logging.exception(e)
+            if (now - mod_data['last_run']) < obj.frequency:
+                continue
+            self.modules[mod_name]['last_run'] = now
+            kwargs = {'mod_name': mod_name, 'obj': obj}
+            threading.Thread(target=self.process_thread, kwargs=kwargs).start()
+
+    def process_thread(self, **kwargs):
+        try:
+            obj = kwargs['obj']
+            response = obj.process()
+            if response is not None and len(response):
+                req = Request()
+                req.colorize = False
+                req.wrap = False
+                req.sendTo = obj.output
+                self.madcow.outputLock.acquire()
+                self.madcow.output(response, req)
+                self.madcow.outputLock.release()
+        except Exception, e:
+            logging.warn('UNCAUGHT EXCEPTION IN %s' % kwargs['mod_name'])
+            logging.exception(e)
 
 
 class Madcow(Base):
@@ -280,7 +294,6 @@ class Madcow(Base):
             self.ignoreList = []
 
         self.admin = Admin(self)
-        self.periodic = PeriodicEvents(madcow=self)
 
         # dynamically generated content
         self.usageLines = []
@@ -290,6 +303,9 @@ class Madcow(Base):
         # start local service for handling requests
         threading.Thread(target=self.startService).start()
 
+        # start thread to handle periodic events
+        threading.Thread(target=self.startPeriodicService).start()
+
     def startService(self, *args, **kwargs):
         addr = ('', self.config.server.port)
         server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
@@ -298,7 +314,9 @@ class Madcow(Base):
         while True:
             if select.select([server.socket], [], [], 0.25)[0]:
                 server.handle_request()
-            self.periodic.process_queue()
+
+    def startPeriodicService(self, *args, **kwargs):
+        PeriodicEvents(madcow=self).start()
 
     def start(self):
         pass
