@@ -17,10 +17,9 @@ class PeriodicEvent(Base):
 
   def __init__(self, madcow):
     self.madcow = madcow
-    self.enabled = True
-    #self.frequency = madcow.config.twitter.updatefreq
-    self.frequency = 60
-    self.output = madcow.config.periodic.channel
+    self.enabled = madcow.config.twitter.enabled
+    self.frequency = madcow.config.twitter.updatefreq
+    self.output = madcow.config.twitter.channel
     self.__updatelast()
   
   def __updatelast(self):

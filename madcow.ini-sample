@@ -124,7 +124,7 @@ reconnectWait=3
 ; smtp settings for summon module
 [smtp]
 server=localhost
-sender=madcow@gruntle.org
+sender=madcow@example.com
 user=
 password=
 
@@ -132,12 +132,10 @@ password=
 [server]
 port=5000
 
-; output channel for periodic scripts
-[periodic]
-channel=#madcow
-
 ; twitter settings
-;[twitter]
-;updatefreq=120  ; in seconds
-;username=twitterbotaccount
-;password=twitterbotpassword
+[twitter]
+enabled=no
+channel=#madcow
+updatefreq=60
+username=twitterbotaccount
+password=twitterbotpassword

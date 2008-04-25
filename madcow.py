@@ -218,12 +218,6 @@ class PeriodicEvents(Base):
 
     def load_modules(self):
         """Load modules to be periodically executed"""
-        try:
-            disabled = self.madcow.config.periodic.disabled
-            disabled = self._re_delim.split(disabled)
-        except:
-            disabled = []
-
         filenames = os.walk(self.dir).next()[2]
         logging.info('[MOD] * Reading periodic modules from %s' % self.dir)
 
@@ -233,15 +227,12 @@ class PeriodicEvents(Base):
             mod_name = filename[:-3]
             if mod_name in PeriodicEvents._ignore_modules:
                 continue
-            if mod_name in disabled:
-                logging.warn('[MOD] %s is disabled in config' % mod_name)
-                continue
             try:
                 module = __import__('periodic.' + mod_name, globals(),
                         locals(), ['PeriodicEvent'])
                 PeriodicEvent = getattr(module, 'PeriodicEvent')
                 obj = PeriodicEvent(madcow=self.madcow)
-                if obj.enabled is False:
+                if not obj.enabled:
                     raise Exception, 'disabled'
                 logging.info('[MOD] Loaded periodic module %s' % mod_name)
                 self.modules[mod_name] = {'last_run': time.time(), 'obj': obj}
