@@ -16,7 +16,7 @@ detach=no
 ; setting this to yes will log public chatter in the logs directory
 ; (IRC and SILC)
 ;
-log=yes
+logpublic=yes
 ;
 ; these nicks will be completely ignored in public settings such as
 ; IRC or SILC. you should put other bots that reside in the channel
@@ -25,7 +25,8 @@ log=yes
 ;ignoreList=somebot, abusiveGuy
 ;
 ; set this to log console output to a file in madcow base directory
-logfile=madcow.log
+loglevel=INFO           ; default level, valid options are DEBUG, INFO, WARN
+logfile=madcow.log      ; leave blank for no file-level logging
 
 [modules]
 ; if you wish to run multiple bots from the same directory you should

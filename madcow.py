@@ -411,17 +411,17 @@ class Madcow(Base):
         except:
             pass
 
-    def log(self, req):
+    def logpublic(self, req):
         """Logs public chatter"""
         line = '%s <%s> %s\n' % (time.strftime('%T'), req.nick, req.message)
         path = os.path.join(self.dir, 'logs', '%s-irc-%s-%s' % (self.ns,
             req.channel, time.strftime('%F')))
 
-        fi = open(path, 'a')
+        fo = open(path, 'a')
         try:
-            fi.write(line)
+            fo.write(line)
         finally:
-            fi.close()
+            fo.close()
 
     def usage(self):
         """Returns help data as a string"""
@@ -429,8 +429,8 @@ class Madcow(Base):
 
     def processMessage(self, req):
         """Process requests"""
-        if self.config.main.log is True and req.private is False:
-            self.log(req)
+        if self.config.main.logpublic and not req.private:
+            self.logpublic(req)
 
         if req.nick.lower() in self.ignoreList:
             log.info('Ignored "%s" from %s' % (req.message, req.nick))
@@ -582,9 +582,8 @@ def main():
             help='detach when run')
     parser.add_option('-p', '--protocol',
             help='force the use of this output protocol')
-    parser.add_option('-D', '--debug', dest='loglevel', default=_loglevel,
-            action='store_const', const=log.DEBUG,
-            help='turn on debugging output (SPAMMY)')
+    parser.add_option('-D', '--debug', dest='loglevel', action='store_const',
+            const=log.DEBUG, help='turn on debugging output (SPAMMY)')
     parser.add_option('-q', '--quiet', dest='loglevel', action='store_const',
             const=log.WARN, help='only show errors')
     opts, args = parser.parse_args()
@@ -593,7 +592,15 @@ def main():
     config = Config(file=opts.config)
 
     # init log facility
-    log.basicConfig(level=opts.loglevel, format=_logformat)
+    try:
+        loglevel = getattr(log, config.main.loglevel)
+    except:
+        loglevel = _loglevel
+
+    if opts.loglevel is not None:
+        loglevel = opts.loglevel
+
+    log.basicConfig(level=loglevel, format=_logformat)
 
     # if specified, log to file as well
     try:
