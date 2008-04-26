@@ -13,10 +13,12 @@ from include.utils import Base
 import SocketServer
 import select
 
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
+__all__ = ['Request', 'User', 'Admin', 'ServiceHandler', 'PeriodicEvents',
+        'Madcow', 'Config']
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
 _loglevel = log.INFO
 

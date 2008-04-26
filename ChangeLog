@@ -1,3 +1,36 @@
+1.1.5: Fri Apr 25 22:35:58 PDT 2008
+    * rewrite email_gateway and consolidate .ini settings for it
+    * add simple tool in include/ called tagstruct, to aid in parsing webpages
+    * improve Base class idioms
+    * add base Error class for custom exceptions
+    * update UserAgent to take a sample size instead of full webpage
+    * add decorator for caching function results (@cache)
+    * add decorator for throttling user calls
+    * support for twitter (see [twitter] in madcow.ini-sample)
+    * abstracted wikimedia parsing class for use in various modules
+    * lots of code cleanup
+    * added support for modules that are executed periodically without
+      user input (see template.py in periodic/)
+    * rename logging module to log to save a few precious columns
+    * remove legacy hard-coded module ignores. if you have updated from
+      a very old version, make sure tac.py, bullshitr.py and ircadmin.py no
+      longer exist in the modules/ directory!
+    * gateway service for email is now optional (see [gateway] section in
+      madcow.ini-sample). you can also set various attributes here
+    * default log level is now INFO (configurable in .ini file), with options
+      to make it very quiet, or debug.
+    * you can now set a file to log to in madcow.ini instead of console-only
+    * threads are now all shut down properly when user ^C's
+    * overhaul to how modules are enabled/diasabled in madcow.ini
+    * war module overhauled & now shows iraq war bodycount
+    * protect learn module from setting arbitrary db keys
+    * completely rewrite lyrics module to use BeautifulSoup
+    * rewrite conservapedia and wikipedia to use wikimedia library
+    * new module - get quotes from wikiquotes
+    * add karma module (nick++/nick--)
+    * change logic in stock quote %-checking
+    * new module - roll.py lets you roll d&d dice
+
 1.1.4: Sat Mar  8 15:30:24 PST 2008
     * remove wikiparse library
     * add email parsing script for summon tie-in
