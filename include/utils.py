@@ -10,7 +10,7 @@ from time import time as unix_time
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['UserAgent', 'Base', 'cache']
+__all__ = ['UserAgent', 'Base', 'cache', 'Error']
 __agent__ = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
@@ -58,6 +58,7 @@ entityMap = {
 }
 
 class Base(object):
+    """Base class"""
 
     def __init__(self, *args, **kwargs):
         self.args = args
@@ -65,6 +66,18 @@ class Base(object):
 
     def __str__(self):
         return '<%s %s>' % (self.__class__.__name__, repr(self.__dict__))
+
+    __repr__ = __str__
+
+
+class Error(Exception):
+    """Base Exception class"""
+
+    def __init__(self, message=None):
+        self.message = message
+
+    def __str__(self):
+        return str(self.message)
 
     __repr__ = __str__
 

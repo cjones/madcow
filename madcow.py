@@ -300,14 +300,16 @@ class Madcow(Base):
         self.modules = {}
         self.loadModules()
 
-        # start local service for handling requests
-        threading.Thread(target=self.startService).start()
+        # start local service for handling email gateway
+        if self.config.gateway.enabled:
+            log.info('launching gateway service')
+            threading.Thread(target=self.startService).start()
 
         # start thread to handle periodic events
         threading.Thread(target=self.startPeriodicService).start()
 
     def startService(self, *args, **kwargs):
-        addr = ('', self.config.server.port)
+        addr = (self.config.gateway.bind, self.config.gateway.port)
         server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
         server.daemon_threads = True
         server.madcow = self

@@ -131,9 +131,12 @@ sender=madcow@example.com
 user=
 password=
 
-; listener port for message injection (email gateway, etc)
-[server]
+; service for email gateway (sms, etc)
+[gateway]
+enabled=yes
+bind=localhost
 port=5000
+channel=#madcow
 
 ; twitter settings
 [twitter]
