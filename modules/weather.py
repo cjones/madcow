@@ -110,7 +110,7 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.weather = Weather()
         try:
-            self.learn = Learn(ns=madcow.ns, dir=madcow.dir)
+            self.learn = Learn(madcow=madcow)
         except:
             self.learn = None
 

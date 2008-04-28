@@ -13,7 +13,7 @@ from include.utils import stripHTML
 from include import twitter
 import time
 
-class PeriodicEvent(Base):
+class Main(Base):
 
   def __init__(self, madcow):
     self.madcow = madcow

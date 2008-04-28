@@ -348,9 +348,9 @@ class Madcow(Base):
             try:
                 obj = __import__(
                         '%s.%s' % (subdir, mod_name),
-                        globals = globals(),
-                        locals = locals(),
-                        fromlist = ['Main']
+                        globals(),
+                        locals(),
+                        ['Main']
                         ).Main(madcow=self)
                 if not obj.enabled:
                     raise Exception, 'disabled'
