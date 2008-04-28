@@ -6,7 +6,6 @@ from include.colorlib import ColorLib
 class ConsoleProtocol(Madcow):
 
     def __init__(self, config=None, dir=None):
-        self.allowThreading = False
         self.colorlib = ColorLib(type='ansi')
         Madcow.__init__(self, config=config, dir=dir)
 
@@ -32,7 +31,7 @@ class ConsoleProtocol(Madcow):
 
                 self.processMessage(req)
 
-    def output(self, message, req):
+    def _output(self, message, req):
         if req.colorize is True:
             message = self.colorlib.rainbow(message)
 

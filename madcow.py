@@ -147,6 +147,20 @@ class Admin(Base):
             self.users[user] = User(user, self.authlib.get_user_data(user))
             return 'You are now logged in. Message me "admin help" for help'
 
+class GatewayService(Base):
+    """Gateway service spawns TCP socket and listens for requests"""
+
+    def __init__(self, madcow):
+        addr = (madcow.config.gateway.bind, madcow.config.gateway.port)
+        self.server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
+        self.server.daemon_threads = True
+        self.server.madcow = madcow
+
+    def start(self):
+        while True:
+            if select.select([self.server.socket], [], [], 0.25)[0]:
+                self.server.handle_request()
+
 
 class ServiceHandler(SocketServer.BaseRequestHandler):
     """This class handles the listener service for message injection"""
@@ -266,9 +280,7 @@ class PeriodicEvents(Base):
                 req.colorize = False
                 req.wrap = False
                 req.sendTo = obj.output
-                self.madcow.outputLock.acquire()
                 self.madcow.output(response, req)
-                self.madcow.outputLock.release()
         except Exception, e:
             log.warn('UNCAUGHT EXCEPTION IN %s' % kwargs['mod_name'])
             log.exception(e)
@@ -305,19 +317,18 @@ class Madcow(Base):
         # start local service for handling email gateway
         if self.config.gateway.enabled:
             log.info('launching gateway service')
-            threading.Thread(target=self.startService).start()
+            self.launchThread(self.startGatewayService)
 
         # start thread to handle periodic events
-        threading.Thread(target=self.startPeriodicService).start()
+        log.info('launching periodic service')
+        self.launchThread(self.startPeriodicService)
 
-    def startService(self, *args, **kwargs):
-        addr = (self.config.gateway.bind, self.config.gateway.port)
-        server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
-        server.daemon_threads = True
-        server.madcow = self
-        while True:
-            if select.select([server.socket], [], [], 0.25)[0]:
-                server.handle_request()
+    def launchThread(self, target, args=[], kwargs={}):
+        thread = threading.Thread(target=target, args=args, kwargs=kwargs)
+        thread.start()
+
+    def startGatewayService(self):
+        GatewayService(madcow=self).start()
 
     def startPeriodicService(self, *args, **kwargs):
         PeriodicEvents(madcow=self).start()
@@ -325,7 +336,12 @@ class Madcow(Base):
     def start(self):
         pass
 
-    def output(self, message, req):
+    def output(self, *args, **kwargs):
+        self.outputLock.acquire()
+        self._output(*args, **kwargs)
+        self.outputLock.release()
+
+    def _output(self, message, req):
         pass
 
     def botName(self):
@@ -468,18 +484,7 @@ class Madcow(Base):
             kwargs = dict(req.__dict__.items() + [('args', args),
                 ('module', module), ('req', req)])
 
-            if self.allowThreading and module.thread:
-                threading.Thread(target=self.processThread,
-                        kwargs=kwargs).start()
-            else:
-                try:
-                    response = module.response(**kwargs)
-                except Exception, e:
-                    log.warn('UNCAUGHT EXCEPTION')
-                    log.exception(e)
-                    response = None
-                if response is not None and len(response) > 0:
-                    self.output(response, req)
+            self.launchThread(self.processThread, kwargs=kwargs)
 
     def processThread(self, **kwargs):
         try:
@@ -489,9 +494,7 @@ class Madcow(Base):
             log.exception(e)
             response = None
         if response is not None and len(response) > 0:
-            self.outputLock.acquire()
             self.output(response, kwargs['req'])
-            self.outputLock.release()
 
 
 class Config(Base):

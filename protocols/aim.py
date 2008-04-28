@@ -10,7 +10,6 @@ import logging as log
 class AIMProtocol(Madcow):
 
     def __init__(self, config=None, dir=None):
-        self.allowThreading = False
         Madcow.__init__(self, config=config, dir=dir)
         self.newline = re.compile('[\r\n]+')
 
@@ -26,7 +25,7 @@ class AIMProtocol(Madcow):
         p.protocolClass.BOSClass._ProtocolHandler = self
         reactor.run()
 
-    def output(self, message, req):
+    def _output(self, message, req):
         message = self.newline.sub('<br>', message)
         req.aim.sendMessage(req.nick, message)
 

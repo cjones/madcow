@@ -11,7 +11,6 @@ import logging as log
 class IRCProtocol(Madcow):
 
     def __init__(self, config=None, dir=None):
-        self.allowThreading = True
         self.colorlib = ColorLib(type='mirc')
 
         Madcow.__init__(self, config=config, dir=dir)
@@ -87,7 +86,7 @@ class IRCProtocol(Madcow):
                 server.privmsg(event.target(), self.config.irc.rejoinReply)
 
     # function to putput to IRC
-    def output(self, message, req):
+    def _output(self, message, req):
         if message is None:
             return
 

@@ -20,7 +20,6 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
     nick = self.config.silcplugin.nick
     silc.SilcClient.__init__(self, keys, nick, nick, nick)
 
-    self.allowThreading = True
     self.channels = re.split('\s*[,;]\s*', self.config.silcplugin.channels)
 
   def botName(self):
@@ -81,7 +80,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
       time.sleep(self.config.silcplugin.reconnectWait)
       self.connect()
 
-  def output(self, message, req):
+  def _output(self, message, req):
     if not message: return
 
     message = message.decode("ascii", "ignore") # remove unprintables
