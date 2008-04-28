@@ -14,8 +14,6 @@ class Main(Base):
     enabled = True
     pattern = re.compile('^\s*bbcnews(?:\s+(.+))?', re.I)
     require_addressing = True
-
-
     help = 'bbcnews <string> - Searches the BBC News Website'
 
     _error = 'Looks like the BBC aren\'t co-operating today.'
@@ -27,9 +25,10 @@ class Main(Base):
     def response(self, **kwargs):
         nick = kwargs['nick']
         query = kwargs['args'][0]
+        print query
 
         try:
-            if len(query) == 0 or query == 'headline':
+            if not query or query == 'headline':
                 url = self._world_url
             else:
                 url = self._search_url + urllib.quote(query)

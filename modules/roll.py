@@ -16,7 +16,6 @@ class Main(Base):
     pattern = re.compile(_regex, re.I)
     require_addressing = True
 
-
     help = 'roll [<numdice>d<sides>] - roll die of the specified size'
     _color_map = {'red': 5, 'yellow': 7, 'green': 3}
 

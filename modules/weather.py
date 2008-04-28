@@ -107,9 +107,6 @@ class Main(Base):
     pattern = re.compile('^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
     require_addressing = True
 
-
-    help = __usage__
-
     def __init__(self, madcow=None):
         self.weather = Weather()
         try:
