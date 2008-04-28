@@ -1,45 +1,33 @@
 #!/usr/bin/env python
 
-"""Plugin to return summary from WikiPedia"""
+"""Stupid quotes"""
 
 import re
 from include.BeautifulSoup import BeautifulSoup
-import urllib, urllib2, cookielib
-import re
-from include import utils
+from include.utils import Base, UserAgent, stripHTML
+from urlparse import urljoin
+import os
+import sys
 
-# constants
-AGENT = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
-BASEURL = 'http://stupidfilter.org/'
-UTF8 = re.compile(r'[\x80-\xff]')
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*(?:stupid)\s*$', re.I)
+    require_addressing = True
 
-class MatchObject(object):
 
-    def __init__(self, *args, **kwargs):
-        self.enabled = True
-        self.pattern = re.compile('^\s*(?:stupid)\s*$', re.I)
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = 'stupid - random stupid comment'
+    help = 'stupid - random stupid comment'
+    base_url = 'http://stupidfilter.org/'
+    url = urljoin(base_url, '/random.php')
+    utf8 = re.compile(r'[\x80-\xff]')
 
-        # build opener to mimic browser
-        cj = cookielib.CookieJar()
-        ch = urllib2.HTTPCookieProcessor(cj)
-        opener = urllib2.build_opener(ch)
-        opener.addheaders = [('User-Agent', AGENT)]
-        self.opener = opener
+    def __init__(self, madcow=None):
+        self.ua = UserAgent()
 
     def get_comment(self):
-        # load page
-        url = BASEURL + 'random.php'
-        req = urllib2.Request(url)
-        req.add_header('Referer', BASEURL)
-        res = self.opener.open(req)
-        page = res.read()
+        page = self.ua.fetch(self.url)
 
         # remove high ascii since this is going to IRC
-        page = UTF8.sub('', page)
+        page = self.utf8.sub('', page)
 
         # create BeautifulSoup document tree
         soup = BeautifulSoup(page)
@@ -58,7 +46,14 @@ class MatchObject(object):
         except Exception, e:
             return '%s: problem with query: %s' % (kwargs['nick'], e)
 
+
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    import os, sys
-    print MatchObject().response(nick=os.environ['USER'])
-    sys.exit(0)
+    sys.exit(main())

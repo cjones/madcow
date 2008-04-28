@@ -1,60 +1,58 @@
 #!/usr/bin/env python
 
-"""
-This fuction is designed to serach the BBC News website and report the number one result.
-"""
+"""Scrape BBC news"""
 
 import sys
 import re
-import urllib
-from include import rssparser, utils
+from include import rssparser
+from include.utils import Base, stripHTML
 import os
+import urllib
+from urlparse import urljoin
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*bbcnews(?:\s+(.+))?', re.I)
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'bbcnews <string> - Searches the BBC News Website'
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^\s*bbcnews(?:\s+(.+))?')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = True
-        self.help = 'bbcnews <String> - Searches the BBC News Website'
-    
+    _error = 'Looks like the BBC aren\'t co-operating today.'
+    _api_url = 'http://newsapi.bbc.co.uk/'
+    _search_url = urljoin(_api_url, '/feeds/search/news/')
+    _rss_url = 'http://newsrss.bbc.co.uk/'
+    _world_url = urljoin(_rss_url, '/rss/newsonline_uk_edition/world/rss.xml')
+
     def response(self, **kwargs):
         nick = kwargs['nick']
-        args = kwargs['args']
-
-        if len(args) == 0:
-            args = ['headline']
+        query = kwargs['args'][0]
 
         try:
-            try:
-                url = 'http://newsapi.bbc.co.uk/feeds/search/news/' + urllib.quote(args[0])
-                if args[0] == 'headline':
-                    url = 'http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml'
-            except:
-                url = 'http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml'
+            if len(query) == 0 or query == 'headline':
+                url = self._world_url
+            else:
+                url = self._search_url + urllib.quote(query)
                             
-            try:
-                res = int(args[1]) - 1
-            except:
-                res = 0
-                
-            doc = urllib.urlopen(url).read()            
             feed = rssparser.parse(url)
-            rurl = feed['items'][res]['link']
-            rtitle = utils.stripHTML(feed['items'][res]['title'])
-            rsum = utils.stripHTML(feed['items'][res]['description'])
-            
-            
-            return rurl + "\r" + rtitle + "\r" + rsum + "\r"
+            item = feed['items'][0]
+            url = item['link']
+            title = stripHTML(item['title'])
+            sum = stripHTML(item['description'])
+            return '\n'.join((url, title, sum))
             
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-            return '%s: Looks like the BBC aren\'t co-operating today.' % nick
+            return '%s: %s' % (nick, self._error)
 
+
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
 
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
-    sys.exit(0)
+    sys.exit(main())

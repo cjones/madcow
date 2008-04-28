@@ -1,55 +1,60 @@
 #!/usr/bin/env python
 
-"""
-Use Google as a calculator
-"""
+"""Use Google as a calculator"""
 
 import sys
 import re
-import urllib
-import urllib2
-from include import utils
+from include.utils import Base, UserAgent, stripHTML
 import os
+from urlparse import urljoin
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*calc\s+(.+)', re.I)
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'calc <expression> - pass expression to google calculator'
+
     reConversionDetected = re.compile('More about (calculator|currency)')
     reConversionResult = re.compile('<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
+    _base_url = 'http://www.google.com/'
+    _search_url = urljoin(_base_url, '/search')
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^\s*calc\s+(.+)')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = 'calc <expression> - pass expression to google calculator'
+    def __init__(self, madcow=None):
+        self.ua = UserAgent()
 
     def response(self, **kwargs):
         try:
-            url = 'http://www.google.com/search?' + urllib.urlencode({
+            opts = {
                 'hl': 'en',
                 'safe': 'off',
                 'c2coff': 1,
                 'btnG': 'Search',
                 'q': ' '.join(kwargs['args']),
-            })
+            }
 
-            request = urllib2.Request(url)
-            request.add_header('User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)')
-            opener = urllib2.build_opener()
-            doc = opener.open(request).read()
+            doc = self.ua.fetch(self._search_url, opts=opts)
 
-            if not MatchObject.reConversionDetected.search(doc):
-                raise Exception
+            if not self.reConversionDetected.search(doc):
+                raise Exception, 'no conversion detected'
 
-            response = MatchObject.reConversionResult.search(doc).group(1)
-            response = utils.stripHTML(response)
+            response = self.reConversionResult.search(doc).group(1)
+            response = stripHTML(response)
             return '%s: %s' % (kwargs['nick'], response)
 
         except Exception, e:
-            return '%s: No results, check your syntax at http://www.google.com/help/calculator.html' % kwargs['nick']
+            print >> sys.stderr, e
+            return '%s: No results (bad syntax?)' % kwargs['nick']
 
+
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
 
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
-    sys.exit(0)
+    sys.exit(main())

@@ -2,18 +2,21 @@
 
 """Plugin to return summary from WikiPedia"""
 
+from include.utils import Base
 from include.wiki import Wiki
 import re
+import sys
+import os
 
-class MatchObject(object):
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*(?:wp|wiki|wikipedia)\s+(.*?)\s*$', re.I)
+    require_addressing = True
+
+
+    help = 'wiki <term> - look up summary of term on wikipedia'
 
     def __init__(self, *args, **kwargs):
-        self.enabled = True
-        self.pattern = re.compile('^\s*(?:wp|wiki|wikipedia)\s+(.*?)\s*$', re.I)
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = 'wiki <term> - look up summary of term on wikipedia'
         self.wiki = Wiki()
 
     def response(self, **kwargs):
@@ -22,7 +25,14 @@ class MatchObject(object):
         except Exception, e:
             return '%s: problem with query: %s' % (kwargs['nick'], e)
 
+
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    import os, sys
-    print MatchObject().response(args=sys.argv[1:], nick=os.environ['USER'])
-    sys.exit(0)
+    sys.exit(main())

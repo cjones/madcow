@@ -124,18 +124,15 @@ class Lyrics(Base):
             return "Couldn't find a match for that query"
 
 
-class MatchObject(Base):
+class Main(Base):
+    enabled = True
+    pattern = re.compile(r'^\s*sing\s+(.+)$')
+    require_addressing = True
 
-    def __init__(self, config=None, ns=_namespace, dir=_dir):
-        self.config = config
-        self.ns = ns
-        self.dir = dir
-        self.enabled = True
-        self.pattern = re.compile(r'^\s*sing\s+(.+)$')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = 'sing (<artist>|song <song> [by <artist>]) [full] - lyrics'
+
+    help = 'sing (<artist>|song <song> [by <artist>]) [full] - lyrics'
+
+    def __init__(self, madcow=None):
         self.lyrics = Lyrics()
 
     def response(self, **kwargs):
@@ -149,9 +146,13 @@ class MatchObject(Base):
             return '%s: problem with query: %s' % (nick, e)
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    mo = MatchObject()
-    nick = os.environ['USER']
-    args = ' '.join(sys.argv[1:])
-    print mo.response(nick=nick, args=[args])
-    sys.exit(0)
+    sys.exit(main())

@@ -17,6 +17,7 @@ results for both are equal, the phrase is 0% slutty.
 import urllib2
 import sys
 import re
+from include.utils import Base
 
 class WordFiltered(Exception):
   """Indicates a word has been filtered by google safe search"""
@@ -70,15 +71,14 @@ def slutrating(phrase):
   return None
 
 # class for this module
-class MatchObject(object):
-  def __init__(self, config=None, ns='madcow', dir=None):
-    self.enabled = True
-    self.pattern = re.compile('^\s*slutcheck\s+(.+)')
-    self.requireAddressing = True
-    self.thread = True
-    self.wrap = False
-    self.help = "slutcheck <phrase> - see how slutty the phrase is"
-  
+class Main(Base):
+  enabled = True
+  pattern = re.compile('^\s*slutcheck\s+(.+)')
+  require_addressing = True
+
+
+  help = "slutcheck <phrase> - see how slutty the phrase is"
+
   # function to generate a response
   def response(self, **kwargs):
     nick = kwargs['nick']
@@ -99,7 +99,7 @@ class MatchObject(object):
 # this is just here so we can test the module from the commandline
 def main(argv = None):
   if argv is None: argv = sys.argv[1:]
-  obj = MatchObject()
+  obj = Main()
   print obj.response(nick='testUser', args=argv)
   
   return 0

@@ -3,9 +3,11 @@
 """Plugin to return random quote from WikiQuotes"""
 
 from include.wiki import Wiki
-from include.utils import stripHTML
+from include.utils import stripHTML, Base
 import re
 import random
+import sys
+import os
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
 _base_url = 'http://en.wikiquote.org/'
@@ -15,15 +17,15 @@ _whitespace = re.compile(r'\s{2,}')
 _author = 'random'
 _max = 10
 
-class MatchObject(object):
+class Main(Base):
+    enabled = True
+    pattern = _pattern
+    require_addressing = True
 
-    def __init__(self, *args, **kwargs):
-        self.enabled = True
-        self.pattern = _pattern
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = 'wikiquote - get random quote from wikiquotes'
+
+    help = 'wikiquote - get random quote from wikiquotes'
+
+    def __init__(self, madcow=None):
         self.wiki = Wiki(base_url=_base_url, advert=_advert)
 
     def get_random_quote(self, author=_author, max=_max):
@@ -78,7 +80,13 @@ class MatchObject(object):
             return '%s: problem with query: %s' % (kwargs['nick'], e)
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    import os, sys
-    print MatchObject().response(args=sys.argv[1:], nick=os.environ['USER'])
-    sys.exit(0)
+    sys.exit(main())

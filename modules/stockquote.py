@@ -88,18 +88,15 @@ class Yahoo(Base):
         return '%s - ' % company + ' | '.join(output)
 
 
-class MatchObject(Base):
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*(?:stocks?|quote)\s+(\S+)', re.I)
+    require_addressing = True
 
-    def __init__(self, config=None, ns=_namespace, dir=_dir):
-        self.config = config
-        self.ns = ns
-        self.dir = dir
-        self.enabled = True
-        self.pattern = re.compile('^\s*(?:stocks?|quote)\s+(\S+)', re.I)
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = True
-        self.help = 'quote <symbol> - get latest stock quote'
+
+    help = 'quote <symbol> - get latest stock quote'
+
+    def __init__(self, madcow=None):
         self.yahoo = Yahoo()
 
     def response(self, **kwargs):
@@ -112,9 +109,13 @@ class MatchObject(Base):
             return "Symbol not found, market may have crashed"
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    mo = MatchObject()
-    nick = os.environ['USER']
-    args = ' '.join(sys.argv[1:])
-    print mo.response(nick=nick, args=[args])
-    sys.exit(0)
+    sys.exit(main())

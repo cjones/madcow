@@ -2,7 +2,7 @@
 
 from include.utils import Base
 
-class PeriodicEvent(Base):
+class Main(Base):
 
     def __init__(self, madcow):
         self.madcow = madcow

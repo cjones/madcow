@@ -99,9 +99,9 @@ class IRCProtocol(Madcow):
             style = random.choice(ColorLib.rainbowStyles)
             message = self.colorlib.rainbow(message, style=style)
 
-        if req.wrap is True:
-            wrap = self.config.irc.wrap
-        else:
+        try:
+            wrap = self.config.irc.wrapsize
+        except:
             wrap = 400
 
         output = []

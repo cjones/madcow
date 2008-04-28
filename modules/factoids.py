@@ -1,38 +1,33 @@
 #!/usr/bin/env python
 
-"""
-This implements the infobot factoid database work-a-like
-"""
+"""This implements the infobot factoid database work-a-like"""
 
 import sys
 import re
 import os
 import anydbm
 import random
+from include.utils import Base
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^(.+)$')
+    require_addressing = False
 
 
-class MatchObject(object):
 
-    def __init__(self, dir=None, ns='madcow', config=None):
-        self.enabled = True
-        self.pattern = re.compile('^(.+)$')
-        self.requireAddressing = False
-        self.thread = False
-        self.wrap = False
+    qmark = re.compile('\s*\?+\s*$')
+    isare = re.compile('^(.+?)\s+(is|are)\s+(.+)\s*$', re.I)
+    query = re.compile('^(?:who|what|where|when|why|how|wtf)', re.I)
+    ors   = re.compile('\s*\|\s*')
+    reply = re.compile('^<reply>\s*(.+)', re.I)
+    also  = re.compile('^\s*also\s+', re.I)
+    isor  = re.compile('^\s*\|')
+    forget = re.compile('forget[:\-, ]+(.+)$', re.I)
 
-        if dir is None:
-            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-        self.dir = dir
-        self.ns = ns
-
-        self.qmark = re.compile('\s*\?+\s*$')
-        self.isare = re.compile('^(.+?)\s+(is|are)\s+(.+)\s*$', re.I)
-        self.query = re.compile('^(?:who|what|where|when|why|how|wtf)', re.I)
-        self.ors   = re.compile('\s*\|\s*')
-        self.reply = re.compile('^<reply>\s*(.+)', re.I)
-        self.also  = re.compile('^\s*also\s+', re.I)
-        self.isor  = re.compile('^\s*\|')
-        self.forget = re.compile('forget[:\-, ]+(.+)$', re.I)
+    def __init__(self, madcow=None):
+        self.dir = madcow.dir
+        self.ns = madcow.ns
 
     def dbFile(self, db_type):
         return self.dir + '/data/db-%s-factoids-%s' % (self.ns, db_type.lower())
@@ -177,19 +172,15 @@ class MatchObject(object):
                     else:
                         val = '%s or %s' % (setVal, val)
                 elif ((setVal is not None) and (correction is False)):
-                    if addressed: return '%s: But %s %s %s' % (nick, key, db_type, setVal)
+                    if addressed:
+                        return '%s: But %s %s %s' % (nick, key, db_type, setVal)
                     else: return
 
                 self.set(db_type, key, val)
-                if addressed: return 'OK, %s' % nick
+                if addressed:
+                    return 'OK, %s' % nick
 
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 
 
-if __name__ == '__main__':
-    args = sys.argv[1:]
-    a = args[0] == 'True' and True or False
-    c = args[1] == 'True' and True or False
-    print MatchObject().response(nick=os.environ['USER'], addressed=a, correction=c, args=[args[2]])
-    sys.exit(0)

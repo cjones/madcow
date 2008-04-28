@@ -1,55 +1,60 @@
 #!/usr/bin/env python
 
-"""
-Get a random offensive ASCII art
-"""
+"""Get a random offensive ASCII art"""
 
+from include.utils import Base, UserAgent, stripHTML
+import re
+from urlparse import urljoin
 import sys
-import re
-import urllib
-import re
-import random
-from include import utils
 import os
+import random
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile(r'^\s*artfart(?:\s+(.+?))?\s*$', re.I)
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'artfart - displays some offensive ascii art'
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile(r'^\s*artfart(?:\s+(.+?))?\s*$', re.I)
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = 'artfart - displays some offensive ascii art'
+    base_url = 'http://www.asciiartfarts.com/'
+    random_url = urljoin(base_url, 'random.cgi')
+    artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre>(.*?)</pre>', re.DOTALL)
 
-        self.baseURL = 'http://www.asciiartfarts.com/'
-        self.randomURL = self.baseURL + 'random.cgi'
-        self.artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre>(.*?)</pre>', re.DOTALL)
+    def __init__(self, madcow=None):
+        self.madcow = madcow
+        self.ua = UserAgent()
 
     def response(self, **kwargs):
         nick = kwargs['nick']
         query = kwargs['args'][0]
         if query is None or query == '':
-            url = self.randomURL
+            url = self.random_url
         else:
             query = ' '.join(query.split())
             query = query.replace(' ', '_')
             query = urllib.quote(query) + '.html'
-            url = self.baseURL + query
+            url = urljoin(self.base_url, query)
 
         try:
-            doc = urllib.urlopen(url).read()
+            doc = self.ua.fetch(url)
             results = self.artfart.findall(doc)
             result = random.choice(results)
             title, art = result
-            art = utils.stripHTML(art)
+            art = stripHTML(art)
             return '>>> %s <<<\n%s' % (title, art)
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return "%s: I had a problem with that, sorry." % nick
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
-    sys.exit(0)
+    sys.exit(main())

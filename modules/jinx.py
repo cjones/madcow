@@ -11,8 +11,9 @@
 import sys
 import re
 import time
+from include.utils import Base
 
-class ChatLine(object):
+class ChatLine(Base):
   """Records a single line of IRC chat"""
   def __init__(self, nick, text):
     self.nick = nick
@@ -22,7 +23,7 @@ class ChatLine(object):
   def __str__(self):
     return "%s: <%s> %s\n" % (str(self.timestamp), self.nick, self.text)
 
-class ChatLog(object):
+class ChatLog(Base):
   """Holds chat lines for a preconfigured duration of time"""
   def __init__(self, timeout=5):
     self.timeout = timeout
@@ -56,13 +57,11 @@ class ChatLog(object):
     return s
 
 # class for this module
-class MatchObject(object):
-  def __init__(self, config=None, ns='madcow', dir=None):
+class Main(Base):
+  def __init__(self, madcow=None):
     self.enabled = True       # True/False - enabled?
     self.pattern = re.compile('^(.*)$') # regular expression that needs to be matched
-    self.requireAddressing = False     # True/False - require addressing?
-    self.thread = False        # True/False - should bot spawn thread?
-    self.wrap = False        # True/False - wrap output?
+    self.require_addressing = False     # True/False - require addressing?
     
     self.log = ChatLog()
     

@@ -1,30 +1,26 @@
 #!/usr/bin/env python
 
-"""
-Module to handle learning
-"""
+"""Module to handle learning"""
 
 import sys
 import re
 import anydbm
 import os
+from include.utils import Base
 
-__allowed__ = ['location', 'email', 'karma']
 
-class MatchObject(object):
+class Main(Base):
+    enabled = True
     pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
+    require_addressing = True
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = MatchObject.pattern
-        self.requireAddressing = True
-        self.thread = False
-        self.wrap = False
-        if dir is None:
-            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-        self.dir = dir
-        self.ns = ns
-        self.help = 'set <location|email> <nick> <val> - set db attribs'
+
+    help = 'set <location|email> <nick> <val> - set db attribs'
+    _allowed = ['location', 'email', 'karma']
+
+    def __init__(self, madcow=None):
+        self.dir = madcow.dir
+        self.ns = madcow.ns
 
     def dbfile(self, db):
         dbfile = '%s/data/db-%s-%s' % (self.dir, self.ns, db)
@@ -59,11 +55,8 @@ class MatchObject(object):
     def response(self, **kwargs):
         nick = kwargs['nick']
         db, key, val = kwargs['args']
-        if db not in __allowed__:
+        if db not in self._allowed:
             return '%s: unknown database' % nick
         self.set(db, key, val)
         return '%s: set %s\'s %s to %s' % (nick, key, db, val)
 
-if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
-    sys.exit(0)

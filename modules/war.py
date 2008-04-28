@@ -2,11 +2,12 @@
 
 """NEVAR FORGET"""
 
-import urllib, urllib2, cookielib
 import re
 from include import rssparser
 from include.utils import Base, UserAgent, stripHTML
 from include.BeautifulSoup import BeautifulSoup
+import os
+import sys
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -40,7 +41,7 @@ class Terror(Base):
 
 class DoomsDay(Base):
     _url = 'http://www.thebulletin.org/minutes-to-midnight/'
-    _re_time = re.compile(r'href="/minutes-to-midnight/">(.*?)</a>')
+    _re_time = re.compile(r'<div class="module-content"><h3>(.*?)</h3>')
 
     def __init__(self, ua):
         self.ua = ua
@@ -99,15 +100,15 @@ class IraqWar(Base):
             return 'UNKNOWN'
 
 
-class MatchObject(Base):
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*(?:terror|doomsday|war)\s*$', re.I)
+    require_addressing = True
 
-    def __init__(self, *args, **kwargs):
-        self.enabled = True
-        self.pattern = re.compile('^\s*(?:terror|doomsday|war)\s*$', re.I)
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = 'terror - NEVAR FORGET'
+
+    help = 'terror - NEVAR FORGET'
+
+    def __init__(self, madcow=None):
         self.ua = UserAgent()
         self.terror = Terror(ua=self.ua)
         self.doom = DoomsDay(ua=self.ua)
@@ -121,7 +122,14 @@ class MatchObject(Base):
         except Exception, e:
             return '%s: problem with query: %s' % (kwargs['nick'], e)
 
+
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    import os, sys
-    print MatchObject().response(nick=os.environ['USER'])
-    sys.exit(0)
+    sys.exit(main())

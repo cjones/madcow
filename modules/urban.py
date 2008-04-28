@@ -1,26 +1,23 @@
 #!/usr/bin/env python
 
-"""
-Look up a definition in the Urban Dictionary
-"""
+"""Look up a definition in the Urban Dictionary"""
 
 import sys
 import re
 import SOAPpy
 import os
+from include.utils import Base
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*urban\s+(.+)')
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'urban <phrase> - look up a word/phrase on urban dictionary'
+    key = 'a979884b386f8b7ea781754892f08d12'
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^\s*urban\s+(.+)')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = True
-        self.help = 'urban <phrase> - look up a word/phrase on urban dictionary'
-
-        self.key = 'a979884b386f8b7ea781754892f08d12'
+    def __init__(self, madcow=None):
         self.server = SOAPpy.SOAPProxy("http://api.urbandictionary.com/soap")
 
     def response(self, **kwargs):
@@ -55,6 +52,13 @@ class MatchObject(object):
             return "%s: Serious problems: %s" % (nick, e)
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
-    sys.exit(0)
+    sys.exit(main())

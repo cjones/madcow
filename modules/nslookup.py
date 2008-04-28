@@ -1,40 +1,48 @@
 #!/usr/bin/env python
 
-"""
-Perform DNS lookups
-"""
+"""Perform DNS lookups"""
 
 import sys
 import re
 import socket
 import os
+from include.utils import Base
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*nslookup\s+(\S+)')
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'nslookup <ip|host> - perform DNS lookup'
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^\s*nslookup\s+(\S+)')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = True
-        self.help = 'nslookup <ip|host> - perform DNS lookup'
+    _byip = re.compile(r'^(\d+\.){3}\d+$')
 
     def response(self, **kwargs):
         nick = kwargs['nick']
-        args = kwargs['args']
-        query = args[0]
+        query = kwargs['args'][0]
 
-        if re.search('^(\d+\.){3}\d+$', query):
-            try: response = socket.gethostbyaddr(query)[0]
-            except: response = 'No hostname for that IP'
+        if self._byip.search(query):
+            try:
+                response = socket.gethostbyaddr(query)[0]
+            except:
+                response = 'No hostname for that IP'
         else:
-            try: response = socket.gethostbyname(query)
-            except: response = 'No IP for that hostname'
+            try:
+                response = socket.gethostbyname(query)
+            except:
+                response = 'No IP for that hostname'
 
         return '%s: %s' % (nick, response)
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
-    sys.exit(0)
+    sys.exit(main())

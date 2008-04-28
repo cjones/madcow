@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-"""
-Watch URLs in channel, punish people for living under a rock
-"""
+"""Watch URLs in channel, punish people for living under a rock"""
 
 import sys
 import re
@@ -13,7 +11,7 @@ from pysqlite2 import dbapi2 as sqlite
 from sqlobject import *
 import random
 from include.throttle import Throttle
-
+from include.utils import Base
 
 class url(SQLObject):
     url = StringCol(alternateID = True)
@@ -53,30 +51,21 @@ class comments(SQLObject):
     url = ForeignKey('url')
 
 
-class Admin(object):
-    pass
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^(.+)$')
+    require_addressing = False
 
 
-class MatchObject(object):
+    help = 'score [name,range] - get memescore, empty for top10'
+    matchURL = re.compile('(http://\S+)', re.I)
+    scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
+    colonHeader = re.compile(r'^\s*(.*?)\s*:\s*$')
 
-    def __init__(self, ns='madcow', config=None, dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^(.+)$')
-        self.requireAddressing = False
-        self.thread = False
-        self.wrap = False
-        self.help = 'score [name,range] - get memescore, empty for top10'
-
-        if dir is None:
-            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-        file = dir + '/data/db-%s-memes' % ns
-
-        self.matchURL = re.compile('(http://\S+)', re.I)
-        self.scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
-        self.colonHeader = re.compile(r'^\s*(.*?)\s*:\s*$')
+    def __init__(self, madcow):
         self.throttle = Throttle()
-
-        sqlhub.processConnection = connectionForURI('sqlite://' + file)
+        dbfile = os.path.join(madcow.dir, 'data/db-%s-memes' % madcow.ns)
+        sqlhub.processConnection = connectionForURI('sqlite://' + dbfile)
         url.createTable(ifNotExists = True)
         author.createTable(ifNotExists = True)
         channel.createTable(ifNotExists = True)

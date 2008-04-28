@@ -6,12 +6,12 @@ from include.utils import Base
 import sys
 import re
 import os
-from learn import MatchObject as Learn
+from learn import Main as Learn
 
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['Karma', 'MatchObject']
+__all__ = ['Karma', 'Main']
 
 class Karma(Base):
     """Infobot style karma"""
@@ -19,8 +19,8 @@ class Karma(Base):
     _query_pattern = re.compile(r'^\s*karma\s+(\S+)\s*\?*\s*$')
     _dbname = 'karma'
 
-    def __init__(self, ns, dir):
-        self.learn = Learn(ns=ns, dir=dir)
+    def __init__(self, madcow):
+        self.learn = Learn(madcow)
 
     def process(self, nick, input):
         # see if someone is trying to adjust karma
@@ -57,21 +57,17 @@ class Karma(Base):
         return int(karma)
 
 
-class MatchObject(object):
+class Main(Base):
     """This object is autoloaded by the bot"""
-    _anything_regex = re.compile(r'^(.+)$', re.DOTALL)
+    enabled = True
+    pattern = re.compile(r'^(.+)$', re.DOTALL)
+    require_addressing = False
 
-    def __init__(self, config=None, ns='madcow', dir='..'):
-        self.ns = ns
-        self.dir = dir
-        self.config = config
-        self.enabled = True
-        self.pattern = MatchObject._anything_regex
-        self.requireAddressing = False
-        self.thread = False
-        self.wrap = False
-        self.help = "<nick>[++/--] - adjust someone's karma"
-        self.karma = Karma(ns, dir)
+
+    help = "<nick>[++/--] - adjust someone's karma"
+
+    def __init__(self, madcow=None):
+        self.karma = Karma(madcow)
 
     def response(self, **kwargs):
         """This function should return a response to the query or None."""
@@ -85,11 +81,3 @@ class MatchObject(object):
             return '%s: problem with command: %s' % (nick, e)
 
 
-def main():
-    mo = MatchObject()
-    nick = os.environ['USER']
-    args = [' '.join(sys.argv[1:])]
-    print mo.response(nick=nick, args=args)
-
-if __name__ == '__main__':
-    sys.exit(main())

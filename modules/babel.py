@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 
-"""
-Use AV's babel translator for language conversion
-"""
+"""Use AV's babel translator for language conversion"""
 
 import sys
 import re
-import urllib
 import os
+from include.utils import Base, UserAgent
+from urlparse import urljoin
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*(list languages|translate)(?:\s+from\s+(\w+)\s+to\s+(\w+)\s*[-:]\s*(.+))?$', re.I)
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'list languages - list translate languages available\n'
+    help += 'translate from <lang> to <lang>: text'
 
     reTranslated = re.compile('<td bgcolor=white class=s><div style=padding:10px;>(.*?)</div></t', re.DOTALL)
     languages = {
@@ -29,15 +34,13 @@ class MatchObject(object):
         'russian': 'ru',
         'spanish': 'es',
     }
+    _base_url = 'http://babelfish.altavista.com/'
+    _trans_url = urljoin(_base_url, '/tr')
+    _unknown =  "I don't know that language, try: list languages"
 
-    def __init__(self, config=None, ns='madcow', dir='..'):
-        self.enabled = True
-        self.pattern = re.compile('^\s*(list languages|translate)(?:\s+from\s+(\w+)\s+to\s+(\w+)\s*[-:]\s*(.+))?$', re.I)
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = True
-        self.help = 'list languages - list translate languages available\n'
-        self.help += 'translate from <lang> to <lang>: text'
+    def __init__(self, madcow=None):
+        self.madcow = madcow
+        self.ua = UserAgent()
 
     def response(self, **kwargs):
         nick = kwargs['nick']
@@ -45,32 +48,39 @@ class MatchObject(object):
 
         try:
             if args[0] == 'list languages':
-                return '%s: %s' % (nick, ', '.join(MatchObject.languages.keys()))
+                return '%s: %s' % (nick, ', '.join(self.languages.keys()))
 
             try:
-                fromLang = MatchObject.languages[args[1].lower()]
-                toLang = MatchObject.languages[args[2].lower()]
+                fromLang = self.languages[args[1].lower()]
+                toLang = self.languages[args[2].lower()]
             except:
-                return "%s: I don't know that language, try: list languages" % nick
+                return '%s: %s' % (nick, self._unknown)
 
-            url = 'http://babelfish.altavista.com/tr?' + urllib.urlencode({
+            opts = {
                 'doit': 'done',
                 'intl': 1,
                 'tt': 'urltext',
                 'trtext': args[3],
                 'lp': '%s_%s' % (fromLang, toLang),
                 'btnTrTxt': 'Translate',
-            })
+            }
 
-            doc = urllib.urlopen(url).read()
-            translated = MatchObject.reTranslated.search(doc).group(1)
+            doc = self.ua.fetch(self._trans_url, opts=opts)
+            translated = self.reTranslated.search(doc).group(1)
             return '%s: %s' % (nick, translated)
 
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-            return "%s: I couldn't make that translation for some reason :/" % nick
+            return "%s: Couldn't translate for some reason :/" % nick
 
+
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
 
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
-    sys.exit(0)
+    sys.exit(main())

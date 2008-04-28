@@ -1,51 +1,46 @@
 #!/usr/bin/env python
 
-"""
-Implement Grufti trigger/response spam
-"""
+"""Implement Grufti trigger/response spam"""
 
 import sys
 import re
 import os
 import random
+from include.utils import Base, slurp
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^(.+)$')
+    require_addressing = False
 
 
-class MatchObject(object):
+
     reMatchBlocks = re.compile('%match\s+(.*?)%end', re.DOTALL)
     reCommaDelim = re.compile('\s*,\s*')
     rePipeDelim = re.compile('\s*\|\s*')
     reToken = re.compile('({{\s*(.*?)\s*}})')
     reIsRegex = re.compile('^/(.+)/$')
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^(.+)$')
-        self.requireAddressing = False
-        self.thread = False
-        self.wrap = False
-
+    def __init__(self, madcow=None):
         self.data = []
-
-        if dir is None:
-            dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-        file = dir + '/grufti-responses.txt'
+        filename = os.path.join(madcow.dir, 'grufti-responses.txt')
 
         try:
-            fi = open(file)
-            doc = fi.read()
-            fi.close()
+            doc = slurp(filename)
 
             for block in self.reMatchBlocks.findall(doc):
                 responses = block.splitlines()
                 matchString = responses.pop(0)
-                if len(responses) == 0: continue
+                if len(responses) == 0:
+                    continue
                 matches = []
                 for match in self.reCommaDelim.split(matchString):
                     isRegex = self.reIsRegex.search(match)
                     if isRegex is not None:
                         regex = re.compile(isRegex.group(1), re.I)
                     else:
-                        regex = re.compile(r'\b' + re.escape(match) + r'\b', re.I)
+                        regex = re.compile(r'\b' + re.escape(match) + r'\b',
+                                re.I)
 
                     matches.append(regex)
 
@@ -77,6 +72,3 @@ class MatchObject(object):
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 
 
-if __name__ == '__main__':
-    print MatchObject(dir='..').response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
-    sys.exit(0)

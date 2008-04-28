@@ -1,36 +1,31 @@
 #!/usr/bin/env python
 
-"""
-get the current woot - author: Twid
-"""
+"""get the current woot - author: Twid"""
 
+from urlparse import urljoin
 import sys
 import re
-import urllib
-import string
 from include import rssparser
-from include import utils
+from include.utils import Base, stripHTML
 import os
+import string
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*woot(?:\s+(\S+))?')
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'woot - get latest offer from woot.com'
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^\s*woot(?:\s+(\S+))?')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = True
-        self.help = 'woot - get latest offer from woot.com'
+    baseURL = 'http://woot.com'
+    max = 200
 
-        self.baseURL = 'http://woot.com'
-        self.max = 200
-    
     def response(self, **kwargs):
         nick = kwargs['nick']
 
         try:
-            url = self.baseURL + '/Blog/Rss.aspx'
+            url = urljoin(self.baseURL, '/Blog/Rss.aspx')
             feed = rssparser.parse(url)
 
             # get latest entry and their homepage url
@@ -46,7 +41,7 @@ class MatchObject(object):
             page = feed['items'][0]['link']
 
             # strip out html
-            longdescription = string.lstrip(utils.stripHTML(longdescription))
+            longdescription = string.lstrip(stripHTML(longdescription))
 
             # these can get absurdly long
             longdescription = longdescription[:self.max] + ' ...'
@@ -58,6 +53,13 @@ class MatchObject(object):
             return "%s: Couldn't load the page woot returned D:" % nick
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])])
-    sys.exit(0)
+    sys.exit(main())

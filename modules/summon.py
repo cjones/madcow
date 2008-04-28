@@ -1,31 +1,25 @@
 #!/usr/bin/env python
 
-"""
-Summon people
-"""
+"""Summon people"""
 
 import sys
 import re
-import urllib
-import learn
+from learn import Main as Learn
+from include.utils import Base
 import os
 from smtplib import SMTP
 
-class MatchObject(object):
+class Main(Base):
+    enabled = True
+    pattern = re.compile(r'^\s*summons?\s+(\S+)(?:\s+(.*?))?\s*$')
+    require_addressing = True
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile(r'^\s*summons?\s+(\S+)(?:\s+(.*?))?\s*$')
-        self.requireAddressing = True
-        self.thread = False
-        self.wrap = False
-        self.ns = ns
-        if dir is None:
-            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-        self.dir = dir
-        self.help = 'summon <nick> [reason] - summon user'
-        self.learn = learn.MatchObject(ns=self.ns, dir=self.dir)
-        self.config = config
+
+    help = 'summon <nick> [reason] - summon user'
+
+    def __init__(self, madcow):
+        self.learn = Learn(madcow)
+        self.config = madcow.config
 
     def response(self, **kwargs):
         try:
@@ -50,6 +44,3 @@ class MatchObject(object):
         except Exception, e:
             return "%s: I couldn't make that summon: %s" % (nick, e)
 
-if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
-    sys.exit(0)

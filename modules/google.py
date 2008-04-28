@@ -38,12 +38,12 @@ class Google(Base):
         self.opener = urllib2.build_opener(NoRedirects, NoErrors)
 
     def lucky(self, query):
-        opts = Google._lucky_opts
+        opts = self._lucky_opts
         opts['q'] = query
-        url = Google._search_url + '?' + urllib.urlencode(opts)
+        url = self._search_url + '?' + urllib.urlencode(opts)
         request = urllib2.Request(url)
-        request.add_header('User-Agent', Google._agent)
-        request.add_header('Referer', Google._base_url)
+        request.add_header('User-Agent', self._agent)
+        request.add_header('Referer', self._base_url)
         result = self.opener.open(request)
         if isinstance(result, str):
             return '%s = %s' % (query, result)
@@ -51,15 +51,15 @@ class Google(Base):
             raise Exception('No matches for ' + query)
 
 
-class MatchObject(Base):
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*google\s+(.*?)\s*$')
+    require_addressing = True
+
+
+    help = "google <query> - i'm feeling lucky"
 
     def __init__(self, *args, **kwargs):
-        self.enabled = True
-        self.pattern = re.compile('^\s*google\s+(.*?)\s*$')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = "google <query> - i'm feeling lucky"
         self.google = Google()
 
     def response(self, **kwargs):
@@ -74,9 +74,13 @@ class MatchObject(Base):
             return '%s: Not so lucky today.. %s' % (nick, e)
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    nick = os.environ['USER']
-    args = [' '.join(sys.argv[1:])]
-    mo = MatchObject()
-    print mo.response(nick=nick, args=args)
-    sys.exit(0)
+    sys.exit(main())

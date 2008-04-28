@@ -5,19 +5,20 @@
 import re
 import random
 import math
+from include.utils import Base
+import sys
+import os
 
-class MatchObject(object):
+class Main(Base):
+    enabled = True
     _allow = '-?(?:[0-9.]+j?|pi|e)'
     _regex = '^\s*roll\s+(%s?)d(%s)\s*$' % (_allow, _allow)
-    _color_map = {'red': 5, 'yellow': 7, 'green': 3}
+    pattern = re.compile(_regex, re.I)
+    require_addressing = True
 
-    def __init__(self, *args, **kwargs):
-        self.enabled = True
-        self.pattern = re.compile(self._regex, re.I)
-        self.requireAddressing = True
-        self.thread = False
-        self.wrap = True
-        self.help = 'roll [<numdice>d<sides>] - roll die of the specified size'
+
+    help = 'roll [<numdice>d<sides>] - roll die of the specified size'
+    _color_map = {'red': 5, 'yellow': 7, 'green': 3}
 
     def roll(self, min, max):
         if isinstance((min * max), (float, complex)):
@@ -72,6 +73,14 @@ class MatchObject(object):
         return '%s rolls %s, needs %s, %s %s' % (nick, saving_throw,
                 save_versus, nick, result)
 
+
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    import sys
-    print MatchObject().response(nick='user', args=sys.argv[1:])
+    sys.exit(main())

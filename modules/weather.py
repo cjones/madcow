@@ -5,20 +5,19 @@
 import sys
 import re
 import os
-from include.utils import UserAgent
-from include.utils import stripHTML
+from include.utils import UserAgent, stripHTML, Base
 from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
 from include import rssparser
-from learn import MatchObject as Learn
+from learn import Main as Learn
 
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['Weather', 'MatchObject']
+__all__ = ['Weather', 'Main']
 __usage__ = 'set location <nick> <location>'
 
-class Weather(object):
+class Weather(Base):
     _base_url = 'http://www.wunderground.com/'
     _search_url = urljoin(_base_url, '/cgi-bin/findweather/getForecast')
     _rss_link = {'type': 'application/rss+xml'}
@@ -103,20 +102,20 @@ class Weather(object):
         return '%s: %s' % (title, output)
 
 
-class MatchObject(object):
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
+    require_addressing = True
 
-    def __init__(self, config=None, ns='madcow', dir='..'):
-        self.config = config
-        self.ns = ns
-        self.dir = dir
-        self.enabled = True
-        self.pattern = re.compile('^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = False
-        self.help = None
+
+    help = __usage__
+
+    def __init__(self, madcow=None):
         self.weather = Weather()
-        self.learn = Learn(ns=self.ns, dir=self.dir)
+        try:
+            self.learn = Learn(ns=madcow.ns, dir=madcow.dir)
+        except:
+            self.learn = None
 
     def response(self, **kwargs):
         nick = kwargs['nick']
@@ -126,9 +125,9 @@ class MatchObject(object):
         except:
             args = None
 
-        if args is None or args == '':
+        if args is None or args == '' and self.learn:
             query = self.learn.lookup('location', nick)
-        elif args.startswith('@'):
+        elif args.startswith('@') and self.learn:
             query = self.learn.lookup('location', args[1:])
         else:
             query = args
@@ -142,7 +141,13 @@ class MatchObject(object):
             return "Couldn't find that place, maybe a bomb dropped on it"
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'],
-            args=[' '.join(sys.argv[1:])])
-    sys.exit(0)
+    sys.exit(main())

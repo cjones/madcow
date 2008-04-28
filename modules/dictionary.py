@@ -1,62 +1,66 @@
 #!/usr/bin/env python
 
-"""
-Lookup a definition in the dictionary...
-"""
+"""Lookup a definition in the dictionary..."""
 
 import sys
 import re
-import urllib
-from include import utils
+from include.utils import stripHTML, Base, UserAgent
 import os
+from urlparse import urljoin
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^\s*define\s+(\w+)(?:\s+(\d+))?$')
+    require_addressing = True
 
 
-class MatchObject(object):
+    help = 'define <word/phrase> [#] - get a definition from merriam-webster'
 
-    def __init__(self, config=None, ns='madcow', dir=None):
-        self.enabled = True
-        self.pattern = re.compile('^\s*define\s+(\w+)(?:\s+(\d+))?$')
-        self.requireAddressing = True
-        self.thread = True
-        self.wrap = True
-        self.help = 'define <word/phrase> [#] - get a definition from merriam-webster'
+    re_defs = re.compile(r'<div class="defs">(.*?)</div>', re.DOTALL)
+    re_newline = re.compile(r'[\r\n]+')
+    re_def_break = re.compile(r'<span class="sense_break"/>')
+    header = re.compile('^.*?:\xa0')
+    base_url = 'http://www.m-w.com/dictionary/'
 
-        self.re_defs = re.compile(r'<div class="defs">(.*?)</div>', re.DOTALL)
-        self.re_newline = re.compile(r'[\r\n]+')
-        self.re_def_break = re.compile(r'<span class="sense_break"/>')
-        self.header = re.compile('^.*?:\xa0')
+    def __init__(self, madcow=None):
+        self.ua = UserAgent()
 
     def response(self, **kwargs):
         nick = kwargs['nick']
-        args = kwargs['args']
+        word = kwargs['args'][0].lower()
         try:
-            word = args[0].lower()
             try:
-                if len(args) > 1: num = int(args[1])
-                else: num = 1
+                num = int(kwargs['args'][1])
             except:
                 num = 1
 
-            url = 'http://www.m-w.com/dictionary/' + word
-            doc = urllib.urlopen(url).read()
+            url = urljoin(self.base_url, word)
+            doc = self.ua.fetch(url)
             defs = self.re_defs.search(doc).group(1)
             defs = self.re_newline.sub('', defs)
             defs = self.re_def_break.split(defs)
             if len(defs) > 1:
                 defs.pop(0)
-            defs = [utils.stripHTML(d) for d in defs]
-            defs = [self.header.sub('', definition) for definition in defs]
-
             if num > len(defs):
                 num = 1
+            definition = defs[num - 1]
+            definition = stripHTML(definition)
+            definition = self.header.sub('', definition)
 
-            return '%s: [%s/%s] %s' % (nick, num, len(defs), defs[num - 1])
+            return '%s: [%s/%s] %s' % (nick, num, len(defs), definition)
 
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return "%s: I couldn't look that up for some reason.  D:" % nick
 
 
+def main():
+    try:
+        main = Main()
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+        print main.response(nick=os.environ['USER'], args=args)
+    except Exception, e:
+        print 'no match: %s' % e
+
 if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=sys.argv[1:])
-    sys.exit(0)
+    sys.exit(main())

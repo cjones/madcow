@@ -212,7 +212,6 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
 
         req = Request()
         req.colorize = False
-        req.wrap = False
         req.sendTo = send_to
         output = 'message from %s: %s' % (sent_from, message)
         self.server.madcow.output(output, req)
@@ -225,36 +224,11 @@ class PeriodicEvents(Base):
     """Class to manage modules which are periodically executed"""
     _re_delim = re.compile(r'\s*[,;]\s*')
     _ignore_modules = ['__init__', 'template']
-    _process_frequency = 0.50
+    _process_frequency = 1
 
     def __init__(self, madcow):
         self.madcow = madcow
-        self.dir = os.path.join(madcow.dir, 'periodic')
-        self.modules = {}
-        self.load_modules()
-
-    def load_modules(self):
-        """Load modules to be periodically executed"""
-        filenames = os.walk(self.dir).next()[2]
-        log.info('[MOD] * Reading periodic modules from %s' % self.dir)
-
-        for filename in filenames:
-            if not filename.endswith('.py'):
-                continue
-            mod_name = filename[:-3]
-            if mod_name in PeriodicEvents._ignore_modules:
-                continue
-            try:
-                module = __import__('periodic.' + mod_name, globals(),
-                        locals(), ['PeriodicEvent'])
-                PeriodicEvent = getattr(module, 'PeriodicEvent')
-                obj = PeriodicEvent(madcow=self.madcow)
-                if not obj.enabled:
-                    raise Exception, 'disabled'
-                log.info('[MOD] Loaded periodic module %s' % mod_name)
-                self.modules[mod_name] = {'last_run': time.time(), 'obj': obj}
-            except Exception, e:
-                log.warn("[MOD] Couldn't load %s: %s" % (mod_name, e))
+        self.last_run = dict.fromkeys(self.madcow.periodics.keys(), time.time())
 
     def start(self):
         while True:
@@ -263,11 +237,10 @@ class PeriodicEvents(Base):
 
     def process_queue(self):
         now = time.time()
-        for mod_name, mod_data in self.modules.items():
-            obj = mod_data['obj']
-            if (now - mod_data['last_run']) < obj.frequency:
+        for mod_name, obj in self.madcow.periodics.items():
+            if (now - self.last_run[mod_name]) < obj.frequency:
                 continue
-            self.modules[mod_name]['last_run'] = now
+            self.last_run[mod_name] = now
             kwargs = {'mod_name': mod_name, 'obj': obj}
             threading.Thread(target=self.process_thread, kwargs=kwargs).start()
 
@@ -278,7 +251,6 @@ class PeriodicEvents(Base):
             if response is not None and len(response):
                 req = Request()
                 req.colorize = False
-                req.wrap = False
                 req.sendTo = obj.output
                 self.madcow.output(response, req)
         except Exception, e:
@@ -295,8 +267,7 @@ class Madcow(Base):
         self.dir = dir
 
         self.ns = self.config.modules.dbnamespace
-        self.ignoreModules = [ '__init__', 'template' ]
-        self.moduleDir = os.path.join(self.dir, 'modules')
+        self.ignore_modules = [ '__init__', 'template' ]
         self.outputLock = threading.RLock()
 
         if self.config.main.ignorelist is not None:
@@ -311,8 +282,8 @@ class Madcow(Base):
 
         # dynamically generated content
         self.usageLines = []
-        self.modules = {}
-        self.loadModules()
+        self.modules = self.load_modules('modules')
+        self.periodics = self.load_modules('periodic')
 
         # start local service for handling email gateway
         if self.config.gateway.enabled:
@@ -347,12 +318,14 @@ class Madcow(Base):
     def botName(self):
         return 'madcow'
 
-    def loadModules(self):
+    def load_modules(self, subdir):
         """
         Dynamic loading of module extensions. This looks for .py files in
         The module directory. They must be well-formed (based on template.py).
         If there are any problems loading, it will skip them.
         """
+        path = os.path.join(self.dir, subdir)
+
         disabled = []
         for mod_name, enabled in self.config.modules.__dict__.items():
             if mod_name == 'dbNamespace':
@@ -360,46 +333,34 @@ class Madcow(Base):
             if not enabled:
                 disabled.append(mod_name)
 
-        files = os.walk(self.moduleDir).next()[2]
-        log.info('[MOD] * Reading modules from %s' % self.moduleDir)
+        log.info('[MOD] * Reading modules from %s' % path)
 
-        for file in files:
-            if file.endswith('.py') is False:
+        modules = {}
+        for filename in os.walk(path).next()[2]:
+            if not filename.endswith('.py'):
                 continue
-
-            modName = file[:-3]
-            if modName in self.ignoreModules:
+            mod_name = filename[:-3]
+            if mod_name in self.ignore_modules:
                 continue
-
-            if modName in disabled:
-                log.warn('[MOD] %s is disabled in config' % modName)
+            if mod_name in disabled:
+                log.warn('[MOD] %s is disabled in config' % mod_name)
                 continue
-
             try:
-                module = __import__('modules.' + modName, globals(), locals(),
-                        ['MatchObject'])
-                MatchObject = getattr(module, 'MatchObject')
-                obj = MatchObject(config=self.config, ns=self.ns, dir=self.dir)
-
-                if obj.enabled is False:
+                obj = __import__(
+                        '%s.%s' % (subdir, mod_name),
+                        globals = globals(),
+                        locals = locals(),
+                        fromlist = ['Main']
+                        ).Main(madcow=self)
+                if not obj.enabled:
                     raise Exception, 'disabled'
-
                 if hasattr(obj, 'help') and obj.help is not None:
                     self.usageLines += obj.help.splitlines()
-
-                log.info('[MOD] Loaded module %s' % modName)
-                self.modules[modName] = obj
-
-                try:
-                    Admin = getattr(module, 'Admin')
-                    obj = Admin()
-                    log.info('[MOD] Registering Admin: %s' % modName)
-                    self.admin.modules[modName] = obj
-                except:
-                    pass
-
+                log.info('[MOD] Loaded module %s' % mod_name)
+                modules[mod_name] = obj
             except Exception, e:
-                log.warn("[MOD] Couldn't load module %s: %s" % (modName, e))
+                log.warn("[MOD] Couldn't load module %s: %s" % (mod_name, e))
+        return modules
 
     def checkAddressing(self, req):
         """Is bot being addressed?"""
@@ -472,7 +433,7 @@ class Madcow(Base):
                 return
 
         for module in self.modules.values():
-            if module.requireAddressing and not req.addressed:
+            if module.require_addressing and not req.addressed:
                 continue
 
             try:

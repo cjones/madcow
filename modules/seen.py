@@ -1,33 +1,28 @@
 #!/usr/bin/env python
 
-"""
-Keep track of what people last said
-"""
+"""Keep track of what people last said"""
 
 import sys
 import re
 import anydbm
 import time
 import os
+from include.utils import Base
+
+class Main(Base):
+    enabled = True
+    pattern = re.compile('^(.+)$')
+    require_addressing = False
 
 
-class MatchObject(object):
+    help = 'seen <nick> - query bot about last time someone was seen speaking'
+    seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)
 
-    def __init__(self, dir='..', ns='madcow', config=None):
-        self.enabled = True
-        self.pattern = re.compile('^(.+)$')
-        self.requireAddressing = False
-        self.thread = False
-        self.wrap = False
-        self.help = 'seen <nick> - query bot about last time someone was seen speaking'
-
-        if dir is None:
-            dir = os.path.abspath(os.path.dirname(sys.argv[0]) + '/..')
-        self.file = dir + '/data/db-%s-seen' % ns
-        self.seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)
+    def __init__(self, madcow):
+        self.dbfile = os.path.join(madcow.dir, 'data/db-%s-seen' % madcow.ns)
 
     def dbm(self):
-        return anydbm.open(self.file, 'c', 0640)
+        return anydbm.open(self.dbfile, 'c', 0640)
 
     def get(self, user):
         user = user.lower()
@@ -85,6 +80,3 @@ class MatchObject(object):
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
 
 
-if __name__ == '__main__':
-    print MatchObject().response(nick=os.environ['USER'], args=[' '.join(sys.argv[1:])], channel='#test')
-    sys.exit(0)
