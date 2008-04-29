@@ -1,3 +1,7 @@
+1.1.6: Mon Apr 28 19:46:48 PDT 2008
+    * major overhaul to threading system/module API
+    * various bugfixes
+
 1.1.5: Fri Apr 25 22:35:58 PDT 2008
     * rewrite email_gateway and consolidate .ini settings for it
     * add simple tool in include/ called tagstruct, to aid in parsing webpages

@@ -13,7 +13,7 @@ from include.utils import Base
 import SocketServer
 import select
 
-__version__ = '1.1.5'
+__version__ = '1.1.6'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
