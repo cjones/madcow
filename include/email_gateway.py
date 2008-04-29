@@ -81,6 +81,8 @@ class EmailGateway(Base):
         except Exception, e:
             raise ParsingError, "couldn't parse payload: %s" % e
 
+        # parse base64 encoded words and work around non-rfc2047 compliant
+        # formats (google/blackberry)
         sender = message['from']
         sender = self._remove_quotes.sub(r'\2', sender)
         headers = decode_header(sender)
