@@ -7,6 +7,7 @@ import re
 import email
 import mimetypes
 import socket
+from email.header import decode_header
 
 # add madcow base directory to path
 _basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
@@ -39,6 +40,7 @@ class EmailGateway(Base):
     _quoted = r'^(-+)\s*(original|forwarded)\s+(message|e?mail)\s*\1'
     _quoted = re.compile(_quoted, re.I)
     _sig = '--'
+    _remove_quotes = re.compile('([\'"])(=\\?(?:[^\x00- ()<>@,;:"/\\[\\]?.=]+\\?){2}[!->@-~]+\\?=)\\1')
 
     def __init__(self, configfile=_configfile):
         config = Config(configfile).gateway
@@ -79,12 +81,19 @@ class EmailGateway(Base):
         except Exception, e:
             raise ParsingError, "couldn't parse payload: %s" % e
 
+        sender = message['from']
+        sender = self._remove_quotes.sub(r'\2', sender)
+        headers = decode_header(sender)
+        header_parts = [unicode(part, charset or 'ascii') for part,
+                charset in headers]
+        sender = str(u' '.join(header_parts))
+
         # send message to madcow service
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(self.service)
             s.send('to: %s\n' % self.channel)
-            s.send('from: %s\n' % message['from'])
+            s.send('from: %s\n' % sender)
             s.send('message: %s\n' % body)
             s.close()
         except Exception, e:
