@@ -5,6 +5,24 @@ SYNOPSIS
     extend its functionality. Madocw ships with modules that emulate
     classic Infobot behavior and much more.
 
+BASIC USAGE
+
+    Copy madcow.ini-sample to madcow.ini, edit options, and run:
+
+    $ ./madcow.py
+
+    In IRC, message the bot with 'help' to see a list of commands. To
+    trigger him publicly, most commands require that you address the bot,
+    for example:
+
+11:37 <cj_> madcow: wiki dinosaurs
+11:37 <madcow> Dinosaur - Dinosaurs were the dominant vertebrate animals of
+               terrestrial ecosystems for over 160 million years, from the late 
+               Triassic period to the end of the Cretaceous period, when most
+               of them became extinct in the CretaceousTertiary extinction 
+               event.
+
+
 REQUIREMENTS
 
     * python 2.4 or higher
@@ -14,7 +32,7 @@ REQUIREMENTS
     protocol.  Most of these are available from your operating systems's
     default package/ports handler.
 
-    IRC  - irc uses python-irclib, which ships with madcow.
+    IRC  - irc uses python-irclib (included with madcow)
     SILC - pysilc (http://cheeseshop.python.org/pypi/pysilc/0.4)
     AIM  - twisted (http://twistedmatrix.com/trac/wiki/TwistedProjects)
 
@@ -36,11 +54,7 @@ WEB FRONTEND FOR MEMEBOT
 
     Please see README.django for full instructions on enabling this.
 
-BASIC USAGE
-
-    Copy madcow.ini-sample to madcow.ini, edit options, and run:
-
-    $ ./madcow.py
+ADVANCED USAGE
 
     By default, the bot will use IRC. If you wish to use SILC or AIM,
     uncomment the appropriate line in madcow.ini. You can also specify a

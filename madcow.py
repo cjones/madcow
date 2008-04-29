@@ -9,7 +9,7 @@ import threading
 import time
 import logging as log
 from include.authlib import AuthLib
-from include.utils import Base
+from include.utils import Base, Error
 import SocketServer
 import select
 
@@ -21,6 +21,10 @@ __all__ = ['Request', 'User', 'Admin', 'ServiceHandler', 'PeriodicEvents',
         'Madcow', 'Config']
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
 _loglevel = log.INFO
+
+class FileNotFound(Error):
+    """Raised when a file is not found"""
+
 
 class Request(Base):
     """Generic object passed in from protocol handlers for processing"""
@@ -488,6 +492,8 @@ class Config(Base):
 
 
     def __init__(self, filename):
+        if not os.path.exists(filename):
+            raise FileNotFound, filename
         parser = ConfigParser()
         parser.read(filename)
         self.sections = {'DEFAULT': self.ConfigSection()}
@@ -557,7 +563,14 @@ def main():
     opts, args = parser.parse_args()
 
     # read config file
-    config = Config(opts.config)
+    try:
+        config = Config(opts.config)
+    except FileNotFound:
+        sys.stderr.write('config file not found, see README\n')
+        return 1
+    except Exception, e:
+        sys.stderr.write('error parsing config: %s\n' % e)
+        return 1
 
     # init log facility
     try:
