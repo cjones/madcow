@@ -7,7 +7,7 @@ import re
 import email
 import mimetypes
 import socket
-from email.header import decode_header
+from email.Header import decode_header
 
 # add madcow base directory to path
 _basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
