@@ -459,47 +459,47 @@ class Madcow(Base):
 
 
 class Config(Base):
-    """
-    Class to handle configuration directives. Usage is: config.module.attribute
-    module maps to the headers in the configuration file. It automatically
-    translates floats and integers to the appropriate type.
-    """
 
-    isInt = re.compile('^[0-9]+$')
-    isFloat = re.compile('^\d+\.\d+$')
-    isTrue = re.compile('^\s*(true|yes|on|1)\s*$')
-    isFalse = re.compile('^\s*(false|no|off|0)\s*$')
+    class ConfigSection(Base):
+        _isint = re.compile(r'^-?[0-9]+$')
+        _isfloat = re.compile(r'^-?\d+\.\d+$')
+        _istrue = re.compile('^(?:true|yes|on|1)$', re.I)
+        _isfalse = re.compile('^(?:false|no|off|0)$', re.I)
 
-    def __init__(self, file=None, section=None, opts=None):
-        if file is not None:
-            cfg = ConfigParser()
-            cfg.read(file)
-
-            for section in cfg.sections():
-                obj = Config(section=section, opts=cfg.items(section))
-                setattr(self, section, obj)
-
-        else:
-            for key, val in opts:
-                if Config.isInt.search(val):
+        def __init__(self, settings=[]):
+            self.settings = {}
+            for key, val in settings:
+                if self._isint.search(val):
                     val = int(val)
-                elif Config.isFloat.search(val):
+                elif self._isfloat.search(val):
                     val = float(val)
-                elif Config.isTrue.search(val):
+                elif self._istrue.search(val):
                     val = True
-                elif Config.isFalse.search(val):
+                elif self._isfalse.search(val):
                     val = False
+                self.settings[key.lower()] = val
 
-                setattr(self, key, val)
+        def __getattr__(self, attr):
+            attr = attr.lower()
+            if self.settings.has_key(attr):
+                return self.settings[attr]
+            else:
+                return None
+
+
+    def __init__(self, filename):
+        parser = ConfigParser()
+        parser.read(filename)
+        self.sections = {'DEFAULT': self.ConfigSection()}
+        for name in parser.sections():
+            self.sections[name] = self.ConfigSection(parser.items(name))
 
     def __getattr__(self, attr):
-        try:
-            return getattr(self, attr)
-        except:
-            try:
-                return getattr(self, attr.lower())
-            except:
-                return None
+        attr = attr.lower()
+        if self.sections.has_key(attr):
+            return self.sections[attr]
+        else:
+            return self.sections['DEFAULT']
 
 
 def detach():
@@ -557,7 +557,7 @@ def main():
     opts, args = parser.parse_args()
 
     # read config file
-    config = Config(file=opts.config)
+    config = Config(opts.config)
 
     # init log facility
     try:
