@@ -27,6 +27,9 @@ logpublic=yes
 ; set this to log console output to a file in madcow base directory
 loglevel=INFO           ; default level, valid options are DEBUG, INFO, WARN
 logfile=madcow.log      ; leave blank for no file-level logging
+;
+; encode output to this format
+charset=utf8
 
 [modules]
 ; if you wish to run multiple bots from the same directory you should

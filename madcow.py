@@ -252,19 +252,20 @@ class PeriodicEvents(Base):
         try:
             obj = kwargs['obj']
             response = obj.process()
-            if response is not None and len(response):
-                req = Request()
-                req.colorize = False
-                req.sendTo = obj.output
-                self.madcow.output(response, req)
         except Exception, e:
             log.warn('UNCAUGHT EXCEPTION IN %s' % kwargs['mod_name'])
             log.exception(e)
+        if response is not None and len(response):
+            req = Request()
+            req.colorize = False
+            req.sendTo = obj.output
+            self.madcow.output(response, req)
 
 
 class Madcow(Base):
     """Core bot handler"""
     reDelim = re.compile(r'\s*[,;]\s*')
+    _codecs = ('ascii', 'utf8', 'latin1',)
 
     def __init__(self, config=None, dir=None):
         self.config = config
@@ -283,6 +284,12 @@ class Madcow(Base):
             self.ignoreList = []
 
         self.admin = Admin(self)
+
+        # set encoding
+        if self.config.main.charset:
+            self.charset = self.config.main.charset
+        else:
+            self.charset = 'utf8'
 
         # dynamically generated content
         self.usageLines = []
@@ -311,10 +318,40 @@ class Madcow(Base):
     def start(self):
         pass
 
+    def encode(self, text):
+        if isinstance(text, str):
+            for charset in self._codecs:
+                try:
+                    text = unicode(text, charset)
+                    break
+                except:
+                    pass
+
+            if isinstance(text, str):
+                text = unicode(text, 'ascii', 'replace')
+
+        try:
+            text = text.encode(self.charset)
+        except:
+            text = text.encode('ascii', 'replace')
+
+        return text
+
     def output(self, *args, **kwargs):
-        self.outputLock.acquire()
-        self._output(*args, **kwargs)
-        self.outputLock.release()
+        try:
+            if not isinstance(args, list):
+                args = list(args)
+            args[0] = self.encode(args[0])
+            self.outputLock.acquire()
+            self._output(*args, **kwargs)
+        except Exception, e:
+            log.error('CRITICAL ERROR IN OUTPUT: %s' % repr(args[0]))
+            log.exception(e)
+
+        try:
+            self.outputLock.release()
+        except:
+            pass
 
     def _output(self, message, req):
         pass
