@@ -21,6 +21,7 @@ __all__ = ['Request', 'User', 'Admin', 'ServiceHandler', 'PeriodicEvents',
         'Madcow', 'Config']
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
 _loglevel = log.INFO
+_charset = 'latin1'
 
 class FileNotFound(Error):
     """Raised when a file is not found"""
@@ -289,7 +290,7 @@ class Madcow(Base):
         if self.config.main.charset:
             self.charset = self.config.main.charset
         else:
-            self.charset = 'utf8'
+            self.charset = _charset
 
         # dynamically generated content
         self.usageLines = []
