@@ -135,9 +135,8 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.lyrics = Lyrics()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        query = kwargs['args'][0].lower().split()
+    def response(self, nick, args, **kwargs):
+        query = args[0].lower().split()
         return self.lyrics.get_lyrics(query)
 
         try:

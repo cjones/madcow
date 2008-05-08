@@ -22,11 +22,8 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.ua = UserAgent()
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
-            nick = kwargs['nick']
-            args = kwargs['args']
-
             doc = self.ua.fetch(self._url)
             soup = BeautifulSoup(doc)
             confs = soup.findAll('div', attrs={'class': 'content'})[3:]

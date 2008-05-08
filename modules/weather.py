@@ -114,11 +114,10 @@ class Main(Base):
         except:
             self.learn = None
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
+    def response(self, nick, args, **kwargs):
 
         try:
-            args = kwargs['args'][0]
+            args = args[0]
         except:
             args = None
 

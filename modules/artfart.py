@@ -25,9 +25,8 @@ class Main(Base):
         self.madcow = madcow
         self.ua = UserAgent()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        query = kwargs['args'][0]
+    def response(self, nick, args, **kwargs):
+        query = args[0]
         if query is None or query == '':
             url = self.random_url
         else:

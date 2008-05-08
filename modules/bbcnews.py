@@ -22,9 +22,8 @@ class Main(Base):
     _rss_url = 'http://newsrss.bbc.co.uk/'
     _world_url = urljoin(_rss_url, '/rss/newsonline_uk_edition/world/rss.xml')
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        query = kwargs['args'][0]
+    def response(self, nick, args, **kwargs):
+        query = args[0]
         print query
 
         try:

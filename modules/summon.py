@@ -21,10 +21,9 @@ class Main(Base):
         self.learn = Learn(madcow)
         self.config = madcow.config
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
-            sendto, reason = kwargs['args']
-            nick = kwargs['nick']
+            sendto, reason = args
             email = self.learn.lookup('email', sendto)
             if email is None:
                 raise Exception, "I don't know the email for %s" % sendto

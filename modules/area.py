@@ -23,9 +23,7 @@ class Main(Base):
         self.madcow = madcow
         self.ua = UserAgent()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        args = kwargs['args']
+    def response(self, nick, args, **kwargs):
 
         try:
             self.ua.fetch(self.base_url)

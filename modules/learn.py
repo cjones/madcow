@@ -52,9 +52,8 @@ class Main(Base):
         dbm[key.lower()] = val
         dbm.close()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        db, key, val = kwargs['args']
+    def response(self, nick, args, **kwargs):
+        db, key, val = args
         if db not in self._allowed:
             return '%s: unknown database' % nick
         self.set(db, key, val)

@@ -58,10 +58,9 @@ class Main(Base):
         db[nick.lower()] = packed
         db.close()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
+    def response(self, nick, args, **kwargs):
         channel = kwargs['channel']
-        line = kwargs['args'][0]
+        line = args[0]
 
         try:
             self.set(nick, channel, line)

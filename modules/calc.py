@@ -24,7 +24,7 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.ua = UserAgent()
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
             opts = {
                 'hl': 'en',

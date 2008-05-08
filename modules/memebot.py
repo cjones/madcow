@@ -100,11 +100,11 @@ class Main(Base):
         scores = sorted(scores, lambda x, y: cmp(y[1], x[1]))
         return scores
 
-    def response(self, **kwargs):
-        nick = kwargs['nick'].lower()
+    def response(self, nick, args, **kwargs):
+        nick = nick.lower()
         chan = kwargs['channel']
         addressed = kwargs['addressed']
-        message = kwargs['args'][0]
+        message = args[0]
 
         if addressed is True:
             try:

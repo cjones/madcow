@@ -67,9 +67,9 @@ class Main(Base):
         quote = '%s: %s' % (title, quote)
         return quote
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
-            author = kwargs['args'][0]
+            author = args[0]
             if author:
                 max = 1
             else:
@@ -77,7 +77,7 @@ class Main(Base):
                 max = _max
             return self.get_random_quote(author=author, max=max)
         except Exception, e:
-            return '%s: problem with query: %s' % (kwargs['nick'], e)
+            return '%s: problem with query: %s' % (nick, e)
 
 
 def main():

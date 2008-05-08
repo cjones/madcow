@@ -18,9 +18,8 @@ class Main(Base):
 
     _byip = re.compile(r'^(\d+\.){3}\d+$')
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        query = kwargs['args'][0]
+    def response(self, nick, args, **kwargs):
+        query = args[0]
 
         if self._byip.search(query):
             try:

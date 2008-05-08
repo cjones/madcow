@@ -26,9 +26,8 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.ua = UserAgent()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        query = kwargs['args'][0]
+    def response(self, nick, args, **kwargs):
+        query = args[0]
 
         try:
             opts = {'verbose': 'on', 'name': query}

@@ -21,9 +21,7 @@ class Main(Base):
     baseURL = 'http://woot.com'
     max = 200
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-
+    def response(self, nick, args, **kwargs):
         try:
             url = urljoin(self.baseURL, '/Blog/Rss.aspx')
             feed = rssparser.parse(url)

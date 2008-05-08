@@ -66,9 +66,7 @@ class Main(Base):
     self.log = ChatLog()
     
   # function to generate a response
-  def response(self, **kwargs):
-    nick = kwargs['nick']
-    args = kwargs['args']
+  def response(self, nick, args, **kwargs):
     line = args[0]
     
     cl = ChatLine(nick, line)

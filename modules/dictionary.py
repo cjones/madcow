@@ -25,12 +25,11 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.ua = UserAgent()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        word = kwargs['args'][0].lower()
+    def response(self, nick, args, **kwargs):
+        word = args[0].lower()
         try:
             try:
-                num = int(kwargs['args'][1])
+                num = int(args[1])
             except:
                 num = 1
 

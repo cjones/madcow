@@ -62,10 +62,7 @@ class Main(Base):
     def __init__(self, *args, **kwargs):
         self.google = Google()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        args = kwargs['args']
-
+    def response(self, nick, args, **kwargs):
         try:
             query = args[0]
             return '%s: %s' % (nick, self.google.lucky(query))

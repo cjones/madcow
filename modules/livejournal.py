@@ -23,10 +23,7 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.ua = UserAgent()
     
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        args = kwargs['args']
-
+    def response(self, nick, args, **kwargs):
         try:
             try:
                 user = args[0]

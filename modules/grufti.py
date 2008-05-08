@@ -58,11 +58,8 @@ class Main(Base):
 
         return output
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
-            nick = kwargs['nick']
-            args = kwargs['args']
-
             for matches, responses in self.data:
                 for match in matches:
                     if match.search(args[0]) is not None:

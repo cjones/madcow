@@ -115,12 +115,12 @@ class Main(Base):
         self.iran = IranWar()
         self.iraq = IraqWar(ua=self.ua)
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
             return __format__ % (self.terror.level(), self.doom.time(),
                     self.iran.war(), self.iraq.war(), self.iraq.bodycount())
         except Exception, e:
-            return '%s: problem with query: %s' % (kwargs['nick'], e)
+            return '%s: problem with query: %s' % (nick, e)
 
 
 def main():

@@ -37,7 +37,7 @@ class Main(Base):
             'straight', 'twopoint'
         )
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
             self.figlet.setFont(font=random.choice(self.fonts))
             text = self.figlet.renderText('your mom')

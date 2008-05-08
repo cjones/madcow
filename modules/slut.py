@@ -80,9 +80,7 @@ class Main(Base):
   help = "slutcheck <phrase> - see how slutty the phrase is"
 
   # function to generate a response
-  def response(self, **kwargs):
-    nick = kwargs['nick']
-    args = kwargs['args']
+  def response(self, nick, args, **kwargs):
     try:
       query = " ".join(args)
       rating = slutrating(query)

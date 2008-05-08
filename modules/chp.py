@@ -23,9 +23,8 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.ua = UserAgent()
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        query = kwargs['args'][0]
+    def response(self, nick, args, **kwargs):
+        query = args[0]
         try:
             check = self.clean.sub('', query)
             check = re.compile(check, re.I)

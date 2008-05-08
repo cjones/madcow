@@ -19,11 +19,11 @@ class Main(Base):
     def __init__(self, *args, **kwargs):
         self.wiki = Wiki()
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
-            return self.wiki.get_summary(kwargs['args'])
+            return self.wiki.get_summary(args)
         except Exception, e:
-            return '%s: problem with query: %s' % (kwargs['nick'], e)
+            return '%s: problem with query: %s' % (nick, e)
 
 
 def main():

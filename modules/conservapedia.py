@@ -25,11 +25,11 @@ class Main(Base):
         self.wiki = Wiki(base_url=_baseurl, random_path=_random_path,
                 advert=_advert)
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
-            return self.wiki.get_summary(kwargs['args'])
+            return self.wiki.get_summary(args)
         except Exception, e:
-            return '%s: problem with query: %s' % (kwargs['nick'], e)
+            return '%s: problem with query: %s' % (nick, e)
 
 
 def main():

@@ -40,11 +40,11 @@ class Main(Base):
         author = cells[3].string
         return '<%s@%s> %s' % (author, source, comment)
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         try:
             return self.get_comment()
         except Exception, e:
-            return '%s: problem with query: %s' % (kwargs['nick'], e)
+            return '%s: problem with query: %s' % (nick, e)
 
 
 def main():

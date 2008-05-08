@@ -68,11 +68,10 @@ class Main(Base):
         else:
             return True
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
+    def response(self, nick, args, **kwargs):
         addressed = kwargs['addressed']
         correction = kwargs['correction']
-        message = kwargs['args'][0]
+        message = args[0]
 
         try:
             # remove dubious whitespace

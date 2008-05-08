@@ -20,10 +20,9 @@ class Main(Base):
         """Module-specific initializations go here"""
         self.madcow = madcow
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         """This function should return a response to the query or None."""
-        nick = kwargs['nick']
-        args = kwargs['args']
+
         try:
             pass
         except Exception, e:

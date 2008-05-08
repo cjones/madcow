@@ -69,11 +69,10 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.karma = Karma(madcow)
 
-    def response(self, **kwargs):
+    def response(self, nick, args, **kwargs):
         """This function should return a response to the query or None."""
 
-        nick = kwargs['nick']
-        input = kwargs['args'][0]
+        input = args[0]
 
         try:
             return self.karma.process(nick, input)

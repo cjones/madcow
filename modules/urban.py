@@ -20,10 +20,7 @@ class Main(Base):
     def __init__(self, madcow=None):
         self.server = SOAPpy.SOAPProxy("http://api.urbandictionary.com/soap")
 
-    def response(self, **kwargs):
-        nick = kwargs['nick']
-        args = kwargs['args']
-
+    def response(self, nick, args, **kwargs):
         try:
             words = args[0].split()
             if words[-1].isdigit():
