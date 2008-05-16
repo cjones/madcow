@@ -74,20 +74,27 @@ class Weather(Base):
 
         try:
             temp = float(Weather._tempF.search(data['Temperature']).group(1))
+            blink = False
             if temp < 0:
                 color = 6
-            elif temp >=0 and temp <= 40:
+            elif temp >=0 and temp < 40:
                 color = 2
-            elif temp >= 40 and temp <= 60:
+            elif temp >= 40 and temp < 60:
                 color = 10
-            elif temp >= 60 and temp <= 80:
+            elif temp >= 60 and temp < 80:
                 color = 3
-            elif temp >= 80 and temp <= 100:
+            elif temp >= 80 and temp < 90:
                 color = 7
-            elif temp > 100:
+            elif temp >= 90 and temp < 100:
                 color = 5
+            elif temp >= 100:
+                color = 5
+                blink = True
             data['Temperature'] = '\x03%s\x16\x16%s\x0F' % (color,
                     data['Temperature'])
+            if blink:
+                data['Temperature'] = '\x1b[5m' + data['Temperature'] + \
+                        '\x1b[0m'
 
         except:
             pass

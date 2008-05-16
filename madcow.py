@@ -495,7 +495,7 @@ class Madcow(Base):
         except Exception, e:
             log.warn('UNCAUGHT EXCEPTION')
             log.exception(e)
-            response = None
+            response = str(e)
         if response is not None and len(response) > 0:
             self.output(response, kwargs['req'])
 
