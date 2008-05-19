@@ -8,6 +8,7 @@ from urlparse import urljoin
 import sys
 import os
 import random
+import urllib
 
 class Main(Base):
     enabled = True
