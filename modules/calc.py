@@ -31,7 +31,7 @@ class Main(Base):
                 'safe': 'off',
                 'c2coff': 1,
                 'btnG': 'Search',
-                'q': ' '.join(kwargs['args']),
+                'q': ' '.join(args),
             }
 
             doc = self.ua.fetch(self._search_url, opts=opts)
@@ -41,11 +41,11 @@ class Main(Base):
 
             response = self.reConversionResult.search(doc).group(1)
             response = stripHTML(response)
-            return '%s: %s' % (kwargs['nick'], response)
+            return '%s: %s' % (nick, response)
 
         except Exception, e:
             print >> sys.stderr, e
-            return '%s: No results (bad syntax?)' % kwargs['nick']
+            return '%s: No results (bad syntax?)' % nick
 
 
 def main():
