@@ -21,7 +21,6 @@ class Delicious(Base):
         'replace': 'no',
         'shared': 'yes',
     }.items()
-    code = re.compile(r'code="(.*?)"')
     title = re.compile(r'<title>(.*?)</title>', re.I+re.DOTALL)
 
     def __init__(self, username, password):
@@ -42,7 +41,6 @@ class Delicious(Base):
         opts['tags'] += tags
         opts['tags'] = ' '.join(opts['tags'])
         result = self.ua.openurl(self.posturl, opts=opts)
-        code = self.code.search(result).group(1)
 
 
 class Main(Module):
