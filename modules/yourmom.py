@@ -5,18 +5,14 @@
 import sys
 import re
 from include.pyfiglet import Figlet
-from include.utils import Base
+from include.utils import Module
 import random
 import os
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*yourmom\s*$')
     require_addressing = True
-
-
     help = 'yourmom - random figlet of the ultimate insult'
-
 
     def __init__(self, madcow=None):
         zipfile = os.path.join(madcow.dir, 'include/fonts.zip')

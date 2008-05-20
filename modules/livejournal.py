@@ -5,24 +5,19 @@
 import sys
 import re
 from include import rssparser
-from include.utils import Base, UserAgent, stripHTML, isUTF8
+from include.utils import Module, stripHTML, isUTF8
+from include.useragent import geturl
 from urlparse import urljoin
-import os
 
-class Main(Base):
+class Main(Module):
     enabled = True
     pattern = re.compile('^\s*(?:livejournal|lj)(?:\s+(\S+))?')
     require_addressing = True
-
-
     help = 'lj [user] - get latest entry to an lj, omit user for a random one'
     baseURL = 'http://livejournal.com'
     randomURL = urljoin(baseURL, '/random.bml')
     max = 800
 
-    def __init__(self, madcow=None):
-        self.ua = UserAgent()
-    
     def response(self, nick, args, **kwargs):
         try:
             try:
@@ -31,7 +26,7 @@ class Main(Base):
                 user = None
 
             if user is None or user == '':
-                doc = self.ua.fetch(self.randomURL)
+                doc = geturl(self.randomURL)
                 user = re.search('"currentJournal": "(.*?)"', doc).group(1)
 
             url = urljoin(self.baseURL, '/users/%s/data/rss' % user)
@@ -67,4 +62,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

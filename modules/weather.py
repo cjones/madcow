@@ -2,35 +2,31 @@
 
 """Get weather report"""
 
-import sys
 import re
-import os
-from include.utils import UserAgent, stripHTML, Base
+from include.utils import stripHTML, Base, Module
+from include.useragent import geturl
 from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
 from include import rssparser
 from learn import Main as Learn
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __all__ = ['Weather', 'Main']
 __usage__ = 'set location <nick> <location>'
 
 class Weather(Base):
-    _base_url = 'http://www.wunderground.com/'
-    _search_url = urljoin(_base_url, '/cgi-bin/findweather/getForecast')
+    baseurl = 'http://www.wunderground.com/'
+    search = urljoin(baseurl, '/cgi-bin/findweather/getForecast')
     _rss_link = {'type': 'application/rss+xml'}
     _tempF = re.compile('(-?[0-9.]+)\s*\xb0\s*F', re.I)
     _bar = re.compile(r'\s*\|\s*')
     _keyval = re.compile(r'^\s*(.*?)\s*:\s*(.*?)\s*$')
 
-    def __init__(self):
-        self.ua = UserAgent()
-
     def forecast(self, location):
-        page = self.ua.fetch(url=Weather._search_url, opts={'query': location},
-                referer=Weather._base_url, method='GET')
+        page = geturl(url=self.search, opts={'query': location},
+                referer=self.baseurl)
         soup = BeautifulSoup(page)
 
         # disambiguation page
@@ -46,34 +42,34 @@ class Weather(Base):
                     if link is None or 'addfav' in str(link['href']):
                         continue
                     city = str(link.contents[0])
-                    href = urljoin(Weather._base_url, str(link['href']))
+                    href = urljoin(self.baseurl, str(link['href']))
                     results.append(city)
                     if city.lower() == location.lower():
-                        match = urljoin(Weather._base_url, href)
+                        match = urljoin(self.baseurl, href)
                         break
                 if match:
                     break
             if match:
-                page = self.ua.fetch(url=match)
+                page = geturl(url=match)
                 soup = BeautifulSoup(page)
             else:
                 return 'Multiple results found: %s' % ', '.join(results)
 
-        rss_url = soup.find('link', attrs=Weather._rss_link)['href']
+        rss_url = soup.find('link', attrs=self._rss_link)['href']
         rss = rssparser.parse(rss_url)
         title = str(soup.find('h1').string).strip()
         conditions = stripHTML(rss['items'][0]['description'])
-        fields = Weather._bar.split(conditions)
+        fields = self._bar.split(conditions)
         data = {}
         for field in fields:
             try:
-                key, val = Weather._keyval.search(field).groups()
+                key, val = self._keyval.search(field).groups()
                 data[key] = val
             except:
                 pass
 
         try:
-            temp = float(Weather._tempF.search(data['Temperature']).group(1))
+            temp = float(self._tempF.search(data['Temperature']).group(1))
             blink = False
             if temp < 0:
                 color = 6
@@ -109,10 +105,10 @@ class Weather(Base):
         return '%s: %s' % (title, output)
 
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
     require_addressing = True
+    help = 'fc [location] - look up weather forecast'
 
     def __init__(self, madcow=None):
         self.weather = Weather()
@@ -141,6 +137,7 @@ class Main(Base):
         try:
             return '%s: %s' % (nick, self.weather.forecast(query))
         except Exception, e:
+            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return "Couldn't find that place, maybe a bomb dropped on it"
 
 
@@ -153,4 +150,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os, sys
     sys.exit(main())

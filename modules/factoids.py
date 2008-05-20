@@ -4,18 +4,13 @@
 
 import sys
 import re
-import os
 import anydbm
 import random
-from include.utils import Base
+from include.utils import Module
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^(.+)$')
     require_addressing = False
-
-
-
     qmark = re.compile('\s*\?+\s*$')
     isare = re.compile('^(.+?)\s+(is|are)\s+(.+)\s*$', re.I)
     query = re.compile('^(?:who|what|where|when|why|how|wtf)', re.I)

@@ -3,11 +3,10 @@
 """Plugin to return random quote from WikiQuotes"""
 
 from include.wiki import Wiki
-from include.utils import stripHTML, Base
+from include.utils import stripHTML, Module
 import re
 import random
 import sys
-import os
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
 _base_url = 'http://en.wikiquote.org/'
@@ -17,12 +16,9 @@ _whitespace = re.compile(r'\s{2,}')
 _author = 'random'
 _max = 10
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = _pattern
     require_addressing = True
-
-
     help = 'wikiquote - get random quote from wikiquotes'
 
     def __init__(self, madcow=None):
@@ -89,4 +85,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

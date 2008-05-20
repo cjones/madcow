@@ -11,7 +11,7 @@ from pysqlite2 import dbapi2 as sqlite
 from sqlobject import *
 import random
 from include.throttle import Throttle
-from include.utils import Base
+from include.utils import Base, Module
 
 class url(SQLObject):
     url = StringCol(alternateID = True)
@@ -51,12 +51,9 @@ class comments(SQLObject):
     url = ForeignKey('url')
 
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^(.+)$')
     require_addressing = False
-
-
     help = 'score [name,range] - get memescore, empty for top10'
     matchURL = re.compile('(http://\S+)', re.I)
     scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)

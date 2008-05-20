@@ -2,22 +2,18 @@
 
 """Use AV's babel translator for language conversion"""
 
-import sys
 import re
-import os
-from include.utils import Base, UserAgent
+from include.utils import Module
+from include.useragent import posturl
 from urlparse import urljoin
+import sys
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*(list languages|translate)(?:\s+from\s+(\w+)\s+to\s+(\w+)\s*[-:]\s*(.+))?$', re.I)
     require_addressing = True
-
-
     help = 'list languages - list translate languages available\n'
     help += 'translate from <lang> to <lang>: text'
-
-    reTranslated = re.compile('<td bgcolor=white class=s><div style=padding:10px;>(.*?)</div></t', re.DOTALL)
+    re_translate = re.compile(r'<div id="result"><div.*?>(.*?)</div>')
     languages = {
         'chinese-simp': 'zh',
         'chinese-trad': 'zt',
@@ -34,13 +30,9 @@ class Main(Base):
         'russian': 'ru',
         'spanish': 'es',
     }
-    _base_url = 'http://babelfish.altavista.com/'
-    _trans_url = urljoin(_base_url, '/tr')
-    _unknown =  "I don't know that language, try: list languages"
-
-    def __init__(self, madcow=None):
-        self.madcow = madcow
-        self.ua = UserAgent()
+    baseurl = 'http://babelfish.yahoo.com/'
+    translate = urljoin(baseurl, '/translate_txt')
+    unknown =  "I don't know that language, try: list languages"
 
     def response(self, nick, args, **kwargs):
         try:
@@ -48,24 +40,25 @@ class Main(Base):
                 return '%s: %s' % (nick, ', '.join(self.languages.keys()))
 
             try:
-                fromLang = self.languages[args[1].lower()]
-                toLang = self.languages[args[2].lower()]
+                from_lang = self.languages[args[1].lower()]
+                to_lang = self.languages[args[2].lower()]
             except:
-                return '%s: %s' % (nick, self._unknown)
+                return '%s: %s' % (nick, self.unknown)
 
             opts = {
+                'ei': 'UTF-8',
                 'doit': 'done',
-                'intl': 1,
+                'fr': 'bf-home',
+                'intl': '1',
                 'tt': 'urltext',
                 'trtext': args[3],
-                'lp': '%s_%s' % (fromLang, toLang),
+                'lp': '%s_%s' % (from_lang, to_lang),
                 'btnTrTxt': 'Translate',
             }
 
-            doc = self.ua.fetch(self._trans_url, opts=opts)
-            translated = self.reTranslated.search(doc).group(1)
+            doc = posturl(self.translate, opts=opts)
+            translated = self.re_translate.search(doc).group(1)
             return '%s: %s' % (nick, translated)
-
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return "%s: Couldn't translate for some reason :/" % nick
@@ -80,4 +73,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

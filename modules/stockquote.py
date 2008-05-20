@@ -2,15 +2,14 @@
 
 """Get stock quote from yahoo ticker"""
 
-import sys
 import re
-import os
-from include.utils import Base, UserAgent, stripHTML
+from include.utils import Base, Module, stripHTML
+from include.useragent import geturl
 from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
 import random
 
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 _namespace = 'madcow'
@@ -23,12 +22,9 @@ class Yahoo(Base):
     _red = '\x035'
     _reset = '\x0F'
 
-    def __init__(self):
-        self.ua = UserAgent()
-
     def get_quote(self, symbol):
         url = Yahoo._quote_url.replace('SYMBOL', symbol)
-        page = self.ua.fetch(url)
+        page = geturl(url)
         soup = BeautifulSoup(page)
         company = ' '.join([str(item) for item in soup.find('h1').contents])
         company = stripHTML(company)
@@ -88,12 +84,9 @@ class Yahoo(Base):
         return '%s - ' % company + ' | '.join(output)
 
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*(?:stocks?|quote)\s+(\S+)', re.I)
     require_addressing = True
-
-
     help = 'quote <symbol> - get latest stock quote'
 
     def __init__(self, madcow=None):
@@ -101,7 +94,6 @@ class Main(Base):
 
     def response(self, nick, args, **kwargs):
         query = args[0]
-
         try:
             return self.yahoo.get_quote(query)
         except Exception, e:
@@ -117,4 +109,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os, sys
     sys.exit(main())

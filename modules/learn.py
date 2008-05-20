@@ -5,16 +5,11 @@
 import sys
 import re
 import anydbm
-import os
-from include.utils import Base
+from include.utils import Module
 
-
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
     require_addressing = True
-
-
     help = 'set <location|email> <nick> <val> - set db attribs'
     _allowed = ['location', 'email', 'karma']
 

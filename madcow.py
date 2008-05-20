@@ -277,6 +277,7 @@ class Modules(Base):
         self.prefix = os.path.dirname(__file__)
         self.mod_dir = os.path.join(self.prefix, self.subdir)
         self.modules = {}
+        self.help = []
         self.load_modules()
 
     def load_modules(self):
@@ -329,6 +330,13 @@ class Modules(Base):
                 log.info("skipped loading %s: disabled" % mod_name)
                 del self.modules[mod_name]
                 continue
+            try:
+                if obj.help:
+                    self.help.append(obj.help)
+                else:
+                    raise Exception
+            except:
+                log.warn('no help for module: %s' % mod_name)
             self.modules[mod_name]['obj'] = obj
             log.info('loaded module: %s' % mod_name)
 
@@ -371,11 +379,12 @@ class Madcow(Base):
         else:
             self.charset = _charset
 
-        # dynamically generated content
-        self.usageLines = []
+        # load modules
         self.modules = Modules(self, 'modules')
         self.periodics = Modules(self, 'periodic')
+        self.usageLines = self.modules.help + self.periodics.help
 
+        # reload modules when receiving SIGHUP
         signal(SIGHUP, self.signal_handler)
 
         # start local service for handling email gateway
@@ -490,7 +499,7 @@ class Madcow(Base):
 
     def usage(self):
         """Returns help data as a string"""
-        return '\n'.join(self.usageLines)
+        return '\n'.join(sorted(self.usageLines))
 
     def processMessage(self, req):
         """Process requests"""

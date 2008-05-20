@@ -6,15 +6,11 @@ import sys
 import re
 import os
 import random
-from include.utils import Base, slurp
+from include.utils import Module, slurp
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^(.+)$')
     require_addressing = False
-
-
-
     reMatchBlocks = re.compile('%match\s+(.*?)%end', re.DOTALL)
     reCommaDelim = re.compile('\s*,\s*')
     rePipeDelim = re.compile('\s*\|\s*')

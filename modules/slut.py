@@ -17,7 +17,7 @@ results for both are equal, the phrase is 0% slutty.
 import urllib2
 import sys
 import re
-from include.utils import Base
+from include.utils import Module
 
 class WordFiltered(Exception):
   """Indicates a word has been filtered by google safe search"""
@@ -71,12 +71,10 @@ def slutrating(phrase):
   return None
 
 # class for this module
-class Main(Base):
+class Main(Module):
   enabled = True
   pattern = re.compile('^\s*slutcheck\s+(.+)')
   require_addressing = True
-
-
   help = "slutcheck <phrase> - see how slutty the phrase is"
 
   # function to generate a response

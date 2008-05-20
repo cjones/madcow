@@ -5,17 +5,15 @@
 import re
 import random
 import math
-from include.utils import Base
+from include.utils import Module
 import sys
 import os
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     _allow = '-?(?:[0-9.]+j?|pi|e)'
     _regex = '^\s*roll\s+(%s?)d(%s)\s*$' % (_allow, _allow)
     pattern = re.compile(_regex, re.I)
     require_addressing = True
-
     help = 'roll [<numdice>d<sides>] - roll die of the specified size'
     _color_map = {'red': 5, 'yellow': 7, 'green': 3}
 

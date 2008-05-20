@@ -2,26 +2,19 @@
 
 """Get traffic info from CHP website (bay area only)"""
 
-import sys
 import re
-from include.utils import Base, UserAgent, stripHTML
-import os
+from include.utils import Module, stripHTML
+from include.useragent import geturl
+import sys
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*chp\s+(.+)', re.I)
     require_addressing = True
-
-
     help = 'chp <highway> - look for CHP reports for highway, such as 101'
-
     url = 'http://cad.chp.ca.gov/sa_list.asp?centerin=GGCC&style=l'
     incidents = re.compile('<tr>(.*?)</tr>', re.DOTALL)
     data = re.compile('<td class="T".*?>(.*?)</td>')
     clean = re.compile('[^0-9a-z ]', re.I)
-
-    def __init__(self, madcow=None):
-        self.ua = UserAgent()
 
     def response(self, nick, args, **kwargs):
         query = args[0]
@@ -30,7 +23,7 @@ class Main(Base):
             check = re.compile(check, re.I)
 
             results = []
-            doc = self.ua.fetch(self.url)
+            doc = geturl(self.url)
             for i in self.incidents.findall(doc):
                 data = [stripHTML(c) for c in self.data.findall(i)][1:]
                 if len(data) != 4:
@@ -58,4 +51,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

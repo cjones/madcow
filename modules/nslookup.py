@@ -2,25 +2,18 @@
 
 """Perform DNS lookups"""
 
-import sys
 import re
 import socket
-import os
-from include.utils import Base
+from include.utils import Module
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*nslookup\s+(\S+)')
     require_addressing = True
-
-
     help = 'nslookup <ip|host> - perform DNS lookup'
-
     _byip = re.compile(r'^(\d+\.){3}\d+$')
 
     def response(self, nick, args, **kwargs):
         query = args[0]
-
         if self._byip.search(query):
             try:
                 response = socket.gethostbyaddr(query)[0]
@@ -31,7 +24,6 @@ class Main(Base):
                 response = socket.gethostbyname(query)
             except:
                 response = 'No IP for that hostname'
-
         return '%s: %s' % (nick, response)
 
 
@@ -44,4 +36,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os, sys
     sys.exit(main())

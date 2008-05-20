@@ -2,16 +2,14 @@
 
 """Scrape BBC news"""
 
-import sys
 import re
 from include import rssparser
-from include.utils import Base, stripHTML
-import os
+from include.utils import Module, stripHTML
 import urllib
 from urlparse import urljoin
+import sys
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*bbcnews(?:\s+(.+))?', re.I)
     require_addressing = True
     help = 'bbcnews <string> - Searches the BBC News Website'
@@ -24,7 +22,6 @@ class Main(Base):
 
     def response(self, nick, args, **kwargs):
         query = args[0]
-        print query
 
         try:
             if not query or query == 'headline':
@@ -53,4 +50,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

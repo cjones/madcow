@@ -4,8 +4,8 @@
 
 import sys
 import re
-import os
-from include.utils import Base, UserAgent, stripHTML
+from include.utils import Base, stripHTML, Module
+from include.useragent import geturl
 from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
 import random
@@ -29,9 +29,6 @@ class Lyrics(Base):
     _leadbreak = re.compile(r'^(?:<br(?:\s+/)?\s*>\s*)+', re.I + re.DOTALL)
     _endbreak = re.compile(r'(?:<br(?:\s+/)?\s*>\s*)+$', re.I + re.DOTALL)
     _whitespace = re.compile(r'\s+')
-
-    def __init__(self):
-        self.ua = UserAgent()
 
     def get_lyrics(self, query):
         # full lyrics or random verse?
@@ -57,7 +54,7 @@ class Lyrics(Base):
             opts = Lyrics._opts
             opts['q'] = song
 
-            page = self.ua.fetch(url=url, opts=opts)
+            page = geturl(url=url, opts=opts)
             soup = BeautifulSoup(page)
 
             for cell in soup.findAll('td', attrs={'class': 'lyric'}):
@@ -74,7 +71,7 @@ class Lyrics(Base):
             url = Lyrics._artist_songs
             url = url.replace('SECTION', query[0][0])
             url = url.replace('ARTIST', '+'.join(query))
-            page = self.ua.fetch(url)
+            page = geturl(url)
             soup = BeautifulSoup(page)
             songs = []
             for cell in soup.findAll('td', attrs={'class': 'lyric'}):
@@ -87,7 +84,7 @@ class Lyrics(Base):
                 song_url = random.choice(songs)
 
         if song_url:
-            page = self.ua.fetch(song_url)
+            page = geturl(song_url)
             soup = BeautifulSoup(page)
             content = soup.find('div', attrs={'id': 'content'})
             [div.extract() for div in content.findAll('div')]
@@ -124,12 +121,9 @@ class Lyrics(Base):
             return "Couldn't find a match for that query"
 
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile(r'^\s*sing\s+(.+)$')
     require_addressing = True
-
-
     help = 'sing (<artist>|song <song> [by <artist>]) [full] - lyrics'
 
     def __init__(self, madcow=None):
@@ -137,8 +131,6 @@ class Main(Base):
 
     def response(self, nick, args, **kwargs):
         query = args[0].lower().split()
-        return self.lyrics.get_lyrics(query)
-
         try:
             return self.lyrics.get_lyrics(query)
         except Exception, e:
@@ -154,4 +146,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

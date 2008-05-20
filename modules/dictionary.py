@@ -4,16 +4,13 @@
 
 import sys
 import re
-from include.utils import stripHTML, Base, UserAgent
-import os
+from include.utils import stripHTML, Module
+from include.useragent import geturl
 from urlparse import urljoin
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*define\s+(\w+)(?:\s+(\d+))?$')
     require_addressing = True
-
-
     help = 'define <word/phrase> [#] - get a definition from merriam-webster'
 
     re_defs = re.compile(r'<div class="defs">(.*?)</div>', re.DOTALL)
@@ -21,9 +18,6 @@ class Main(Base):
     re_def_break = re.compile(r'<span class="sense_break"/>')
     header = re.compile('^.*?:\xa0')
     base_url = 'http://www.m-w.com/dictionary/'
-
-    def __init__(self, madcow=None):
-        self.ua = UserAgent()
 
     def response(self, nick, args, **kwargs):
         word = args[0].lower()
@@ -34,7 +28,7 @@ class Main(Base):
                 num = 1
 
             url = urljoin(self.base_url, word)
-            doc = self.ua.fetch(url)
+            doc = geturl(url)
             defs = self.re_defs.search(doc).group(1)
             defs = self.re_newline.sub('', defs)
             defs = self.re_def_break.split(defs)
@@ -62,4 +56,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

@@ -6,32 +6,26 @@ from urlparse import urljoin
 import sys
 import re
 from include import rssparser
-from include.utils import Base, stripHTML
-import os
-import string
+from include.utils import Module, stripHTML
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*woot(?:\s+(\S+))?')
     require_addressing = True
-
-
     help = 'woot - get latest offer from woot.com'
-
-    baseURL = 'http://woot.com'
+    baseurl = 'http://woot.com'
+    rssurl = urljoin(baseurl, '/Blog/Rss.aspx')
     max = 200
 
     def response(self, nick, args, **kwargs):
         try:
-            url = urljoin(self.baseURL, '/Blog/Rss.aspx')
-            feed = rssparser.parse(url)
+            feed = rssparser.parse(self.rssurl)
 
             # get latest entry and their homepage url
-            title = string.split(feed['items'][0]['title'])
-            offer = string.join(title[:-2])
+            title = feed['items'][0]['title'].split()
+            offer = ' '.join(title[:-2])
             
             try:
-                price = "$%s" % string.atof(title[-1])
+                price = "$%.2f" % title[-1]
             except:
                 price = ''
 
@@ -39,10 +33,11 @@ class Main(Base):
             page = feed['items'][0]['link']
 
             # strip out html
-            longdescription = string.lstrip(stripHTML(longdescription))
+            longdescription = stripHTML(longdescription).strip()
 
             # these can get absurdly long
-            longdescription = longdescription[:self.max] + ' ...'
+            if longdescription > self.max:
+                longdescription = longdescription[:self.max-4] + ' ...'
 
             return '%s: %s\n[%s]\n%s' % (offer, price, page, longdescription)
 
@@ -60,4 +55,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

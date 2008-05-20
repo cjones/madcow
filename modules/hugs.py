@@ -4,27 +4,22 @@
 
 import sys
 import re
-from include.utils import Base, stripHTML, UserAgent
-import os
+from include.utils import Module, stripHTML
+from include.useragent import geturl
 from include.BeautifulSoup import BeautifulSoup
+from urlparse import urljoin
 import random
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*hugs\s*$', re.I)
     require_addressing = True
-
-
     help = 'hugs - random confession'
-
-    _url = 'http://beta.grouphug.us/random'
-
-    def __init__(self, madcow=None):
-        self.ua = UserAgent()
+    baseurl = 'http://beta.grouphug.us/'
+    random = urljoin(baseurl, '/random')
 
     def response(self, nick, args, **kwargs):
         try:
-            doc = self.ua.fetch(self._url)
+            doc = geturl(self.random)
             soup = BeautifulSoup(doc)
             confs = soup.findAll('div', attrs={'class': 'content'})[3:]
             conf = random.choice(confs)
@@ -33,7 +28,6 @@ class Main(Base):
             conf = stripHTML(conf)
             conf = conf.strip()
             return conf
-
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return '%s: I had some issues with that..' % nick
@@ -48,4 +42,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

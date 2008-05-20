@@ -2,10 +2,9 @@
 
 """Infobot style karma"""
 
-from include.utils import Base
+from include.utils import Base, Module
 import sys
 import re
-import os
 from learn import Main as Learn
 
 __version__ = '0.1'
@@ -57,13 +56,10 @@ class Karma(Base):
         return int(karma)
 
 
-class Main(Base):
+class Main(Module):
     """This object is autoloaded by the bot"""
-    enabled = True
     pattern = re.compile(r'^(.+)$', re.DOTALL)
     require_addressing = False
-
-
     help = "<nick>[++/--] - adjust someone's karma"
 
     def __init__(self, madcow=None):
@@ -71,9 +67,7 @@ class Main(Base):
 
     def response(self, nick, args, **kwargs):
         """This function should return a response to the query or None."""
-
         input = args[0]
-
         try:
             return self.karma.process(nick, input)
         except Exception, e:

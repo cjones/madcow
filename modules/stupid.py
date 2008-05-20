@@ -4,27 +4,20 @@
 
 import re
 from include.BeautifulSoup import BeautifulSoup
-from include.utils import Base, UserAgent, stripHTML
+from include.utils import Module, stripHTML
+from include.useragent import geturl
 from urlparse import urljoin
-import os
-import sys
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*(?:stupid)\s*$', re.I)
     require_addressing = True
-
-
     help = 'stupid - random stupid comment'
     base_url = 'http://stupidfilter.org/'
     url = urljoin(base_url, '/random.php')
     utf8 = re.compile(r'[\x80-\xff]')
 
-    def __init__(self, madcow=None):
-        self.ua = UserAgent()
-
     def get_comment(self):
-        page = self.ua.fetch(self.url)
+        page = geturl(self.url)
 
         # remove high ascii since this is going to IRC
         page = self.utf8.sub('', page)
@@ -56,4 +49,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os, sys
     sys.exit(main())

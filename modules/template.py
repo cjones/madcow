@@ -2,25 +2,24 @@
 
 """Module stub"""
 
+from include.useragent import geturl
+from include.utils import Module
+import sys
 import re
-from include.utils import Base
 
-class Main(Base):
-    """This object is autoloaded by the bot"""
+class Main(Module):
     pattern = re.compile(r'^\s*keyword\s+(\S+)\s*', re.I)
-    enabled = True
     require_addressing = True
     help = 'help message for this addon'
 
     def __init__(self, madcow=None):
-        """Module-specific initializations go here"""
         self.madcow = madcow
 
     def response(self, nick, args, **kwargs):
-        """This function should return a response to the query or None."""
         try:
-            pass
+            return 'not impemented'
         except Exception, e:
+            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
             return '%s: problem with query: %s' % (nick, e)
 
 
@@ -33,5 +32,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
-    import os, sys
+    import os
     sys.exit(main())

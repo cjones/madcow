@@ -17,9 +17,8 @@ class UserAgent:
     _msie = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
     blocksize = 512
 
-    def __init__(self, agent=_msie, cookies=True):
+    def __init__(self, agent=_msie, cookies=True, handlers=[]):
         self.agent = agent
-        handlers = []
         if cookies:
             handlers.append(HTTPCookieProcessor(CookieJar()))
         self.opener = build_opener(*handlers)

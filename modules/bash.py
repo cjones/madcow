@@ -2,11 +2,11 @@
 
 """Interface for getting really stupid IRC quotes"""
 
-import sys
 import re
 import random
-from include.utils import Base, UserAgent, stripHTML
-import os
+from include.utils import Base, Module, stripHTML
+from include.useragent import geturl
+import sys
 
 class Bash(Base):
     random = 'http://www.bash.org/?random'
@@ -36,14 +36,10 @@ class Limerick(Base):
     entries = re.compile('<div class="quote_output">\s*(.*?)\s*</div>', re.DOTALL)
 
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*(bash|qdb|xkcdb|limerick)(?:\s+(\S+))?', re.I)
     require_addressing = True
-
-
     help = '<bash|qdb|xkcdb|limerick> [#|query] - get stupid IRC quotes'
-
     sources = {
         'bash': Bash(),
         'qdb': QDB(),
@@ -51,10 +47,6 @@ class Main(Base):
         'limerick': Limerick(),
     }
     _error = 'Having some issues, make some stupid quotes yourself'
-
-    def __init__(self, madcow=None):
-        self.madcow = madcow
-        self.ua = UserAgent()
 
     def response(self, nick, args, **kwargs):
         try:
@@ -78,7 +70,7 @@ class Main(Base):
             else:
                 url = source.random
 
-            doc = self.ua.fetch(url)
+            doc = geturl(url)
             entries = source.entries.findall(doc)
 
             if query:
@@ -105,4 +97,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os
     sys.exit(main())

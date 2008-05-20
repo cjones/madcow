@@ -2,19 +2,14 @@
 
 """Summon people"""
 
-import sys
 import re
 from learn import Main as Learn
-from include.utils import Base
-import os
+from include.utils import Module
 from smtplib import SMTP
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile(r'^\s*summons?\s+(\S+)(?:\s+(.*?))?\s*$')
     require_addressing = True
-
-
     help = 'summon <nick> [reason] - summon user'
 
     def __init__(self, madcow):

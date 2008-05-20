@@ -7,14 +7,11 @@ import re
 import anydbm
 import time
 import os
-from include.utils import Base
+from include.utils import Module
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^(.+)$')
     require_addressing = False
-
-
     help = 'seen <nick> - query bot about last time someone was seen speaking'
     seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)
 
@@ -73,7 +70,8 @@ class Main(Base):
             if not message:
                 return "%s: I haven't seen %s say anything plz" % (nick, user)
 
-            return '%s: %s was last seen %s ago on %s saying "%s"' % (nick, user, last, channel, message)
+            return '%s: %s was last seen %s ago on %s saying "%s"' % (nick,
+                    user, last, channel, message)
 
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)

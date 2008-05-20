@@ -10,7 +10,7 @@ from time import time as unix_time
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['UserAgent', 'Base', 'cache', 'Error']
+__all__ = ['UserAgent', 'Base', 'Module', 'cache', 'Error']
 __agent__ = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
@@ -68,6 +68,19 @@ class Base(object):
         return '<%s %s>' % (self.__class__.__name__, repr(self.__dict__))
 
     __repr__ = __str__
+
+
+class Module(Base):
+    pattern = re.compile('')
+    enabled = True
+    require_addressing = True
+    help = None
+
+    def __init__(self, madcow=None):
+        self.madcow = madcow
+
+    def response(self, nick, args, **kwargs):
+        return 'not implemented'
 
 
 class Error(Exception):

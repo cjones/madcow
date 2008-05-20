@@ -4,12 +4,13 @@
 
 import re
 from include import rssparser
-from include.utils import Base, UserAgent, stripHTML
+from include.utils import Base, Module, stripHTML
+from include.useragent import geturl
 from include.BeautifulSoup import BeautifulSoup
 import os
 import sys
 
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __format__ = 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s'
@@ -25,12 +26,9 @@ class Terror(Base):
         'low': 9,
     }
 
-    def __init__(self, ua):
-        self.ua = ua
-
     def level(self):
         try:
-            doc = self.ua.fetch(Terror._url)
+            doc = geturl(Terror._url)
             level = Terror._re_level.search(doc).group(1)
             color = Terror._color_map[level.lower()]
             return '\x03%s,1\x16\x16%s\x0f' % (color, level)
@@ -43,12 +41,9 @@ class DoomsDay(Base):
     _url = 'http://www.thebulletin.org/minutes-to-midnight/'
     _re_time = re.compile(r'<div class="module-content"><h3>(.*?)</h3>')
 
-    def __init__(self, ua):
-        self.ua = ua
-
     def time(self):
         try:
-            doc = self.ua.fetch(DoomsDay._url)
+            doc = geturl(DoomsDay._url)
             time = DoomsDay._re_time.search(doc).group(1)
             return time
         except Exception, e:
@@ -73,9 +68,6 @@ class IraqWar(Base):
     _bodycount_url = 'http://www.iraqbodycount.org/'
     _re_whitespace = re.compile(r'\s+')
 
-    def __init__(self, ua):
-        self.ua = ua
-
     def war(self):
         try:
             rss = rssparser.parse(IraqWar._war_url)
@@ -86,7 +78,7 @@ class IraqWar(Base):
 
     def bodycount(self):
         try:
-            doc = self.ua.fetch(IraqWar._bodycount_url)
+            doc = geturl(IraqWar._bodycount_url)
             soup = BeautifulSoup(doc)
             data = soup.find('td', attrs={'class': 'main-num'})
             data = data.find('a')
@@ -100,20 +92,16 @@ class IraqWar(Base):
             return 'UNKNOWN'
 
 
-class Main(Base):
-    enabled = True
+class Main(Module):
     pattern = re.compile('^\s*(?:terror|doomsday|war)\s*$', re.I)
     require_addressing = True
-
-
     help = 'terror - NEVAR FORGET'
 
     def __init__(self, madcow=None):
-        self.ua = UserAgent()
-        self.terror = Terror(ua=self.ua)
-        self.doom = DoomsDay(ua=self.ua)
+        self.terror = Terror()
+        self.doom = DoomsDay()
         self.iran = IranWar()
-        self.iraq = IraqWar(ua=self.ua)
+        self.iraq = IraqWar()
 
     def response(self, nick, args, **kwargs):
         try:
