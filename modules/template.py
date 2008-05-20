@@ -2,19 +2,15 @@
 
 """Module stub"""
 
-import sys
 import re
-import os
 from include.utils import Base
 
 class Main(Base):
     """This object is autoloaded by the bot"""
-    pattern = re.compile(r'^\s*keyword\s+(\S+)', re.I)
+    pattern = re.compile(r'^\s*keyword\s+(\S+)\s*', re.I)
     enabled = True
     require_addressing = True
-
-
-    help = None
+    help = 'help message for this addon'
 
     def __init__(self, madcow=None):
         """Module-specific initializations go here"""
@@ -22,7 +18,6 @@ class Main(Base):
 
     def response(self, nick, args, **kwargs):
         """This function should return a response to the query or None."""
-
         try:
             pass
         except Exception, e:
@@ -38,4 +33,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
+    import os, sys
     sys.exit(main())

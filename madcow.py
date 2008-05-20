@@ -12,6 +12,7 @@ from include.authlib import AuthLib
 from include.utils import Base, Error
 import SocketServer
 import select
+from signal import signal, SIGHUP
 
 __version__ = '1.1.6'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
@@ -233,7 +234,8 @@ class PeriodicEvents(Base):
 
     def __init__(self, madcow):
         self.madcow = madcow
-        self.last_run = dict.fromkeys(self.madcow.periodics.keys(), time.time())
+        self.last_run = dict.fromkeys(self.madcow.periodics.dict().keys(),
+                time.time())
 
     def start(self):
         while True:
@@ -242,7 +244,7 @@ class PeriodicEvents(Base):
 
     def process_queue(self):
         now = time.time()
-        for mod_name, obj in self.madcow.periodics.items():
+        for mod_name, obj in self.madcow.periodics.dict().items():
             if (now - self.last_run[mod_name]) < obj.frequency:
                 continue
             self.last_run[mod_name] = now
@@ -261,6 +263,83 @@ class PeriodicEvents(Base):
             req.colorize = False
             req.sendTo = obj.output
             self.madcow.output(response, req)
+
+
+class Modules(Base):
+    _entry = 'Main'
+    _pyext = re.compile(r'\.py$')
+    _ignore_mods = ('__init__',)
+
+    def __init__(self, madcow, subdir, entry=_entry):
+        self.madcow = madcow
+        self.subdir = subdir
+        self.entry = entry
+        self.prefix = os.path.dirname(__file__)
+        self.mod_dir = os.path.join(self.prefix, self.subdir)
+        self.modules = {}
+        self.load_modules()
+
+    def load_modules(self):
+        disabled = list(self._ignore_mods)
+        for mod_name, enabled in self.madcow.config.modules.__dict__.items():
+            if not enabled:
+                disabled.append(mod_name)
+        log.info('reading modules from %s' % self.mod_dir)
+        try:
+            filenames = os.walk(self.mod_dir).next()[2]
+        except Exception, e:
+            log.warn("Couldn't load modules from %s: %s" % (self.mod_dir, e))
+            return
+        for filename in filenames:
+            if not self._pyext.search(filename):
+                continue
+            mod_name = self._pyext.sub('', filename)
+            if mod_name in disabled:
+                log.info('skipping %s: disabled' % mod_name)
+                continue
+            if self.modules.has_key(mod_name):
+                mod = self.modules[mod_name]['mod']
+                try:
+                    reload(mod)
+                    log.info('reloaded module %s' % mod_name)
+                except Exception, e:
+                    log.warn("couldn't reload %s: %s" % (mod_name, e))
+                    del self.modules[mod_name]
+                    continue
+            else:
+                try:
+                    mod = __import__(
+                        '%s.%s' % (self.subdir, mod_name),
+                        globals(),
+                        locals(),
+                        [self.entry],
+                    )
+                except Exception, e:
+                    log.warn("couldn't load module %s: %s" % (mod_name, e))
+                    continue
+                self.modules[mod_name] = {'mod': mod}
+            try:
+                Main = getattr(mod, self.entry)
+                obj = Main(self.madcow)
+            except Exception, e:
+                log.warn("failure loading %s: %s" % (mod_name, e))
+                del self.modules[mod_name]
+                continue
+            if not obj.enabled:
+                log.info("skipped loading %s: disabled" % mod_name)
+                del self.modules[mod_name]
+                continue
+            self.modules[mod_name]['obj'] = obj
+            log.info('loaded module: %s' % mod_name)
+
+    def dict(self):
+        modules = {}
+        for mod_name, mod_data in self.modules.items():
+            modules[mod_name] = mod_data['obj']
+        return modules
+
+    def __iter__(self):
+        return self.dict().iteritems()
 
 
 class Madcow(Base):
@@ -294,8 +373,10 @@ class Madcow(Base):
 
         # dynamically generated content
         self.usageLines = []
-        self.modules = self.load_modules('modules')
-        self.periodics = self.load_modules('periodic')
+        self.modules = Modules(self, 'modules')
+        self.periodics = Modules(self, 'periodic')
+
+        signal(SIGHUP, self.signal_handler)
 
         # start local service for handling email gateway
         if self.config.gateway.enabled:
@@ -305,6 +386,11 @@ class Madcow(Base):
         # start thread to handle periodic events
         log.info('launching periodic service')
         self.launchThread(self.startPeriodicService)
+
+    def signal_handler(self, *args, **kwargs):
+        log.info('reloading modules')
+        self.modules.load_modules()
+        self.periodics.load_modules()
 
     def launchThread(self, target, args=[], kwargs={}):
         thread = threading.Thread(target=target, args=args, kwargs=kwargs)
@@ -359,50 +445,6 @@ class Madcow(Base):
 
     def botName(self):
         return 'madcow'
-
-    def load_modules(self, subdir):
-        """
-        Dynamic loading of module extensions. This looks for .py files in
-        The module directory. They must be well-formed (based on template.py).
-        If there are any problems loading, it will skip them.
-        """
-        path = os.path.join(self.dir, subdir)
-
-        disabled = []
-        for mod_name, enabled in self.config.modules.__dict__.items():
-            if mod_name == 'dbNamespace':
-                continue
-            if not enabled:
-                disabled.append(mod_name)
-
-        log.info('[MOD] * Reading modules from %s' % path)
-
-        modules = {}
-        for filename in os.walk(path).next()[2]:
-            if not filename.endswith('.py'):
-                continue
-            mod_name = filename[:-3]
-            if mod_name in self.ignore_modules:
-                continue
-            if mod_name in disabled:
-                log.warn('[MOD] %s is disabled in config' % mod_name)
-                continue
-            try:
-                obj = __import__(
-                        '%s.%s' % (subdir, mod_name),
-                        globals(),
-                        locals(),
-                        ['Main']
-                        ).Main(madcow=self)
-                if not obj.enabled:
-                    raise Exception, 'disabled'
-                if hasattr(obj, 'help') and obj.help is not None:
-                    self.usageLines += obj.help.splitlines()
-                log.info('[MOD] Loaded module %s' % mod_name)
-                modules[mod_name] = obj
-            except Exception, e:
-                log.warn("[MOD] Couldn't load module %s: %s" % (mod_name, e))
-        return modules
 
     def checkAddressing(self, req):
         """Is bot being addressed?"""
@@ -470,24 +512,30 @@ class Madcow(Base):
         # pass through admin
         if req.private is True:
             response = self.admin.parse(req)
-            if response is not None:
+            if response is not None and len(response):
                 self.output(response, req)
                 return
 
-        for module in self.modules.values():
-            if module.require_addressing and not req.addressed:
+        if self.config.main.module == 'cli' and req.message == 'reload':
+            self.signal_handler()
+
+        for mod_name, mod in self.modules:
+            if mod.require_addressing and not req.addressed:
                 continue
 
             try:
-                args = module.pattern.search(req.message).groups()
+                args = mod.pattern.search(req.message).groups()
             except:
                 continue
 
             # make new dict explictly for thread safety
             kwargs = dict(req.__dict__.items() + [('args', args),
-                ('module', module), ('req', req)])
+                ('module', mod), ('req', req)])
 
-            self.launchThread(self.processThread, kwargs=kwargs)
+            if self.config.main.module == 'cli':
+                self.processThread(**kwargs)
+            else:
+                self.launchThread(self.processThread, kwargs=kwargs)
 
     def processThread(self, **kwargs):
         try:
