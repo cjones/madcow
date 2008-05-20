@@ -56,6 +56,7 @@ bible=yes               ; jesus quotes
 calc=yes                ; google calculator
 chp=yes                 ; california real-time traffic reports
 conservapedia=yes       ; look up inaccurate conservative information
+delicious=yes           ; post all urls to delicious (see config below)
 dictionary=yes          ; definition of words
 factoids=yes            ; makes madcow remember stuff from chatter
 google=yes              ; i'm feeling lucky query
@@ -167,3 +168,6 @@ db_pass=memebot
 db_host=localhost
 db_port=3306
 
+[delicious]
+username=
+password=
