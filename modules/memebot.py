@@ -97,9 +97,7 @@ class Main(Module):
         return urlparse.urlunparse(uri)
 
     def getScoreForAuthor(self, a):
-        return    a.pointsNew    *  1 + \
-            a.pointsOld    * -2 + \
-            a.pointsCredit *  2
+        return a.pointsNew + (a.pointsOld  * -2) + (a.pointsCredit * 2)
 
     def getScores(self):
         scores = [(a.name, self.getScoreForAuthor(a)) for a in author.select()]

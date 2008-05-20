@@ -502,6 +502,9 @@ class Madcow(Base):
         return '\n'.join(sorted(self.usageLines))
 
     def processMessage(self, req):
+        if 'NOBOT' in req.message:
+            return
+
         """Process requests"""
         if self.config.main.logpublic and not req.private:
             self.logpublic(req)
