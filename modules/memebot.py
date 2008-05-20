@@ -31,7 +31,7 @@ class url(SQLObject):
 
 
 class author(SQLObject):
-    name = StringCol()
+    name = StringCol(alternateID=True, length=50)
     urls = MultipleJoin('url')
     comments = MultipleJoin('comments')
     pointsNew = IntCol(default=0)
@@ -40,7 +40,7 @@ class author(SQLObject):
 
 
 class channel(SQLObject):
-    name = StringCol()
+    name = StringCol(alternateID=True, length=50)
     urls = MultipleJoin('url')
 
 
@@ -183,7 +183,10 @@ class Main(Module):
 
         try:
             # old meme
-            old = url.byClean(clean)
+            try:
+                old = url.select(url.q.clean == clean)[0]
+            except:
+                raise SQLObjectNotFound
 
             if len(comment1) > 0:
                 comments(url=old, text=comment1, author=me)
