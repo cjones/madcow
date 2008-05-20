@@ -13,8 +13,8 @@ from include.throttle import Throttle
 from include.utils import Base, Module
 
 class url(SQLObject):
-    url = StringCol(alternateID=True, length=500)
-    clean = StringCol(alternateID=True, length=500)
+    url = StringCol()
+    clean = StringCol()
     author = ForeignKey('author')
     channel = ForeignKey('channel')
     citations = IntCol(default=0)
@@ -31,7 +31,7 @@ class url(SQLObject):
 
 
 class author(SQLObject):
-    name = StringCol(alternateID=True, length=50)
+    name = StringCol()
     urls = MultipleJoin('url')
     comments = MultipleJoin('comments')
     pointsNew = IntCol(default=0)
@@ -40,7 +40,7 @@ class author(SQLObject):
 
 
 class channel(SQLObject):
-    name = StringCol(alternateID=True, length=50)
+    name = StringCol()
     urls = MultipleJoin('url')
 
 
