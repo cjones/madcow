@@ -282,7 +282,7 @@ class Modules(Base):
 
     def load_modules(self):
         disabled = list(self._ignore_mods)
-        for mod_name, enabled in self.madcow.config.modules.__dict__.items():
+        for mod_name, enabled in self.madcow.config.modules.settings.items():
             if not enabled:
                 disabled.append(mod_name)
         log.info('reading modules from %s' % self.mod_dir)
