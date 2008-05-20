@@ -14,13 +14,6 @@ class Delicious(Base):
 
     baseurl = 'https://api.del.icio.us/'
     posturl = urljoin(baseurl, '/v1/posts/add')
-    opts = {
-        'url': None,
-        'description': None,
-        'tags': [],
-        'replace': 'no',
-        'shared': 'yes',
-    }.items()
     title = re.compile(r'<title>(.*?)</title>', re.I+re.DOTALL)
 
     def __init__(self, username, password):
@@ -35,12 +28,14 @@ class Delicious(Base):
             title = self.title.search(html).group(1)
         except:
             title = url
-        opts = dict(self.opts)
-        opts['url'] = url
-        opts['description'] = title
-        opts['tags'] += tags
-        opts['tags'] = ' '.join(opts['tags'])
-        result = self.ua.openurl(self.posturl, opts=opts)
+        opts = {
+            'url': url,
+            'description': title,
+            'tags': ' '.join(tags),
+            'replace': 'no',
+            'shared': 'yes',
+        }
+        self.ua.openurl(self.posturl, opts=opts)
 
 
 class Main(Module):
