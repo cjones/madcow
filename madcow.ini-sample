@@ -42,48 +42,57 @@ charset=latin1
 ; give them a unique namespace. this is used to name the db files
 ; something unique. if you do not change this, then multiple bots will
 ; share the same backend data store.  this may be what you want. but
-; probably not.
+; probably not. concurrency problems have not been considered, so prolly
+; don't even try running multiple bots with the same namespace.
 ;
 dbNamespace=madcow
 ;
 ; what modules are enabled (yes/no)
+;
+; these are the standard information modules, which you'll probably
+; want enabled as they are quite useful.
 area=yes                ; look up area codes
-artfart=yes             ; random ascii art
 babel=yes               ; language translations
-bash=yes                ; bash quotes
 bbcnews=yes             ; bbc news headlines
-bible=yes               ; jesus quotes
 calc=yes                ; google calculator
-chp=yes                 ; california real-time traffic reports
-conservapedia=yes       ; look up inaccurate conservative information
-delicious=yes           ; post all urls to delicious (see config below)
 dictionary=yes          ; definition of words
-factoids=yes            ; makes madcow remember stuff from chatter
 google=yes              ; i'm feeling lucky query
-grufti=yes              ; random response triggeres, like grufti bot
-hugs=yes                ; random group hug confession
-jinx=yes                ; someone owes you a coke for being unoriginal
-karma=yes               ; keep track of karma (nick++, nick--)
 learn=yes               ; used for various modules to cache per-user data
-livejournal=yes         ; random livejournal entry
-lyrics=yes              ; look up song lyrics
-memebot=yes             ; track urls and lay smackdown on old memes
 movie=yes               ; rate movie on imdb & rotten tomatoes
 nslookup=yes            ; look up ip of hostnames
-roll=yes                ; roll ad&d dice
 seen=yes                ; keep track of last thing everyone in channel said
-slut=yes                ; how slutty is the phrase?
 stockquote=yes          ; get yahoo stock quotes
-stupid=yes              ; random quote from stupid-project
 summon=yes              ; summon users (send email/sms)
 urban=yes               ; look up word/phrase on urban dictionary
-war=yes                 ; current war status
 weather=yes             ; look up weather from wunderground
-webtender=yes           ; how to make drinks
 wikipedia=yes           ; look up summary from wikipedia
 wikiquotes=yes          ; look up quotes from wikiquotes
-woot=yes                ; latest woot offer
-yourmom=yes             ; yourmom ascii art
+;
+; the following modules are either silly, or potentially annoying/offensive.
+; they are disabled by default so you can make the decision about how
+; obnoxious your bot is able to be.
+;
+artfart=no             ; random ascii art
+bash=no                ; bash (irc/im) quotes
+bible=no               ; get a quote from the bible
+chp=no                 ; california real-time traffic reports
+conservapedia=no       ; look up inaccurate "conservative information"
+delicious=no           ; post all urls to delicious (see config below)
+factoids=no            ; makes madcow remember stuff from chatter
+grufti=no              ; random response triggeres, like grufti bot
+hugs=no                ; random group hug confession
+jinx=no                ; someone owes you a coke for being unoriginal
+karma=no               ; keep track of karma (nick++, nick--)
+livejournal=no         ; get livejournal entries (random or by nick)
+lyrics=no              ; look up song lyrics (spammy!)
+memebot=no             ; track urls and lay smackdown on old memes
+roll=no                ; roll ad&d dice
+slut=no                ; how slutty is the phrase? (safesearch vs. regular)
+stupid=no              ; random quote from stupid-project
+war=no                 ; current war status
+webtender=no           ; how to make drinks!
+woot=no                ; latest woot offer
+yourmom=no             ; yourmom ascii art :D
 
 ; admin module
 [admin]
@@ -162,9 +171,10 @@ password=twitterbotpassword
 ; serious concurrency issues
 [memebot]
 db_engine=sqlite
-db_name=memebot         
-db_user=memebot
-db_pass=memebot
+; fill the following out if you use mysql.
+db_name=
+db_user=
+db_pass=
 db_host=localhost
 db_port=3306
 
