@@ -5,7 +5,7 @@
 from include.useragent import UserAgent
 from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
-from include.utils import Module, Base
+from include.utils import Module, Base, stripHTML
 import sys
 import re
 
@@ -25,7 +25,7 @@ class Delicious(Base):
     def post(self, url, tags):
         try:
             html = self.ua.openurl(url, size=2048)
-            title = self.title.search(html).group(1)
+            title = stripHTML(self.title.search(html).group(1))
         except:
             title = url
         opts = {
