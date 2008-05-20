@@ -67,6 +67,7 @@ learn=yes               ; used for various modules to cache per-user data
 livejournal=yes         ; random livejournal entry
 lyrics=yes              ; look up song lyrics
 memebot=yes             ; track urls and lay smackdown on old memes
+movie=yes               ; rate movie on imdb & rotten tomatoes
 nslookup=yes            ; look up ip of hostnames
 roll=yes                ; roll ad&d dice
 seen=yes                ; keep track of last thing everyone in channel said

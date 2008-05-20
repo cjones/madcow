@@ -1,3 +1,16 @@
+1.1.7: Tue May 20 00:06:35 PDT 2008
+    * parse utf8-quoted names in email_gateway properly
+    * add dedicated user agent library
+    * code cleanup on modules
+    * can reload madcow config with SIGHUP (not supported on all systems)
+    * always encode output to the designated encoding (utf8, latin1, ascii)
+    * help messages are alphabetized
+    * typing "reload" from the CLI will reload modules
+    * do not fork when run from cli
+    * update memebot to use mysql or sqlite (specificed in ini)
+    * fix babel fish translation modules
+    * new module to rate movie (imdb & rottentomatoes)
+
 1.1.6: Mon Apr 28 19:46:48 PDT 2008
     * major overhaul to threading system/module API
     * various bugfixes
@@ -176,3 +189,4 @@
     * Get a rid of all the CVS Id tags
     * Clean up jesus module to not have footnotes
     * Stock module can now do mutual funds
+
