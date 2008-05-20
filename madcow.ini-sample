@@ -156,6 +156,8 @@ username=twitterbotaccount
 password=twitterbotpassword
 
 ; database config (mysql and sqlite supported)
+; NOTE: if you use the web frontend, i recommend mysql, as sqlite has
+; serious concurrency issues
 [memebot]
 db_engine=sqlite
 db_name=memebot         
