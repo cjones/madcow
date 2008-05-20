@@ -14,7 +14,7 @@ import SocketServer
 import select
 from signal import signal, SIGHUP
 
-__version__ = '1.1.6'
+__version__ = '1.1.7'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
