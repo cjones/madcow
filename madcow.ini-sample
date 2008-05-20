@@ -154,3 +154,13 @@ channel=#madcow
 updatefreq=60
 username=twitterbotaccount
 password=twitterbotpassword
+
+; database config (mysql and sqlite supported)
+[memebot]
+db_engine=sqlite
+db_name=memebot         
+db_user=memebot
+db_pass=memebot
+db_host=localhost
+db_port=3306
+

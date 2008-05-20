@@ -7,18 +7,17 @@ import re
 import os
 import urlparse
 import datetime
-from pysqlite2 import dbapi2 as sqlite
 from sqlobject import *
 import random
 from include.throttle import Throttle
 from include.utils import Base, Module
 
 class url(SQLObject):
-    url = StringCol(alternateID = True)
-    clean = StringCol(alternateID = True)
+    url = StringCol(alternateID=True, length=500)
+    clean = StringCol(alternateID=True, length=500)
     author = ForeignKey('author')
     channel = ForeignKey('channel')
-    citations = IntCol(default = 0)
+    citations = IntCol(default=0)
     posted = DateTimeCol(default = datetime.datetime.now)
     comments = MultipleJoin('comments')
 
@@ -32,16 +31,16 @@ class url(SQLObject):
 
 
 class author(SQLObject):
-    name = StringCol(alternateID = True)
+    name = StringCol(alternateID=True, length=50)
     urls = MultipleJoin('url')
     comments = MultipleJoin('comments')
-    pointsNew = IntCol(default = 0)
-    pointsOld = IntCol(default = 0)
-    pointsCredit = IntCol(default = 0)
+    pointsNew = IntCol(default=0)
+    pointsOld = IntCol(default=0)
+    pointsCredit = IntCol(default=0)
 
 
 class channel(SQLObject):
-    name = StringCol(alternateID = True)
+    name = StringCol(alternateID=True, length=50)
     urls = MultipleJoin('url')
 
 
@@ -58,32 +57,42 @@ class Main(Module):
     matchURL = re.compile('(http://\S+)', re.I)
     scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
     colonHeader = re.compile(r'^\s*(.*?)\s*:\s*$')
+    riffs = [
+        'OLD MEME ALERT!',
+        'omg, SO OLD!',
+        'Welcome to yesterday.',
+        'been there, done that.',
+        'you missed the mememobile.',
+        'oldest. meme. EVAR.',
+        'jesus christ you suck.',
+        'you need a new memesource, bucko.',
+        'that was funny the first time i saw it.',
+        'new to the internet?',
+        'i think that came installed with the internet',
+    ]
 
     def __init__(self, madcow):
         self.throttle = Throttle()
-        dbfile = os.path.join(madcow.dir, 'data/db-%s-memes' % madcow.ns)
-        sqlhub.processConnection = connectionForURI('sqlite://' + dbfile)
-        url.createTable(ifNotExists = True)
-        author.createTable(ifNotExists = True)
-        channel.createTable(ifNotExists = True)
-        comments.createTable(ifNotExists = True)
+        config = madcow.config.memebot
+        engine = config.db_engine
+        uri = engine + '://'
+        if engine == 'sqlite':
+            uri += os.path.join(madcow.dir, 'data/db-%s-memes' % madcow.ns)
+        else:
+            uri += '%s:%s@%s:%s/%s' % (config.db_user, config.db_pass,
+                    config.db_host, config.db_port, config.db_name)
+        sqlhub.processConnection = connectionForURI(uri)
 
-        self.riffs = [
-            'OLD MEME ALERT!',
-            'omg, SO OLD!',
-            'Welcome to yesterday.',
-            'been there, done that.',
-            'you missed the mememobile.',
-            'oldest. meme. EVAR.',
-            'jesus christ you suck.',
-            'you need a new memesource, bucko.',
-            'that was funny the first time i saw it.',
-        ]
+        url.createTable(ifNotExists=True)
+        author.createTable(ifNotExists=True)
+        channel.createTable(ifNotExists=True)
+        comments.createTable(ifNotExists=True)
 
     def cleanURL(self, url):
         uri = list(urlparse.urlparse(url))
         uri[1] = uri[1].lower()
-        if uri[2] == '': uri[2] = '/'
+        if uri[2] == '':
+            uri[2] = '/'
         uri[5] = ''
         return urlparse.urlunparse(uri)
 
@@ -99,11 +108,11 @@ class Main(Module):
 
     def response(self, nick, args, **kwargs):
         nick = nick.lower()
-        chan = kwargs['channel']
+        chan = kwargs['channel'].lower()
         addressed = kwargs['addressed']
         message = args[0]
 
-        if addressed is True:
+        if addressed:
             try:
                 x, y = self.scoreRequest.search(message).groups()
                 scores = self.getScores()
@@ -112,14 +121,17 @@ class Main(Module):
                 if x is None:
                     scores = scores[:10]
                     x = 1
-                elif x.isdigit() is True:
+                elif x.isdigit():
                     x = int(x)
-                    if x == 0: x = 1
-                    if x > size: x = size
+                    if x == 0:
+                        x = 1
+                    if x > size:
+                        x = size
 
-                    if y is not None and y.isdigit() is True:
+                    if y is not None and y.isdigit():
                         y = int(y)
-                        if y > size: y = size
+                        if y > size:
+                            y = size
                         scores = scores[x-1:y]
                     else:
                         scores = [scores[x-1]]
@@ -142,11 +154,12 @@ class Main(Module):
                 pass
 
         match = self.matchURL.search(message)
-        if match is None: return
+        if match is None:
+            return
 
         event = self.throttle.registerEvent(name='memebot', user=nick)
-        if event.isThrottled() is True:
-            if event.warn() is True:
+        if event.isThrottled():
+            if event.warn():
                 return '%s: Stop abusing me plz.' % nick
             else:
                 return
@@ -155,25 +168,32 @@ class Main(Module):
         clean = self.cleanURL(orig)
 
         comment1, comment2 = re.split(re.escape(orig), message)
-        try: comment1 = self.colonHeader.search(comment1).group(1)
-        except: pass
+        try:
+            comment1 = self.colonHeader.search(comment1).group(1)
+        except:
+            pass
 
         comment1 = comment1.strip()
         comment2 = comment2.strip()
 
-        try: me = author.byName(nick)
-        except SQLObjectNotFound: me = author(name = nick)
+        try:
+            me = author.byName(nick)
+        except SQLObjectNotFound:
+            me = author(name=nick)
 
         try:
             # old meme
             old = url.byClean(clean)
 
-            if len(comment1) > 0: comments(url=old, text=comment1, author=me)
-            if len(comment2) > 0: comments(url=old, text=comment2, author=me)
+            if len(comment1) > 0:
+                comments(url=old, text=comment1, author=me)
+            if len(comment2) > 0:
+                comments(url=old, text=comment2, author=me)
 
             # chew them out unless its my own
             if old.author.name != nick:
-                response = 'first posted by %s on %s' % (old.author.name, old.posted)
+                response = 'first posted by %s on %s' % (old.author.name,
+                        old.posted)
                 riff = random.choice(self.riffs)
                 old.author.pointsCredit = old.author.pointsCredit + 1
                 me.pointsOld = me.pointsOld + 1
@@ -182,17 +202,20 @@ class Main(Module):
 
 
         except SQLObjectNotFound:
-            try: c = channel.byName(chan)
-            except SQLObjectNotFound: c = channel(name = chan)
+            try:
+                c = channel.byName(chan)
+            except SQLObjectNotFound:
+                c = channel(name=chan)
 
-            urlid = url(url = orig, clean = clean, author = me, channel = c)
+            urlid = url(url=orig, clean=clean, author=me, channel=c)
 
-            if len(comment1) > 0: comments(url=urlid, text=comment1, author=me)
-            if len(comment2) > 0: comments(url=urlid, text=comment2, author=me)
+            if len(comment1) > 0:
+                comments(url=urlid, text=comment1, author=me)
+            if len(comment2) > 0:
+                comments(url=urlid, text=comment2, author=me)
 
             me.pointsNew = me.pointsNew + 1
 
         except Exception, e:
             print >> sys.stderr, 'error: %s' % e
 
-        return
