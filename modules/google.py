@@ -50,7 +50,9 @@ class Google(Base):
         opts['q'] = query
         try:
             result = self.ua.openurl(self.search, opts=opts,
-                    referer=self.baseurl)
+                    referer=self.baseurl, size=1024)
+            if not result.startswith('http'):
+                raise Exception, 'non-redirect response'
             return '%s = %s' % (query, result)
 
         except Exception, e:
