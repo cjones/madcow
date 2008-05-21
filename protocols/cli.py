@@ -2,10 +2,8 @@ from madcow import Madcow, Request
 import os
 from include.colorlib import ColorLib
 import re
-import sys
-import termios
-import tty
 import logging as log
+from include.shell import Shell
 
 class ConsoleProtocol(Madcow):
     change_nick = re.compile(r'^\s*nick\s+(\S+)\s*$', re.I)
@@ -15,19 +13,19 @@ class ConsoleProtocol(Madcow):
         Madcow.__init__(self, config=config, dir=dir)
         self.user_nick = os.environ['USER']
         self.shell = Shell()
-        self.history = []
 
     def start(self, *args):
         while True:
             try:
-                input = self.shell.readline('>>> ', history=self.history)
+                input = self.shell.readline('>>> ')
             except IOError:
                 continue
 
-            self.history.append(input)
-
             if input.lower() == 'quit':
                 break
+
+            if input.lower() == 'history':
+                print 'history: %s' % repr(self.shell.history)
 
             if len(input) > 0:
                 req = Request(message=input)
@@ -63,78 +61,4 @@ class ConsoleProtocol(Madcow):
 class ProtocolHandler(ConsoleProtocol):
     pass
 
-
-class Shell:
-    """Simple shell emulation.. might not work everywhere"""
-    
-    linefeed = '\r\n'
-    backspace = '\x08\x7f'
-    ansi = '\x1b['
-    up = ansi + 'A'
-    down = ansi + 'B'
-    right = ansi + 'C'
-    left = ansi + 'D'
-
-    def getch(self):
-        fd = sys.stdin.fileno()
-        old = termios.tcgetattr(fd)
-        try:
-            tty.setraw(fd)
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old)
-        return ch
-
-    def rotate(self, seq, n=1):
-        n = n % len(seq)
-        return seq[n:] + seq[:n]
-
-    def readline(self, prompt='', history=[], fo=sys.stdout):
-        fo.write(prompt)
-        line = ''
-        history.reverse()
-        buf = ''
-
-        def redraw():
-            new = prompt + line
-            padding = 80 - len(new)
-            fo.write('\r' + new)
-            fo.write(' ' * padding)
-            fo.write(self.left * padding)
-
-        while True:
-            ch = self.getch()
-            if ch == '\x03':
-                raise KeyboardInterrupt
-            if ch == '\x04':
-                raise EOFError
-            if ch in self.linefeed:
-                fo.write(self.linefeed)
-                break
-            if ch in self.backspace:
-                if len(line):
-                    line = line[:-1]
-                    fo.write(self.left + ' ' + self.left)
-                continue
-            buf += ch
-            if buf == self.up:
-                buf = ''
-                if history:
-                    line = history[0]
-                    history = self.rotate(history)
-                    redraw()
-                continue
-            elif buf == self.down:
-                buf = ''
-                if history:
-                    line = history[0]
-                    history = self.rotate(history, -1)
-                    redraw()
-                continue
-            elif buf == self.ansi[:len(buf)]:
-                continue
-            fo.write(buf)
-            line += buf
-            buf = ''
-        return line
 
