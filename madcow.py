@@ -13,6 +13,7 @@ from include.utils import Base, Error
 import SocketServer
 import select
 from signal import signal, SIGHUP
+import shutil
 
 __version__ = '1.1.7'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
@@ -643,12 +644,13 @@ def main():
     """Entry point to set up bot and run it"""
 
     # where we are being run from
-    dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+    dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(dir)
+    default_config = os.path.join(dir, 'madcow.ini')
 
     # parse commandline options
     parser = OptionParser(version=__version__)
-    parser.add_option('-c', '--config', default=dir+'/madcow.ini',
+    parser.add_option('-c', '--config', default=default_config,
             help='default: %default', metavar='FILE')
     parser.add_option('-d', '--detach', action='store_true', default=False,
             help='detach when run')
@@ -663,6 +665,13 @@ def main():
     opts, args = parser.parse_args()
 
     # read config file
+    if not os.path.exists(opts.config):
+        if opts.config == default_config:
+            shutil.copyfile(default_config + '-sample', opts.config)
+        else:
+            print >> sys.stderr, 'config not found: %s' % opts.config
+            return 1
+
     try:
         config = Config(opts.config)
     except FileNotFound:
