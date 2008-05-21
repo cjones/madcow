@@ -10,8 +10,8 @@ from time import time as unix_time
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['UserAgent', 'Base', 'Module', 'cache', 'Error']
-__agent__ = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)'
+__all__ = ['Base', 'Module', 'Error', 'cache', 'throttle', 'stripHTML',
+        'isUTF8', 'unescape_entities', 'slurp']
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
 re_br = re.compile('<br[^>]+>', re.I)
@@ -93,50 +93,6 @@ class Error(Exception):
         return str(self.message)
 
     __repr__ = __str__
-
-
-class UserAgent(Base):
-    __blocksize__ = 16 * 1024
-
-    def __init__(self):
-        self.cj = cookielib.CookieJar()
-        self.ch = urllib2.HTTPCookieProcessor(self.cj)
-        self.opener = urllib2.build_opener(self.ch)
-        self.opener.addheaders = [('User-Agent', __agent__)]
-
-    def fetch(self, url, referer=None, opts={}, method='GET', save=None,
-            sample_size=None):
-        try:
-            payload = urllib.urlencode(opts)
-            method = method.lower()
-            if method == 'get':
-                if len(payload):
-                    url += '?' + payload
-                payload = None
-            req = urllib2.Request(url, data=payload)
-            if referer is not None:
-                req.add_header('Referer', referer)
-
-            res = self.opener.open(req)
-            size = res.headers.getheader('content-length')
-            if save is not None:
-                fi = open(save, 'wb')
-                try:
-                    while True:
-                        block = res.read(UserAgent.__blocksize__)
-                        if not len(block):
-                            break
-                        fi.write(block)
-                finally:
-                    fi.close()
-            else:
-                if sample_size is not None:
-                    return res.read(sample_size)
-                else:
-                    return res.read()
-        except Exception, e:
-            sys.stderr.write("couldn't load page %s: %s\n" % (url, e))
-        return ''
 
 
 class cache:

@@ -1,6 +1,7 @@
 """Return summary from WikiMedia projects"""
 
-from utils import stripHTML, Base, UserAgent
+from utils import stripHTML, Base
+from useragent import geturl
 from BeautifulSoup import BeautifulSoup
 import re
 from urlparse import urljoin
@@ -46,7 +47,6 @@ class Wiki(Base):
         self.error = error
         self.summary_size = summary_size
         self.sample_size = sample_size
-        self.ua = UserAgent()
 
     def get_summary(self, query):
         soup, title = self.get_soup(query)
@@ -106,8 +106,8 @@ class Wiki(Base):
         else:
             opts = {'search': query, 'go': 'Go'}
             url = urljoin(self.base_url, self.search_path)
-        page = self.ua.fetch(url, referer=self.base_url, opts=opts,
-                sample_size=self.sample_size)
+        page = geturl(url, referer=self.base_url, opts=opts,
+                size=self.sample_size)
 
         # remove high ascii since this is going to IRC
         page = Wiki._nbsp_entity.sub(' ', page)
