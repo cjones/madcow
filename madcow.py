@@ -21,7 +21,7 @@ __license__ = 'GPL'
 __all__ = ['Request', 'User', 'Admin', 'ServiceHandler', 'PeriodicEvents',
         'Madcow', 'Config']
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
-_loglevel = log.INFO
+_loglevel = log.WARN
 _charset = 'latin1'
 
 class FileNotFound(Error):
@@ -655,7 +655,9 @@ def main():
     parser.add_option('-p', '--protocol',
             help='force the use of this output protocol')
     parser.add_option('-D', '--debug', dest='loglevel', action='store_const',
-            const=log.DEBUG, help='turn on debugging output (SPAMMY)')
+            const=log.DEBUG,help='turn on debugging output')
+    parser.add_option('-v', '--verbose', dest='loglevel', action='store_const',
+            const=log.INFO, help='increase logging output')
     parser.add_option('-q', '--quiet', dest='loglevel', action='store_const',
             const=log.WARN, help='only show errors')
     opts, args = parser.parse_args()
@@ -675,10 +677,8 @@ def main():
         loglevel = getattr(log, config.main.loglevel)
     except:
         loglevel = _loglevel
-
     if opts.loglevel is not None:
         loglevel = opts.loglevel
-
     log.basicConfig(level=loglevel, format=_logformat)
 
     # if specified, log to file as well

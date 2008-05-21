@@ -3,8 +3,8 @@
 ; specify protocol module to use. you can override this with the -p
 ; switch when run from the commandline
 ;
-module=irc
-;module=cli
+module=cli
+;module=irc
 ;module=aim
 ;module=silcplugin
 ;
@@ -25,7 +25,7 @@ logpublic=yes
 ;ignoreList=somebot, abusiveGuy
 ;
 ; set this to log console output to a file in madcow base directory
-loglevel=INFO           ; default level, valid options are DEBUG, INFO, WARN
+loglevel=WARN           ; default level, valid options are DEBUG, INFO, WARN
 logfile=madcow.log      ; leave blank for no file-level logging
 ;
 ; encode output to this format (latin1, utf8, ascii, etc.)
