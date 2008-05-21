@@ -336,7 +336,7 @@ class Modules(Base):
                 else:
                     raise Exception
             except:
-                log.warn('no help for module: %s' % mod_name)
+                log.info('no help for module: %s' % mod_name)
             self.modules[mod_name]['obj'] = obj
             log.info('loaded module: %s' % mod_name)
 
@@ -449,7 +449,7 @@ class Madcow(Base):
         except:
             pass
 
-    def _output(self, message, req):
+    def _output(self, message, req=None):
         pass
 
     def botName(self):

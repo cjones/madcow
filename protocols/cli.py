@@ -7,6 +7,11 @@ from include.shell import Shell
 
 class ConsoleProtocol(Madcow):
     change_nick = re.compile(r'^\s*nick\s+(\S+)\s*$', re.I)
+    _cli_usage = [
+        'quit - quit madcow',
+        'history - show history',
+        'nick <nick> - change your nick',
+    ]
 
     def __init__(self, config=None, dir=None):
         self.colorlib = ColorLib(type='ansi')
@@ -15,9 +20,11 @@ class ConsoleProtocol(Madcow):
         self.shell = Shell()
 
     def start(self, *args):
+        self.output("type 'help' for a list of commands")
+        self.usageLines += self._cli_usage
         while True:
             try:
-                input = self.shell.readline('>>> ')
+                input = self.shell.readline('\x1b[1;31m>>>\x1b[0m ')
             except IOError:
                 continue
 
@@ -51,7 +58,9 @@ class ConsoleProtocol(Madcow):
             pass
         self.processMessage(req)
 
-    def _output(self, message, req):
+    def _output(self, message, req=None):
+        if req is None:
+            req = Request(message=message)
         if req.colorize is True:
             message = self.colorlib.rainbow(message)
 
