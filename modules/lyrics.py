@@ -29,6 +29,7 @@ class Lyrics(Base):
     _leadbreak = re.compile(r'^(?:<br(?:\s+/)?\s*>\s*)+', re.I + re.DOTALL)
     _endbreak = re.compile(r'(?:<br(?:\s+/)?\s*>\s*)+$', re.I + re.DOTALL)
     _whitespace = re.compile(r'\s+')
+    _spam = '!! &nbsp; &nbsp;Download to your phone.\n'
 
     def get_lyrics(self, query):
         # full lyrics or random verse?
@@ -113,9 +114,11 @@ class Lyrics(Base):
 
 
             if full:
-                return '\n'.join(verses)
+                response = '\n'.join(verses)
             else:
-                return random.choice(verses)
+                response = random.choice(verses)
+            response = response.replace(self._spam, '')
+            return response
 
         else:
             return "Couldn't find a match for that query"

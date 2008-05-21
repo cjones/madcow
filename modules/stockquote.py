@@ -38,9 +38,12 @@ class Yahoo(Base):
             key, val = row.findAll('td')
             key = str(key.contents[0])
             if key == 'Change:':
-                img = val.find('img')
-                alt = str(img['alt'])
-                val = alt + stripHTML(str(val.contents[0]))
+                try:
+                    img = val.find('img')
+                    alt = str(img['alt'])
+                    val = alt + stripHTML(str(val.contents[0]))
+                except:
+                    val = '0.00%'
             elif key == 'Ask:':
                 continue
             else:
