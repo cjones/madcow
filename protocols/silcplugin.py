@@ -32,7 +32,10 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def start(self):
     self.connect()
     while True:
-      self.run_one()
+      try:
+        self.run_one()
+      except Exception, e:
+        log.exception(e)
       time.sleep(0.2)
 
   def private_message(self, sender, flags, message):
