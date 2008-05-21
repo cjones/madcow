@@ -72,24 +72,33 @@ class Admin(Base):
     _reFist = re.compile('^\s*fist\s+(\S+)\s+(.+)$', re.I)
     _reHelp = re.compile('^\s*admin\s+help\s*$', re.I)
     _reLogout = re.compile('^\s*log(?:out|off)\s*$', re.I)
+    _reDelUser = re.compile(r'\s*del(?:ete)?\s+(\S+)\s*$', re.I)
+    _reListUsers = re.compile(r'\s*list\s+users\s*$', re.I)
+    _reChFlag = re.compile(r'\s*chflag\s+(\S+)\s+(\S+)\s*$', re.I)
 
-    _usage =  'admin help - this screen\n'
-    _usage += 'register <pass> - register with bot\n'
-    _usage += 'login <pass> - login to bot\n'
-    _usage += 'fist <chan> <msg> - make bot say something in channel\n'
-    _usage += 'logout - log out of bot'
+    _basic_usage = [
+        'admin help - this screen',
+        'register <pass> - register with bot',
+        'login <pass> - login to bot',
+        'logout - log out of bot',
+    ]
+
+    _admin_usage = [
+        'fist <chan> <msg> - make bot say something in channel',
+        'del <user> - delete a user',
+        'list users - list users :P',
+        'chflag <user> <[+-][aor]> - update user flags',
+    ]
 
     def __init__(self, bot):
         self.bot = bot
         self.authlib = AuthLib('%s/data/db-%s-passwd' % (bot.dir, bot.ns))
         self.users = {}
         self.modules = {}
-        self.usageLines = Admin._usage.splitlines()
 
     def parse(self, req):
         if self.bot.config.admin.enabled is not True:
             return
-
         nick = req.nick
         command = req.message
         response = None
@@ -121,11 +130,13 @@ class Admin(Base):
 
         # help
         if Admin._reHelp.search(command):
-            return '\n'.join(self.usageLines)
+            usage = self._basic_usage
+            if user.isAdmin():
+                usage += self._admin_usage
+            return '\n'.join(usage)
 
         # admin functions
         if user.isAdmin():
-
             # be the puppetmaster
             try:
                 channel, message = Admin._reFist.search(command).groups()
@@ -134,25 +145,61 @@ class Admin(Base):
             except:
                 pass
 
-    def registerUser(self, user, passwd):
-        if self.bot.config.admin.allowRegistration is True:
-            flags = self.bot.config.admin.defaultFlags
-            if flags is None:
-                flags = 'r'
+            # delete a user
+            try:
+                deluser = self._reDelUser.search(command).group(1)
+                self.authlib.delete_user(deluser)
+                if self.users.has_key(deluser):
+                    del self.users[deluser]
+                return 'User deleted: %s' % deluser
+            except:
+                pass
 
-            self.authlib.add_user(user, passwd, flags)
-            return "You are now registered, try logging in: login <pass>"
-        else:
+            # list users
+            try:
+                if self._reListUsers.search(command):
+                    output = []
+                    passwd = self.authlib.get_passwd()
+                    for user, data in passwd.items():
+                        flags = []
+                        if 'a' in data['flags']:
+                            flags.append('admin')
+                        if 'r' in data['flags']:
+                            flags.append('registered')
+                        if 'o' in data['flags']:
+                            flags.append('autoop')
+                        flags = ' '.join(flags)
+                        output.append('%s: %s' % (user, flags))
+                    return '\n'.join(output)
+            except Exception, e:
+                pass
+
+            try:
+                chuser, newflags = self.reChFlag.search(command).groups()
+                print 'ok, chflagging user=%s, flags=%s' % (chuser, newflags)
+            except Exception, e:
+                print 'error in chflags: %s' % e
+                        
+
+    def registerUser(self, user, passwd):
+        if not self.bot.config.admin.allowRegistration:
             return "Registration is disabled."
+        if self.authlib.user_exists(user):
+            return "User already registered."
+        flags = self.bot.config.admin.defaultFlags
+        if not flags:
+            flags = 'r'
+        self.authlib.add_user(user, passwd, flags)
+        return "You are now registered, try logging in: login <pass>"
 
     def authenticateUser(self, user, passwd):
-        status = self.authlib.verify_user(user, passwd)
-
-        if status is False:
+        if not self.authlib.user_exists(user):
+            return "You are not registered: try register <password>."
+        if not self.authlib.check_user(user, passwd):
             return 'Nice try.. notifying FBI'
-        else:
-            self.users[user] = User(user, self.authlib.get_user_data(user))
-            return 'You are now logged in. Message me "admin help" for help'
+        self.users[user] = User(user, self.authlib.get_flags(user))
+        return 'You are now logged in. Message me "admin help" for help'
+
 
 class GatewayService(Base):
     """Gateway service spawns TCP socket and listens for requests"""
