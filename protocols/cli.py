@@ -12,20 +12,22 @@ class ConsoleProtocol(Madcow):
         'history - show history',
         'nick <nick> - change your nick',
     ]
+    _prompt = '\x1b[1;31m>>>\x1b[0m '
 
     def __init__(self, config=None, dir=None):
         self.colorlib = ColorLib(type='ansi')
         Madcow.__init__(self, config=config, dir=dir)
         self.user_nick = os.environ['USER']
         self.shell = Shell()
+        self.usageLines += self._cli_usage
 
     def start(self, *args):
         self.output("type 'help' for a list of commands")
-        self.usageLines += self._cli_usage
         while True:
             try:
-                input = self.shell.readline('\x1b[1;31m>>>\x1b[0m ')
+                input = self.shell.readline(self._prompt)
             except IOError:
+                # this happens when you get EINTR from SIGHUP handling
                 continue
 
             if input.lower() == 'quit':
