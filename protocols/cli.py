@@ -5,6 +5,7 @@ import re
 import sys
 import termios
 import tty
+import logging as log
 
 class ConsoleProtocol(Madcow):
     change_nick = re.compile(r'^\s*nick\s+(\S+)\s*$', re.I)
@@ -18,7 +19,11 @@ class ConsoleProtocol(Madcow):
 
     def start(self, *args):
         while True:
-            input = self.shell.readline('>>> ', history=self.history)
+            try:
+                input = self.shell.readline('>>> ', history=self.history)
+            except IOError:
+                continue
+
             self.history.append(input)
 
             if input.lower() == 'quit':
