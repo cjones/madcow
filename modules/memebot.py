@@ -12,42 +12,45 @@ import random
 from include.throttle import Throttle
 from include.utils import Base, Module
 
-class url(SQLObject):
-    url = StringCol()
-    clean = StringCol()
-    author = ForeignKey('author')
-    channel = ForeignKey('channel')
-    citations = IntCol(default=0)
-    posted = DateTimeCol(default = datetime.datetime.now)
-    comments = MultipleJoin('comments')
+try:
+    class url(SQLObject):
+        url = StringCol()
+        clean = StringCol()
+        author = ForeignKey('author')
+        channel = ForeignKey('channel')
+        citations = IntCol(default=0)
+        posted = DateTimeCol(default = datetime.datetime.now)
+        comments = MultipleJoin('comments')
 
-    def truncated_url(self):
-        if (len(self.url) > 48):
-            return self.url[:48] + ' ... ' + self.url[-4:]
-        else:
-            return self.url
+        def truncated_url(self):
+            if (len(self.url) > 48):
+                return self.url[:48] + ' ... ' + self.url[-4:]
+            else:
+                return self.url
 
-    turl = property(truncated_url)
-
-
-class author(SQLObject):
-    name = StringCol(alternateID=True, length=50)
-    urls = MultipleJoin('url')
-    comments = MultipleJoin('comments')
-    pointsNew = IntCol(default=0)
-    pointsOld = IntCol(default=0)
-    pointsCredit = IntCol(default=0)
+        turl = property(truncated_url)
 
 
-class channel(SQLObject):
-    name = StringCol(alternateID=True, length=50)
-    urls = MultipleJoin('url')
+    class author(SQLObject):
+        name = StringCol(alternateID=True, length=50)
+        urls = MultipleJoin('url')
+        comments = MultipleJoin('comments')
+        pointsNew = IntCol(default=0)
+        pointsOld = IntCol(default=0)
+        pointsCredit = IntCol(default=0)
 
 
-class comments(SQLObject):
-    text = StringCol()
-    author = ForeignKey('author')
-    url = ForeignKey('url')
+    class channel(SQLObject):
+        name = StringCol(alternateID=True, length=50)
+        urls = MultipleJoin('url')
+
+
+    class comments(SQLObject):
+        text = StringCol()
+        author = ForeignKey('author')
+        url = ForeignKey('url')
+except:
+    pass
 
 
 class Main(Module):
