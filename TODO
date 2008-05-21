@@ -26,9 +26,5 @@ emailing them to cjones@gruntle.org.
 
 TODO: (feature requests)
 
-- authentication for remote admin functions
-- option to create a FIFO unix file that you can pipe to to fist
-  madcow.. maybe
 - chatroom support for aim/oscar module
-- colors don't terminate properly
 
