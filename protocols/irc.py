@@ -42,7 +42,11 @@ class IRCProtocol(Madcow):
             self.server.add_global_handler(event,
                     getattr(self, 'on_' + event), 0)
 
-        self.irc.process_forever()
+        while True:
+            try:
+                self.irc.process_once(0.2)
+            except Exception, e:
+                log.exception(e)
 
     def botName(self):
         return self.server.get_nickname()
