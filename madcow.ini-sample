@@ -103,6 +103,7 @@ allowRegistration=yes
 ;
 ; a = admin
 ; r = registered
+; o = auto-op (irc only)
 ;
 defaultFlags=r
 
