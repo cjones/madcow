@@ -178,6 +178,13 @@ db_pass=
 db_host=localhost
 db_port=3306
 
+; set this up to post urls to delicious
 [delicious]
 username=
 password=
+
+; IRC ONLY, will give +o to users with oper flag
+[ircops]
+enabled=no
+updatefreq=10
+

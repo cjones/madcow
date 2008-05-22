@@ -7,27 +7,27 @@ from madcow import Madcow, Request
 from include.colorlib import ColorLib
 import random
 import logging as log
+from time import time as unix_time
 
 class IRCProtocol(Madcow):
 
     def __init__(self, config=None, dir=None):
         self.colorlib = ColorLib(type='mirc')
-
         Madcow.__init__(self, config=config, dir=dir)
-
         if log.root.level <= log.DEBUG:
             irclib.DEBUG = 1
         else:
             irclib.DEBUG = 0
-
         self.irc = irclib.IRC()
         self.server = self.irc.server()
-        self.events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg']
-
+        self.events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg',
+                'namreply']
         if self.config.irc.channels is not None:
-            self.channels = Madcow.reDelim.split(self.config.irc.channels)
+            self.channels = self.reDelim.split(self.config.irc.channels)
         else:
             self.channels = []
+        self.names = {}
+        self.last_names_update = unix_time()
 
     def connect(self):
         log.info('[IRC] * Connecting to %s:%s' % (self.config.irc.host,
@@ -46,6 +46,7 @@ class IRCProtocol(Madcow):
             try:
                 self.irc.process_once(0.2)
             except Exception, e:
+                log.warn('EINTR detected in irc loop')
                 log.exception(e)
 
     def botName(self):
@@ -149,6 +150,23 @@ class IRCProtocol(Madcow):
             req.colorize = True
         else:
             req.colorize = False
+
+    def on_namreply(self, server, event):
+        log.debug('[IRC] Updating NAMES list')
+        args = event.arguments()
+        channel = args[1]
+        nicks = {}
+        for nick in args[2].split():
+            nick = nick.lower()
+            opped = False
+            if nick.startswith('@'):
+                opped = True
+                nick = nick[1:]
+            elif nick.startswith('+'):
+                nick = nick[1:]
+            nicks[nick] = opped
+        self.names[channel] = nicks
+        self.last_names_update = unix_time()
 
 
 class ProtocolHandler(IRCProtocol):
