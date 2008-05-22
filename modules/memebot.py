@@ -73,6 +73,7 @@ class Main(Module):
         'new to the internet?',
         'i think that came installed with the internet',
     ]
+    get_frag = re.compile(r'^(.*)#([^;/?:@=&]*)$')
 
     def __init__(self, madcow):
         self.throttle = Throttle()
@@ -91,13 +92,53 @@ class Main(Module):
         channel.createTable(ifNotExists=True)
         comments.createTable(ifNotExists=True)
 
+
     def cleanURL(self, url):
-        uri = list(urlparse.urlparse(url))
-        uri[1] = uri[1].lower()
-        if uri[2] == '':
-            uri[2] = '/'
-        uri[5] = ''
-        return urlparse.urlunparse(uri)
+        # stolen from urlparse.urlsplit(), which doesn't handle
+        # splitting frags correctly
+        netloc = query = fragment = ''
+        i = url.find(':')
+        scheme = url[:i].lower()
+        url = url[i+1:]
+        if url[:2] == '//':
+            delim = len(url)
+            for c in '/?#':
+                wdelim = url.find(c, 2)
+                if wdelim >= 0:
+                    delim = min(delim, wdelim)
+            netloc, url = url[2:delim], url[delim:]
+        if '#' in url:
+            try:
+                url, fragment = self.get_frag.search(url).groups()
+            except:
+                pass
+        if '?' in url:
+            url, query = url.split('?', 1)
+
+        ### now for memebots normalizing..
+        # make hostname lowercase and remove www
+        netloc = netloc.lower()
+        if netloc.startswith('www.') and len(netloc) > 4:
+            netloc = netloc[4:]
+        # all urls have trailing slash
+        if url == '':
+            url = '/'
+        # remove empty query settings, these are usually form artifacts
+        # and put them in order
+        try:
+            query = query.split('&')
+            query = [part.split('=') for part in query]
+            query = [[x, y] for x, y in query if len(y)]
+            query = ['='.join([x, y]) for x, y in query]
+            query = sorted(query)
+            query = '&'.join(query)
+        except:
+            # probably not valid query string, just "?newmeme"
+            query = ''
+        # ignore fragments
+        fragment = ''
+
+        return urlparse.urlunsplit([scheme, netloc, url, query, fragment])
 
     def getScoreForAuthor(self, a):
         return a.pointsNew + (a.pointsOld  * -2) + (a.pointsCredit * 2)
