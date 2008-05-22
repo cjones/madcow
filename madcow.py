@@ -98,7 +98,6 @@ class Admin(Base):
         self.bot = bot
         self.authlib = AuthLib('%s/data/db-%s-passwd' % (bot.dir, bot.ns))
         self.users = {}
-        self.modules = {}
 
     def parse(self, req):
         if not self.bot.config.admin.enabled:
