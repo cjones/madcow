@@ -10,7 +10,6 @@ class Main(Base):
         self.madcow = madcow
         self.enabled = madcow.config.ircops.enabled
         self.frequency = madcow.config.ircops.updatefreq
-        self.output = madcow.config.ircops.channel
         self.output = None
         if madcow.config.main.module != 'irc':
             self.enabled = False
