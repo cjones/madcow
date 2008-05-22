@@ -1,3 +1,4 @@
+import urlparse
 from django.db import connection
 from django.http import HttpResponse, HttpResponseRedirect
 from www.memebot.models import *
@@ -10,7 +11,8 @@ import re
 from django.db.models import Q
 from django.utils.html import escape
 from urllib import urlencode
-from urlparse import urlparse, urlunparse
+
+get_frag = re.compile(r'^(.*)#([^;/?:@=&]*)$')
 
 """
 XXX This code could use some serious reworking..
@@ -279,17 +281,7 @@ def search(request, *args, **kwargs):
 
 def memecheck(request, *args, **kwargs):
     try:
-        url = request.GET['url']
-        if url.startswith('http://') is False:
-            url = 'http://' + url
-
-        uri = list(urlparse(url))
-        uri[1] = uri[1].lower()
-        if uri[2] == '': uri[2] = '/'
-        uri[5] = ''
-
-        url = urlunparse(uri)
-
+        url = cleanURL(request.GET['url'])
         results = URL.objects.filter(clean__iexact=url).order_by('-id')[:1]
         if results.count() > 0:
             result = results[0]
@@ -298,7 +290,10 @@ def memecheck(request, *args, **kwargs):
         else:
             response = '<span class="newmeme">NEW MEME</span>'
 
-    except:
+    except Exception, e:
+        f = open('/tmp/djerror', 'wb')
+        f.write(str(e))
+        f.close()
         url = 'url'
         response = None
 
@@ -321,3 +316,51 @@ def memecheck(request, *args, **kwargs):
     })
 
     return HttpResponse(t.render(c))
+
+def cleanURL(url):
+    # stolen from urlparse.urlsplit(), which doesn't handle
+    # splitting frags correctly
+    netloc = query = fragment = ''
+    i = url.find(':')
+    scheme = url[:i].lower()
+    url = url[i+1:]
+    if url[:2] == '//':
+        delim = len(url)
+        for c in '/?#':
+            wdelim = url.find(c, 2)
+            if wdelim >= 0:
+                delim = min(delim, wdelim)
+        netloc, url = url[2:delim], url[delim:]
+    if '#' in url:
+        try:
+            url, fragment = get_frag.search(url).groups()
+        except:
+            pass
+    if '?' in url:
+        url, query = url.split('?', 1)
+
+    ### now for memebots normalizing..
+    # make hostname lowercase and remove www
+    netloc = netloc.lower()
+    if netloc.startswith('www.') and len(netloc) > 4:
+        netloc = netloc[4:]
+    # all urls have trailing slash
+    if url == '':
+        url = '/'
+    # remove empty query settings, these are usually form artifacts
+    # and put them in order
+    try:
+        query = query.split('&')
+        query = [part.split('=') for part in query]
+        query = [[x, y] for x, y in query if len(y)]
+        query = ['='.join([x, y]) for x, y in query]
+        query = sorted(query)
+        query = '&'.join(query)
+    except:
+        # probably not valid query string, just "?newmeme"
+        query = ''
+    # ignore fragments
+    fragment = ''
+
+    return urlparse.urlunsplit([scheme, netloc, url, query, fragment])
+
