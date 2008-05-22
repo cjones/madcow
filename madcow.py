@@ -67,19 +67,23 @@ class User(Base):
 class Admin(Base):
     """Class to handle admin interface"""
 
+    _reAdminCommand = re.compile(r'^\s*admin\s+(.+?)\s*$', re.I)
     _reRegister = re.compile('^\s*register\s+(\S+)\s*$', re.I)
     _reAuth = re.compile('^\s*(?:log[io]n|auth)\s+(\S+)\s*$', re.I)
     _reFist = re.compile('^\s*fist\s+(\S+)\s+(.+)$', re.I)
-    _reHelp = re.compile('^\s*admin\s+help\s*$', re.I)
+    _reHelp = re.compile('^\s*help\s*$', re.I)
     _reLogout = re.compile('^\s*log(?:out|off)\s*$', re.I)
     _reDelUser = re.compile(r'\s*del(?:ete)?\s+(\S+)\s*$', re.I)
     _reListUsers = re.compile(r'\s*list\s+users\s*$', re.I)
     _reChFlag = re.compile(r'\s*chflag\s+(\S+)\s+(\S+)\s*$', re.I)
 
     _basic_usage = [
-        'admin help - this screen',
+        'help - this screen',
         'register <pass> - register with bot',
         'login <pass> - login to bot',
+    ]
+
+    _loggedin_usage = [
         'logout - log out of bot',
     ]
 
@@ -97,25 +101,37 @@ class Admin(Base):
         self.modules = {}
 
     def parse(self, req):
-        if self.bot.config.admin.enabled is not True:
+        if not self.bot.config.admin.enabled:
+            return
+        try:
+            command = self._reAdminCommand.search(req.message).group(1)
+        except:
             return
         nick = req.nick
-        command = req.message
-        response = None
 
         # register
         try:
-            passwd = Admin._reRegister.search(command).group(1)
+            passwd = self._reRegister.search(command).group(1)
             return self.registerUser(nick, passwd)
         except:
             pass
 
         # log in
         try:
-            passwd = Admin._reAuth.search(command).group(1)
+            passwd = self._reAuth.search(command).group(1)
             return self.authenticateUser(nick, passwd)
         except:
             pass
+
+        # help
+        help = []
+        help += self._basic_usage
+        if nick in self.users:
+            help += self._loggedin_usage
+            if self.users[nick].isAdmin():
+                help += self._admin_usage
+        if self._reHelp.search(command):
+            return '\n'.join(help)
 
         # don't pass this point unless we are logged in
         try:
@@ -128,58 +144,74 @@ class Admin(Base):
             del self.users[nick]
             return 'You are now logged out.'
 
-        # help
-        if Admin._reHelp.search(command):
-            usage = self._basic_usage
-            if user.isAdmin():
-                usage += self._admin_usage
-            return '\n'.join(usage)
+        # functions pas here require admin
+        if not user.isAdmin():
+            return
 
-        # admin functions
-        if user.isAdmin():
-            # be the puppetmaster
-            try:
-                channel, message = Admin._reFist.search(command).groups()
-                req.sendTo = channel
-                return message
-            except:
-                pass
+        # be the puppetmaster
+        try:
+            channel, message = Admin._reFist.search(command).groups()
+            req.sendTo = channel
+            return message
+        except:
+            pass
 
-            # delete a user
-            try:
-                deluser = self._reDelUser.search(command).group(1)
-                self.authlib.delete_user(deluser)
-                if self.users.has_key(deluser):
-                    del self.users[deluser]
-                return 'User deleted: %s' % deluser
-            except:
-                pass
+        # delete a user
+        try:
+            deluser = self._reDelUser.search(command).group(1)
+            self.authlib.delete_user(deluser)
+            if self.users.has_key(deluser):
+                del self.users[deluser]
+            return 'User deleted: %s' % deluser
+        except:
+            pass
 
-            # list users
-            try:
-                if self._reListUsers.search(command):
-                    output = []
-                    passwd = self.authlib.get_passwd()
-                    for user, data in passwd.items():
-                        flags = []
-                        if 'a' in data['flags']:
-                            flags.append('admin')
-                        if 'r' in data['flags']:
-                            flags.append('registered')
-                        if 'o' in data['flags']:
-                            flags.append('autoop')
-                        flags = ' '.join(flags)
-                        output.append('%s: %s' % (user, flags))
-                    return '\n'.join(output)
-            except Exception, e:
-                pass
+        # list users
+        try:
+            if self._reListUsers.search(command):
+                output = []
+                passwd = self.authlib.get_passwd()
+                for luser, data in passwd.items():
+                    flags = []
+                    if 'a' in data['flags']:
+                        flags.append('admin')
+                    if 'r' in data['flags']:
+                        flags.append('registered')
+                    if 'o' in data['flags']:
+                        flags.append('autoop')
+                    if self.users.has_key(luser):
+                        flags.append('loggedin')
+                    flags = ' '.join(flags)
+                    output.append('%s: %s' % (luser, flags))
+                return '\n'.join(output)
+        except:
+            pass
 
-            try:
-                chuser, newflags = self.reChFlag.search(command).groups()
-                print 'ok, chflagging user=%s, flags=%s' % (chuser, newflags)
-            except Exception, e:
-                print 'error in chflags: %s' % e
-                        
+        # update user flags
+        try:
+            chuser, newflags = self._reChFlag.search(command).groups()
+            return self.changeFlags(chuser, newflags)
+        except:
+            pass
+
+    def changeFlags(self, user, chflags):
+        curflags = self.authlib.get_flags(user)
+        curflags = set(curflags)
+        args = re.split(r'([+-])', chflags)[1:]
+        for i in range(0, len(args), 2):
+            action, flags = args[i], args[i+1]
+            flags = set(flags)
+            if action == '-':
+                for flag in flags:
+                    curflags.discard(flag)
+            elif action == '+':
+                for flag in flags:
+                    curflags.add(flag)
+        curflags = ''.join(curflags)
+        self.authlib.change_flags(user, curflags)
+        if self.users.has_key(user):
+            self.users[user].flags = curflags
+        return 'flags for %s changed to %s' % (user, curflags)
 
     def registerUser(self, user, passwd):
         if not self.bot.config.admin.allowRegistration:

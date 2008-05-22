@@ -1,3 +1,4 @@
+import sys
 from madcow import Madcow, Request
 import os
 from include.colorlib import ColorLib
@@ -11,8 +12,10 @@ class ConsoleProtocol(Madcow):
         'quit - quit madcow',
         'history - show history',
         'nick <nick> - change your nick',
+        'clear - clear screen'
     ]
     _prompt = '\x1b[1;31m>>>\x1b[0m '
+    _clear = '\x1b[H\x1b[J'
 
     def __init__(self, config=None, dir=None):
         self.colorlib = ColorLib(type='ansi')
@@ -35,6 +38,10 @@ class ConsoleProtocol(Madcow):
 
             if input.lower() == 'history':
                 print 'history: %s' % repr(self.shell.history)
+
+            if input.lower() == 'clear':
+                sys.stdout.write(self._clear)
+                continue
 
             if len(input) > 0:
                 req = Request(message=input)

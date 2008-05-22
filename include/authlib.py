@@ -56,6 +56,20 @@ class AuthLib(Base):
         finally:
             fo.close()
 
+    def change_flags(self, user, flags):
+        passwd = self.get_passwd()
+        if not passwd.has_key(user):
+            raise UserNotFound
+        passwd[user]['flags'] = flags
+        self.write_passwd(passwd)
+
+    def change_password(self, user, plain):
+        passwd = self.get_passwd()
+        if not passwd.has_key(user):
+            raise UserNotFound
+        passwd[user]['password'] = self.encrypt(plain)
+        self.write_passwd(passwd)
+
     def add_user(self, user, plain, flags=''):
         if ':' in user:
             raise IllegalUserName, 'usernames cannot have : in them'
