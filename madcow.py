@@ -108,7 +108,7 @@ class Admin(Base):
             return
         if not req.private:
             return
-        nick = req.nick
+        nick = req.nick.lower()
 
         # register
         try:
