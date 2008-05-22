@@ -111,6 +111,8 @@ class AuthLib(Base):
         return sha.new(salt + plain).digest(), salt
 
     def check(self, encrypted, plain):
+        if encrypted == '*':
+            return False
         salted = b64decode(encrypted)
         salt, digest = salted[:4], salted[4:]
         return digest == self.get_digest(plain, salt)[0]
