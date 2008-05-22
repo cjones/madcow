@@ -107,6 +107,8 @@ class Admin(Base):
             command = self._reAdminCommand.search(req.message).group(1)
         except:
             return
+        if not req.private:
+            return
         nick = req.nick
 
         # register
