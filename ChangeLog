@@ -1,15 +1,32 @@
-1.1.7: Tue May 20 00:06:35 PDT 2008
-    * parse utf8-quoted names in email_gateway properly
-    * add dedicated user agent library
-    * code cleanup on modules
+1.1.8: Wed May 21 23:40:39 PDT 2008
+    * new module to rate movie (imdb & rottentomatoes)
+    * added delicious module (posts urls to a delicious account)
+    * updated CLI to be more shell-like (history)
+    * add commands to CLI - history, nick, clear, reload
+    * add auto-op functionality (IRC ONLY)
+    * reworked admin interface. msg bot with "admin help" for commands
+    * if 'NOBOT' appears in message, madcow will ignore it
     * can reload madcow config with SIGHUP (not supported on all systems)
     * always encode output to the designated encoding (utf8, latin1, ascii)
-    * help messages are alphabetized
-    * typing "reload" from the CLI will reload modules
-    * do not fork when run from cli
     * update memebot to use mysql or sqlite (specificed in ini)
     * fix babel fish translation modules
-    * new module to rate movie (imdb & rottentomatoes)
+    * lyrics module removes ringtone spam
+    * bot now creates a default config when run for the first time
+    * default config now has spammy/offensive modules disabled by default
+    * stockquote module handles no-change responses correctly
+    * fixed horrible google.py bug that caused much spam
+    * parse utf8-quoted names in email_gateway properly
+    * help messages are alphabetized
+    * do not fork when run from cli
+    * add dedicated user agent library
+    * rewrite authlib
+    * refactor much code
+    * wrote a test suite to make checking module freshness easier
+    * a fix for SIGHUP handler on systems that don't set SA_RESTART
+    * FIXED problem with modules not being disabled properly
+
+1.1.7: Tue May 20 00:06:35 PDT 2008
+    * not released
 
 1.1.6: Mon Apr 28 19:46:48 PDT 2008
     * major overhaul to threading system/module API
