@@ -24,6 +24,7 @@ __all__ = ['Request', 'User', 'Admin', 'ServiceHandler', 'PeriodicEvents',
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
 _loglevel = log.WARN
 _charset = 'latin1'
+_pidfile = 'madcow.pid'
 
 class FileNotFound(Error):
     """Raised when a file is not found"""
@@ -727,6 +728,7 @@ def main():
     dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(dir)
     default_config = os.path.join(dir, 'madcow.ini')
+    default_pidfile = os.path.join(dir, _pidfile)
 
     # parse commandline options
     parser = OptionParser(version=__version__)
@@ -742,6 +744,8 @@ def main():
             const=log.INFO, help='increase logging output')
     parser.add_option('-q', '--quiet', dest='loglevel', action='store_const',
             const=log.WARN, help='only show errors')
+    parser.add_option('-P', '--pidfile', default=default_pidfile,
+            metavar='<file>', help='default: %default')
     opts, args = parser.parse_args()
 
     # read config file
@@ -802,11 +806,26 @@ def main():
     # daemonize if requested
     if config.main.detach or opts.detach:
         detach()
+    
+    # write pidfile
+    if os.path.exists(opts.pidfile):
+        log.warn('removing stale pidfile: %s' % opts.pidfile)
+        os.remove(opts.pidfile)
+    try:
+        fo = open(opts.pidfile, 'wb')
+        try:
+            fo.write(str(os.getpid()))
+        finally:
+            fo.close()
+    except Exception, e:
+        log.warn('filed to write %s: %s' % (opts.pidfile, e))
 
     # run bot & shut down threads when done
     try:
         ProtocolHandler(config=config, dir=dir).start()
     finally:
+        if os.path.exists(opts.pidfile):
+            os.remove(opts.pidfile)
         for thread in threading.enumerate():
             thread._Thread__stop()
 

@@ -1,0 +1,60 @@
+#!/bin/sh
+
+pidfile=madcow.pid
+
+getpid() {
+    if [ -f $pidfile ]; then
+        pid=`cat $pidfile`
+        echo $pid
+    else
+        echo "$pidfile not found" >&2
+        exit 1
+    fi
+}
+
+stop_madcow() {
+    pid=`getpid` || exit 1
+    kill -9 $pid
+    rm -f $pidfile
+    echo "madcow stopped"
+}
+
+reload_madcow() {
+    pid=`getpid` || exit 1
+    kill -HUP $pid
+    echo "madcow reloaded"
+}
+
+start_madcow() {
+    if [ -f $pidfile ]; then
+        pid=`getpid`
+        echo "already running? (pid=$pid)" >&2
+        exit 1
+    fi
+    ./madcow.py -d -p irc
+    echo "madcow started"
+}
+
+restart_madcow() {
+    stop_madcow || exit 1
+    sleep 1
+    start_madcow
+}
+
+case "$*" in
+    "stop")
+    stop_madcow
+    ;;
+    "start")
+    start_madcow
+    ;;
+    "restart")
+    restart_madcow
+    ;;
+    "reload")
+    reload_madcow
+    ;;
+    *)
+    echo "$0 [stop|start|restart|reload]" >&2
+esac
+
