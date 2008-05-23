@@ -47,7 +47,7 @@ tests = {
     },
     'memebot': {
         'request': 'http://google.com/',
-        'result': re.compile(r'first posted by cjones'),
+        'result': re.compile(r'first posted by j0no'),
     },
     'woot': {
         'request': 'woot',
