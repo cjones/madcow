@@ -47,7 +47,7 @@ tests = {
     },
     'memebot': {
         'request': 'http://google.com/',
-        'result': re.compile(r'first posted by cj_'),
+        'result': re.compile(r'first posted by cjones'),
     },
     'woot': {
         'request': 'woot',
@@ -71,7 +71,7 @@ tests = {
     },
     'factoids': [
         {
-            'request': 'no, madcow, foo is bar',
+            'request': 'foo is bar',
             'result': 'OK, test',
         },
         {
@@ -212,6 +212,7 @@ class Main(Module):
                     req.sendTo = 'test'
                     req.addressed = True
                     req.colorize = False
+                    req.correction = True
                     try:
                         args = obj.pattern.search(req.message).groups()
                     except:
