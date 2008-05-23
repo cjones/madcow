@@ -83,15 +83,26 @@ class Main(Module):
         if engine == 'sqlite':
             uri += os.path.join(madcow.dir, 'data/db-%s-memes' % madcow.ns)
         else:
-            uri += '%s:%s@%s:%s/%s' % (config.db_user, config.db_pass,
-                    config.db_host, config.db_port, config.db_name)
-        sqlhub.processConnection = connectionForURI(uri)
+            user = config.db_user
+            if len(config.db_pass):
+                user += ':' + config.db_pass
+            host = config.db_host
+            if not len(host):
+                host = 'localhost'
+            if len(config.db_port):
+                host += ':' + config.db_port
+            uri += '%s@%s/%s' % (user, host, config.db_name)
+        try:
+            sqlhub.processConnection = connectionForURI(uri)
+        except Exception, e:
+            log.warn('invalid uri: %s (%s)' % (uri, e))
+            self.enabled = False
+            return
 
         url.createTable(ifNotExists=True)
         author.createTable(ifNotExists=True)
         channel.createTable(ifNotExists=True)
         comments.createTable(ifNotExists=True)
-
 
     def cleanURL(self, url):
         # stolen from urlparse.urlsplit(), which doesn't handle

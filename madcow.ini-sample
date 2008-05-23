@@ -176,8 +176,8 @@ db_engine=sqlite
 db_name=
 db_user=
 db_pass=
-db_host=localhost
-db_port=3306
+db_host=
+db_port=
 
 ; set this up to post urls to delicious
 [delicious]
