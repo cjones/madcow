@@ -13,7 +13,7 @@ tar cfjv ${release}.tar.bz2 $release
 
 # upload to anon ftp
 #
-rsync -vPazue ssh ${release}.tar.bz2 cj__@frs.sourceforge.net/uploads/
+rsync -vPazue ssh ${release}.tar.bz2 cj__@frs.sourceforge.net:uploads/
 
 # activate release on SF.net:
 echo "http://sourceforge.net/project/admin/editpackages.php?group_id=199970"
