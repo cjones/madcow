@@ -60,9 +60,10 @@ class ChatLog(Base):
 class Main(Module):
   priority = 0
   terminate = False
+  allow_threading = False
   def __init__(self, madcow=None):
     self.enabled = True       # True/False - enabled?
-    self.pattern = re.compile('^(.*)$') # regular expression that needs to be matched
+    self.pattern = Module._any
     self.require_addressing = False     # True/False - require addressing?
     
     self.log = ChatLog()

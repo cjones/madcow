@@ -55,6 +55,7 @@ except:
 
 class Main(Module):
     pattern = Module._any
+    allow_threading = False
     priority = 10
     terminate = False
     require_addressing = False

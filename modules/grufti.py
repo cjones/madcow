@@ -10,6 +10,7 @@ from include.utils import Module, slurp
 
 class Main(Module):
     pattern = Module._any
+    allow_threading = False
     priority = 100
     terminate = False
     require_addressing = False

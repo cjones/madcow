@@ -13,6 +13,7 @@ class Main(Module):
     pattern = Module._any
     priority = 0
     terminate = False
+    allow_threading = False
     require_addressing = False
     help = 'seen <nick> - query bot about last time someone was seen speaking'
     seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)

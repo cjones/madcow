@@ -10,6 +10,7 @@ from include.utils import Module
 class Main(Module):
     pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
     require_addressing = True
+    allow_threading = False
     help = 'set <location|email> <nick> <val> - set db attribs'
     _allowed = ['location', 'email', 'karma']
 

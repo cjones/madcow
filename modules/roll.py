@@ -13,6 +13,7 @@ class Main(Module):
     _allow = '-?(?:[0-9.]+j?|pi|e)'
     _regex = '^\s*roll\s+(%s?)d(%s)\s*$' % (_allow, _allow)
     pattern = re.compile(_regex, re.I)
+    allow_threading = False
     require_addressing = True
     help = 'roll [<numdice>d<sides>] - roll die of the specified size'
     _color_map = {'red': 5, 'yellow': 7, 'green': 3}

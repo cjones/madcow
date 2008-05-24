@@ -12,6 +12,7 @@ import os
 class Main(Module):
     pattern = re.compile('^\s*yourmom\s*$')
     require_addressing = True
+    allow_threading = False
     help = 'yourmom - random figlet of the ultimate insult'
 
     def __init__(self, madcow=None):

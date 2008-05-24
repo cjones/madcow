@@ -621,10 +621,11 @@ class Madcow(Base):
             self.signal_handler()
 
         for mod_name, mod in self.modules.by_priority():
+            log.debug('trying: %s' % mod_name)
+
             if mod.require_addressing and not req.addressed:
                 continue
 
-            log.debug('trying: %s' % mod_name) # XXX
             try:
                 args = mod.pattern.search(req.message).groups()
             except:
@@ -632,13 +633,15 @@ class Madcow(Base):
 
             req.matched = True # module can set this to false to avoid term
 
-            # make new dict explictly for thread safety
+            # make new dict explictly for thread safety. XXX hack
             kwargs = dict(req.__dict__.items() + [('args', args),
                 ('module', mod), ('req', req)])
 
             if self.config.main.module == 'cli' or not mod.allow_threading:
+                log.debug('running non-threaded code for module %s' % mod_name)
                 self.processThread(**kwargs)
             else:
+                log.debug('launching thread for module: %s' % mod_name)
                 self.launchThread(self.processThread, kwargs=kwargs)
 
             if mod.terminate and req.matched:
