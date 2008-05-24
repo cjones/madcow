@@ -1,4 +1,5 @@
-1.1.9: TBD
+1.1.9: Fri May 23 22:52:02 PDT 2008
+    * clarify auto-op/admin process in README and add ownership setting to ini
     * add module execution priority and termination
     * update test suite
     * add rc script to include/ for starting/stopping madcow

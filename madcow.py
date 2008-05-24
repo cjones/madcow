@@ -15,7 +15,7 @@ import select
 from signal import signal, SIGHUP
 import shutil
 
-__version__ = '1.1.8'
+__version__ = '1.1.9'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
