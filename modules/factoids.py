@@ -11,6 +11,7 @@ from include.utils import Module
 class Main(Module):
     pattern = Module._any
     require_addressing = False
+    allow_threading = False
     priority = 99
     qmark = re.compile('\s*\?+\s*$')
     isare = re.compile('^(.+?)\s+(is|are)\s+(.+)\s*$', re.I)

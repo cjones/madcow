@@ -78,6 +78,7 @@ class Module(Base):
     help = None
     priority = 50
     terminate = True
+    allow_threading = True
 
     def __init__(self, madcow=None):
         self.madcow = madcow

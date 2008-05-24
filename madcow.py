@@ -292,7 +292,8 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
             return
 
         # see if we can reverse lookup sender
-        db = self.server.madcow.modules['learn'].get_db('email')
+        modules = self.server.madcow.modules.dict()
+        db = modules['learn'].get_db('email')
         for user, email in db.items():
             if sent_from == email:
                 sent_from = user
@@ -635,7 +636,7 @@ class Madcow(Base):
             kwargs = dict(req.__dict__.items() + [('args', args),
                 ('module', mod), ('req', req)])
 
-            if self.config.main.module == 'cli':
+            if self.config.main.module == 'cli' or not mod.allow_threading:
                 self.processThread(**kwargs)
             else:
                 self.launchThread(self.processThread, kwargs=kwargs)

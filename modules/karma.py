@@ -71,6 +71,7 @@ class Main(Module):
     pattern = Module._any
     require_addressing = False
     help = "<nick>[++/--] - adjust someone's karma"
+    allow_threading = False
 
     def __init__(self, madcow=None):
         self.karma = Karma(madcow)
