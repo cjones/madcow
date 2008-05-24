@@ -25,6 +25,8 @@ _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
 _loglevel = log.WARN
 _charset = 'latin1'
 _pidfile = 'madcow.pid'
+_config = 'madcow.ini'
+_config_warning = 'created config %s - you should edit this and rerun'
 
 class FileNotFound(Error):
     """Raised when a file is not found"""
@@ -144,7 +146,7 @@ class Admin(Base):
             del self.users[nick]
             return 'You are now logged out.'
 
-        # functions pas here require admin
+        # functions past here require admin
         if not user.isAdmin():
             return
 
@@ -221,6 +223,10 @@ class Admin(Base):
         flags = self.bot.config.admin.defaultFlags
         if not flags:
             flags = 'r'
+        flags = set(flags)
+        if user.lower() == self.bot.config.main.owner.lower():
+            flags.add('a')
+        flags = ''.join(flags)
         self.authlib.add_user(user, passwd, flags)
         return "You are now registered, try logging in: login <pass>"
 
@@ -750,7 +756,7 @@ def main():
     # where we are being run from
     dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(dir)
-    default_config = os.path.join(dir, 'madcow.ini')
+    default_config = os.path.join(dir, _config)
     default_pidfile = os.path.join(dir, _pidfile)
 
     # parse commandline options
@@ -775,6 +781,7 @@ def main():
     if not os.path.exists(opts.config):
         if opts.config == default_config:
             shutil.copyfile(default_config + '-sample', opts.config)
+            print >> sys.stderr, _config_warning % _config
         else:
             print >> sys.stderr, 'config not found: %s' % opts.config
             return 1

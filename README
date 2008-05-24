@@ -22,6 +22,26 @@ BASIC USAGE
                of them became extinct in the CretaceousTertiary extinction 
                event.
 
+    Note: by default, madcow runs as a commandline tool. Change the protocol
+    to irc in madcow.ini (and edit the connection options in [irc]) to
+    connect to IRC.
+
+
+AUTO-OPS / ADMIN
+
+    In madcow.ini, set owner name to your IRC nick. Message bot with
+    'admin register <password>'. This will register you as an admin.
+    Other users may now register, and you can give them auto-op flag with
+    /msg madcow admin chflag <user> +o. You can also set the default flags
+    in madcow.ini to give any user that registers auto-ops.
+
+    If you wish to batch-add users for auto-op access without them registering,
+    edit data/db-madcow-passwd and add a line for each user:
+
+    nick:*:o
+
+    Note they will not be able to login in this case.
+
 
 REQUIREMENTS
 

@@ -36,6 +36,10 @@ logfile=madcow.log      ; leave blank for no file-level logging
 ; modules (such as weather, wikipedia, etc) that retrieve from the web make
 ; use of unicode characters.
 charset=latin1
+;
+; nickname of the bot owner. when you first register with the bot, if the
+; nick matches, you will be granted admin privileges.
+owner=nick
 
 [modules]
 ; if you wish to run multiple bots from the same directory you should
