@@ -12,6 +12,10 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __all__ = ['Karma', 'Main']
 
+class KarmaResponse(Base):
+    pass
+
+
 class Karma(Base):
     """Infobot style karma"""
     _adjust_pattern = re.compile(r'^\s*(.*?)[+-]([+-]+)\s*$')
@@ -22,12 +26,15 @@ class Karma(Base):
         self.learn = Learn(madcow)
 
     def process(self, nick, input):
+        kr = KarmaResponse(reply=None, matched=False)
+
         # see if someone is trying to adjust karma
         try:
             target, adjustment = Karma._adjust_pattern.search(input).groups()
             # don't let people adjust their own karma ;p
             if nick.lower() != target.lower():
                 self.adjust(nick=target, adjustment=adjustment)
+            kr.matched = True
         except:
             pass
 
@@ -35,9 +42,12 @@ class Karma(Base):
         try:
             target = Karma._query_pattern.search(input).group(1)
             karma = self.query(nick=target)
-            return "%s: %s's karma is %s" % (nick, target, karma)
+            kr.matched = True
+            kr.reply = "%s: %s's karma is %s" % (nick, target, karma)
         except:
             pass
+
+        return kr
 
     def set(self, nick, karma):
         self.learn.set(Karma._dbname, nick.lower(), str(karma))
@@ -58,7 +68,7 @@ class Karma(Base):
 
 class Main(Module):
     """This object is autoloaded by the bot"""
-    pattern = re.compile(r'^(.+)$', re.DOTALL)
+    pattern = Module._any
     require_addressing = False
     help = "<nick>[++/--] - adjust someone's karma"
 
@@ -69,7 +79,9 @@ class Main(Module):
         """This function should return a response to the query or None."""
         input = args[0]
         try:
-            return self.karma.process(nick, input)
+            kr = self.karma.process(nick, input)
+            kwargs['req'].matched = kr.matched
+            return kr.reply
         except Exception, e:
             return '%s: problem with command: %s' % (nick, e)
 

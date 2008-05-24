@@ -54,7 +54,9 @@ except:
 
 
 class Main(Module):
-    pattern = re.compile('^(.+)$')
+    pattern = Module._any
+    priority = 10
+    terminate = False
     require_addressing = False
     help = 'score [name,range] - get memescore, empty for top10'
     matchURL = re.compile('(http://\S+)', re.I)

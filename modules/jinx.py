@@ -11,7 +11,7 @@
 import sys
 import re
 import time
-from include.utils import Base
+from include.utils import Base, Module
 
 class ChatLine(Base):
   """Records a single line of IRC chat"""
@@ -57,7 +57,9 @@ class ChatLog(Base):
     return s
 
 # class for this module
-class Main(Base):
+class Main(Module):
+  priority = 0
+  terminate = False
   def __init__(self, madcow=None):
     self.enabled = True       # True/False - enabled?
     self.pattern = re.compile('^(.*)$') # regular expression that needs to be matched

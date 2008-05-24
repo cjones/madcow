@@ -39,7 +39,9 @@ class Delicious(Base):
 
 
 class Main(Module):
-    pattern = re.compile(r'^(.+)$')
+    priority = 11
+    terminate = False
+    pattern = Module._any
     require_addressing = False
     url = re.compile(r'https?://\S+', re.I)
     error = "I could not post that URL to delicious, maybe it's DOWN"

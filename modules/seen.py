@@ -10,7 +10,9 @@ import os
 from include.utils import Module
 
 class Main(Module):
-    pattern = re.compile('^(.+)$')
+    pattern = Module._any
+    priority = 0
+    terminate = False
     require_addressing = False
     help = 'seen <nick> - query bot about last time someone was seen speaking'
     seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)

@@ -71,10 +71,13 @@ class Base(object):
 
 
 class Module(Base):
+    _any = re.compile(r'^(.+)$')
     pattern = re.compile('')
     enabled = True
     require_addressing = True
     help = None
+    priority = 50
+    terminate = True
 
     def __init__(self, madcow=None):
         self.madcow = madcow

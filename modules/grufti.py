@@ -9,7 +9,9 @@ import random
 from include.utils import Module, slurp
 
 class Main(Module):
-    pattern = re.compile('^(.+)$')
+    pattern = Module._any
+    priority = 100
+    terminate = False
     require_addressing = False
     reMatchBlocks = re.compile('%match\s+(.*?)%end', re.DOTALL)
     reCommaDelim = re.compile('\s*,\s*')

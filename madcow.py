@@ -422,6 +422,12 @@ class Modules(Base):
             self.modules[mod_name]['obj'] = obj
             log.info('loaded module: %s' % mod_name)
 
+    def by_priority(self):
+        modules = self.dict()
+        modules = sorted(modules.items(), lambda x, y: cmp(x[1].priority,
+            y[1].priority))
+        return modules
+
     def dict(self):
         modules = {}
         for mod_name, mod_data in self.modules.items():
@@ -613,14 +619,17 @@ class Madcow(Base):
         if self.config.main.module == 'cli' and req.message == 'reload':
             self.signal_handler()
 
-        for mod_name, mod in self.modules:
+        for mod_name, mod in self.modules.by_priority():
             if mod.require_addressing and not req.addressed:
                 continue
 
+            log.debug('trying: %s' % mod_name) # XXX
             try:
                 args = mod.pattern.search(req.message).groups()
             except:
                 continue
+
+            req.matched = True # module can set this to false to avoid term
 
             # make new dict explictly for thread safety
             kwargs = dict(req.__dict__.items() + [('args', args),
@@ -630,6 +639,10 @@ class Madcow(Base):
                 self.processThread(**kwargs)
             else:
                 self.launchThread(self.processThread, kwargs=kwargs)
+
+            if mod.terminate and req.matched:
+                log.debug('terminating because %s matched' % mod_name)
+                break
 
     def processThread(self, **kwargs):
         try:

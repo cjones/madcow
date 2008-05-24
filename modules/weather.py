@@ -9,6 +9,7 @@ from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
 from include import rssparser
 from learn import Main as Learn
+import sys
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'

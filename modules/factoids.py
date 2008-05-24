@@ -9,8 +9,9 @@ import random
 from include.utils import Module
 
 class Main(Module):
-    pattern = re.compile('^(.+)$')
+    pattern = Module._any
     require_addressing = False
+    priority = 99
     qmark = re.compile('\s*\?+\s*$')
     isare = re.compile('^(.+?)\s+(is|are)\s+(.+)\s*$', re.I)
     query = re.compile('^(?:who|what|where|when|why|how|wtf)', re.I)
@@ -64,6 +65,14 @@ class Main(Module):
             return True
 
     def response(self, nick, args, **kwargs):
+        reply = self.get_response(nick, args, **kwargs)
+
+        # only terminate if we didn't have a response
+        if reply is None or not len(reply):
+            kwargs['req'].matched = False
+        return reply
+
+    def get_response(self, nick, args, **kwargs):
         addressed = kwargs['addressed']
         correction = kwargs['correction']
         message = args[0]
