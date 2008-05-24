@@ -42,6 +42,7 @@ class Main(Module):
     pattern = re.compile(r'^(.+)$')
     require_addressing = False
     url = re.compile(r'https?://\S+', re.I)
+    error = "I could not post that URL to delicious, maybe it's DOWN"
 
     def __init__(self, madcow=None):
         try:
@@ -61,5 +62,6 @@ class Main(Module):
                 self.delicious.post(url, tags=['madcow', nick])
         except Exception, e:
             print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-            return '%s: problem with query: %s' % (nick, e)
+            return "%s: %s" % (nick, self.error)
+
 
