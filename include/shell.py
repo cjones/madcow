@@ -96,6 +96,10 @@ class Shell:
                 continue
             elif buf == self.ansi[:len(buf)]:
                 continue
+            elif buf.startswith(self.ansi):
+                buf = ''
+                post = 0
+                continue
             pos = 0
             fo.write(buf)
             line += buf

@@ -107,8 +107,6 @@ class Admin(Base):
             command = self._reAdminCommand.search(req.message).group(1)
         except:
             return
-        if not req.private:
-            return
         nick = req.nick.lower()
 
         # register
@@ -351,7 +349,7 @@ class PeriodicEvents(Base):
 class Modules(Base):
     _entry = 'Main'
     _pyext = re.compile(r'\.py$')
-    _ignore_mods = ('__init__',)
+    _ignore_mods = ('__init__', 'template')
 
     def __init__(self, madcow, subdir, entry=_entry):
         self.madcow = madcow
@@ -423,6 +421,15 @@ class Modules(Base):
             self.modules[mod_name]['obj'] = obj
             log.info('loaded module: %s' % mod_name)
 
+        # if debug level set, show execution order/details of modules
+        if log.root.level <= log.DEBUG:
+            for mod_name, obj in self.by_priority():
+                try:
+                    log.debug('%-13s: pri=%3s thread=%-5s stop=%s' % (mod_name,
+                        obj.priority, obj.allow_threading, obj.terminate))
+                except:
+                    pass
+
     def by_priority(self):
         modules = self.dict()
         modules = sorted(modules.items(), lambda x, y: cmp(x[1].priority,
@@ -449,7 +456,6 @@ class Madcow(Base):
         self.dir = dir
 
         self.ns = self.config.modules.dbnamespace
-        self.ignore_modules = [ '__init__', 'template' ]
         self.outputLock = threading.RLock()
 
         if self.config.main.ignorelist is not None:

@@ -1,3 +1,15 @@
+1.1.9: TBD
+    * add module execution priority and termination
+    * update test suite
+    * add rc script to include/ for starting/stopping madcow
+    * improve URL cleaning algorithm for memebot
+    * madcow now creates a pidfile when launched
+    * FIX bug with gateway responses that caused it to crash
+    * increase --debug output to show module exec and raw SQL
+    * improve mysql options to allow default port/host
+    * document and improve the module template
+    * make friendly error when delicious is down
+
 1.1.8: Wed May 21 23:40:39 PDT 2008
     * new module to rate movie (imdb & rottentomatoes)
     * added delicious module (posts urls to a delicious account)
@@ -206,4 +218,3 @@
     * Get a rid of all the CVS Id tags
     * Clean up jesus module to not have footnotes
     * Stock module can now do mutual funds
-
