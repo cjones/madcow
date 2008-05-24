@@ -11,6 +11,7 @@ from sqlobject import *
 import random
 from include.throttle import Throttle
 from include.utils import Base, Module
+import logging as log
 
 try:
     class url(SQLObject):
@@ -101,6 +102,13 @@ class Main(Module):
             log.warn('invalid uri: %s (%s)' % (uri, e))
             self.enabled = False
             return
+
+        # show raw SQL being dispatched if loglevel is debug
+        if log.root.level <= log.DEBUG:
+            url._connection.debug = True
+            author._connection.debug = True
+            channel._connection.debug = True
+            comments._connection.debug = True
 
         url.createTable(ifNotExists=True)
         author.createTable(ifNotExists=True)
