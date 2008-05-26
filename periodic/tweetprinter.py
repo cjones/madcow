@@ -20,6 +20,8 @@ class Main(Base):
     self.enabled = madcow.config.twitter.enabled
     self.frequency = madcow.config.twitter.updatefreq
     self.output = madcow.config.twitter.channel
+    self.api = twitter.Api()
+    self.api.SetCache(None) # this fills up /tmp :(
     self.__updatelast()
   
   def __updatelast(self):
@@ -32,7 +34,7 @@ class Main(Base):
   def process(self):
     """This is called by madcow, should return a string or None"""
     try:
-      tweets = twitter.Api().GetFriendsTimeline(user=self.madcow.config.twitter.username, since=self.__get_update_str())
+      tweets = self.api.GetFriendsTimeline(user=self.madcow.config.twitter.username, since=self.__get_update_str())
     except Exception,e:
       print str(e)
       return None
