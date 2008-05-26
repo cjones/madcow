@@ -3,7 +3,7 @@
 """Module stub"""
 
 from include.utils import Module
-import sys
+import logging as log
 import re
 #from include.useragent import geturl   # mimic browser
 #from include.utils import stripHTML    # strip HTML/unescape entities
@@ -15,7 +15,11 @@ __copyright__ = 'Copyright (C) 2008'
 __all__ = []
 
 class Main(Module):
-    pattern = re.compile(r'^\s*keyword\s+(\S+)\s*', re.I)
+    pattern = None
+    # example regexes
+    #pattern = re.compile(r'^\s*trigger\s*$, re.I)               # no params
+    #pattern = re.compile(r'^\s*trigger\s+(\S+)\s*', re.I)       # with params
+    #pattern = re.compile(r'^\s*trigger(?:\s+(.+?))?\s*$', re.I) # opt params
     #pattern = Module._any      # this will match anything (read NOTE below!)
 
     # DEFAULTS
@@ -52,9 +56,10 @@ class Main(Module):
         try:
             return 'not impemented'
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-            # return a friendlier error message
-            return '%s: problem with query: %s' % (nick, e)
+            error = 'error in %s: %s' % (self.__module__, e)
+            log.warn(error)
+            log.exception(e)
+            return '%s: %s' % (nick, error)
 
 
 def main():
@@ -66,5 +71,5 @@ def main():
         print 'no match: %s' % e
 
 if __name__ == '__main__':
-    import os
+    import os, sys
     sys.exit(main())
