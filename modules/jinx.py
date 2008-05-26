@@ -8,10 +8,10 @@
 
 # Handle coke allocation
 
-import sys
 import re
 import time
 from include.utils import Base, Module
+import logging as log
 
 class ChatLine(Base):
   """Records a single line of IRC chat"""
@@ -70,12 +70,16 @@ class Main(Module):
     
   # function to generate a response
   def response(self, nick, args, **kwargs):
-    line = args[0]
-    
-    cl = ChatLine(nick, line)
-    self.log.add(cl)
-    
-    oldline = self.log.getMatchingLine(cl)
-    if oldline and oldline.nick != nick:
-      return "Jinx! %s owes %s a coke!" % (nick, oldline.nick)
+    try:
+      line = args[0]
+      
+      cl = ChatLine(nick, line)
+      self.log.add(cl)
+      
+      oldline = self.log.getMatchingLine(cl)
+      if oldline and oldline.nick != nick:
+        return "Jinx! %s owes %s a coke!" % (nick, oldline.nick)
+    except Exception, e:
+      log.warn('error in %s: %s' % (self.__module__, e))
+      log.exception(e)
     

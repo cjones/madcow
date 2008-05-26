@@ -2,11 +2,11 @@
 
 """Implement Grufti trigger/response spam"""
 
-import sys
 import re
 import os
 import random
 from include.utils import Module, slurp
+import logging as log
 
 class Main(Module):
     pattern = Module._any
@@ -46,7 +46,8 @@ class Main(Module):
                 self.data.append((matches, responses))
 
         except Exception, e:
-            print >> sys.stderr, 'aborting load of grufti: %s' % e
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             self.enabled = False
 
     def parseTokens(self, response):
@@ -65,6 +66,6 @@ class Main(Module):
                         return self.parseTokens(random.choice(responses))
 
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
 

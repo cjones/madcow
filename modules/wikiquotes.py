@@ -6,7 +6,7 @@ from include.wiki import Wiki
 from include.utils import stripHTML, Module
 import re
 import random
-import sys
+import logging as log
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
 _base_url = 'http://en.wikiquote.org/'
@@ -73,17 +73,11 @@ class Main(Module):
                 max = _max
             return self.get_random_quote(author=author, max=max)
         except Exception, e:
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return '%s: problem with query: %s' % (nick, e)
 
 
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
-
 if __name__ == '__main__':
-    import os
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

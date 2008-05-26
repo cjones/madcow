@@ -2,10 +2,10 @@
 
 """Look up a definition in the Urban Dictionary"""
 
-import sys
 import re
 import SOAPpy
 from include.utils import Module
+import logging as log
 
 class Main(Module):
     pattern = re.compile('^\s*urban\s+(.+)')
@@ -43,18 +43,11 @@ class Main(Module):
             return response.encode("utf-8")
 
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return "%s: Serious problems: %s" % (nick, e)
 
 
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
-
 if __name__ == '__main__':
-    import os
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

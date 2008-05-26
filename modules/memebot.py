@@ -2,7 +2,6 @@
 
 """Watch URLs in channel, punish people for living under a rock"""
 
-import sys
 import re
 import os
 import urlparse
@@ -284,5 +283,6 @@ class Main(Module):
             me.pointsNew = me.pointsNew + 1
 
         except Exception, e:
-            print >> sys.stderr, 'error: %s' % e
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
 

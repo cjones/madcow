@@ -2,12 +2,12 @@
 
 """Keep track of what people last said"""
 
-import sys
 import re
 import anydbm
 import time
 import os
 from include.utils import Module
+import logging as log
 
 class Main(Module):
     pattern = Module._any
@@ -77,6 +77,6 @@ class Main(Module):
                     user, last, channel, message)
 
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
 

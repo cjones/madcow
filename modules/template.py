@@ -29,6 +29,7 @@ class Main(Module):
     #priority = 50              # what order to run in (lower=first)
     #terminate = True           # whether to stop if this modules matches
     #allow_threading = True     # whether to launch a thread for this module
+    #error = None               # error that's returned to user, if any
 
     # NOTE: if you use Module._any, you should NOT terminate, or set this
     # as a high enough priority to be called after other modules. currently
@@ -56,20 +57,11 @@ class Main(Module):
         try:
             return 'not impemented'
         except Exception, e:
-            error = 'error in %s: %s' % (self.__module__, e)
-            log.warn(error)
+            log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
-            return '%s: %s' % (nick, error)
+            return '%s: %s' % (nick, self.error)
 
-
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
 
 if __name__ == '__main__':
-    import os, sys
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

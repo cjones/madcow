@@ -6,6 +6,7 @@ import re
 from learn import Main as Learn
 from include.utils import Module
 from smtplib import SMTP
+import logging as log
 
 class Main(Module):
     pattern = re.compile(r'^\s*summons?\s+(\S+)(?:\s+(.*?))?\s*$')
@@ -36,5 +37,7 @@ class Main(Module):
             return "%s: summoned %s" % (nick, sendto)
 
         except Exception, e:
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return "%s: I couldn't make that summon: %s" % (nick, e)
 

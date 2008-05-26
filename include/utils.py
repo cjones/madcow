@@ -6,6 +6,7 @@ import re
 import urllib, urllib2, cookielib
 import sys
 from time import time as unix_time
+import os
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -79,6 +80,7 @@ class Module(Base):
     priority = 50
     terminate = True
     allow_threading = True
+    error = None
 
     def __init__(self, madcow=None):
         self.madcow = madcow
@@ -217,3 +219,12 @@ def slurp(filename):
     except Exception, e:
         print >> sys.stderr, "couldn't read %s: %s" % (filename, e)
 
+def test_module(mod):
+    main = mod()
+    try:
+        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
+    except:
+        print 'no match, double-check regex'
+        return 1
+    print main.response(nick=os.environ['USER'], args=args)
+    return 0

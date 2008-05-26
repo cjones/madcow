@@ -2,10 +2,10 @@
 
 """Module to handle learning"""
 
-import sys
 import re
 import anydbm
 from include.utils import Module
+import logging as log
 
 class Main(Module):
     pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
@@ -49,9 +49,14 @@ class Main(Module):
         dbm.close()
 
     def response(self, nick, args, **kwargs):
-        db, key, val = args
-        if db not in self._allowed:
-            return '%s: unknown database' % nick
-        self.set(db, key, val)
-        return '%s: set %s\'s %s to %s' % (nick, key, db, val)
+        try:
+            db, key, val = args
+            if db not in self._allowed:
+                return '%s: unknown database' % nick
+            self.set(db, key, val)
+            return '%s: set %s\'s %s to %s' % (nick, key, db, val)
+        except Exception, e:
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
+            return "%s: couldn't set that" % nick
 

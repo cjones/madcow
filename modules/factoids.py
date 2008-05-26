@@ -2,11 +2,11 @@
 
 """This implements the infobot factoid database work-a-like"""
 
-import sys
 import re
 import anydbm
 import random
 from include.utils import Module
+import logging as log
 
 class Main(Module):
     pattern = Module._any
@@ -185,6 +185,6 @@ class Main(Module):
                     return 'OK, %s' % nick
 
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
 

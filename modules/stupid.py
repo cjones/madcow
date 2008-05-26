@@ -7,6 +7,7 @@ from include.BeautifulSoup import BeautifulSoup
 from include.utils import Module, stripHTML
 from include.useragent import geturl
 from urlparse import urljoin
+import logging as log
 
 class Main(Module):
     pattern = re.compile('^\s*(?:stupid)\s*$', re.I)
@@ -37,17 +38,11 @@ class Main(Module):
         try:
             return self.get_comment()
         except Exception, e:
-            return '%s: problem with query: %s' % (nick, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
+            return '%s: make your own stupid quotes' % nick
 
-
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
 
 if __name__ == '__main__':
-    import os, sys
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

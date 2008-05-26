@@ -15,9 +15,9 @@ If a safe search returns 0 results, and unsafe returns, say, 100, the phrase is 
 results for both are equal, the phrase is 0% slutty.
 """
 import urllib2
-import sys
 import re
 from include.utils import Module
+import logging as log
 
 class WordFiltered(Exception):
   """Indicates a word has been filtered by google safe search"""
@@ -88,16 +88,11 @@ class Main(Module):
     except WordFiltered, wf:
       return "%s: Hmm, google is filtering the word '%s'.." % (nick, wf.word)
     except Exception, e:
-      print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+      log.warn('error in %s: %s' % (self.__module__, e))
+      log.exception(e)
       return '%s: I failed to perform that lookup' % nick
   
 
-# this is just here so we can test the module from the commandline
-def main(argv = None):
-  if argv is None: argv = sys.argv[1:]
-  obj = Main()
-  print obj.response(nick='testUser', args=argv)
-  
-  return 0
-
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+  from include.utils import test_module
+  test_module(Main)

@@ -2,12 +2,12 @@
 
 """Generate random figlet of the ultimate insult! """
 
-import sys
 import re
 from include.pyfiglet import Figlet
 from include.utils import Module
 import random
 import os
+import logging as log
 
 class Main(Module):
     pattern = re.compile('^\s*yourmom\s*$')
@@ -41,7 +41,8 @@ class Main(Module):
             return text
 
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return '%s: your mom :(' % nick
 
 

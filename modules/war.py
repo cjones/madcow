@@ -7,8 +7,7 @@ from include import rssparser
 from include.utils import Base, Module, stripHTML
 from include.useragent import geturl
 from include.BeautifulSoup import BeautifulSoup
-import os
-import sys
+import logging as log
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -33,7 +32,8 @@ class Terror(Base):
             color = Terror._color_map[level.lower()]
             return '\x03%s,1\x16\x16%s\x0f' % (color, level)
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return 'UNKNOWN'
 
 
@@ -47,7 +47,8 @@ class DoomsDay(Base):
             time = DoomsDay._re_time.search(doc).group(1)
             return time
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return 'UNKNOWN'
 
 
@@ -59,7 +60,8 @@ class IranWar(Base):
             rss = rssparser.parse(IranWar._url)
             return rss['items'].pop(0)['title']
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return 'UNKNOWN'
 
 
@@ -73,7 +75,8 @@ class IraqWar(Base):
             rss = rssparser.parse(IraqWar._war_url)
             return rss['items'].pop(0)['title']
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return 'UNKNOWN'
 
     def bodycount(self):
@@ -88,7 +91,8 @@ class IraqWar(Base):
             data = data.strip()
             return data
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return 'UNKNOWN'
 
 
@@ -108,16 +112,11 @@ class Main(Module):
             return __format__ % (self.terror.level(), self.doom.time(),
                     self.iran.war(), self.iraq.war(), self.iraq.bodycount())
         except Exception, e:
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return '%s: problem with query: %s' % (nick, e)
 
 
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
-
 if __name__ == '__main__':
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

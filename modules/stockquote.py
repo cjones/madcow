@@ -8,6 +8,7 @@ from include.useragent import geturl
 from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
 import random
+import logging as log
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -100,17 +101,11 @@ class Main(Module):
         try:
             return self.yahoo.get_quote(query)
         except Exception, e:
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return "Symbol not found, market may have crashed"
 
 
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
-
 if __name__ == '__main__':
-    import os, sys
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

@@ -3,9 +3,9 @@
 """Infobot style karma"""
 
 from include.utils import Base, Module
-import sys
 import re
 from learn import Main as Learn
+import logging as log
 
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -84,6 +84,7 @@ class Main(Module):
             kwargs['req'].matched = kr.matched
             return kr.reply
         except Exception, e:
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return '%s: problem with command: %s' % (nick, e)
-
 

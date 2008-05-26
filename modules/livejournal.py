@@ -2,12 +2,12 @@
 
 """get a random lj"""
 
-import sys
 import re
 from include import rssparser
 from include.utils import Module, stripHTML, isUTF8
 from include.useragent import geturl
 from urlparse import urljoin
+import logging as log
 
 class Main(Module):
     enabled = True
@@ -49,18 +49,11 @@ class Main(Module):
             return '%s: [%s] %s' % (nick, page, entry)
 
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return "%s: Couldn't load the page LJ returned D:" % nick
 
 
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
-
 if __name__ == '__main__':
-    import os
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

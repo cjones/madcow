@@ -2,17 +2,21 @@
 
 """I'm feeling lucky"""
 
-import sys
 import urllib
 import urllib2
-from include.utils import Base, Module
+from include.utils import Base, Module, Error
 from include.useragent import UserAgent
 from urlparse import urljoin
 import re
+import logging as log
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
+
+class NonRedirectResponse(Error):
+    """Raised when google doesn't return a redirect"""
+
 
 class Response(Base):
 
@@ -48,16 +52,11 @@ class Google(Base):
     def lucky(self, query):
         opts = dict(self.luckyopts.items())
         opts['q'] = query
-        try:
-            result = self.ua.openurl(self.search, opts=opts,
-                    referer=self.baseurl, size=1024)
-            if not result.startswith('http'):
-                raise Exception, 'non-redirect response'
-            return '%s = %s' % (query, result)
-
-        except Exception, e:
-            print >> sys.stderr, e
-            return 'No matches'
+        result = self.ua.openurl(self.search, opts=opts,
+                referer=self.baseurl, size=1024)
+        if not result.startswith('http'):
+            raise NonRedirectResponse
+        return '%s = %s' % (query, result)
 
 
 class Main(Module):
@@ -73,18 +72,11 @@ class Main(Module):
             query = args[0]
             return '%s: %s' % (nick, self.google.lucky(query))
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
-            return '%s: Not so lucky today.. %s' % (nick, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
+            return '%s: Not so lucky today..' % nick
 
-
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
 
 if __name__ == '__main__':
-    import os
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

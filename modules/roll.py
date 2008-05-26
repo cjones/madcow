@@ -6,8 +6,8 @@ import re
 import random
 import math
 from include.utils import Module
-import sys
 import os
+import logging as log
 
 class Main(Module):
     _allow = '-?(?:[0-9.]+j?|pi|e)'
@@ -69,13 +69,6 @@ class Main(Module):
                 save_versus, nick, result)
 
 
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
-
 if __name__ == '__main__':
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)

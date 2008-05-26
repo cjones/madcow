@@ -6,8 +6,8 @@ from include.useragent import UserAgent
 from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
 from include.utils import Module, Base, stripHTML
-import sys
 import re
+import logging as log
 
 class Delicious(Base):
     """Simple API frontend"""
@@ -63,7 +63,7 @@ class Main(Module):
             for url in self.url.findall(args[0]):
                 self.delicious.post(url, tags=['madcow', nick])
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return "%s: %s" % (nick, self.error)
-
 

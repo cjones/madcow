@@ -2,11 +2,11 @@
 
 """Lookup a definition in the dictionary..."""
 
-import sys
 import re
 from include.utils import stripHTML, Module
 from include.useragent import geturl
 from urlparse import urljoin
+import logging as log
 
 class Main(Module):
     pattern = re.compile('^\s*define\s+(\w+)(?:\s+(\d+))?$')
@@ -43,18 +43,11 @@ class Main(Module):
             return '%s: [%s/%s] %s' % (nick, num, len(defs), definition)
 
         except Exception, e:
-            print >> sys.stderr, 'error in %s: %s' % (self.__module__, e)
+            log.warn('error in %s: %s' % (self.__module__, e))
+            log.exception(e)
             return "%s: I couldn't look that up for some reason.  D:" % nick
 
 
-def main():
-    try:
-        main = Main()
-        args = main.pattern.search(' '.join(sys.argv[1:])).groups()
-        print main.response(nick=os.environ['USER'], args=args)
-    except Exception, e:
-        print 'no match: %s' % e
-
 if __name__ == '__main__':
-    import os
-    sys.exit(main())
+    from include.utils import test_module
+    test_module(Main)
