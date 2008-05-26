@@ -56,7 +56,10 @@ class IRCProtocol(Madcow):
     def on_welcome(self, server, event):
         log.info('[IRC] * Connected')
 
-        # TODO: identify with nickserv
+        # identify with nickserv
+        if self.config.irc.nickServUser and self.config.irc.nickServPass:
+            self.server.privmsg(self.config.irc.nickServUser,
+                    'IDENTIFY %s' % self.config.irc.nickServPass)
 
         # become an oper
         if self.config.irc.oper is True:

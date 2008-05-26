@@ -126,6 +126,8 @@ rejoinReply=
 oper=no
 operUser=
 operPass=
+nickServUser=NickServ
+nickServPass=
 ; if you don't want wrapping, set this very high. the rfc has
 ; a limitation and your bot WILL get dropped for sending raw
 ; messages that exceed it. 400 is a good number if you are
