@@ -87,6 +87,7 @@ class Main(Module):
                     road = self.re_tags.sub('', road)
                     road = road.replace(' ', '')
                     speed = self.re_tags.sub('', speed)
+                    speed = speed.replace(' or higher', '')
                     speeds.append('%s=%s' % (road, speed))
                 except:
                     continue
