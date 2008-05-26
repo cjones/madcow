@@ -429,12 +429,16 @@ class Modules(Base):
 
         # if debug level set, show execution order/details of modules
         if log.root.level <= log.DEBUG:
-            for mod_name, obj in self.by_priority():
-                try:
-                    log.debug('%-13s: pri=%3s thread=%-5s stop=%s' % (mod_name,
-                        obj.priority, obj.allow_threading, obj.terminate))
-                except:
-                    pass
+            try:
+                for mod_name, obj in self.by_priority():
+                    try:
+                        log.debug('%-13s: pri=%3s thread=%-5s stop=%s' % (
+                            mod_name, obj.priority, obj.allow_threading,
+                            obj.terminate))
+                    except:
+                        pass
+            except:
+                pass
 
     def by_priority(self):
         modules = self.dict()
