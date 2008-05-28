@@ -37,7 +37,10 @@ class IRCProtocol(Madcow):
 
     def _stop(self):
         log.info('[IRC] * Quitting IRC')
-        self.server.disconnect('bot is shutting down')
+        message = self.config.irc.quitMessage
+        if message is None:
+            message = 'no reason'
+        self.server.disconnect(message)
 
     def _start(self):
         self.connect()
