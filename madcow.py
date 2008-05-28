@@ -79,6 +79,7 @@ class Admin(Base):
     _reDelUser = re.compile(r'\s*del(?:ete)?\s+(\S+)\s*$', re.I)
     _reListUsers = re.compile(r'\s*list\s+users\s*$', re.I)
     _reChFlag = re.compile(r'\s*chflag\s+(\S+)\s+(\S+)\s*$', re.I)
+    _reAddUser = re.compile(r'^\s*add\s+(\S+)\s+(\S+)(?:\s+(\S+))?\s*$', re.I)
 
     _basic_usage = [
         'help - this screen',
@@ -92,6 +93,7 @@ class Admin(Base):
 
     _admin_usage = [
         'fist <chan> <msg> - make bot say something in channel',
+        'add <user> <flags> [pass] - add a user (no pass = no login)',
         'del <user> - delete a user',
         'list users - list users :P',
         'chflag <user> <[+-][aor]> - update user flags',
@@ -149,6 +151,12 @@ class Admin(Base):
         # functions past here require admin
         if not user.isAdmin():
             return
+
+        try:
+            adduser = self._reAddUser.search(command).groups()
+            return self.addUser(*adduser)
+        except:
+            pass
 
         # be the puppetmaster
         try:
@@ -214,6 +222,13 @@ class Admin(Base):
         if self.users.has_key(user):
             self.users[user].flags = curflags
         return 'flags for %s changed to %s' % (user, curflags)
+
+    def addUser(self, user, flags, password):
+        if self.authlib.user_exists(user):
+            return "User already registered."
+        flags = ''.join(set(flags))
+        self.authlib.add_user(user, password, flags)
+        return 'user added: %s' % user
 
     def registerUser(self, user, passwd):
         if not self.bot.config.admin.allowRegistration:

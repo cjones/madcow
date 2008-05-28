@@ -73,7 +73,10 @@ class AuthLib(Base):
     def add_user(self, user, plain, flags=''):
         if ':' in user:
             raise IllegalUserName, 'usernames cannot have : in them'
-        password = self.encrypt(plain)
+        if plain == None:
+            password = '*'
+        else:
+            password = self.encrypt(plain)
         passwd = self.get_passwd()
         passwd[user] = {'password': password, 'flags': flags}
         self.write_passwd(passwd)
