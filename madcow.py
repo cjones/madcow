@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
+"""Madcow infobot"""
+
 import sys
 import os
 from ConfigParser import ConfigParser
 from optparse import OptionParser
 import re
-import threading
 import time
 import logging as log
 from include.authlib import AuthLib
@@ -14,6 +15,7 @@ import SocketServer
 import select
 from signal import signal, SIGHUP, SIGTERM
 import shutil
+from include.thread import lock, launch_thread, stop_threads
 
 __version__ = '1.1.9'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
@@ -58,9 +60,11 @@ class User(Base):
         self.loggedIn = int(time.time())
 
     def isAdmin(self):
+        """Boolean: user is an admin"""
         return 'a' in self.flags
 
     def isRegistered(self):
+        """Boolean: user is registerd"""
         if 'a' in self.flags or 'r' in self.flags:
             return True
         else:
@@ -105,6 +109,7 @@ class Admin(Base):
         self.users = {}
 
     def parse(self, req):
+        """Parse request for admin commands and execute, returns output"""
         if not self.bot.config.admin.enabled:
             return
         try:
@@ -205,6 +210,7 @@ class Admin(Base):
             pass
 
     def changeFlags(self, user, chflags):
+        """Change flags for a user"""
         curflags = self.authlib.get_flags(user)
         curflags = set(curflags)
         args = re.split(r'([+-])', chflags)[1:]
@@ -224,6 +230,7 @@ class Admin(Base):
         return 'flags for %s changed to %s' % (user, curflags)
 
     def addUser(self, user, flags, password):
+        """Add a new user"""
         if self.authlib.user_exists(user):
             return "User already registered."
         flags = ''.join(set(flags))
@@ -231,6 +238,7 @@ class Admin(Base):
         return 'user added: %s' % user
 
     def registerUser(self, user, passwd):
+        """Register with the bot"""
         if not self.bot.config.admin.allowRegistration:
             return "Registration is disabled."
         if self.authlib.user_exists(user):
@@ -246,6 +254,7 @@ class Admin(Base):
         return "You are now registered, try logging in: login <pass>"
 
     def authenticateUser(self, user, passwd):
+        """Attempt to log in"""
         if not self.authlib.user_exists(user):
             return "You are not registered: try register <password>."
         if not self.authlib.check_user(user, passwd):
@@ -264,6 +273,7 @@ class GatewayService(Base):
         self.server.madcow = madcow
 
     def start(self):
+        """While bot is alive, listen for connections"""
         while self.server.madcow.running:
             if select.select([self.server.socket], [], [], 0.25)[0]:
                 self.server.handle_request()
@@ -281,6 +291,7 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
         log.info('connection from %s' % repr(self.client_address))
 
     def handle(self):
+        """Handles a TCP connection to gateway service"""
         data = ''
         while self.server.madcow.running:
             read = self.request.recv(1024)
@@ -340,20 +351,23 @@ class PeriodicEvents(Base):
                 time.time())
 
     def start(self):
+        """While bot is alive, process periodic event queue"""
         while self.madcow.running:
             self.process_queue()
             time.sleep(self._process_frequency)
 
     def process_queue(self):
+        """Process queue"""
         now = time.time()
         for mod_name, obj in self.madcow.periodics.dict().items():
             if (now - self.last_run[mod_name]) < obj.frequency:
                 continue
             self.last_run[mod_name] = now
-            kwargs = {'mod_name': mod_name, 'obj': obj}
-            threading.Thread(target=self.process_thread, kwargs=kwargs).start()
+            launch_thread(target=self.process_thread, name='PeriodicEvent',
+                    kwargs={'mod_name': mod_name, 'obj': obj})
 
     def process_thread(self, **kwargs):
+        """Handles a periodic event"""
         try:
             obj = kwargs['obj']
             response = obj.process()
@@ -383,6 +397,7 @@ class Modules(Base):
         self.load_modules()
 
     def load_modules(self):
+        """Load/reload modules"""
         disabled = list(self._ignore_mods)
         for mod_name, enabled in self.madcow.config.modules.settings.items():
             if not enabled:
@@ -456,12 +471,14 @@ class Modules(Base):
                 pass
 
     def by_priority(self):
+        """Return list of tuples for modules, sorted by priority"""
         modules = self.dict()
         modules = sorted(modules.items(), lambda x, y: cmp(x[1].priority,
             y[1].priority))
         return modules
 
     def dict(self):
+        """Return dict of modules"""
         modules = {}
         for mod_name, mod_data in self.modules.items():
             modules[mod_name] = mod_data['obj']
@@ -477,11 +494,11 @@ class Madcow(Base):
     _codecs = ('ascii', 'utf8', 'latin1',)
 
     def __init__(self, config=None, dir=None):
+        """Initialize bot"""
         self.config = config
         self.dir = dir
 
         self.ns = self.config.modules.dbnamespace
-        self.outputLock = threading.RLock()
 
         if self.config.main.ignorelist is not None:
             self.ignoreList = self.config.main.ignorelist
@@ -511,22 +528,18 @@ class Madcow(Base):
         self.running = False
 
     def reload_modules(self):
+        """Reload all modules"""
         log.info('reloading modules')
         self.modules.load_modules()
         self.periodics.load_modules()
 
     def signal_handler(self, sig, frame):
+        """Handles signals"""
         if sig == SIGTERM:
             log.warn('got SIGTERM, signaling shutting down')
             self.running = False
         elif sig == SIGHUP:
             self.reload_modules()
-
-    def launchThread(self, target, name=None, args=[], kwargs={}):
-        thread = threading.Thread(target=target, name=name, args=args,
-                kwargs=kwargs)
-        thread.start()
-        return thread
 
     def startGatewayService(self):
         GatewayService(madcow=self).start()
@@ -541,11 +554,11 @@ class Madcow(Base):
         # start local service for handling email gateway
         if self.config.gateway.enabled:
             log.info('launching gateway service')
-            self.launchThread(self.startGatewayService, 'GatewayService')
+            launch_thread(self.startGatewayService, 'GatewayService')
 
         # start thread to handle periodic events
         log.info('launching periodic service')
-        self.launchThread(self.startPeriodicService, 'PeriodicService')
+        launch_thread(self.startPeriodicService, 'PeriodicService')
         self._start()
 
     def _start(self):
@@ -553,25 +566,22 @@ class Madcow(Base):
 
     def stop(self):
         """Stop the bot"""
+
+        # signal loops in threads that they should exit
         self.running = False
+
+        # protocol specific shutdown procedure (quit irc, etc)
         self._stop()
 
-        # shut down threads cleanly
-        for thread in threading.enumerate():
-            name = thread.getName()
-            if name == 'MainThread':
-                continue
-            log.info('stopping %s' % name)
-            thread.join(3)
-            if thread.isAlive():
-                log.warn('%s failed to stop, killing' % name)
-                thread._Thread__stop()
+        # stop all threads
+        stop_threads()
 
     def _stop(self):
         """Protocol-specific shutdown procedure"""
         pass
 
     def encode(self, text):
+        """Force output to the bots encoding"""
         if isinstance(text, str):
             for charset in self._codecs:
                 try:
@@ -582,12 +592,10 @@ class Madcow(Base):
 
             if isinstance(text, str):
                 text = unicode(text, 'ascii', 'replace')
-
         try:
             text = text.encode(self.charset)
         except:
             text = text.encode('ascii', 'replace')
-
         return text
 
     def output(self, *args, **kwargs):
@@ -595,14 +603,14 @@ class Madcow(Base):
             if not isinstance(args, list):
                 args = list(args)
             args[0] = self.encode(args[0])
-            self.outputLock.acquire()
+            lock.acquire()
             self._output(*args, **kwargs)
         except Exception, e:
             log.error('CRITICAL ERROR IN OUTPUT: %s' % repr(args[0]))
             log.exception(e)
 
         try:
-            self.outputLock.release()
+            lock.release()
         except:
             pass
 
@@ -710,8 +718,7 @@ class Madcow(Base):
                 self.processThread(**kwargs)
             else:
                 log.debug('launching thread for module: %s' % mod_name)
-                self.launchThread(self.processThread, name=mod_name,
-                        kwargs=kwargs)
+                launch_thread(self.processThread, mod_name, kwargs=kwargs)
 
             if mod.terminate and req.matched:
                 log.debug('terminating because %s matched' % mod_name)
