@@ -29,11 +29,13 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
     log.info("connecting to %s:%s" % (self.config.silcplugin.host, self.config.silcplugin.port))
     self.connect_to_server(self.config.silcplugin.host, self.config.silcplugin.port)
 
-  def start(self):
+  def _start(self):
     self.connect()
-    while True:
+    while self.running:
       try:
         self.run_one()
+      except KeyboardInterrupt:
+        self.running = False
       except Exception, e:
         log.exception(e)
       time.sleep(0.2)

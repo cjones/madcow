@@ -14,7 +14,7 @@ getpid() {
 
 stop_madcow() {
     pid=`getpid` || exit 1
-    kill -9 $pid
+    kill -15 $pid
     rm -f $pidfile
     echo "madcow stopped"
 }

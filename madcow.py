@@ -12,7 +12,7 @@ from include.authlib import AuthLib
 from include.utils import Base, Error
 import SocketServer
 import select
-from signal import signal, SIGHUP
+from signal import signal, SIGHUP, SIGTERM
 import shutil
 
 __version__ = '1.1.9'
@@ -249,7 +249,7 @@ class GatewayService(Base):
         self.server.madcow = madcow
 
     def start(self):
-        while True:
+        while self.server.madcow.running:
             if select.select([self.server.socket], [], [], 0.25)[0]:
                 self.server.handle_request()
 
@@ -267,7 +267,7 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
 
     def handle(self):
         data = ''
-        while True:
+        while self.server.madcow.running:
             read = self.request.recv(1024)
             if len(read) == 0:
                 break
@@ -325,7 +325,7 @@ class PeriodicEvents(Base):
                 time.time())
 
     def start(self):
-        while True:
+        while self.madcow.running:
             self.process_queue()
             time.sleep(self._process_frequency)
 
@@ -489,26 +489,29 @@ class Madcow(Base):
         self.periodics = Modules(self, 'periodic')
         self.usageLines = self.modules.help + self.periodics.help
 
-        # reload modules when receiving SIGHUP
+        # signal handlers
         signal(SIGHUP, self.signal_handler)
+        signal(SIGTERM, self.signal_handler)
 
-        # start local service for handling email gateway
-        if self.config.gateway.enabled:
-            log.info('launching gateway service')
-            self.launchThread(self.startGatewayService)
+        self.running = False
 
-        # start thread to handle periodic events
-        log.info('launching periodic service')
-        self.launchThread(self.startPeriodicService)
-
-    def signal_handler(self, *args, **kwargs):
+    def reload_modules(self):
         log.info('reloading modules')
         self.modules.load_modules()
         self.periodics.load_modules()
 
-    def launchThread(self, target, args=[], kwargs={}):
-        thread = threading.Thread(target=target, args=args, kwargs=kwargs)
+    def signal_handler(self, sig, frame):
+        if sig == SIGTERM:
+            log.warn('got SIGTERM, signaling shutting down')
+            self.running = False
+        elif sig == SIGHUP:
+            self.reload_modules()
+
+    def launchThread(self, target, name=None, args=[], kwargs={}):
+        thread = threading.Thread(target=target, name=name, args=args,
+                kwargs=kwargs)
         thread.start()
+        return thread
 
     def startGatewayService(self):
         GatewayService(madcow=self).start()
@@ -517,6 +520,40 @@ class Madcow(Base):
         PeriodicEvents(madcow=self).start()
 
     def start(self):
+        """Start the bot"""
+        self.running = True
+
+        # start local service for handling email gateway
+        if self.config.gateway.enabled:
+            log.info('launching gateway service')
+            self.launchThread(self.startGatewayService, 'GatewayService')
+
+        # start thread to handle periodic events
+        log.info('launching periodic service')
+        self.launchThread(self.startPeriodicService, 'PeriodicService')
+        self._start()
+
+    def _start(self):
+        pass
+
+    def stop(self):
+        """Stop the bot"""
+        self.running = False
+        self._stop()
+
+        # shut down threads cleanly
+        for thread in threading.enumerate():
+            name = thread.getName()
+            if name == 'MainThread':
+                continue
+            log.info('stopping %s' % name)
+            thread.join(3)
+            if thread.isAlive():
+                log.warn('%s failed to stop, killing' % name)
+                thread._Thread__stop()
+
+    def _stop(self):
+        """Protocol-specific shutdown procedure"""
         pass
 
     def encode(self, text):
@@ -634,7 +671,7 @@ class Madcow(Base):
                 return
 
         if self.config.main.module == 'cli' and req.message == 'reload':
-            self.signal_handler()
+            self.reload_modules()
 
         for mod_name, mod in self.modules.by_priority():
             log.debug('trying: %s' % mod_name)
@@ -658,7 +695,8 @@ class Madcow(Base):
                 self.processThread(**kwargs)
             else:
                 log.debug('launching thread for module: %s' % mod_name)
-                self.launchThread(self.processThread, kwargs=kwargs)
+                self.launchThread(self.processThread, name=mod_name,
+                        kwargs=kwargs)
 
             if mod.terminate and req.matched:
                 log.debug('terminating because %s matched' % mod_name)
@@ -856,13 +894,15 @@ def main():
 
     # run bot & shut down threads when done
     try:
-        ProtocolHandler(config=config, dir=dir).start()
+        bot = ProtocolHandler(config=config, dir=dir)
+        bot.start()
     finally:
+        log.info('removing pidfile')
         if os.path.exists(opts.pidfile):
             os.remove(opts.pidfile)
-        for thread in threading.enumerate():
-            thread._Thread__stop()
+        bot.stop()
 
+    log.info('madcow is exiting cleanly')
     return 0
 
 if __name__ == '__main__':

@@ -85,7 +85,17 @@ class Main(Module):
         uri = engine + '://'
         if engine == 'sqlite':
             uri += os.path.join(madcow.dir, 'data/db-%s-memes' % madcow.ns)
-        else:
+        elif engine == 'mysql':
+
+            # XXX on freebsd, launch a dummy thread before importing mysql
+            # to work around a nasty threading problem
+            if os.uname()[0] == 'FreeBSD':
+                try:
+                    import threading
+                    threading.Thread().start()
+                except ImportError:
+                    pass
+
             user = config.db_user
             if len(config.db_pass):
                 user += ':' + config.db_pass

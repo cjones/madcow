@@ -24,9 +24,9 @@ class ConsoleProtocol(Madcow):
         self.shell = Shell()
         self.usageLines += self._cli_usage
 
-    def start(self, *args):
+    def _start(self, *args):
         self.output("type 'help' for a list of commands")
-        while True:
+        while self.running:
             try:
                 input = self.shell.readline(self._prompt)
             except IOError:

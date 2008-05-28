@@ -35,16 +35,22 @@ class IRCProtocol(Madcow):
         self.server.connect(self.config.irc.host, self.config.irc.port,
                 self.config.irc.nick)
 
-    def start(self):
+    def _stop(self):
+        log.info('[IRC] * Quitting IRC')
+        self.server.disconnect('bot is shutting down')
+
+    def _start(self):
         self.connect()
         for event in self.events:
             log.info('[IRC] * Registering event: %s' % event)
             self.server.add_global_handler(event,
                     getattr(self, 'on_' + event), 0)
 
-        while True:
+        while self.running:
             try:
                 self.irc.process_once(0.2)
+            except KeyboardInterrupt:
+                self.running = False
             except Exception, e:
                 log.warn('EINTR detected in irc loop')
                 log.exception(e)
@@ -75,12 +81,9 @@ class IRCProtocol(Madcow):
     def on_disconnect(self, server, event):
         log.warn('[IRC] * Disconnected from server')
 
-        if self.config.irc.reconnect is True:
-            if self.config.irc.reconnectWait > 0:
-                time.sleep(self.config.irc.reconnectWait)
+        if self.config.irc.reconnect and self.running:
+            time.sleep(self.config.irc.reconnectWait)
             self.connect()
-        else:
-            sys.exit(1)
 
     # when kicked, rejoin channel if configured to do so
     def on_kick(self, server, event):
