@@ -663,8 +663,6 @@ class Madcow(Base):
             except:
                 pass
 
-        print repr(req)
-
     def logpublic(self, req):
         """Logs public chatter"""
         line = '%s <%s> %s\n' % (time.strftime('%T'), req.nick, req.message)

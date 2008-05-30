@@ -82,7 +82,21 @@ class Factoids(Base):
     _literal = re.compile(r'^\s*literal\s+', I)
     _verbs = ('is', 'are')
     _ydets = re.compile(r'^\s*(an?|the)\s+(.*?)$')
-    _results = re.compile(r'\s*|\s*')
+    _results = re.compile(r'\s*\|\s*')
+    _isreply = re.compile(r'^\s*<reply>\s*', I)
+    _reply_formats = (
+        'KEY is RESULT',
+        'i think KEY is RESULT',
+        'hmmm... KEY is RESULT',
+        'it has been said that KEY is RESULT',
+        'KEY is probably RESULT',
+        'rumour has it KEY is RESULT',
+        'i heard KEY was RESULT',
+        'somebody said KEY was RESULT',
+        'i guess KEY is RESULT',
+        'well, KEY is RESULT',
+        'KEY is, like, RESULT',
+    )
 
     # DBM functions
     def get_dbm(self, dbname):
@@ -278,11 +292,38 @@ class Factoids(Base):
             if ydet:
                 orig_y = '%s %s' % (ydet, orig_y)
 
-        result = random.choice(self._results.split(result))
+        if not literal:
+            result = random.choice(self._results.split(result))
 
         if result:
             if literal:
                 return '%s: %s =%s= %s' % (nick, orig_y, v, result)
+            result, short = self._isreply.subn('', result)
+            if not short:
+                if v == 'is':
+                    format = random.choice(self._reply_formats)
+                    format = format.replace('KEY', orig_y)
+                    format = format.replace('RESULT', result)
+                    result = format
+                else:
+                    result = '%s %s %s' % (orig_y, v, result)
+
+        """
+        # XXX this seems horribly flawed.........
+        # XXX fix outgoing name purification
+        if not short:
+            result = re.sub(r'%s is' % who, 'you are', result)
+            result = re.sub(r'%s is' % botnick, 'i am', result)
+            result = re.sub(r'%s was' % botnick, 'i was', result)
+            if addressed:
+                result = re.sub(r'you are', 'i am') # XXX ?? wtf
+        """
+
+
+        # some stuff people can insert into the reply
+        result = result.replace('$who', nick)
+        result = result.strip()
+        return result
 
 
 class Main(Module):
