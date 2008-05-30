@@ -53,7 +53,7 @@ class Main(Module):
         except:
             username = ''
             password = ''
-        if not username and not password:
+        if not username or not password:
             self.enabled = False
             return
         self.delicious = Delicious(username, password)
