@@ -497,6 +497,7 @@ class Madcow(Base):
         """Initialize bot"""
         self.config = config
         self.dir = dir
+        self.cached_nick = None
 
         self.ns = self.config.modules.dbnamespace
 
@@ -622,33 +623,47 @@ class Madcow(Base):
 
     def checkAddressing(self, req):
         """Is bot being addressed?"""
-        nick = self.botName()
+        nick = re.escape(self.botName())
 
-        # compile regex based on current nick
-        self.reCorrection = re.compile('^\s*no,?\s*%s\s*[,:> -]+\s*(.+)' % 
-                re.escape(nick), re.I)
-        self.reAddressed = re.compile('^\s*%s\s*[,:> -]+\s*(.+)' %
-                re.escape(nick), re.I)
-        self.reFeedback = re.compile('^\s*%s\s*\?+$' % re.escape(nick), re.I)
+        # recompile nick-based regex if it changes
+        if nick != self.cached_nick:
+            self.cached_nick = nick
+            self.re_cor = re.compile(r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nick,
+                    re.I)
+            self.re_cor_addr = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
+            self.re_feedback = re.compile(r'^\s*%s[ !]*\?[ !]*$' % nick, re.I)
+            self.re_addr_end = re.compile(r'^(.+),\s+%s\W*$' % nick, re.I)
+            self.re_addr_pre = re.compile(r'^\s*%s[,: -]+(.+)$' % nick, re.I)
 
-        # correction: "no, bot, foo is bar"
+        if self.re_feedback.search(req.message):
+            req.feedback = req.addressed = True
+
         try:
-            req.message = self.reCorrection.search(req.message).group(1)
-            req.correction = True
+            req.message = self.re_addr_end.search(req.message).group(1)
             req.addressed = True
         except:
             pass
 
-        # bot ping: "bot?"
-        if self.reFeedback.search(req.message):
-            req.feedback = True
-
-        # addressed
         try:
-            req.message = self.reAddressed.search(req.message).group(1)
+            req.message = self.re_addr_pre.search(req.message).group(1)
             req.addressed = True
         except:
             pass
+
+        try:
+            req.message = self.re_cor.search(req.message).group(1)
+            req.correction = req.addressed = True
+        except:
+            pass
+
+        if req.addressed:
+            try:
+                req.message = self.re.cor_addr.search(req.message).group(1)
+                req.correction = True
+            except:
+                pass
+
+        print repr(req)
 
     def logpublic(self, req):
         """Logs public chatter"""
