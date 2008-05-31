@@ -249,7 +249,10 @@ class Factoids(Base):
 
         # get qword
         message = message.strip()
-        qword, message = self._qword.search(message).groups()
+        try:
+            qword, message = self._qword.search(message).groups()
+        except:
+            qword = None
         if not qword and final_qmark and addressed:
             qword = 'where'
 
