@@ -22,7 +22,7 @@ class Factoids(Base):
     yes, this code is totally ridiculous, but it works pretty well. :P
     """
 
-    # precompile as many regex as we can
+    # precompiled regex for do_question
     _qwords = '|'.join('what where who'.split())
     _normalizations = (
         (r'^\S+\s*[:-]+\s*', ''),
@@ -120,6 +120,45 @@ class Factoids(Base):
         'RESULT, NICK',
     )
 
+    # precompiled regex for do_statement
+    _normalize_statements = [
+        (r'\bi am\b', 'NICK is', False),
+        (r'\bmy\b', "NICK's", False),
+        (r'\byour\b', "BOTNICK's", False),
+        (r'\byou are\b', 'BOTNICK is', True),
+        (r'^no\s*,\s*', '', False),
+        (r'^i\s+(heard|think)\s+', '', False),
+        (r'^some(one|1|body)\s+said\s+', '', False),
+        (r'\s+', ' ', False),
+    ]
+    _get_st_verb = re.compile(r'^(.*?)\b(is|are)\b(.*?)$', I)
+    _article = re.compile(r'^(the|da|an?)\s+')
+    _maxkey = 50
+    _maxval = 250
+    _st_qwords = 'who what where when why how'.split()
+    _st_fails = [
+        re.compile(r'^(who|what|when|where|why|how|it) '),
+        re.compile(r'^(this|that|these|those|they|you) '),
+        re.compile(r'^(every(one|body)|we) '),
+        re.compile(r'^\s*\*'),
+        re.compile(r'^\s*<+[-=]+'),
+        re.compile(r'^[\[<\(]\w+[\]>\)]'),
+        re.compile(r'^heya?,? '),
+        re.compile(r'^\s*th(is|at|ere|ese|ose|ey)'),
+        re.compile(r'^\s*it\'?s?\W'),
+        re.compile(r'^\s*if '),
+        re.compile(r'^\s*how\W'),
+        re.compile(r'^\s*why\W'),
+        re.compile(r'^\s*h(is|er) '),
+        re.compile(r'^\s*\D[\d\w]*\.{2,}'),
+        re.compile(r'^\s*so is'),
+        re.compile(r'^\s*s+o+r+[ye]+\b'),
+        re.compile(r'^\s*supposedly'),
+        re.compile(r'^all '),
+    ]
+    _also = re.compile(r'^also\s+')
+    _forget = re.compile(r'^forget\s+((an?|the)\s+)?', I)
+
     # DBM functions
     def get_dbm(self, dbname):
         dbfile = 'db-%s-%s' % (self.parent.madcow.ns, dbname.lower())
@@ -141,18 +180,17 @@ class Factoids(Base):
         dbm = self.get_dbm(dbname)
         forgot = False
         try:
-            del dbm[key]
+            del dbm[key.lower()]
             forgot = True
         finally:
             dbm.close()
         return forgot
 
     def parse(self, message, nick, req):
-        result = self.do_question(message, nick, req)
-        if result:
-            return result
-        result = self.do_statement(message, nick, req)
-        return result
+        for func in (self.do_forget, self.do_question, self.do_statement):
+            result = func(message, nick, req)
+            if result:
+                return result
 
     def do_question(self, message, nick, req):
         addressed = req.addressed
@@ -239,7 +277,7 @@ class Factoids(Base):
         # output final result
         if result:
             if literal:
-                return '%s: %s =%s= %s' % (nick, orig_y, v, result)
+                return '%s: %s =%s= %s' % (nick, key, verb, result)
             result = random.choice(self._results.split(result))
             result, short = self._isreply.subn('', result)
             if not short:
@@ -283,6 +321,87 @@ class Factoids(Base):
             req.sendTo = target
 
         return result
+
+    def do_statement(self, message, nick, req):
+        botnick = self.parent.madcow.botName()
+        addressed = req.addressed
+        private = req.private
+        correction = req.correction
+
+        # normalize
+        message = message.strip()
+        for norm, replacement, needs_addressing in self._normalize_statements:
+            if needs_addressing and not addressed:
+                continue
+            replacement = replacement.replace('BOTNICK', botnick)
+            replacement = replacement.replace('NICK', nick)
+            message = re.compile(norm, I).sub(replacement, message)
+
+        # does this look like a statement?
+        try:
+            key, verb, val = self._get_st_verb.search(message).groups()
+        except:
+            return
+
+        # clean it up
+        key = key.strip().lower()
+        key = self._article.sub('', key)
+        key = key[:self._maxkey]
+        val = val.strip()
+        val = val[:self._maxval]
+
+        # stuff to ignore to prevent storing dumb stuff
+        if key in self._st_qwords:
+            return
+        if not addressed:
+            try:
+                for regex in self._st_fails:
+                    if regex.search(key):
+                        raise Exception
+            except:
+                return
+
+        # update db
+        val, also = self._also.subn('', val)
+        exists = self.get(verb, key)
+        if exists == val:
+            return 'I already had it that way, %s' % nick
+        if exists:
+            if also:
+                exists = self._results.split(exists)
+                val = '|'.join(exists + [val])
+            elif not correction:
+                return '%s: but %s %s %s' % (nick, key, verb, exists)
+        val = val[:self._maxval]
+        self.set(verb, key, val)
+        if addressed:
+            return 'OK, %s' % nick
+
+    def do_forget(self, message, nick, req):
+        try:
+            key, forget = self._forget.subn('', message)
+        except:
+            forget = 0
+        if not forget:
+            return
+        key = self._endpunc.sub('', key).strip()
+
+        # message normalizations
+        for norm, replacement in self._normalizations:
+            key = norm.sub(replacement, key)
+
+        # remove
+        found = False
+        for dbname in self._verbs:
+            if self.get(dbname, key):
+                self.unset(dbname, key)
+                found = True
+
+        # respond
+        if found:
+            return '%s: I forgot %s' % (nick, key)
+        else:
+            return "%s, I didn't find anything matching %s" % (nick, key)
 
 
 class Main(Module):
