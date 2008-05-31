@@ -24,36 +24,21 @@ class Factoids(Base):
 
     # precompile as many regex as we can
     _qwords = '|'.join('what where who'.split())
-    _talkingto = re.compile(r'^\s*\S+\s*[:-]+\s*')
-    _mnorms = (
-        (r'^\s*hey,*\s+where', 'where'),
+    _normalizations = (
+        (r'^\S+\s*[:-]+\s*', ''),
+        (r'^hey\s*[-,.: ]+\s*', ''),
         (r'whois', 'who is'),
         (r'where can i find', 'where is'),
-        (r'how about', 'where is'),
-        (r'\s+da\s+', ' the '),
-        (r'^\s*(gee|boy|golly|gosh)\s*,?\s*', ''),
-        (r'^(well|and|but|or|yes)\s*,?\s*', ''),
-        (r'^\s*(does\s+)?(any|ne)\s*(1|one|body)\s+know\s+', ''),
-        (r'^\s*heya?\s*,?\s*\S+\.\s+', ''),
-        (r'^\s*[uh]+m*[,.]*\s+', ''),
-        (r'^\s*o+[hk]+(a+y+)?[,.]*\s+', ''),
-        (r'^\s*g(ee+z|osh|olly)+[,.]*\s+', ''),
-        (r'^\s*w(ow|hee+|o+ho+)+[,.]*\s+', ''),
-        (r'^\s*still\s*,\s*', ''),
-        (r'^\s*well\s*,\s*', ''),
-        (r'^\s*(stupid\s+)?question\s*[:-]+\s*', ''),
-    )
-    _mnorms = [(re.compile(x, I), y) for x, y in _mnorms]
-
-    _tell = r'^\s*tell\s+(\S+)\s+'
-    _tell1 = re.compile(_tell + r'about[: ]+(.+)', I)
-    _tell2 = re.compile(_tell + r'where\s+(?:\S+)\s+can\s+(?:\S+)\s+(.+)', I)
-    _tell3 = re.compile(_tell + r'(%s)\s+(.*?)\s+(is|are)[.?!]*$' % _qwords, I)
-
-    _endpunc = re.compile(r'[.?!]+\s*$')
-    _qmark = re.compile(r'[?!]*\?[?!1]*\s*$')
-
-    _qnorms = [
+        (r'\bhow about\b', 'where is'),
+        (r'\bda\b', 'the'),
+        (r'^([gj]ee+z*|boy|golly|gosh)\s*[-,. ]+\s*', ''),
+        (r'^(well|and|but|or|yes)\s*[-,. ]+\s*', ''),
+        (r'^(does\s+)?(any|ne)\s*(1|one|body)\s+know\s+', ''),
+        (r'^[uh]+m*\s*[-,. ]+\s*', ''),
+        (r'^o+[hk]+(a+y+)?\s*[-,. ]+\s*', ''),
+        (r'^w(ow|hee+|o+ho+)+\s*[,. ]+\s*', ''),
+        (r'^(still|well)\s*,\s*', ''),
+        (r'^(stupid\s+)?question\s*[:-]+\s*', ''),
         (r'(?:^| )(%s)\s+(.*)\s+(is|are)(?: |$)' % _qwords, r' \1 \3 \2 '),
         (r'(?:^| )(%s)\s+(\S+)\s+(is|are)(?: |$)' % _qwords, r' \1 \3 \2 '),
         (r'be tellin\'?g?', r'tell'),
@@ -61,7 +46,7 @@ class Factoids(Base):
         (r',? any(hoo?w?|ways?)', r' '),
         (r',?\s*(pretty )*please\??\s*$', r'?'),
         (r'th(e|at|is) (((m(o|u)th(a|er) ?)?fuck(in\'?g?)?|hell|heck|(god-?)?damn?(ed)?) ?)+', r''),
-        (r'wtf', r'where'),
+        (r'\bw+t+f+\b', r'where'),
         (r'this (.*) thingy?', r' \1'),
         (r'this thingy? (called )?', r''),
         (r'ha(s|ve) (an?y?|some|ne) (idea|clue|guess|seen) ', r'know '),
@@ -73,12 +58,38 @@ class Factoids(Base):
         (r'(i|one|we|he|she) can (find|get)', r'is'),
         (r'(the )?(address|url) (for|to) ', r''),
         (r'(where is )+', r'where is '),
-    ]
+        (r"(?:^| )(%s)'?s(?: |$)" % _qwords, r' \1 is '),
+    )
+    _normalizations = [(re.compile(x, I), y) for x, y in _normalizations]
+    _tell = r'^tell\s+(\S+)\s+'
+    _tell1 = re.compile(_tell + r'about[: ]+(.+)', I)
+    _tell2 = re.compile(_tell + r'where\s+(?:\S+)\s+can\s+(?:\S+)\s+(.+)', I)
+    _tell3 = re.compile(_tell + r'(%s)\s+(.*?)\s+(is|are)[.?!]*$' % _qwords, I)
+    _endpunc = re.compile(r'\s*[.?!]+\s*$')
+    _qmark = re.compile(r'\s*[?!]*\?[?!1]*\s*$')
+    _normalize_names = [
+        (r'(^|\W)WHOs\s+', r"\1NICK's ", False),
+        (r'(^|\W)WHOs$', r"\1NICK's", False),
+        (r"(^|\W)WHO'(\s|$)", r"\1NICK's\2", False),
+        (r"(^|\s)i'm(\W|$)", r'\1NICK is\2', False),
+        (r"(^|\s)i've(\W|$)", r'\1NICK has\2', False),
+        (r'(^|\s)i have(\W|$)', r'\1NICK has\2', False),
+        (r"(^|\s)i haven'?t(\W|$)", r'\1NICK has not\2', False),
+        (r'(^|\s)i(\W|$)', r'\1NICK\2', False),
+        (r' am\b', r' is', False),
+        (r'\bam ', r'is', False),
+        (r'yourself', r'BOTNICK', True),
+        (r'(^|\s)(me|myself)(\W|$)', r'\1NICK\3', False),
+        (r'(^|\s)my(\W|$)', r'\1NICK\'s\2', False),
+        (r"(^|\W)you'?re(\W|$)", r'\1you are\2', False),
 
-    _qnorms = [(re.compile(x, I), y) for x, y in _qnorms]
-    _whereat = re.compile(r'\s+at\s*(\?*)$', I)
-    _contractions = re.compile(r"(?:^| )(%s)'?s(?: |$)" % _qwords, I)
-    _qword = re.compile(r'(?:^|^(.*?)\s+)(%s)(?:$|\s+(.*)$)' % _qwords, I)
+        (r'(^|\W)are you(\W|$)', r'\1is BOTNICK\2', True),
+        (r'(^|\W)you are(\W|$)', r'\1BOTNICK is\2', True),
+        (r'(^|\W)you(\W|$)', r'\1BOTNICK\2', True),
+        (r'(^|\W)your(\W|$)', r"\1BOTNICK's\2", True),
+    ]
+    _whereat = re.compile(r'\s+at$', I)
+    _qword = re.compile(r'^(?:(%s)\s+)?(.+)$' % _qwords)
     _literal = re.compile(r'^\s*literal\s+', I)
     _verbs = ('is', 'are')
     _ydets = re.compile(r'^\s*(an?|the)\s+(.*?)$')
@@ -131,8 +142,7 @@ class Factoids(Base):
 
         # message normalizations
         message = message.strip()
-        message = self._talkingto.sub('', message)
-        for norm, replacement in self._mnorms:
+        for norm, replacement in self._normalizations:
             message = norm.sub(replacement, message)
 
         # parse syntax for instructing bot to speak to someone else
@@ -155,20 +165,7 @@ class Factoids(Base):
         elif target.lower() == 'us':
             target = None
 
-        # parse for question
-        message = message.strip()
-        final_qmark = False
-        if self._qmark.search(message):
-            message = self._qmark.sub('', message)
-            final_qmark = True
-
-        # query normalizations
-        for norm, replacement in self._qnorms:
-            message = norm.sub(replacement, message)
-        message = message.strip()
-        if self._qmark.search(message):
-            message = self._qmark.sub('', message)
-            final_qmark = True
+        message, final_qmark = self._qmark.subn('', message)
 
         # switchPerson from infobot.pl
         if target:
@@ -178,68 +175,30 @@ class Factoids(Base):
         who = re.escape(who).lower()[:9].split()[0]
         botnick = self.parent.madcow.botName()
 
-        # even more normalizations based on nicks
-        message = re.compile(r'(^|\W)%ss\s+' % who, I).sub(r'\1%s\'s '% nick,
-                message)
-        message = re.compile(r'(^|\W)%ss$' % who, I).sub(r'\1%s\'s' % nick,
-                message)
-        message = re.compile(r'(^|\W)%s\'(\s|$)' % who,
-                I).sub(r'\1%s\'s\2' % nick, message)
-        message = re.compile(r'(^|\s)i\'m(\W|$)', I).sub(r'\1%s is\2' % nick,
-                message)
-        message = re.compile(r'(^|\s)i\'ve(\W|$)', I).sub(r'\1%s has\2' % nick,
-                message)
-        message = re.compile(r'(^|\s)i have(\W|$)', I).sub(r'\1%s has\2' % nick,
-                message)
-        message = re.compile(r'(^|\s)i haven\'?t(\W|$)',
-                I).sub(r'\1%s has not\2' % nick, message)
-        message = re.compile(r'(^|\s)i(\W|$)', I).sub(r'\1%s\2' % nick, message)
-        message = re.compile(r' am\b', I).sub(r' is', message)
-        message = re.compile(r'\bam ', I).sub(r'is', message)
-        if addressed:
-            message = re.compile(r'yourself', I).sub(botnick, message)
-        message = re.compile(r'(^|\s)(me|myself)(\W|$)',
-                I).sub(r'\1%s$3' % nick, message)
-        message = re.compile(r'(^|\s)my(\W|$)', I).sub(r'\1%s\'s\2' % nick,
-                message)
-        message = re.compile(r'(^|\W)you\'?re(\W|$)', I).sub(r'\1you are\2',
-                message)
-        if addressed:
-            message = re.compile(r'(^|\W)are you(\W|$)',
-                    I).sub(r'\1is %s\2' % botnick, message)
-            message = re.compile(r'(^|\W)you are(\W|$)',
-                    I).sub(r'\1%s is\2' % botnick, message)
-            message = re.compile(r'(^|\W)you(\W|$)', I).sub(r'\1%s\2' % botnick,
-                    message)
-            message = re.compile(r'(^|\W)your(\W|$)',
-                    I).sub(r'\1%s\'s\2' % botnick, message)
+        # callback to interpolate the dynamic regexes
+        interpolate = lambda x: x.replace('WHO', who).replace('BOTNICK',
+                botnick).replace('NICK', nick)
 
-        # a couple more normalizations.. can go elsewhere?
-        message = self._whereat.sub(r'\1', message)
-        message = self._contractions.sub(r' \1 is ', message)
+        for norm, replacement, need_addressing in self._normalize_names:
+            if need_addressing and not addressed:
+                continue
+            norm = interpolate(norm)
+            replacement = interpolate(replacement)
+            message = re.sub(norm, replacement, message)
+
+        # this has to come after the punctuation check, i guess..
+        message = self._whereat.sub('', message)
 
         # get qword
-        # XXX this is flawed even in infobot.. is it trying too hard?
-        # e.g.: your mom is what i'm sayin -> your mom isi'm sayin
-        # ... what are they trying to accomplish here??
-        try:
-            before, qword, after = self._qword.search(message).groups()
-            if not before:
-                before = ''
-            if not after:
-                after = ''
-            message = before + after
-        except:
-            qword = None
-        message = message.strip()
+        qword, message = self._qword.search(message).groups()
         if not qword and final_qmark and addressed:
             qword = 'where'
-        
-        # infobot: getReply
-        # XXX this is totally shit.. 
-        # XXX its getting lowered before even here, but orig_y is useless w/o
-        message = message.lower()
+
+        # literal request?
         message, literal = self._literal.subn('', message)
+
+        # infobot: getReply XXX this is totally shit..
+        # hard to wrap my mind around it well enough to clean it up
         v = y = orig_y = None
         ydet = ''
         for verb in self._verbs:
@@ -292,7 +251,8 @@ class Factoids(Base):
             if ydet:
                 orig_y = '%s %s' % (ydet, orig_y)
 
-        if not literal:
+        # output final result
+        if result and not literal:
             result = random.choice(self._results.split(result))
 
         if result:
@@ -307,6 +267,8 @@ class Factoids(Base):
                     result = format
                 else:
                     result = '%s %s %s' % (orig_y, v, result)
+            result = result.replace('$who', nick)
+            result = result.strip()
 
         """
         # XXX this seems horribly flawed.........
@@ -319,10 +281,9 @@ class Factoids(Base):
                 result = re.sub(r'you are', 'i am') # XXX ?? wtf
         """
 
-
-        # some stuff people can insert into the reply
-        result = result.replace('$who', nick)
-        result = result.strip()
+        # so.. should we really send it or not?
+        if not final_qmark and not addressed and not key:
+            result = None
         return result
 
 
