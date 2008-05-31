@@ -362,6 +362,9 @@ class Factoids(Base):
             except:
                 return
 
+        if not len(key):
+            return
+
         # update db
         val, also = self._also.subn('', val)
         val, also_or = self._also_or.subn('', val)

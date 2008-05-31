@@ -633,7 +633,8 @@ class Madcow(Base):
             self.re_cor_addr = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
             self.re_feedback = re.compile(r'^\s*%s[ !]*\?[ !]*$' % nick, re.I)
             self.re_addr_end = re.compile(r'^(.+),\s+%s\W*$' % nick, re.I)
-            self.re_addr_pre = re.compile(r'^\s*%s[,: -]+(.+)$' % nick, re.I)
+            self.re_addr_pre = re.compile(r'^\s*%s\s*[,:-]+\s*(.+)$' % nick,
+                    re.I)
 
         if self.re_feedback.search(req.message):
             req.feedback = req.addressed = True
