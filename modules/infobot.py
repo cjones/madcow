@@ -65,8 +65,8 @@ class Factoids(Base):
     _tell1 = re.compile(_tell + r'about[: ]+(.+)', I)
     _tell2 = re.compile(_tell + r'where\s+(?:\S+)\s+can\s+(?:\S+)\s+(.+)', I)
     _tell3 = re.compile(_tell + r'(%s)\s+(.*?)\s+(is|are)[.?!]*$' % _qwords, I)
-    _endpunc = re.compile(r'\s*[.?!]+\s*$')
     _qmark = re.compile(r'\s*[?!]*\?[?!1]*\s*$')
+    _endpunc = re.compile(r'\s*[.?!]+\s*$')
     _normalize_names = [
         (r'(^|\W)WHOs\s+', r"\1NICK's ", False),
         (r'(^|\W)WHOs$', r"\1NICK's", False),
@@ -92,7 +92,7 @@ class Factoids(Base):
     _qword = re.compile(r'^(?:(%s)\s+)?(.+)$' % _qwords)
     _literal = re.compile(r'^\s*literal\s+', I)
     _verbs = ('is', 'are')
-    _ydets = re.compile(r'^\s*(an?|the)\s+(.*?)$')
+    _get_verb = re.compile(r'^.*?(is|are)\s+(?:(an?|the)\s+)?(.+)\s*$')
     _results = re.compile(r'\s*\|\s*')
     _isreply = re.compile(r'^\s*<reply>\s*', I)
     _reply_formats = (
@@ -117,13 +117,13 @@ class Factoids(Base):
 
     def get(self, dbname, key):
         dbm = self.get_dbm(dbname)
-        val = dbm.get(key)
+        val = dbm.get(key.lower())
         dbm.close()
         return val
 
     def set(self, dbname, key, val):
         dbm = self.get_dbm(dbname)
-        dbm[key] = val
+        dbm[key.lower()] = val
         dbm.close()
 
     def unset(self, dbname, key):
@@ -147,18 +147,19 @@ class Factoids(Base):
 
         # parse syntax for instructing bot to speak to someone else
         try:
-            target, key = self._tell1.search(message).groups()
+            target, tell_obj = self._tell1.search(message).groups()
         except:
             try:
-                target, key = self._tell2.search(message).groups()
+                target, tell_obj = self._tell2.search(message).groups()
             except:
                 try:
-                    target, q, key, verb = self._tell3.search(message).groups()
-                    key = ' '.join([q, verb, key])
-                except Exception, e:
-                    target = key = None
-        if key:
-            message = self._endpunc.sub('', key)
+                    target, q, tell_obj, verb = \
+                        self._tell3.search(message).groups()
+                    tell_obj = ' '.join([q, verb, tell_obj])
+                except:
+                    target = tell_obj = None
+        if tell_obj:
+            message = self._endpunc.sub('', tell_obj)
 
         if not target or target.lower() == 'me':
             target = nick
@@ -166,6 +167,7 @@ class Factoids(Base):
             target = None
 
         message, final_qmark = self._qmark.subn('', message)
+        message = self._endpunc.sub('', message)
 
         # switchPerson from infobot.pl
         if target:
@@ -190,6 +192,7 @@ class Factoids(Base):
         message = self._whereat.sub('', message)
 
         # get qword
+        message = message.strip()
         qword, message = self._qword.search(message).groups()
         if not qword and final_qmark and addressed:
             qword = 'where'
@@ -197,76 +200,39 @@ class Factoids(Base):
         # literal request?
         message, literal = self._literal.subn('', message)
 
-        # infobot: getReply XXX this is totally shit..
-        # hard to wrap my mind around it well enough to clean it up
-        v = y = orig_y = None
-        ydet = ''
-        for verb in self._verbs:
-            result = self.get(verb, message)
+        # if no verb specified, try both dbs for direct match?
+        result = None
+        for dbname in self._verbs:
+            result = self.get(dbname, message)
             if result:
-                # XXX is this really necessary :/
-                v = verb
-                y = result
-                orig_y = message
+                verb = dbname
+                key = message
                 break
-        if not v: # D:
-            l = message.split()
-            for verb in self._verbs:
-                if verb in l:
-                    i = l.index(verb)
-                    y = l[i:]
-                    v = y.pop(0)
-                    y = ' '.join(y)
-                    orig_y = y
-                    y = y.lower()
-                    try:
-                        ydet, y = self._ydets.search(y).groups()
-                    except:
-                        ydet = ''
-                    if qword:
-                        if v == 'is':
-                            result = self.get('is', y)
-                        elif v == 'are':
-                            result = self.get('are', y)
 
-                    the_verb = v
-                    break
-        if not v:
+        # that didn't work, let's try this..
+        if not result and qword:
             try:
-                ydet, message = self._ydets.search(message).groups()
+                verb, keymod, key = self._get_verb.search(message).groups()
+                result = self.get(verb, key)
+                if keymod:
+                    key = '%s %s' % (keymod, key)
             except:
-                ydet = ''
-            message = self._endpunc.sub('', message)
-            check = self.get('is', message)
-            if check:
-                result = check
-                orig_y = message
-                v = 'is'
-            else:
-                check = self.get('are', message)
-                if check:
-                    result = check
-                    v = 'are'
-                    orig_y = message
-            if ydet:
-                orig_y = '%s %s' % (ydet, orig_y)
+                pass
 
         # output final result
-        if result and not literal:
-            result = random.choice(self._results.split(result))
-
         if result:
             if literal:
                 return '%s: %s =%s= %s' % (nick, orig_y, v, result)
+            result = random.choice(self._results.split(result))
             result, short = self._isreply.subn('', result)
             if not short:
-                if v == 'is':
+                if verb == 'is':
                     format = random.choice(self._reply_formats)
-                    format = format.replace('KEY', orig_y)
+                    format = format.replace('KEY', key)
                     format = format.replace('RESULT', result)
                     result = format
                 else:
-                    result = '%s %s %s' % (orig_y, v, result)
+                    result = '%s %s %s' % (key, verb, result)
             result = result.replace('$who', nick)
             result = result.strip()
 
@@ -282,7 +248,7 @@ class Factoids(Base):
         """
 
         # so.. should we really send it or not?
-        if not final_qmark and not addressed and not key:
+        if not final_qmark and not addressed and not tell_obj:
             result = None
         return result
 
