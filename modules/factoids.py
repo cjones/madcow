@@ -156,6 +156,7 @@ class Factoids(Base):
         re.compile(r'^\s*supposedly'),
         re.compile(r'^all '),
     ]
+    _also_or = re.compile(r'\s*\|\s*')
     _also = re.compile(r'^also\s+')
     _forget = re.compile(r'^forget\s+((an?|the)\s+)?', I)
 
@@ -363,13 +364,17 @@ class Factoids(Base):
 
         # update db
         val, also = self._also.subn('', val)
+        val, also_or = self._also_or.subn('', val)
+
         exists = self.get(verb, key)
         if exists == val:
             return 'I already had it that way, %s' % nick
         if exists:
             if also:
-                exists = self._results.split(exists)
-                val = '|'.join(exists + [val])
+                if also_or:
+                    val = exists + '|' + val
+                else:
+                    val = exists + ' or ' + val
             elif not correction:
                 return '%s: but %s %s %s' % (nick, key, verb, exists)
         val = val[:self._maxval]
