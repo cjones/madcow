@@ -108,6 +108,17 @@ class Factoids(Base):
         'well, KEY is RESULT',
         'KEY is, like, RESULT',
     )
+    _unknown = (
+        "i don't know",
+        "i wish i knew",
+        "i haven't a clue",
+        "no idea",
+        "bugger all, i dunno",
+    )
+    _unknown_format = (
+        'NICK: RESULT',
+        'RESULT, NICK',
+    )
 
     # DBM functions
     def get_dbm(self, dbname):
@@ -137,8 +148,14 @@ class Factoids(Base):
         return forgot
 
     def parse(self, message, nick, req):
+        result = self.do_question(message, nick, req)
+        if result:
+            return result
+        result = self.do_statement(message, nick, req)
+        return result
+
+    def do_question(self, message, nick, req):
         addressed = req.addressed
-        correction = req.correction
 
         # message normalizations
         message = message.strip()
@@ -250,6 +267,21 @@ class Factoids(Base):
         # so.. should we really send it or not?
         if not final_qmark and not addressed and not tell_obj:
             result = None
+
+        # did we actually figure this out? if not, say so only if explicit
+        if qword or final_qmark:
+            if addressed and not result:
+                result = random.choice(self._unknown)
+                format = random.choice(self._unknown_format)
+                format = format.replace('RESULT', result)
+                format = format.replace('NICK', nick)
+                result = format
+
+        # modify output parameters for tells
+        if result and tell_obj:
+            result = '%s wants you to know: %s' % (nick, result)
+            req.sendTo = target
+
         return result
 
 
