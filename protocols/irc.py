@@ -127,13 +127,9 @@ class IRCProtocol(Madcow):
             self.server.privmsg(req.sendTo, line)
 
     def on_privmsg(self, server, event):
-        log.info('[IRC] PRIVMSG from %s: %s' % (event.source(),
-            event.arguments()[0]))
         self.on_message(server, event, private=True)
 
     def on_pubmsg(self, server, event):
-        log.info('[IRC] <%s/%s> %s' % (event.source(), event.target(),
-            event.arguments()[0]))
         self.on_message(server, event, private=False)
 
     def on_message(self, server, event, private):
