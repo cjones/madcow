@@ -1,3 +1,20 @@
+1.2.0: Sun Jun  1 01:27:56 PDT 2008
+    * full rewrite of factoids module to work like infobot.pl
+    * all modules now log errors/warnings to logfile when daemonized
+    * config setting added for irc shutdown message
+    * new module - bay area traffic approximation times/speed
+    * new admin function - add user
+    * bot now shuts down cleanly when receiving SIGTERM or SIGINT
+    * support for NickServ authentication
+    * no longer spew IRC chatter unless in DEBUG mode
+    * fix tweetprinter to work with API changes (http auth/user agent check)
+    * tweetprinter no longer caches objects in /tmp
+    * more module code cleanup
+    * abstract threading support to a library
+    * fix bug where madcow would crash in debug mode with periodics running
+    * added comments to most functions
+    * improved addressed-checking code (caches regex until nick changes)
+
 1.1.9: Fri May 23 22:52:02 PDT 2008
     * clarify auto-op/admin process in README and add ownership setting to ini
     * add module execution priority and termination
