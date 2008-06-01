@@ -924,7 +924,7 @@ class Api(object):
     data = simplejson.loads(json)
     return [Status.NewFromJsonDict(x) for x in data]
 
-  def GetFriendsTimeline(self, user=None, since=None):
+  def GetFriendsTimeline(self, since=None):
     '''Fetch the sequence of twitter.Status messages for a user's friends
 
     The twitter.Api instance must be authenticated if the user is private.
@@ -941,12 +941,7 @@ class Api(object):
     Returns:
       A sequence of twitter.Status instances, one for each message
     '''
-    if user:
-      url = 'http://twitter.com/statuses/friends_timeline/%s.json' % user
-    elif not user and not self._username:
-      raise TwitterError("User must be specified if API is not authenticated.")
-    else:
-      url = 'http://twitter.com/statuses/friends_timeline.json'
+    url = 'http://twitter.com/statuses/friends_timeline/'
     parameters = {}
     if since:
       parameters['since'] = since
