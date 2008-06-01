@@ -1,3 +1,8 @@
+1.2.1: Sun Jun  1 06:58:25 PDT 2008
+    * fix logging spam
+    * fix broken twitter API
+    * fix handling of grufti module on first run
+
 1.2.0: Sun Jun  1 01:27:56 PDT 2008
     * full rewrite of factoids module to work like infobot.pl
     * all modules now log errors/warnings to logfile when daemonized
@@ -192,8 +197,8 @@
     filters to be applied within the protocol module.
 
 1.0.6: Thu Jul 12 22:37:03 PDT 2007
-    * Fix all module regex's to only trigger from beginning of line to prevent the
-      spam caused by chaining multiple keywords
+    * Fix all module regex's to only trigger from beginning of line to prevent
+      the spam caused by chaining multiple keywords
     * Rename django settings file to a sample name so updates won't clobber it
     * add "today" link to memebot page when you navigate to older days
     * update AAF to show the title of the ascii art, as well as the option to
@@ -210,7 +215,7 @@
     * Add throttling to memebot for URL postings to prevent gaming
 
 1.0.4: Thu Jul  5 19:21:38 PDT 2007
-    * NEW - django frontend for memebot (see http://memebot.gruntle.org/ for ex.)
+    * NEW - django frontend for memebot (see http://memebot.gruntle.org/)
     * Fix bug with SILC private messages
     * Remove typo in memebot insult list
     * Improve weather.py module's logic to work with ambiguous serach results
@@ -236,3 +241,4 @@
     * Get a rid of all the CVS Id tags
     * Clean up jesus module to not have footnotes
     * Stock module can now do mutual funds
+
