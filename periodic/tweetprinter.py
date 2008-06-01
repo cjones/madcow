@@ -23,6 +23,8 @@ class Main(Base):
     self.output = madcow.config.twitter.channel
     self.api = twitter.Api()
     self.api.SetCache(None) # this fills up /tmp :(
+    self.api.SetCredentials(self.madcow.config.twitter.username,
+        self.madcow.config.twitter.password)
     self.__updatelast()
   
   def __updatelast(self):
