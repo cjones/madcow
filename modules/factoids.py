@@ -23,7 +23,7 @@ class Factoids(Base):
     """
 
     # precompiled regex for do_question
-    _qwords = '|'.join('what where who'.split())
+    _qwords = 'what|where|who'
     _normalizations = (
         (r'^\S+\s*[:-]+\s*', ''),
         (r'^hey\s*[-,.: ]+\s*', ''),
@@ -134,7 +134,7 @@ class Factoids(Base):
     _get_st_verb = re.compile(r'^(.*?)\b(is|are)\b(.*?)$', I)
     _article = re.compile(r'^(the|da|an?)\s+')
     _maxkey = 50
-    _maxval = 250
+    _maxval = 325
     _st_qwords = 'who what where when why how'.split()
     _st_fails = [
         re.compile(r'^(who|what|when|where|why|how|it) '),
