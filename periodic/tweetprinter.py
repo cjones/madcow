@@ -39,15 +39,21 @@ class Main(Base):
     """This is called by madcow, should return a string or None"""
     try:
       log.debug('getting tweets...')
-      tweets = self.api.GetFriendsTimeline(user=self.madcow.config.twitter.username, since=self.__get_update_str())
-    except Exception,e:
+      tweets = self.api.GetFriendsTimeline(since=self.__get_update_str())
+    except Exception, e:
+      try:
+        if e.code == 304:
+          log.debug('no new tweets')
+          return
+      except:
+        pass
       log.warn('error in %s: %s' % (self.__module__, e))
       log.exception(e)
-      return None
-    
-    lines = []
+      return
     
     log.debug('found %s tweets, parsing')
+    lines = []
+    
     for t in reversed(tweets):
       if time.localtime(t.GetCreatedAtInSeconds()) < self.lastupdate: # twitter fails sometimes, so we do our own filter..
         print "ignoring old tweet with timestamp %s (TWITTER SUCKS)" % t.created_at
