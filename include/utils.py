@@ -209,15 +209,13 @@ def unescape_entities(text):
     return text
 
 def slurp(filename):
+    fo = open(filename, 'rb')
+    data = None
     try:
-        f = open(filename, 'rb')
-        try:
-            data = f.read()
-        finally:
-            f.close()
-        return data
-    except Exception, e:
-        print >> sys.stderr, "couldn't read %s: %s" % (filename, e)
+        data = fo.read()
+    finally:
+        fo.close()
+    return data
 
 def test_module(mod):
     main = mod()

@@ -7,6 +7,7 @@ import os
 import random
 from include.utils import Module, slurp
 import logging as log
+import shutil
 
 class Main(Module):
     pattern = Module._any
@@ -19,14 +20,18 @@ class Main(Module):
     rePipeDelim = re.compile('\s*\|\s*')
     reToken = re.compile('({{\s*(.*?)\s*}})')
     reIsRegex = re.compile('^/(.+)/$')
+    _filename = 'grufti-responses.txt'
+    _sample = _filename + '-sample'
 
     def __init__(self, madcow=None):
-        self.data = []
-        filename = os.path.join(madcow.dir, 'grufti-responses.txt')
-
         try:
+            self.data = []
+            filename = os.path.join(madcow.dir, 'grufti-responses.txt')
+            if not os.path.exists(filename):
+                sample = os.path.join(madcow.dir, self._sample)
+                shutil.copyfile(sample, filename)
+                log.warn('created %s' % self._filename)
             doc = slurp(filename)
-
             for block in self.reMatchBlocks.findall(doc):
                 responses = block.splitlines()
                 matchString = responses.pop(0)
@@ -38,13 +43,9 @@ class Main(Module):
                     if isRegex is not None:
                         regex = re.compile(isRegex.group(1), re.I)
                     else:
-                        regex = re.compile(r'\b' + re.escape(match) + r'\b',
-                                re.I)
-
+                        regex = re.compile(r'\b%s\b' % re.escape(match) , re.I)
                     matches.append(regex)
-
                 self.data.append((matches, responses))
-
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
@@ -55,7 +56,6 @@ class Main(Module):
         for token, wordString in self.reToken.findall(response):
             word = random.choice(self.rePipeDelim.split(wordString))
             output = re.sub(re.escape(token), word, output, 1)
-
         return output
 
     def response(self, nick, args, **kwargs):

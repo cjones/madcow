@@ -195,5 +195,5 @@ password=
 ; IRC ONLY, will give +o to users with oper flag
 [ircops]
 enabled=no
-updatefreq=10
+updatefreq=30
 
