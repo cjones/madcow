@@ -18,18 +18,17 @@ class IMDB(Base):
     _rating = re.compile(r'<b>User Rating:</b>.*<b>([0-9.]+)/10</b>', reopts)
 
     def rating(self, movie):
-        html = geturl(self.searchurl, referer=self.baseurl,
-                opts={'s': 'tt', 'q': movie})
-        title = self.title.search(html).group(1)
-        if 'Search' in title:
+        try:
+            html = geturl(self.searchurl, referer=self.baseurl,
+                    opts={'s': 'tt', 'q': movie})
+            title = self.title.search(html).group(1)
             titleurl = [item[1] for item in self.titles.findall(html)][0]
             titleurl = urljoin(self.baseurl, titleurl)
             html = geturl(titleurl, referer=self.searchurl)
-        try:
             rating = self._rating.search(html).group(1)
+            return rating
         except:
-            rating = '?'
-        return rating
+            return '?'
 
 
 class RottenTomatoes(Base):
@@ -39,13 +38,16 @@ class RottenTomatoes(Base):
     _rating = re.compile(r'<a onmouseover="toggle_display\(\'bubble_allCritics\'\)" onmouseout="toggle_display\(\'bubble_allCritics\'\)" title="(.*?%)"', reopts)
 
     def freshness(self, movie):
-        html = geturl(self.searchurl, referer=self.baseurl,
-                opts={'sitesearch': 'rt', 'search': movie})
-        titleurl = self.titles.findall(html)[0]
-        titleurl = urljoin(self.baseurl, titleurl)
-        html = geturl(titleurl, referer=self.searchurl)
-        rating = self._rating.search(html).group(1)
-        return rating
+        try:
+            html = geturl(self.searchurl, referer=self.baseurl,
+                    opts={'sitesearch': 'rt', 'search': movie})
+            titleurl = self.titles.findall(html)[0]
+            titleurl = urljoin(self.baseurl, titleurl)
+            html = geturl(titleurl, referer=self.searchurl)
+            rating = self._rating.search(html).group(1)
+            return rating
+        except:
+            return '?'
 
 
 class Main(Module):
