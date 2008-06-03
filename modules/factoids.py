@@ -444,6 +444,7 @@ class Main(Module):
     require_addressing = False
     priority = 99
     allow_threading = False
+    terminate = False
 
     def __init__(self, madcow=None):
         self.madcow = madcow
