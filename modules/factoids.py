@@ -159,6 +159,7 @@ class Factoids(Base):
     _also_or = re.compile(r'\s*\|\s*')
     _also = re.compile(r'^also\s+')
     _forget = re.compile(r'^forget\s+((an?|the)\s+)?', I)
+    _replace = re.compile(r'^\s*(.+?)\s*=~\s*s/(.+?)/(.*?)/\s*$')
 
     # DBM functions
     def get_dbm(self, dbname):
@@ -188,7 +189,8 @@ class Factoids(Base):
         return forgot
 
     def parse(self, message, nick, req):
-        for func in (self.do_forget, self.do_question, self.do_statement):
+        for func in (self.do_replace, self.do_forget, self.do_question,
+                self.do_statement):
             result = func(message, nick, req)
             if result:
                 return result
@@ -413,6 +415,28 @@ class Factoids(Base):
             return '%s: I forgot %s' % (nick, key)
         else:
             return "%s, I didn't find anything matching %s" % (nick, key)
+
+    def do_replace(self, message, nick, req):
+        try:
+            key, orig, new = self._replace.search(message).groups()
+        except:
+            return
+
+        found = None
+        for dbname in self._verbs:
+            val = self.get(dbname, key)
+            if val:
+                found = val
+                break
+        if not found:
+            return '%s: no entry in db for %s' % (nick, repr(key))
+
+        if orig not in val:
+            return '%s: entry found, but %s is not in it' % (nick, repr(orig))
+
+        val = val.replace(orig, new)
+        self.set(dbname, key, val)
+        return 'OK, %s' % nick
 
 
 class Main(Module):
