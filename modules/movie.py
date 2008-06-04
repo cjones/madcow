@@ -20,6 +20,7 @@ reopts = re.I + re.DOTALL
 whitespace = re.compile(r'\s+')
 html_title = re.compile(r'<title>(.*?)</title>', re.I)
 year = re.compile(r'\(\d{4}\)\s*$')
+badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
 class IMDB(Base):
     """Interface to IMDB"""
@@ -34,6 +35,7 @@ class IMDB(Base):
         """Get the rating for a movie"""
         try:
             page = geturl(self.search, opts={'s': 'all', 'q': movie})
+            movie = normalize(movie)
             title = html_title.search(page).group(1)
             if title == self.search_title:
                 # normalize search results
@@ -83,6 +85,7 @@ class RottenTomatoes(Base):
         try:
             opts={'sitesearch': 'rt', 'search': movie}
             page = geturl(self.search, opts=opts, referer=self.baseurl)
+            movie = normalize(movie)
             title = html_title.search(page).group(1)
             if title == self.search_title:
                 # normalize search results
@@ -125,7 +128,6 @@ class MovieRatings(Base):
 
     def rate(self, movie):
         """Get movie ratings from imdb and rotten tomatoes"""
-        movie = normalize(movie)
         ratings = [self.imdb.rate(movie), self.rt.rate(movie)]
         ratings = [rating for rating in ratings if rating is not None]
         if ratings:
@@ -152,6 +154,7 @@ def normalize(name):
     """Normalize a movie title for easy comparison"""
     name = stripHTML(name)
     name = year.sub('', name)
+    name = badchars.sub(' ', name)
     name = name.lower()
     name = name.strip()
     name = whitespace.sub(' ', name)
