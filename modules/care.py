@@ -5,7 +5,7 @@
 from include.utils import Module
 import logging as log
 import re
-from calc import Main as GoogleCalc
+from include.google import Google
 
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -29,7 +29,7 @@ class Main(Module):
     max = 100
 
     def __init__(self, madcow=None):
-        self.calc = GoogleCalc(madcow)
+        self.google = Google()
         self.bar = [i for i in '.' * self.size]
         self.size = float(self.size)
         self.min = float(self.min)
@@ -41,7 +41,7 @@ class Main(Module):
             val = args[0]
             if not self.isnum.search(val):
                 # try google calculator if not a number
-                val = self.calc.response(nick, [val])
+                val = self.google.calculator(val)
                 val = self.numsep.sub(r'\1\2', val)
                 val = self.sep.split(val)[1]
                 val = val.split()[0]

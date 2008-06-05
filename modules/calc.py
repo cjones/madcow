@@ -3,39 +3,23 @@
 """Use Google as a calculator"""
 
 import re
-from include.utils import Module, stripHTML
-from include.useragent import geturl
-from urlparse import urljoin
+from include.utils import Module
+from include.google import Google
 import logging as log
 
 class Main(Module):
     pattern = re.compile('^\s*calc\s+(.+)', re.I)
     require_addressing = True
     help = 'calc <expression> - pass expression to google calculator'
-    reConversionDetected = re.compile('More about (calculator|currency)')
-    reConversionResult = re.compile('<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
-    _base_url = 'http://www.google.com/'
-    _search_url = urljoin(_base_url, '/search')
+
+    def __init__(self, madcow=None):
+        self.google = Google()
 
     def response(self, nick, args, **kwargs):
         try:
-            opts = {
-                'hl': 'en',
-                'safe': 'off',
-                'c2coff': 1,
-                'btnG': 'Search',
-                'q': ' '.join(args),
-            }
-
-            doc = geturl(self._search_url, opts=opts)
-
-            if not self.reConversionDetected.search(doc):
-                raise Exception, 'no conversion detected'
-
-            response = self.reConversionResult.search(doc).group(1)
-            response = stripHTML(response)
+            query = args[0]
+            response = self.google.calculator(query)
             return '%s: %s' % (nick, response)
-
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
