@@ -17,7 +17,6 @@ class Main(Module):
     pattern = None
     pattern = re.compile(r'^\s*care(?:(?:[- ]?o)?[- ]?meter)?\s+(.+)\s*$', re.I)
     help = 'care <#> - display a care-o-meter'
-    allow_threading = False
     error = 'invalid care factor'
     isnum = re.compile(r'^\s*[0-9.]+\s*$')
     sep = re.compile(r'\s*=\s*')
