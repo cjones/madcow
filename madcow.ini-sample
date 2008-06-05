@@ -79,6 +79,7 @@ wikiquotes=yes          ; look up quotes from wikiquotes
 artfart=no             ; random ascii art
 bash=no                ; bash (irc/im) quotes
 bible=no               ; get a quote from the bible
+care=no                ; generate a high-precision care-o-meter
 chp=no                 ; california real-time traffic reports
 conservapedia=no       ; look up inaccurate "conservative information"
 delicious=no           ; post all urls to delicious (see config below)
