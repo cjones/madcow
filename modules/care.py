@@ -21,6 +21,7 @@ class Main(Module):
     error = 'invalid care factor'
     isnum = re.compile(r'^\s*[0-9.]+\s*$')
     sep = re.compile(r'\s*=\s*')
+    numsep = re.compile(r'(\d)\s+(\d)')
     title = 'CARE-O-METER'
 
     # settings
@@ -30,7 +31,6 @@ class Main(Module):
 
     def __init__(self, madcow=None):
         self.calc = GoogleCalc(madcow)
-
         self.bar = [i for i in '.' * self.size]
         self.size = float(self.size)
         self.min = float(self.min)
@@ -43,6 +43,7 @@ class Main(Module):
             if not self.isnum.search(val):
                 # try google calculator if not a number
                 val = self.calc.response(nick, [val])
+                val = self.numsep.sub(r'\1\2', val)
                 val = self.sep.split(val)[1]
                 val = val.split()[0]
             val = float(val)
