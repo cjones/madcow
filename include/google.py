@@ -43,7 +43,8 @@ class Google(Base):
     luckyopts = {'hl': 'en', 'btnI': 'I', 'aq': 'f', 'safe': 'off'}
     calcopts = {'hl': 'en', 'safe': 'off', 'c2coff': 1, 'btnG': 'Search'}
     spellcheck_opts = {'hl': 'en', 'aq': 'f', 'safe': 'off'}
-    misspelled = re.compile(r'Did you mean to search for: </font><a.*?><b><i>(.*?)</i>', re.I + re.DOTALL)
+    correct = re.compile(r'Did you mean to search for: </font><a.*?>(.*?)</a>',
+            re.I + re.DOTALL)
     reConversionDetected = re.compile('More about (calculator|currency)')
     reConversionResult = re.compile('<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
 
@@ -64,7 +65,8 @@ class Google(Base):
         opts['q'] = query
         result = self.ua.openurl(self.search, opts=opts, referer=self.baseurl)
         try:
-            result = self.misspelled.search(result).group(1)
+            result = self.correct.search(result).group(1)
+            result = stripHTML(result)
         except:
             result = query
         return result
