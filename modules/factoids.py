@@ -376,7 +376,10 @@ class Factoids(Base):
 
         exists = self.get(verb, key)
         if exists == val:
-            return 'I already had it that way, %s' % nick
+            if addressed:
+                return 'I already had it that way, %s' % nick
+            else:
+                return
         if exists:
             if also:
                 if also_or:
@@ -384,7 +387,10 @@ class Factoids(Base):
                 else:
                     val = exists + ' or ' + val
             elif not correction:
-                return '%s: but %s %s %s' % (nick, key, verb, exists)
+                if addressed:
+                    return '%s: but %s %s %s' % (nick, key, verb, exists)
+                else:
+                    return
         val = val[:self._maxval]
         self.set(verb, key, val)
         if addressed:
