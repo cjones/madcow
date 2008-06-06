@@ -18,7 +18,7 @@ class ConsoleProtocol(Madcow):
     _clear = '\x1b[H\x1b[J'
 
     def __init__(self, config=None, dir=None):
-        self.colorlib = ColorLib(type='ansi')
+        self.colorlib = ColorLib('ansi')
         Madcow.__init__(self, config=config, dir=dir)
         self.user_nick = os.environ['USER']
         self.shell = Shell()

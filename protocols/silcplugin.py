@@ -14,7 +14,7 @@ import logging as log
 class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def __init__(self, config=None, dir=None):
     madcow.Madcow.__init__(self, config=config, dir=dir)
-    self.colorlib = ColorLib(type='mirc')
+    self.colorlib = ColorLib('mirc')
 
     keys = silc.create_key_pair("silc.pub", "silc.priv", passphrase="")
     nick = self.config.silcplugin.nick

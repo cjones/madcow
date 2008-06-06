@@ -12,7 +12,7 @@ from time import time as unix_time
 class IRCProtocol(Madcow):
 
     def __init__(self, config=None, dir=None):
-        self.colorlib = ColorLib(type='mirc')
+        self.colorlib = ColorLib('mirc')
         Madcow.__init__(self, config=config, dir=dir)
         if log.root.level <= log.DEBUG:
             irclib.DEBUG = 1
@@ -110,7 +110,7 @@ class IRCProtocol(Madcow):
             return
 
         if req.colorize is True:
-            style = random.choice(ColorLib.rainbowStyles)
+            style = random.choice(self.colorlib._rainbow_map.keys())
             message = self.colorlib.rainbow(message, style=style)
 
         try:
