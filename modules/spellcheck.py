@@ -14,7 +14,7 @@ __copyright__ = 'Copyright (C) 2008 Christopher Jones'
 __all__ = []
 
 class Main(Module):
-    pattern = re.compile(r'^\s*spell(?:\s*check)?\s+(\w+)\s*$', re.I)
+    pattern = re.compile(r'^\s*spell(?:\s*check)?\s+(.+?)\s*$', re.I)
     help = 'spellcheck <word> - use google to spellcheck'
 
     def __init__(self, madcow=None):
