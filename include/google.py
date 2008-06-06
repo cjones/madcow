@@ -43,7 +43,7 @@ class Google(Base):
     luckyopts = {'hl': 'en', 'btnI': 'I', 'aq': 'f', 'safe': 'off'}
     calcopts = {'hl': 'en', 'safe': 'off', 'c2coff': 1, 'btnG': 'Search'}
     spellcheck_opts = {'hl': 'en', 'aq': 'f', 'safe': 'off'}
-    correct = re.compile(r'Did you mean to search for: </font><a.*?>(.*?)</a>',
+    correct = re.compile(r'Did you mean.*?:.*?</font>.*?<a.*?>\s*(.*?)\s*</a>',
             re.I + re.DOTALL)
     reConversionDetected = re.compile('More about (calculator|currency)')
     reConversionResult = re.compile('<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
