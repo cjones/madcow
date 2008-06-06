@@ -112,18 +112,16 @@ class Main(Module):
             song, artist, random_song, full = args
             if song:
                 if artist:
-                    response = self.freak.get_song_for_artist(song, artist)
+                    verses = self.freak.get_song_for_artist(song, artist)
                 else:
-                    response = self.freak.search_for_song(song)
+                    verses = self.freak.search_for_song(song)
             elif random_song:
-                response = self.freak.random_song_for_artist(random_song)
+                verses = self.freak.random_song_for_artist(random_song)
+            verses = map(stripHTML, verses)
+            if full:
+                return '\n'.join(verses)
             else:
-                response = 'what?'
-            if response:
-                if full:
-                    return '\n'.join(response)
-                else:
-                    return random.choice(response)
+                return random.choice(verses)
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
