@@ -148,6 +148,7 @@ class IRCProtocol(Madcow):
         self.processMessage(req)
 
     def preProcess(self, req):
+        req.message = self.colorlib.strip_color(req.message)
         self.checkAddressing(req)
 
         if req.message.startswith('^'):

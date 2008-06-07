@@ -110,6 +110,11 @@ class ColorLib(Base):
         'canada': 'ooowww',
     }
 
+    # regex for stripping color codes
+    _ansi_color = re.compile(r'\x1b\[[0-9;]+m')
+    _mirc_color = re.compile(r'\x03\d{0,2},?\d{1,2}(?:\x16{2})?')
+    _html_color = re.compile(r'<span style=".*">')
+
     def __init__(self, protocol):
         if protocol not in self._protocols:
             raise UnknownProtocol, protocol
@@ -196,4 +201,14 @@ class ColorLib(Base):
             output += '\n'
         self.rainbow_offset[style] = offset % 256
         return output
+
+    def strip_color(self, text):
+        if self.protocol == 'ansi':
+            text = self._ansi_color.sub('', text)
+        elif self.protocol == 'mirc':
+            text = self._mirc_color.sub('', text)
+        elif self.protocol == 'html':
+            text = self._html_color.sub('', text)
+        text = text.replace(self.reset(), '')
+        return text
 
