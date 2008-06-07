@@ -24,7 +24,7 @@ badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
 class IMDB(Base):
     """Interface to IMDB"""
-    baseurl = 'http://www.imdb.com/'
+    baseurl = 'http://imdb.com/'
     search = urljoin(baseurl, '/find')
     search_title = 'IMDb  Search'
     movies = re.compile('<a\s+.*?href=(["\'])(/title/tt\d+/)\\1.*?>(.*?</a>)',
