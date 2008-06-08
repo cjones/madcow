@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Generate random figlet of the ultimate insult! """
+"""Generate ASCII text using figlet! """
 
 import re
 from include.pyfiglet import Figlet
@@ -9,11 +9,13 @@ import random
 import os
 import logging as log
 
+__author__ = 'James Johnston <jjohnston@email4life.com>'
+
 class Main(Module):
-    pattern = re.compile('^\s*yourmom\s*$')
+    pattern = re.compile('^\s*figlet\s+(.+?)\s*$')
     require_addressing = True
     allow_threading = False
-    help = 'yourmom - random figlet of the ultimate insult'
+    help = 'figlet <text> - ASCII text generator'
 
     def __init__(self, madcow=None):
         zipfile = os.path.join(madcow.dir, 'include/fonts.zip')
@@ -37,12 +39,15 @@ class Main(Module):
     def response(self, nick, args, **kwargs):
         try:
             self.figlet.setFont(font=random.choice(self.fonts))
-            text = self.figlet.renderText('your mom')
+            text = self.figlet.renderText(args[0])
             return text
 
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
-            return '%s: your mom :(' % nick
+            return '%s: figlet :(' % nick
 
 
+if __name__ == '__main__':
+    from include.utils import test_module
+    test_module(Main)

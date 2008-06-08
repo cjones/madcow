@@ -84,6 +84,7 @@ chp=no                 ; california real-time traffic reports
 conservapedia=no       ; look up inaccurate "conservative information"
 delicious=no           ; post all urls to delicious (see config below)
 factoids=no            ; makes madcow remember stuff from chatter
+figlet=no              ; generate ascii fonts
 grufti=no              ; random response triggeres, like grufti bot
 hugs=no                ; random group hug confession
 jinx=no                ; someone owes you a coke for being unoriginal
@@ -98,7 +99,6 @@ traffic=no             ; real-time traffic data (n. california only)
 war=no                 ; current war status
 webtender=no           ; how to make drinks!
 woot=no                ; latest woot offer
-yourmom=no             ; yourmom ascii art :D
 
 ; admin module
 [admin]
