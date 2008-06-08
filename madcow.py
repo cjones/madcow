@@ -26,7 +26,6 @@ __all__ = ['Request', 'User', 'Admin', 'ServiceHandler', 'PeriodicEvents',
 _logformat = '[%(asctime)s] %(levelname)s: %(message)s'
 _loglevel = log.WARN
 _charset = 'latin1'
-_pidfile = 'madcow.pid'
 _config = 'madcow.ini'
 _config_warning = 'created config %s - you should edit this and rerun'
 
@@ -835,7 +834,6 @@ def main():
     dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(dir)
     default_config = os.path.join(dir, _config)
-    default_pidfile = os.path.join(dir, _pidfile)
 
     # parse commandline options
     parser = OptionParser(version=__version__)
@@ -851,8 +849,8 @@ def main():
             const=log.INFO, help='increase logging output')
     parser.add_option('-q', '--quiet', dest='loglevel', action='store_const',
             const=log.WARN, help='only show errors')
-    parser.add_option('-P', '--pidfile', default=default_pidfile,
-            metavar='<file>', help='default: %default')
+    parser.add_option('-P', '--pidfile', metavar='<file>',
+            help='override pidfile')
     opts, args = parser.parse_args()
 
     # read config file
@@ -915,27 +913,39 @@ def main():
     if config.main.detach or opts.detach:
         detach()
     
+    # determine pidfile to use (commandline overrides config)
+    if opts.pidfile:
+        pidfile = opts.pidfile
+    else:
+        pidfile = config.main.pidfile
+
     # write pidfile
-    if os.path.exists(opts.pidfile):
-        log.warn('removing stale pidfile: %s' % opts.pidfile)
-        os.remove(opts.pidfile)
-    try:
-        fo = open(opts.pidfile, 'wb')
+    if pidfile:
+        if os.path.exists(pidfile):
+            log.warn('removing stale pidfile: %s' % pidfile)
+            os.remove(pidfile)
         try:
-            fo.write(str(os.getpid()))
-        finally:
-            fo.close()
-    except Exception, e:
-        log.warn('filed to write %s: %s' % (opts.pidfile, e))
+            fo = open(pidfile, 'wb')
+            try:
+                fo.write(str(os.getpid()))
+            finally:
+                fo.close()
+        except Exception, e:
+            log.warn('filed to write %s: %s' % pidfile)
+            log.exception(e)
 
     # run bot & shut down threads when done
     try:
         bot = ProtocolHandler(config=config, dir=dir)
         bot.start()
     finally:
-        log.info('removing pidfile')
-        if os.path.exists(opts.pidfile):
-            os.remove(opts.pidfile)
+        if pidfile and os.path.exists(pidfile):
+            log.info('removing pidfile')
+            try:
+                os.remove(pidfile)
+            except Exception, e:
+                log.warn('failed to remove pidfile %s' % pidfile)
+                log.exception(e)
         bot.stop()
 
     log.info('madcow is exiting cleanly')

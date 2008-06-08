@@ -28,6 +28,10 @@ logpublic=yes
 loglevel=WARN           ; default level, valid options are DEBUG, INFO, WARN
 logfile=madcow.log      ; leave blank for no file-level logging
 ;
+; filename to record process PID in
+;
+pidfile=madcow.pid
+;
 ; encode output to this format (latin1, utf8, ascii, etc.)
 ; most common terminals default to latin1, so this is the default of madcow.
 ; encoding to utf8 will allow you to support a wider range of output,
