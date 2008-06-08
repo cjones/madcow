@@ -9,7 +9,7 @@ from urlparse import urljoin
 import logging as log
 
 class Main(Module):
-    pattern = re.compile('^\s*define\s+(\w+)(?:\s+(\d+))?$')
+    pattern = re.compile('^\s*define\s+(\S+)(?:\s+(\d+))?$')
     require_addressing = True
     help = 'define <word/phrase> [#] - get a definition from merriam-webster'
 
