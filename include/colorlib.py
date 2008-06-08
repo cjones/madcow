@@ -112,7 +112,7 @@ class ColorLib(Base):
 
     # regex for stripping color codes
     _ansi_color = re.compile(r'\x1b\[[0-9;]+m')
-    _mirc_color = re.compile(r'\x03\d{0,2},?\d{1,2}(?:\x16{2})?')
+    _mirc_color = re.compile(r"([\x02\x0F\x1F\x0E\x16\x1B]|\x03([0-9]{0,2})(,([0-9]{0,2}))?|\x04[0-9A-Fa-f]{6}(,([0-9A-Fa-f]){6})?)*")  
     _html_color = re.compile(r'<span style=".*">')
 
     def __init__(self, protocol):
