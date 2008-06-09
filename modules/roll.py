@@ -52,6 +52,9 @@ class Main(Module):
         if sides == 0 or num_dice == 0:
             return 'GOOD JOB, UNIVERSE %s' % self.colorize('EXPLODES', 'red')
 
+        if sides == 1 and num_dice == 1:
+            return 'CHEATING DETECTED, YOU %s' % self.colorize('DIE', 'red')
+
         min = num_dice
         max = num_dice * sides
         saving_throw = self.roll(min, max)
