@@ -835,6 +835,14 @@ def main():
     sys.path.append(dir)
     default_config = os.path.join(dir, _config)
 
+    # make sure proper subdirs exist
+    datadir = os.path.join(dir, 'data')
+    if not os.path.exists(datadir):
+        os.mkdir(datadir)
+    logdir = os.path.join(dir, 'logs')
+    if not os.path.exists(logdir):
+        os.mkdir(logdir)
+
     # parse commandline options
     parser = OptionParser(version=__version__)
     parser.add_option('-c', '--config', default=default_config,
