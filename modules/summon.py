@@ -22,7 +22,7 @@ class Main(Module):
             sendto, reason = args
             email = self.learn.lookup('email', sendto)
             if email is None:
-                raise Exception, "I don't know the email for %s" % sendto
+                return "%s: I don't know the email for %s" % (nick, sendto)
             body = 'To: %s <%s>\n' % (sendto, email)
             body += 'From: %s\n' % (self.config.smtp.sender)
             body += 'Subject: Summon from %s' % nick

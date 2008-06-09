@@ -76,7 +76,11 @@ tests = {
         },
         {
             'request': 'foo?',
-            'result': 'test: foo is bar',
+            'result': re.compile(r'foo.*?(is|was).*?bar'),
+        },
+        {
+            'request': 'forget foo',
+            'result': 'test: I forgot foo',
         },
     ],
     'calc': {
@@ -159,7 +163,7 @@ tests = {
     },
     'movie': {
         'request': 'rate manos, the hands of fate',
-        'result': 'test: freshness: 8%, imdb rating: 1.8',
+        'result': 'test: IMDB: 1.8, Freshness: 8%',
     },
     'stockquote': {
         'request': 'quote goog',
