@@ -385,12 +385,11 @@ class Modules(Base):
     _pyext = re.compile(r'\.py$')
     _ignore_mods = ('__init__', 'template')
 
-    def __init__(self, madcow, subdir, entry=_entry):
+    def __init__(self, madcow, subdir, entry=_entry, dir=None):
         self.madcow = madcow
         self.subdir = subdir
         self.entry = entry
-        self.prefix = os.path.dirname(__file__)
-        self.mod_dir = os.path.join(self.prefix, self.subdir)
+        self.mod_dir = os.path.join(dir, self.subdir)
         self.modules = {}
         self.help = []
         self.load_modules()
@@ -517,8 +516,8 @@ class Madcow(Base):
             self.charset = _charset
 
         # load modules
-        self.modules = Modules(self, 'modules')
-        self.periodics = Modules(self, 'periodic')
+        self.modules = Modules(self, 'modules', dir=self.dir)
+        self.periodics = Modules(self, 'periodic', dir=self.dir)
         self.usageLines = self.modules.help + self.periodics.help
 
         # signal handlers
@@ -831,7 +830,7 @@ def main():
     """Entry point to set up bot and run it"""
 
     # where we are being run from
-    dir = os.path.abspath(os.path.dirname(__file__))
+    dir = os.path.abspath(os.path.dirname(sys.argv[0]))
     sys.path.append(dir)
     default_config = os.path.join(dir, _config)
 
@@ -945,6 +944,12 @@ def main():
     # run bot & shut down threads when done
     try:
         bot = ProtocolHandler(config=config, dir=dir)
+    except Exception, e:
+        log.fatal("couldn't initialize bot")
+        log.exception(e)
+        return 1
+
+    try:
         bot.start()
     finally:
         if pidfile and os.path.exists(pidfile):
