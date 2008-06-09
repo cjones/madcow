@@ -17,6 +17,7 @@ from signal import signal, SIGHUP, SIGTERM
 import shutil
 from include.thread import lock, launch_thread, stop_threads
 
+# STATIC GLOBALS
 __version__ = '1.2.1'
 __author__ = 'Christopher Jones <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
