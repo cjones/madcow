@@ -28,7 +28,8 @@ elif self.subdir == 'periodic':
     filenames = _static_periodic"""
 _grufti_code = """fi = open(%s, 'wb')
 try:
-    fi.write(madcow._grufti_data)
+    import madcow as bot
+    fi.write(bot._grufti_data)
 finally:
     fi.close()"""
 _zipheader = """#!/bin/sh
