@@ -64,7 +64,7 @@ class IMDB(Base):
             response = 'IMDB'
             if normalize(title) != movie:
                 response += ' [%s]' % stripHTML(title)
-            response += ': %s' % rating
+            response += ': %s/10' % rating
             return response
 
         except:
@@ -121,14 +121,74 @@ class RottenTomatoes(Base):
             return
 
 
+class MetaCritic(Base):
+    baseurl = 'http://www.metacritic.com/'
+    search = urljoin(baseurl, '/search/process')
+    movie_opts = {
+        'sort': 'relevance',
+        'termType': 'all',
+        'ts': None,
+        'ty': '1',
+        'x': '24',
+        'y': '10',
+    }
+    result = re.compile(r'<strong>Film:</strong>\s+<a href="([^"]+)"><b>(.*?)</b>', re.I+re.DOTALL)
+    critic_rating = re.compile(r'ALT="Metascore: ([0-9.]+)"')
+    user_rating = re.compile(r'<span class="subhead">([0-9.]+)</span>')
+
+    def rate(self, movie):
+        try:
+            opts = dict(self.movie_opts)
+            opts['ts'] = movie
+            page = geturl(self.search, opts=opts)
+            movie = normalize(movie)
+            movies = self.result.findall(page)
+            movies = [(path, normalize(title)) for path, title in movies]
+            url = None
+            for path, title in movies:
+                if title == movie:
+                    url = urljoin(self.baseurl, path)
+                    break
+            if not url:
+                url = urljoin(self.baseurl, movies[0][0])
+            page = geturl(url, referer=self.search)
+            try:
+                critic_rating = self.critic_rating.search(page).group(1)
+                critic_rating = 'Critics: ' + critic_rating + '/100'
+            except:
+                critic_rating = None
+            try:
+                user_rating = self.user_rating.search(page).group(1)
+                user_rating = 'Users: ' + user_rating + '/10'
+            except:
+                user_rating = None
+
+            title = html_title.search(page).group(1)
+            title = title.replace(': Reviews', '')
+
+            response = 'Meta'
+            if normalize(title) != movie:
+                response += ' [%s]' % stripHTML(title)
+            ratings = [i for i in (critic_rating, user_rating) if i is not None]
+            ratings = ', '.join(ratings)
+            if ratings:
+                response += ' - %s' % ratings
+            return response
+        except:
+            return
+
+
 class MovieRatings(Base):
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
-    imdb = IMDB()
-    rt = RottenTomatoes()
+    sources = (
+        IMDB(),
+        RottenTomatoes(),
+        MetaCritic(),
+    )
 
     def rate(self, movie):
         """Get movie ratings from imdb and rotten tomatoes"""
-        ratings = [self.imdb.rate(movie), self.rt.rate(movie)]
+        ratings = [source.rate(movie) for source in self.sources]
         ratings = [rating for rating in ratings if rating is not None]
         if ratings:
             return ', '.join(ratings)
