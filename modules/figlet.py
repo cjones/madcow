@@ -36,7 +36,7 @@ class Main(Module):
             'straight', 'twopoint'
         )
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             self.figlet.setFont(font=random.choice(self.fonts))
             text = self.figlet.renderText(args[0])

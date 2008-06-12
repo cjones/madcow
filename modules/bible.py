@@ -20,7 +20,7 @@ class Main(Module):
     junk_html = re.compile(r'<(h4|h5|span|sup|strong|ol|a).*?</\1>', re.I)
     max = 800
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         query = args[0]
 
         try:

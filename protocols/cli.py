@@ -7,7 +7,7 @@ import logging as log
 from include.shell import Shell
 
 class ConsoleProtocol(Madcow):
-    change_nick = re.compile(r'^\s*nick\s+(\S+)\s*$', re.I)
+    _new_nick = re.compile(r'^\s*nick\s+(\S+)\s*$', re.I)
     _cli_usage = [
         'quit - quit madcow',
         'history - show history',
@@ -21,12 +21,14 @@ class ConsoleProtocol(Madcow):
         self.colorlib = ColorLib('ansi')
         Madcow.__init__(self, config=config, dir=dir)
         self.user_nick = os.environ['USER']
-        self.shell = Shell()
+        self.shell = Shell(polls=[self.check_response_queue])
         self.usageLines += self._cli_usage
 
-    def _start(self, *args):
+    def start(self):
+        Madcow.start(self)
         self.output("type 'help' for a list of commands")
         while self.running:
+            self.check_response_queue()
             try:
                 input = self.shell.readline(self._prompt)
             except IOError:
@@ -56,23 +58,17 @@ class ConsoleProtocol(Madcow):
                     req.colorize = True
                     req.message = req.message[1:]
 
-                self._processMessage(req)
+                try:
+                    self.user_nick = self._new_nick.search(req.message).group(1)
+                    self.output('nick changed to: %s' % self.user_nick, req)
+                    continue
+                except:
+                    pass
+                self.process_message(req)
 
-    def _processMessage(self, req):
-        try:
-            self.user_nick = self.change_nick.search(req.message).group(1)
-            self.output('nick changed to: %s' % self.user_nick, req)
-            return
-        except:
-            pass
-        self.processMessage(req)
-
-    def _output(self, message, req=None):
-        if req is None:
-            req = Request(message=message)
-        if req.colorize is True:
+    def protocol_output(self, message, req=None):
+        if req is not None and req.colorize is True:
             message = self.colorlib.rainbow(message)
-
         print message
 
 

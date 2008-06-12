@@ -23,6 +23,6 @@ class Main(Base):
         self.frequency = madcow.config.modulename.updatefreq
         self.output = madcow.config.modulename.channel
 
-    def process(self):
+    def response(self, *args):
         """This is called by madcow, should return a string or None"""
 

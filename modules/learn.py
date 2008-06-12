@@ -48,7 +48,7 @@ class Main(Module):
         dbm[key.lower()] = val
         dbm.close()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             db, key, val = args
             if db not in self._allowed:

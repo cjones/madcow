@@ -20,7 +20,7 @@ class Main(Module):
     _rss_url = 'http://newsrss.bbc.co.uk/'
     _world_url = urljoin(_rss_url, '/rss/newsonline_uk_edition/world/rss.xml')
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         query = args[0]
 
         try:

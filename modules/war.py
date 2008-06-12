@@ -107,7 +107,7 @@ class Main(Module):
         self.iran = IranWar()
         self.iraq = IraqWar()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             return __format__ % (self.terror.level(), self.doom.time(),
                     self.iran.war(), self.iraq.war(), self.iraq.bodycount())

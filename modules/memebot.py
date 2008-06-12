@@ -169,7 +169,7 @@ class Main(Module):
         scores = sorted(scores, lambda x, y: cmp(y[1], x[1]))
         return scores
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         nick = nick.lower()
         chan = kwargs['channel'].lower()
         addressed = kwargs['addressed']

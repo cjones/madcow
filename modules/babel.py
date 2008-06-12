@@ -34,7 +34,7 @@ class Main(Module):
     translate = urljoin(baseurl, '/translate_txt')
     unknown =  "I don't know that language, try: list languages"
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             if args[0] == 'list languages':
                 return '%s: %s' % (nick, ', '.join(self.languages.keys()))

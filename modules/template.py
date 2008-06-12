@@ -49,7 +49,7 @@ class Main(Module):
     def __init__(self, madcow=None):
         self.madcow = madcow # this gives user access to the internal bot
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         # this function should return a response or None
         # - args is a list that matches the matched parts of the pattern
         # - kwargs give you access to the details of the request from the bot

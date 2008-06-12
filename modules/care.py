@@ -36,7 +36,7 @@ class Main(Module):
         self.max = float(self.max)
         self.range = self.max - self.min
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             val = args[0]
             if not self.isnum.search(val):

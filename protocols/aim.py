@@ -13,7 +13,8 @@ class AIMProtocol(Madcow):
         Madcow.__init__(self, config=config, dir=dir)
         self.newline = re.compile('[\r\n]+')
 
-    def _start(self):
+    def start(self):
+        Madcow.start(self)
         log.info('[AIM] Logging into aol.com')
         server = ('login.oscar.aol.com', 5190)
         p = protocol.ClientCreator(
@@ -23,9 +24,10 @@ class AIMProtocol(Madcow):
         log.info('[AIM] Connected')
 
         p.protocolClass.BOSClass._ProtocolHandler = self
+        ### XXX HOW TO CHECK RESPONSE QUEUE?
         reactor.run()
 
-    def _output(self, message, req):
+    def protocol_output(self, message, req=None):
         message = self.newline.sub('<br>', message)
         req.aim.sendMessage(req.nick, message)
 
@@ -60,7 +62,7 @@ class OSCARConnection(oscar.BOSConnection):
         handler = self._ProtocolHandler
         log.info('[AIM] <%s> %s' % (req.nick, req.message))
         handler.checkAddressing(req)
-        handler.processMessage(req)
+        handler.process_message(req)
 
 
 class OSCARAuth(oscar.OscarAuthenticator):

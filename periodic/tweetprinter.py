@@ -35,7 +35,7 @@ class Main(Base):
   def __get_update_str(self):
     return time.strftime("%a, %d %b %Y %X GMT", self.lastupdate)
 
-  def process(self):
+  def response(self, *args):
     """This is called by madcow, should return a string or None"""
     try:
       log.debug('getting tweets...')

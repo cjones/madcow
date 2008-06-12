@@ -18,7 +18,7 @@ class Main(Module):
     random_url = urljoin(baseurl, 'random.cgi')
     artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre>(.*?)</pre>', re.DOTALL)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         query = args[0]
         if query is None or query == '':
             url = self.random_url

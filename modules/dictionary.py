@@ -19,7 +19,7 @@ class Main(Module):
     header = re.compile('^.*?:\xa0')
     base_url = 'http://www.m-w.com/dictionary/'
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         word = args[0].lower()
         try:
             try:

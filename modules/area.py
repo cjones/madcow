@@ -16,7 +16,7 @@ class Main(Module):
     searchurl = urljoin(baseurl, '/lookups/phonelocation.asp')
     city = re.compile(r'<tr><td><A[^>]+>(.*?)</a></td><td>(.*?)</td><td align=center>\d+</td></tr>')
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             geturl(self.baseurl)
             doc = geturl(self.searchurl, opts={'number': args[0]})

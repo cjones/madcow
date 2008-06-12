@@ -163,7 +163,7 @@ tests = {
     },
     'movie': {
         'request': 'rate manos, the hands of fate',
-        'result': 'test: IMDB: 1.8, Freshness: 8%',
+        'result': 'test: IMDB: 1.8/10, Freshness: 8%',
     },
     'stockquote': {
         'request': 'quote goog',
@@ -190,7 +190,7 @@ class Main(Module):
         if madcow.config.main.module != 'cli':
             self.enabled = False
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         testmod = args[0]
         results = {}
         for mod_name, obj in self.madcow.modules:
@@ -223,9 +223,9 @@ class Main(Module):
                         print "\n* args didn't match"
                         passed = False
                         break
-                    kwargs = dict(req.__dict__.items() + [('args', args),
-                        ('module', obj), ('req', req)])
-                    response = obj.response(**kwargs)
+                    kwargs = {'req': req}
+                    kwargs.update(req.__dict__)
+                    response = obj.response(req.nick, args, kwargs)
                     if isinstance(t['result'], str):
                         if response != t['result']:
                             passed = False

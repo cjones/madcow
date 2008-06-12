@@ -201,7 +201,7 @@ class Main(Module):
     error = 'does that movie even exist?'
     movie = MovieRatings()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             return '%s: %s' % (nick, self.movie.rate(args[0]))
         except Exception, e:

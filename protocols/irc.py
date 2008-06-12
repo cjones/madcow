@@ -23,7 +23,7 @@ class IRCProtocol(Madcow):
         self.events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg',
                 'namreply']
         if self.config.irc.channels is not None:
-            self.channels = self.reDelim.split(self.config.irc.channels)
+            self.channels = self._delim.split(self.config.irc.channels)
         else:
             self.channels = []
         self.names = {}
@@ -35,14 +35,16 @@ class IRCProtocol(Madcow):
         self.server.connect(self.config.irc.host, self.config.irc.port,
                 self.config.irc.nick)
 
-    def _stop(self):
+    def stop(self):
+        Madcow.stop(self)
         log.info('[IRC] * Quitting IRC')
         message = self.config.irc.quitMessage
         if message is None:
             message = 'no reason'
         self.server.disconnect(message)
 
-    def _start(self):
+    def start(self):
+        Madcow.start(self)
         self.connect()
         for event in self.events:
             log.info('[IRC] * Registering event: %s' % event)
@@ -51,11 +53,12 @@ class IRCProtocol(Madcow):
 
         while self.running:
             try:
-                self.irc.process_once(0.2)
+                self.irc.process_once(0.1)
+                self.check_response_queue()
             except KeyboardInterrupt:
                 self.running = False
             except Exception, e:
-                log.warn('EINTR detected in irc loop')
+                log.warn('EINTR detected in irc loop?')
                 log.exception(e)
 
     def botName(self):
@@ -83,7 +86,6 @@ class IRCProtocol(Madcow):
     # when losing connection, reconnect if configured to do so, otherwise exit
     def on_disconnect(self, server, event):
         log.warn('[IRC] * Disconnected from server')
-
         if self.config.irc.reconnect and self.running:
             time.sleep(self.config.irc.reconnectWait)
             self.connect()
@@ -99,8 +101,8 @@ class IRCProtocol(Madcow):
                 server.join(event.target())
                 server.privmsg(event.target(), self.config.irc.rejoinReply)
 
-    # function to putput to IRC
-    def _output(self, message, req):
+    # function to output to IRC
+    def protocol_output(self, message, req=None):
         if message is None:
             return
 
@@ -109,20 +111,17 @@ class IRCProtocol(Madcow):
         if len(message) == 0:
             return
 
-        if req.colorize is True:
+        if req.colorize:
             style = random.choice(self.colorlib._rainbow_map.keys())
             message = self.colorlib.rainbow(message, style=style)
-
         try:
             wrap = self.config.irc.wrapsize
         except:
             wrap = 400
-
         output = []
         for line in message.splitlines():
             for wrapped in textwrap.wrap(line, wrap):
                 output.append(wrapped)
-
         for line in output:
             self.server.privmsg(req.sendTo, line)
 
@@ -144,10 +143,6 @@ class IRCProtocol(Madcow):
         else:
             req.sendTo = req.channel
 
-        self.preProcess(req)
-        self.processMessage(req)
-
-    def preProcess(self, req):
         req.message = self.colorlib.strip_color(req.message)
         self.checkAddressing(req)
 
@@ -156,6 +151,7 @@ class IRCProtocol(Madcow):
             req.colorize = True
         else:
             req.colorize = False
+        self.process_message(req)
 
     def on_namreply(self, server, event):
         log.debug('[IRC] Updating NAMES list')
@@ -177,5 +173,4 @@ class IRCProtocol(Madcow):
 
 class ProtocolHandler(IRCProtocol):
     pass
-
 

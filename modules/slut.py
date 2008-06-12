@@ -78,7 +78,7 @@ class Main(Module):
   help = "slutcheck <phrase> - see how slutty the phrase is"
 
   # function to generate a response
-  def response(self, nick, args, **kwargs):
+  def response(self, nick, args, kwargs):
     try:
       query = " ".join(args)
       rating = slutrating(query)

@@ -17,7 +17,7 @@ class Main(Module):
     baseurl = 'http://beta.grouphug.us/'
     random = urljoin(baseurl, '/random')
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             doc = geturl(self.random)
             soup = BeautifulSoup(doc)

@@ -456,7 +456,7 @@ class Main(Module):
         self.madcow = madcow
         self.factoids = Factoids(parent=self)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             return self.factoids.parse(args[0], nick, kwargs['req'])
         except Exception, e:

@@ -20,7 +20,7 @@ class Main(Module):
     def __init__(self, madcow=None):
         self.google = Google()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             query = args[0]
             corrected = self.google.spellcheck(query)

@@ -17,7 +17,7 @@ class Main(Module):
         self.learn = Learn(madcow)
         self.config = madcow.config
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             sendto, reason = args
             email = self.learn.lookup('email', sendto)

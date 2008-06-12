@@ -13,6 +13,10 @@ module=cli
 ;
 detach=no
 ;
+; how many worker threads to spawn for module handling
+;
+workers=5
+;
 ; setting this to yes will log public chatter in the logs directory
 ; (IRC and SILC)
 ;
@@ -26,7 +30,7 @@ logpublic=yes
 ;
 ; set this to log console output to a file in madcow base directory
 loglevel=WARN           ; default level, valid options are DEBUG, INFO, WARN
-logfile=madcow.log      ; leave blank for no file-level logging
+logfile=logs/madcow.log ; leave blank for no file-level logging
 ;
 ; filename to record process PID in
 ;

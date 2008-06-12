@@ -63,7 +63,7 @@ class Main(Module):
         quote = '%s: %s' % (title, quote)
         return quote
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             author = args[0]
             if author:

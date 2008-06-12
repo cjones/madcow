@@ -18,7 +18,7 @@ class Main(Module):
     randomURL = urljoin(baseURL, '/random.bml')
     max = 800
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             try:
                 user = args[0]

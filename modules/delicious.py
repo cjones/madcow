@@ -44,7 +44,6 @@ class Main(Module):
     pattern = Module._any
     require_addressing = False
     url = re.compile(r'https?://\S+', re.I)
-    error = "I could not post that URL to delicious, maybe it's DOWN"
 
     def __init__(self, madcow=None):
         try:
@@ -58,12 +57,11 @@ class Main(Module):
             return
         self.delicious = Delicious(username, password)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             for url in self.url.findall(args[0]):
                 self.delicious.post(url, tags=['madcow', nick])
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
-            return "%s: %s" % (nick, self.error)
 

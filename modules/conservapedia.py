@@ -21,7 +21,7 @@ class Main(Module):
         self.wiki = Wiki(base_url=_baseurl, random_path=_random_path,
                 advert=_advert)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             return self.wiki.get_summary(args)
         except Exception, e:

@@ -16,7 +16,7 @@ class Main(Module):
     data = re.compile('<td class="T".*?>(.*?)</td>')
     clean = re.compile('[^0-9a-z ]', re.I)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         query = args[0]
         try:
             check = self.clean.sub('', query)

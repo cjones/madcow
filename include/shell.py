@@ -3,6 +3,9 @@
 import sys
 import termios
 import tty
+import fcntl
+import os
+from select import select
 
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -22,7 +25,8 @@ class Shell:
     right = ansi + 'C'
     left = ansi + 'D'
 
-    def __init__(self):
+    def __init__(self, polls=[]):
+        self.polls = list(polls)
         self.history = []
 
     def add_history(self, input):
@@ -32,16 +36,6 @@ class Shell:
         self.history = unique
         self.history.reverse()
 
-    def getch(self):
-        fd = sys.stdin.fileno()
-        old = termios.tcgetattr(fd)
-        try:
-            tty.setraw(fd)
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old)
-        return ch
-
     def readline(self, prompt='', fo=sys.stdout):
         line = ''
         buf = ''
@@ -49,6 +43,7 @@ class Shell:
         history.append(line)
         history.reverse()
         fo.write(prompt)
+        fo.flush()
         pos = 0
 
         def redraw():
@@ -57,56 +52,75 @@ class Shell:
             fo.write('\r' + new)
             fo.write(' ' * padding)
             fo.write(self.left * padding)
+            fo.flush()
 
-        while True:
-            ch = self.getch()
-            if ch in self.quit:
-                line = 'quit'
-                redraw()
-                fo.write(self.linefeed)
-                break
-            if ch in self.linefeed:
-                fo.write(self.linefeed)
-                break
-            if ch in self.backspace:
-                if len(line):
-                    line = line[:-1]
-                    fo.write(self.left + ' ' + self.left)
-                continue
-            buf += ch
-            if buf == self.up:
-                buf = ''
-                if self.history:
-                    if pos == 0:
-                        history[0] = line
-                    pos += 1
-                    if pos == len(history):
+        stdin = sys.stdin.fileno()
+        old = termios.tcgetattr(stdin)
+        try:
+            tty.setraw(stdin)
+            fcntl.fcntl(stdin, fcntl.F_SETFL, os.O_NONBLOCK)
+            while True:
+                for poll in self.polls:
+                    poll()
+                if stdin in select([stdin], [], [], 0.1)[0]:
+                    ch = os.read(stdin, 1)
+                else:
+                    ch = ''
+                if ch is not None and not len(ch):
+                    continue
+                if ch in self.quit:
+                    line = 'quit'
+                    redraw()
+                    fo.write(self.linefeed)
+                    fo.flush()
+                    break
+                if ch in self.linefeed:
+                    fo.write(self.linefeed)
+                    fo.flush()
+                    break
+                if ch in self.backspace:
+                    if len(line):
+                        line = line[:-1]
+                        fo.write(self.left + ' ' + self.left)
+                        fo.flush()
+                    continue
+                buf += ch
+                if buf == self.up:
+                    buf = ''
+                    if self.history:
+                        if pos == 0:
+                            history[0] = line
+                        pos += 1
+                        if pos == len(history):
+                            pos -= 1
+                        line = history[pos]
+                        redraw()
+                    continue
+                elif buf == self.down:
+                    buf = ''
+                    if history:
                         pos -= 1
-                    line = history[pos]
-                    redraw()
-                continue
-            elif buf == self.down:
+                        if pos < 0:
+                            pos = 0
+                        line = history[pos]
+                        redraw()
+                    continue
+                elif buf == self.ansi[:len(buf)]:
+                    continue
+                elif buf.startswith(self.ansi):
+                    buf = ''
+                    post = 0
+                    continue
+                pos = 0
+                fo.write(buf)
+                fo.flush()
+                line += buf
                 buf = ''
-                if history:
-                    pos -= 1
-                    if pos < 0:
-                        pos = 0
-                    line = history[pos]
-                    redraw()
-                continue
-            elif buf == self.ansi[:len(buf)]:
-                continue
-            elif buf.startswith(self.ansi):
-                buf = ''
-                post = 0
-                continue
-            pos = 0
-            fo.write(buf)
-            line += buf
-            buf = ''
-        if len(line):
-            self.add_history(line)
-        return line
+            if len(line):
+                self.add_history(line)
+            return line
+        finally:
+            termios.tcsetattr(stdin, termios.TCSADRAIN, old)
 
 
 def main():

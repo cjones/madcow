@@ -19,7 +19,7 @@ class Main(Module):
     ingredients = re.compile('<LI>(.*?CLASS=ingr.+)')
     instructions = re.compile('<H3>Mixing instructions:</H3>.*?<P>(.*?)</P>', re.DOTALL)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         query = args[0]
         try:
             doc = geturl(self.search, opts={'verbose': 'on', 'name': query})

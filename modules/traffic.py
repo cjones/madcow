@@ -57,7 +57,7 @@ class Main(Module):
                 break
         return c, m, x
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             from_loc = self.get_location_data(args[0])
             to_loc = self.get_location_data(args[1])

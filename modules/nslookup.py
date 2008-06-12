@@ -13,7 +13,7 @@ class Main(Module):
     help = 'nslookup <ip|host> - perform DNS lookup'
     _byip = re.compile(r'^(\d+\.){3}\d+$')
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         query = args[0]
         if self._byip.search(query):
             try:

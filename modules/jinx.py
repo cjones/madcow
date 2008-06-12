@@ -69,7 +69,7 @@ class Main(Module):
     self.log = ChatLog()
     
   # function to generate a response
-  def response(self, nick, args, **kwargs):
+  def response(self, nick, args, kwargs):
     try:
       line = args[0]
       

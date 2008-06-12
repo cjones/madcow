@@ -34,7 +34,7 @@ class Main(Module):
         author = cells[3].string
         return '<%s@%s> %s' % (author, source, comment)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             return self.get_comment()
         except Exception, e:

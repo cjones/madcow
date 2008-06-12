@@ -107,7 +107,7 @@ class Main(Module):
     def __init__(self, madcow=None):
         self.freak = LyricsFreak()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             song, artist, random_song, full = args
             if song:

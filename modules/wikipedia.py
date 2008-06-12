@@ -15,7 +15,7 @@ class Main(Module):
     def __init__(self, *args, **kwargs):
         self.wiki = Wiki()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             return self.wiki.get_summary(args)
         except Exception, e:

@@ -19,7 +19,7 @@ class Main(Module):
     def __init__(self, *args, **kwargs):
         self.google = Google()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             query = args[0]
             return '%s: %s' % (nick, self.google.lucky(query))

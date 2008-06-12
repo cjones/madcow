@@ -45,7 +45,7 @@ class Main(Module):
         color_code = self._color_map[color]
         return '\x03%d\x16\x16%s\x0f' % (color_code, text)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         num_dice = self.normalize(args[0])
         sides = self.normalize(args[1])
 

@@ -14,7 +14,7 @@ class Main(Base):
         if madcow.config.main.module != 'irc':
             self.enabled = False
 
-    def process(self):
+    def response(self, *args):
         # determine who can be opped
         auto_op = []
         passwd = self.madcow.admin.authlib.get_passwd()

@@ -76,7 +76,7 @@ class Main(Module):
     def __init__(self, madcow=None):
         self.karma = Karma(madcow)
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         """This function should return a response to the query or None."""
         input = args[0]
         try:

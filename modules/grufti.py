@@ -58,7 +58,7 @@ class Main(Module):
             output = re.sub(re.escape(token), word, output, 1)
         return output
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             for matches, responses in self.data:
                 for match in matches:

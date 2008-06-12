@@ -118,7 +118,7 @@ class Main(Module):
         except:
             self.learn = None
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
 
         try:
             args = args[0]

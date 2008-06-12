@@ -96,7 +96,7 @@ class Main(Module):
     def __init__(self, madcow=None):
         self.yahoo = Yahoo()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         query = args[0]
         try:
             return self.yahoo.get_quote(query)

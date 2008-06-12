@@ -94,7 +94,7 @@ def add_statics():
     mfile = os.path.join(_prefix, 'madcow.py')
     madcow = slurp(mfile).splitlines()
     for static in statics:
-        i = madcow.index('# STATIC GLOBALS')
+        i = madcow.index('# STATIC VARIABLES')
         madcow.insert(i+1, static)
     for i, line in enumerate(madcow):
         try:

@@ -16,7 +16,7 @@ class Main(Module):
     rssurl = urljoin(baseurl, '/Blog/Rss.aspx')
     max = 200
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             feed = rssparser.parse(self.rssurl)
 

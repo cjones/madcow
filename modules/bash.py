@@ -49,7 +49,7 @@ class Main(Module):
     }
     _error = 'Having some issues, make some stupid quotes yourself'
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         try:
             source = self.sources[args[0]]
 

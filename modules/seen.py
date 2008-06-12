@@ -58,7 +58,7 @@ class Main(Module):
         db[nick.lower()] = packed
         db.close()
 
-    def response(self, nick, args, **kwargs):
+    def response(self, nick, args, kwargs):
         channel = kwargs['channel']
         line = args[0]
 
