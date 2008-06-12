@@ -24,9 +24,9 @@ logpublic=yes
 ;
 ; these nicks will be completely ignored in public settings such as
 ; IRC or SILC. you should put other bots that reside in the channel
-; in this list to prevent feedback loops.
+; in this list to prevent feedback loops. comma-delimited
 ;
-;ignoreList=somebot, abusiveGuy
+ignoreList=
 ;
 ; set this to log console output to a file in madcow base directory
 loglevel=WARN           ; default level, valid options are DEBUG, INFO, WARN

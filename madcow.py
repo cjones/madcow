@@ -327,6 +327,10 @@ class FileNotFound(Error):
     """Raised when a file is not found"""
 
 
+class ConfigError(Error):
+    """Raised when a required config option is missing"""
+
+
 class Request(Base):
     """Generic object passed in from protocol handlers for processing"""
 
@@ -778,7 +782,8 @@ class Config(Base):
         _istrue = re.compile('^(?:true|yes|on|1)$', re.I)
         _isfalse = re.compile('^(?:false|no|off|0)$', re.I)
 
-        def __init__(self, settings=[]):
+        def __init__(self, settings, name):
+            self.name = name
             self.settings = {}
             for key, val in settings:
                 if self._isint.search(val):
@@ -796,7 +801,8 @@ class Config(Base):
             if self.settings.has_key(attr):
                 return self.settings[attr]
             else:
-                return None
+                raise ConfigError, 'missing setting %s in section %s' % (
+                        attr, self.name)
 
 
     def __init__(self, filename):
@@ -804,16 +810,16 @@ class Config(Base):
             raise FileNotFound, filename
         parser = ConfigParser()
         parser.read(filename)
-        self.sections = {'DEFAULT': self.ConfigSection()}
+        self.sections = {}
         for name in parser.sections():
-            self.sections[name] = self.ConfigSection(parser.items(name))
+            self.sections[name] = self.ConfigSection(parser.items(name), name)
 
     def __getattr__(self, attr):
         attr = attr.lower()
         if self.sections.has_key(attr):
             return self.sections[attr]
         else:
-            return self.sections['DEFAULT']
+            raise ConfigError, "missing section: %s" % attr
 
 
 def launch_thread(target, name, args=(), kwargs=None):
