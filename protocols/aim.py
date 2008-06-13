@@ -16,16 +16,28 @@ class AIMProtocol(Madcow):
     def start(self):
         Madcow.start(self)
         log.info('[AIM] Logging into aol.com')
-        server = ('login.oscar.aol.com', 5190)
         p = protocol.ClientCreator(
-            reactor, OSCARAuth, self.config.aim.username, self.config.aim.password, icq = 0
-        )
-        p.connectTCP(*server)
+            reactor, OSCARAuth, self.config.aim.username,
+            self.config.aim.password, icq=0)
+        p.connectTCP('login.oscar.aol.com', 5190)
         log.info('[AIM] Connected')
-
         p.protocolClass.BOSClass._ProtocolHandler = self
-        ### XXX HOW TO CHECK RESPONSE QUEUE?
         reactor.run()
+
+    def output(self, response, req=None):
+        # override queueing system, because twisted kinda blows :(
+        # encode output, lock threads, and call protocol_output
+        try:
+            self.lock.acquire()
+            response = self.encode(response)
+            self.protocol_output(response, req)
+        except Exception, e:
+            log.error('error in output: %s' % repr(response))
+            log.exception(e)
+        try:
+            self.lock.release()
+        except:
+            pass
 
     def protocol_output(self, message, req=None):
         message = self.newline.sub('<br>', message)
