@@ -11,7 +11,8 @@ import re
 from include.colorlib import ColorLib
 import logging as log
 
-class ProtocolHandler(madcow.Madcow, silc.SilcClient):
+class SilcPlugin(madcow.Madcow, silc.SilcClient):
+
   def __init__(self, config=None, dir=None):
     madcow.Madcow.__init__(self, config, dir)
     self.colorlib = ColorLib('mirc')
@@ -27,8 +28,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
     log.info("connecting to %s:%s" % (self.config.silcplugin.host, self.config.silcplugin.port))
     self.connect_to_server(self.config.silcplugin.host, self.config.silcplugin.port)
 
-  def start(self):
-    madcow.Madcow.start(self)
+  def run(self):
     self.connect()
     while self.running:
       self.check_response_queue()
@@ -37,6 +37,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
       except KeyboardInterrupt:
         self.running = False
       except Exception, e:
+        log.error('exception caught in silc loop')
         log.exception(e)
       time.sleep(0.2)
 
@@ -53,9 +54,11 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
     if private:
       req.addressed = True
       req.sendTo = sender
+      req.channel = 'privmsg'
     else:
-      req.channel = channel.channel_name
+      req.addressed = False
       req.sendTo = channel
+      req.channel = channel.channel_name
 
     req.message = self.colorlib.strip_color(req.message)
     self.checkAddressing(req)
@@ -65,6 +68,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
       req.colorize = True
     else:
       req.colorize = False
+
     self.process_message(req)
 
   # not much of a point recovering from a kick when the silc code just segfaults on you :/
@@ -87,6 +91,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
 
     # XXX is this necessary now that main bot encodes to latin1/utf8?
     # BB: Yup, still needed :)
+    # CJ: your mom.
     message = message.decode(self.config.main.charset, "ignore") # remove unprintables
 
     if req.colorize:
@@ -97,7 +102,7 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
     else:
       self.send_to_channel(req.sendTo, message)
 
-  # XXX should these use irc's textwrap?
+  # should these use irc's textwrap?
   # Nah, silc doesn't have message limits like IRC, so wrapping just
   # induces unnecessary ugliness
 
@@ -108,3 +113,6 @@ class ProtocolHandler(madcow.Madcow, silc.SilcClient):
   def send_to_user(self, user, message):
     for line in message.splitlines():
       self.send_private_message(user, line)
+
+
+ProtocolHandler = SilcPlugin

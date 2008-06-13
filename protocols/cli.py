@@ -24,8 +24,7 @@ class ConsoleProtocol(Madcow):
         self.shell = Shell(polls=[self.check_response_queue])
         self.usageLines += self._cli_usage
 
-    def start(self):
-        Madcow.start(self)
+    def run(self):
         self.output("type 'help' for a list of commands")
         while self.running:
             self.check_response_queue()

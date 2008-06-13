@@ -6,15 +6,10 @@ from twisted.internet import protocol, reactor
 from include import utils
 import logging as log
 
-
 class AIMProtocol(Madcow):
+    newline = re.compile('[\r\n]+')
 
-    def __init__(self, config=None, dir=None):
-        Madcow.__init__(self, config=config, dir=dir)
-        self.newline = re.compile('[\r\n]+')
-
-    def start(self):
-        Madcow.start(self)
+    def run(self):
         log.info('[AIM] Logging into aol.com')
         p = protocol.ClientCreator(
             reactor, OSCARAuth, self.config.aim.username,
@@ -25,19 +20,8 @@ class AIMProtocol(Madcow):
         reactor.run()
 
     def output(self, response, req=None):
-        # override queueing system, because twisted kinda blows :(
-        # encode output, lock threads, and call protocol_output
-        try:
-            self.lock.acquire()
-            response = self.encode(response)
-            self.protocol_output(response, req)
-        except Exception, e:
-            log.error('error in output: %s' % repr(response))
-            log.exception(e)
-        try:
-            self.lock.release()
-        except:
-            pass
+        # XXX override queueing system, because twisted kinda blows :(
+        self.handle_response(response, req)
 
     def protocol_output(self, message, req=None):
         message = self.newline.sub('<br>', message)
@@ -81,7 +65,5 @@ class OSCARAuth(oscar.OscarAuthenticator):
     BOSClass = OSCARConnection
 
 
-class ProtocolHandler(AIMProtocol):
-    pass
-
+ProtocolHandler = AIMProtocol
 

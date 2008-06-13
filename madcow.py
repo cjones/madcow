@@ -7,15 +7,15 @@ import os
 from ConfigParser import ConfigParser
 from optparse import OptionParser
 import re
-import time
+from time import sleep, strftime, time as unix_time
 import logging as log
 from include.authlib import AuthLib
 from include.utils import Base, Error
 import SocketServer
-import select
+from select import select
 from signal import signal, SIGHUP, SIGTERM
 import shutil
-from threading import Thread, RLock
+from threading import Thread, RLock, enumerate as threads
 from Queue import Queue, Empty
 from types import StringTypes, StringType
 
@@ -78,7 +78,7 @@ class Madcow(Base):
         signal(SIGTERM, self.signal_handler)
 
         # initialize threads
-        self.module_queue = Queue()
+        self.request_queue = Queue()
         self.response_queue = Queue()
         self.lock = RLock()
 
@@ -86,28 +86,23 @@ class Madcow(Base):
         """Start the bot"""
         self.running = True
 
-        ## START WORKER THREADS
-        # worker threads exit when running is set to False
+        # start services
+        for service in Service.__subclasses__():
+            thread = service(self)
+            thread.setDaemon(True)
+            thread.start()
 
-        # start local service for handling email gateway
-        if self.config.gateway.enabled:
-            launch_thread(self.start_gateway_service, 'GatewayService')
-
-        # start thread to handle periodic events
-        launch_thread(self.start_periodic_service, 'PeriodicService')
-
-        # launch worker threads for module processing
+        # start worker threads
         for i in range(0, self.config.main.workers):
-            name = 'ModuleWorker%s' % (i + 1)
-            launch_thread(self.module_queue_dispatcher, name)
+            name = 'ModuleWorker' + str(i + 1)
+            thread = Thread(target=self.request_handler, name=name)
+            thread.setDaemon(True)
+            thread.start()
 
-    def start_gateway_service(self):
-        """Begin gateway service"""
-        GatewayService(madcow=self).start()
+        self.run()
 
-    def start_periodic_service(self):
-        """Begin periodic service"""
-        PeriodicEvents(madcow=self).start()
+    def run(self):
+        print 'no protocol implemented'
 
     def signal_handler(self, sig, frame):
         """Handles signals"""
@@ -138,7 +133,9 @@ class Madcow(Base):
         except Exception, e:
             log.exception(e)
             return
+        self.handle_response(response, req)
 
+    def handle_response(self, response, req=None):
         # encode output, lock threads, and call protocol_output
         try:
             self.lock.acquire()
@@ -177,16 +174,16 @@ class Madcow(Base):
 
     ### MODULE PROCESSING ###
 
-    def module_queue_dispatcher(self):
+    def request_handler(self):
         """Dispatcher for workers"""
         while self.running:
             try:
-                request = self.module_queue.get()
+                request = self.request_queue.get()
             except Exception, e:
                 log.exception(e)
                 continue
             self.process_module_item(request)
-            self.module_queue.task_done()
+            self.request_queue.task_done()
 
     def process_module_item(self, request):
         """Run module response method and output any response"""
@@ -290,7 +287,7 @@ class Madcow(Base):
                 self.process_module_item(request)
             else:
                 log.debug('launching thread for module: %s' % mod_name)
-                self.module_queue.put(request)
+                self.request_queue.put(request)
 
             if obj.terminate and req.matched:
                 log.debug('terminating because %s matched' % mod_name)
@@ -298,9 +295,9 @@ class Madcow(Base):
 
     def logpublic(self, req):
         """Logs public chatter"""
-        line = '%s <%s> %s\n' % (time.strftime('%T'), req.nick, req.message)
+        line = '%s <%s> %s\n' % (strftime('%T'), req.nick, req.message)
         path = os.path.join(self.dir, 'logs', '%s-irc-%s-%s' % (self.ns,
-            req.channel, time.strftime('%F')))
+            req.channel, strftime('%F')))
 
         fo = open(path, 'a')
         try:
@@ -323,6 +320,115 @@ class Madcow(Base):
         return 'madcow'
 
 
+class Service(Base, Thread):
+    """Service object"""
+
+    def __init__(self, bot):
+        self.bot = bot
+        Thread.__init__(self, name=self.__class__.__name__)
+
+
+class GatewayService(Service):
+    """Gateway service spawns TCP socket and listens for requests"""
+
+    def run(self):
+        """While bot is alive, listen for connections"""
+        addr = (self.bot.config.gateway.bind, self.bot.config.gateway.port)
+        server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
+        server.daemon_threads = True
+        server.bot = self.bot
+        while self.bot.running:
+            if select([server.socket], [], [], 0.25)[0]:
+                server.handle_request()
+
+
+class ServiceHandler(SocketServer.BaseRequestHandler):
+    """This class handles the listener service for message injection"""
+
+    # pre-compiled regex
+    re_from = re.compile(r'^from:\s*(.+?)\s*$', re.I)
+    re_to = re.compile(r'^to:\s*(#\S+)\s*$', re.I)
+    re_message = re.compile(r'^message:\s*(.+?)\s*$', re.I)
+
+    def setup(self):
+        log.info('connection from %s' % repr(self.client_address))
+
+    def handle(self):
+        """Handles a TCP connection to gateway service"""
+        data = ''
+        while self.server.bot.running:
+            read = self.request.recv(1024)
+            if len(read) == 0:
+                break
+            data += read
+        log.info('got payload: %s' % repr(data))
+
+        sent_from = send_to = message = None
+        for line in data.splitlines():
+            try:
+                sent_from = ServiceHandler.re_from.search(line).group(1)
+            except:
+                pass
+
+            try:
+                send_to = ServiceHandler.re_to.search(line).group(1)
+            except:
+                pass
+
+            try:
+                message = ServiceHandler.re_message.search(line).group(1)
+            except:
+                pass
+
+        if sent_from is None or send_to is None or message is None:
+            log.warn('invalid payload')
+            return
+
+        # see if we can reverse lookup sender
+        modules = self.server.bot.modules.dict()
+        db = modules['learn'].get_db('email')
+        for user, email in db.items():
+            if sent_from == email:
+                sent_from = user
+                break
+
+        req = Request()
+        req.colorize = False
+        req.sendTo = send_to
+        output = 'message from %s: %s' % (sent_from, message)
+        self.server.bot.output(output, req)
+
+    def finish(self):
+        log.info('connection closed by %s' % repr(self.client_address))
+        
+
+class PeriodicEvents(Service):
+    """Class to manage modules which are periodically executed"""
+    _re_delim = re.compile(r'\s*[,;]\s*')
+    _ignore_modules = ['__init__', 'template']
+    _process_frequency = 1
+
+    def run(self):
+        """While bot is alive, process periodic event queue"""
+        self.last_run = dict.fromkeys(self.bot.periodics.dict().keys(),
+                unix_time())
+        while self.bot.running:
+            self.process_queue()
+            sleep(self._process_frequency)
+
+    def process_queue(self):
+        """Process queue"""
+        now = unix_time()
+        for mod_name, obj in self.bot.periodics.dict().items():
+            if (now - self.last_run[mod_name]) < obj.frequency:
+                continue
+            self.last_run[mod_name] = now
+            req = Request()
+            req.sendTo = obj.output
+            request = (obj, None, None, {'req': req})
+            self.bot.request_queue.put(request)
+
+
 class FileNotFound(Error):
     """Raised when a file is not found"""
 
@@ -334,17 +440,19 @@ class ConfigError(Error):
 class Request(Base):
     """Generic object passed in from protocol handlers for processing"""
 
-    def __init__(self, message=None):
+    def __init__(self, message, **kwargs):
         self.message = message
+        self.__dict__.update(kwargs)
 
         # required attributes get a default
-        self.nick = None
+        self.nick = 'unknown'
         self.addressed = False
         self.correction = False
-        self.channel = None
+        self.channel = 'unknown'
         self.args = []
 
     def __getattr__(self, attr):
+        # XXX should it really do this? not so sure..
         return None
 
 
@@ -354,7 +462,7 @@ class User(Base):
     def __init__(self, user, flags):
         self.user = user
         self.flags = flags
-        self.loggedIn = int(time.time())
+        self.loggedIn = int(unix_time())
 
     def isAdmin(self):
         """Boolean: user is an admin"""
@@ -560,112 +668,6 @@ class Admin(Base):
         return 'You are now logged in. Message me "admin help" for help'
 
 
-class GatewayService(Base):
-    """Gateway service spawns TCP socket and listens for requests"""
-
-    def __init__(self, madcow):
-        addr = (madcow.config.gateway.bind, madcow.config.gateway.port)
-        self.server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
-        self.server.daemon_threads = True
-        self.server.madcow = madcow
-
-    def start(self):
-        """While bot is alive, listen for connections"""
-        while self.server.madcow.running:
-            if select.select([self.server.socket], [], [], 0.25)[0]:
-                self.server.handle_request()
-
-
-class ServiceHandler(SocketServer.BaseRequestHandler):
-    """This class handles the listener service for message injection"""
-
-    # pre-compiled regex
-    re_from = re.compile(r'^from:\s*(.+?)\s*$', re.I)
-    re_to = re.compile(r'^to:\s*(#\S+)\s*$', re.I)
-    re_message = re.compile(r'^message:\s*(.+?)\s*$', re.I)
-
-    def setup(self):
-        log.info('connection from %s' % repr(self.client_address))
-
-    def handle(self):
-        """Handles a TCP connection to gateway service"""
-        data = ''
-        while self.server.madcow.running:
-            read = self.request.recv(1024)
-            if len(read) == 0:
-                break
-            data += read
-        log.info('got payload: %s' % repr(data))
-
-        sent_from = send_to = message = None
-        for line in data.splitlines():
-            try:
-                sent_from = ServiceHandler.re_from.search(line).group(1)
-            except:
-                pass
-
-            try:
-                send_to = ServiceHandler.re_to.search(line).group(1)
-            except:
-                pass
-
-            try:
-                message = ServiceHandler.re_message.search(line).group(1)
-            except:
-                pass
-
-        if sent_from is None or send_to is None or message is None:
-            log.warn('invalid payload')
-            return
-
-        # see if we can reverse lookup sender
-        modules = self.server.madcow.modules.dict()
-        db = modules['learn'].get_db('email')
-        for user, email in db.items():
-            if sent_from == email:
-                sent_from = user
-                break
-
-        req = Request()
-        req.colorize = False
-        req.sendTo = send_to
-        output = 'message from %s: %s' % (sent_from, message)
-        self.server.madcow.output(output, req)
-
-    def finish(self):
-        log.info('connection closed by %s' % repr(self.client_address))
-
-
-class PeriodicEvents(Base):
-    """Class to manage modules which are periodically executed"""
-    _re_delim = re.compile(r'\s*[,;]\s*')
-    _ignore_modules = ['__init__', 'template']
-    _process_frequency = 1
-
-    def __init__(self, madcow):
-        self.madcow = madcow
-        self.last_run = dict.fromkeys(self.madcow.periodics.dict().keys(),
-                time.time())
-
-    def start(self):
-        """While bot is alive, process periodic event queue"""
-        while self.madcow.running:
-            self.process_queue()
-            time.sleep(self._process_frequency)
-
-    def process_queue(self):
-        """Process queue"""
-        now = time.time()
-        for mod_name, obj in self.madcow.periodics.dict().items():
-            if (now - self.last_run[mod_name]) < obj.frequency:
-                continue
-            self.last_run[mod_name] = now
-            req = Request()
-            req.sendTo = obj.output
-            request = (obj, None, None, {'req': req})
-            self.madcow.module_queue.put(request)
-
-
 class Modules(Base):
     """This class dynamically loads plugins and instantiates them"""
     _entry = 'Main'
@@ -821,14 +823,6 @@ class Config(Base):
         else:
             raise ConfigError, "missing section: %s" % attr
 
-
-def launch_thread(target, name, args=(), kwargs=None):
-    """Launch a daemon thread"""
-    log.info('launching daemon thread: %s' % name)
-    thread = Thread(target=target, name=name, args=args, kwargs=kwargs)
-    thread.setDaemon(True)
-    thread.start()
-    return thread
 
 def detach():
     """Daemonize on POSIX system"""

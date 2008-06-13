@@ -15,9 +15,8 @@ class ProtocolHandler(Madcow):
         """Protocol-specific shutdown procedure"""
         Madcow.stop(self)
 
-    def start(self):
+    def run(self):
         """Protocol-specific loop"""
-        Madcow.start(self)
         while self.running:
             try:
                 # in a real protocol, this should not block, otherwise
@@ -48,7 +47,7 @@ class ProtocolHandler(Madcow):
     def process_message(self, message, nick):
         """Create request object from recived message and process it"""
 
-        # this object is persists as it's processed by the bot subsystem.
+        # this object persists as it's processed by the bot subsystem.
         # if this requests generates a response, you will receive it along
         # with the response message in protocol_output(), which means you
         # can set arbitrary attributes and access them later, for example
