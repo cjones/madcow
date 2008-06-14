@@ -88,6 +88,7 @@ class Madcow(Base):
 
         # start services
         for service in Service.__subclasses__():
+            log.info('starting service: %s' % service.__name__)
             thread = service(self)
             thread.setDaemon(True)
             thread.start()
@@ -392,10 +393,10 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
                 sent_from = user
                 break
 
-        req = Request()
+        output = 'message from %s: %s' % (sent_from, message)
+        req = Request(output)
         req.colorize = False
         req.sendTo = send_to
-        output = 'message from %s: %s' % (sent_from, message)
         self.server.bot.output(output, req)
 
     def finish(self):
@@ -423,7 +424,7 @@ class PeriodicEvents(Service):
             if (now - self.last_run[mod_name]) < obj.frequency:
                 continue
             self.last_run[mod_name] = now
-            req = Request()
+            req = Request(None)
             req.sendTo = obj.output
             request = (obj, None, None, {'req': req})
             self.bot.request_queue.put(request)
