@@ -43,7 +43,13 @@ class Main(Module):
                     if isRegex is not None:
                         regex = re.compile(isRegex.group(1), re.I)
                     else:
-                        regex = re.compile(r'\b%s\b' % re.escape(match) , re.I)
+                        regex = ''
+                        if match[0].isalnum():
+                            regex += r'\b'
+                        regex += re.escape(match)
+                        if match[-1].isalnum():
+                            regex += r'\b'
+                        regex = re.compile(regex, re.I)
                     matches.append(regex)
                 self.data.append((matches, responses))
         except Exception, e:
