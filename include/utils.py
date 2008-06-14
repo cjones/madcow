@@ -224,5 +224,5 @@ def test_module(mod):
     except:
         print 'no match, double-check regex'
         return 1
-    print main.response(nick=os.environ['USER'], args=args)
+    print main.response(nick=os.environ['USER'], args=args, kwargs={})
     return 0
