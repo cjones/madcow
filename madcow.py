@@ -20,7 +20,7 @@ from Queue import Queue, Empty
 from types import StringTypes, StringType
 
 # STATIC VARIABLES
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
