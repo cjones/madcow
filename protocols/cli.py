@@ -17,12 +17,12 @@ class ConsoleProtocol(Madcow):
     _prompt = '\x1b[1;31m>>>\x1b[0m '
     _clear = '\x1b[H\x1b[J'
 
-    def __init__(self, config=None, dir=None):
+    def __init__(self, config, prefix):
         self.colorlib = ColorLib('ansi')
-        Madcow.__init__(self, config=config, dir=dir)
+        Madcow.__init__(self, config, prefix)
         self.user_nick = os.environ['USER']
         self.shell = Shell(polls=[self.check_response_queue])
-        self.usageLines += self._cli_usage
+        self.usage_lines += self._cli_usage
 
     def run(self):
         self.output("type 'help' for a list of commands")
@@ -51,7 +51,7 @@ class ConsoleProtocol(Madcow):
                 req.private = True
                 req.addressed = True
 
-                self.checkAddressing(req)
+                self.check_addressing(req)
 
                 if req.message.startswith('^'):
                     req.colorize = True

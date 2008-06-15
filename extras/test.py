@@ -213,7 +213,7 @@ class Main(Module):
                     req.nick = 'test'
                     req.channel = 'test'
                     req.private = True
-                    req.sendTo = 'test'
+                    req.sendto = 'test'
                     req.addressed = True
                     req.colorize = False
                     req.correction = True

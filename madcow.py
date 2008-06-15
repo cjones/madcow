@@ -15,7 +15,7 @@ import SocketServer
 from select import select
 from signal import signal, SIGHUP, SIGTERM
 import shutil
-from threading import Thread, RLock, enumerate as threads
+from threading import Thread, RLock
 from Queue import Queue, Empty
 from types import StringTypes, StringType
 
@@ -26,26 +26,31 @@ __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
 __url__ = 'http://madcow.sourceforge.net/'
 __all__ = ['Request', 'Madcow', 'Config']
-_logformat = '[%(asctime)s] %(levelname)s: %(message)s'
-_loglevel = log.WARN
-_charset = 'latin1'
-_config = 'madcow.ini'
-_config_warning = 'created config %s - you should edit this and rerun'
+__logformat__ = '[%(asctime)s] %(levelname)s: %(message)s'
+__loglevel__ = log.WARN
+__charset__ = 'latin1'
+__config__ = 'madcow.ini'
 
 class Madcow(Base):
     """Core bot handler, subclassed by protocols"""
 
     _delim = re.compile(r'\s*[,;]\s*')
     _codecs = ('ascii', 'utf8', 'latin1')
+    _botname = 'madcow'
+    re_cor1 = None
+    re_addrend = None
+    re_feedback = None
+    re_cor2 = None
+    re_addrpre = None
 
     ### INITIALIZATION FUNCTIONS ###
 
-    def __init__(self, config=None, dir=None):
+    def __init__(self, config, prefix):
         """Initialize bot"""
         self.config = config
-        self.dir = dir
+        self.prefix = prefix
         self.cached_nick = None
-        self.ns = self.config.modules.dbnamespace
+        self.namespace = self.config.modules.dbnamespace
         self.running = False
 
         # parse ignore list
@@ -64,14 +69,14 @@ class Madcow(Base):
         if self.config.main.charset:
             self.charset = self.config.main.charset
         else:
-            self.charset = _charset
+            self.charset = __charset__
 
         # load modules
-        self.modules = Modules(self, 'modules', dir=self.dir)
-        self.periodics = Modules(self, 'periodic', dir=self.dir)
-        self.usageLines = self.modules.help + self.periodics.help
-        self.usageLines.append('help - this screen')
-        self.usageLines.append('version - get bot version')
+        self.modules = Modules(self, 'modules', self.prefix)
+        self.periodics = Modules(self, 'periodic', self.prefix)
+        self.usage_lines = self.modules.help + self.periodics.help
+        self.usage_lines.append('help - this screen')
+        self.usage_lines.append('version - get bot version')
 
         # signal handlers
         signal(SIGHUP, self.signal_handler)
@@ -103,9 +108,13 @@ class Madcow(Base):
         self.run()
 
     def run(self):
+        """Runs madcow loop"""
         print 'no protocol implemented'
+        while self.running:
+            # this is where you do actual stuff
+            sleep(1)
 
-    def signal_handler(self, sig, frame):
+    def signal_handler(self, sig, *args):
         """Handles signals"""
         if sig == SIGTERM:
             log.warn('got SIGTERM, signaling shutting down')
@@ -131,25 +140,24 @@ class Madcow(Base):
             response, req = self.response_queue.get_nowait()
         except Empty:
             return
-        except Exception, e:
-            log.exception(e)
+        except Exception, exc:
+            log.exception(exc)
             return
         self.handle_response(response, req)
         self.response_queue.task_done()
 
     def handle_response(self, response, req=None):
-        # encode output, lock threads, and call protocol_output
+        """encode output, lock threads, and call protocol_output"""
+        response = self.encode(response)
         try:
             self.lock.acquire()
-            response = self.encode(response)
-            self.protocol_output(response, req)
-        except Exception, e:
-            log.error('error in output: %s' % repr(response))
-            log.exception(e)
-        try:
+            try:
+                self.protocol_output(response, req)
+            except Exception, exc:
+                log.error('error in output: %s' % repr(response))
+                log.exception(exc)
+        finally:
             self.lock.release()
-        except:
-            pass
 
     def encode(self, text):
         """Force output to the bots encoding if possible"""
@@ -178,22 +186,20 @@ class Madcow(Base):
     def request_handler(self):
         """Dispatcher for workers"""
         while self.running:
+            request = self.request_queue.get()
             try:
-                request = self.request_queue.get()
-            except Exception, e:
-                log.exception(e)
-                continue
-            self.process_module_item(request)
-            self.request_queue.task_done()
+                self.process_module_item(request)
+            finally:
+                self.request_queue.task_done()
 
     def process_module_item(self, request):
         """Run module response method and output any response"""
         obj, nick, args, kwargs = request
         try:
             response = obj.response(nick, args, kwargs)
-        except Exception, e:
+        except Exception, exc:
             log.warn('Uncaught module exception')
-            log.exception(e)
+            log.exception(exc)
             return
 
         if response is not None and len(response) > 0:
@@ -201,40 +207,44 @@ class Madcow(Base):
 
     ### INPUT FROM USER ###
 
-    def checkAddressing(self, req):
+    def check_addressing(self, req):
         """Is bot being addressed?"""
-        nick = re.escape(self.botName())
+        nick = re.escape(self.botname())
 
         # recompile nick-based regex if it changes
         if nick != self.cached_nick:
             self.cached_nick = nick
-            self.re_cor = re.compile(r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nick,
+            self.re_cor1 = re.compile(r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nick,
                     re.I)
-            self.re_cor_addr = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
+            self.re_cor2 = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
             self.re_feedback = re.compile(r'^\s*%s[ !]*\?[ !]*$' % nick, re.I)
-            self.re_addr_end = re.compile(r'^(.+),\s+%s\W*$' % nick, re.I)
-            self.re_addr_pre = re.compile(r'^\s*%s[-,: ]+(.+)$' % nick,
-                    re.I)
+            self.re_addrend = re.compile(r'^(.+),\s+%s\W*$' % nick, re.I)
+            self.re_addrpre = re.compile(r'^\s*%s[-,: ]+(.+)$' % nick, re.I)
+
         if self.re_feedback.search(req.message):
             req.feedback = req.addressed = True
+
         try:
-            req.message = self.re_addr_end.search(req.message).group(1)
+            req.message = self.re_addrend.search(req.message).group(1)
             req.addressed = True
         except:
             pass
+
         try:
-            req.message = self.re_addr_pre.search(req.message).group(1)
+            req.message = self.re_addrpre.search(req.message).group(1)
             req.addressed = True
         except:
             pass
+
         try:
-            req.message = self.re_cor.search(req.message).group(1)
+            req.message = self.re_cor1.search(req.message).group(1)
             req.correction = req.addressed = True
         except:
             pass
+
         if req.addressed:
             try:
-                req.message = self.re.cor_addr.search(req.message).group(1)
+                req.message = self.re_cor2.search(req.message).group(1)
                 req.correction = True
             except:
                 pass
@@ -297,31 +307,33 @@ class Madcow(Base):
     def logpublic(self, req):
         """Logs public chatter"""
         line = '%s <%s> %s\n' % (strftime('%T'), req.nick, req.message)
-        path = os.path.join(self.dir, 'logs', '%s-irc-%s-%s' % (self.ns,
-            req.channel, strftime('%F')))
+        path = os.path.join(
+            self.prefix, 'logs',
+            '%s-irc-%s-%s' % (self.namespace, req.channel, strftime('%F'))
+        )
 
-        fo = open(path, 'a')
+        logfile = open(path, 'a')
         try:
-            fo.write(line)
+            logfile.write(line)
         finally:
-            fo.close()
+            logfile.close()
 
     ### MISC FUNCTIONS ###
 
     def usage(self):
         """Returns help data as a string"""
-        return '\n'.join(sorted(self.usageLines))
+        return '\n'.join(sorted(self.usage_lines))
 
     def stop(self):
         """Stop the bot"""
         self.running = False
 
-    def botName(self):
+    def botname(self):
         """Should return the real name of the bot"""
-        return 'madcow'
+        return self._botname
 
 
-class Service(Base, Thread):
+class Service(Thread):
     """Service object"""
 
     def __init__(self, bot):
@@ -347,11 +359,10 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
     """This class handles the listener service for message injection"""
 
     # pre-compiled regex
-    re_from = re.compile(r'^from:\s*(.+?)\s*$', re.I)
-    re_to = re.compile(r'^to:\s*(#\S+)\s*$', re.I)
-    re_message = re.compile(r'^message:\s*(.+?)\s*$', re.I)
+    re_payload = re.compile(r'^\s*(from|to|message)\s*:\s*(.+?)\s*$', re.I)
 
     def setup(self):
+        """Called when a connection is created"""
         log.info('connection from %s' % repr(self.client_address))
 
     def handle(self):
@@ -362,44 +373,36 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
             if len(read) == 0:
                 break
             data += read
-        log.info('got payload: %s' % repr(data))
+        log.debug('got payload: %s' % repr(data))
 
-        sent_from = send_to = message = None
+        payload = {}
         for line in data.splitlines():
             try:
-                sent_from = ServiceHandler.re_from.search(line).group(1)
+                key, val = self.re_payload.search(line).groups()
             except:
-                pass
+                continue
+            payload[key.lower()] = val
 
-            try:
-                send_to = ServiceHandler.re_to.search(line).group(1)
-            except:
-                pass
-
-            try:
-                message = ServiceHandler.re_message.search(line).group(1)
-            except:
-                pass
-
-        if sent_from is None or send_to is None or message is None:
+        if len(payload) != 3:
             log.warn('invalid payload')
             return
 
         # see if we can reverse lookup sender
         modules = self.server.bot.modules.dict()
-        db = modules['learn'].get_db('email')
-        for user, email in db.items():
-            if sent_from == email:
-                sent_from = user
+        dbm = modules['learn'].get_db('email')
+        for user, email in dbm.items():
+            if payload['from'] == email:
+                payload['from'] = user
                 break
 
-        output = 'message from %s: %s' % (sent_from, message)
+        output = 'message from %s: %s' % (payload['from'], payload['message'])
         req = Request(output)
         req.colorize = False
-        req.sendTo = send_to
+        req.sendto = payload['to']
         self.server.bot.output(output, req)
 
     def finish(self):
+        """Called when connection closes"""
         log.info('connection closed by %s' % repr(self.client_address))
         
 
@@ -408,6 +411,7 @@ class PeriodicEvents(Service):
     _re_delim = re.compile(r'\s*[,;]\s*')
     _ignore_modules = ['__init__', 'template']
     _process_frequency = 1
+    last_run = {}
 
     def run(self):
         """While bot is alive, process periodic event queue"""
@@ -425,7 +429,7 @@ class PeriodicEvents(Service):
                 continue
             self.last_run[mod_name] = now
             req = Request(None)
-            req.sendTo = obj.output
+            req.sendto = obj.output
             request = (obj, None, None, {'req': req})
             self.bot.request_queue.put(request)
 
@@ -441,20 +445,17 @@ class ConfigError(Error):
 class Request(Base):
     """Generic object passed in from protocol handlers for processing"""
 
-    def __init__(self, message, **kwargs):
+    def __init__(self, message):
         self.message = message
-        self.__dict__.update(kwargs)
-
-        # required attributes get a default
-        self.nick = 'unknown'
-        self.addressed = False
+        self.sendto = None
+        self.private = False
+        self.nick = None
+        self.matched = False
+        self.feedback = False
         self.correction = False
-        self.channel = 'unknown'
-        self.args = []
-
-    def __getattr__(self, attr):
-        # XXX should it really do this? not so sure..
-        return None
+        self.colorize = False
+        self.channel = None
+        self.addressed = False
 
 
 class User(Base):
@@ -463,13 +464,12 @@ class User(Base):
     def __init__(self, user, flags):
         self.user = user
         self.flags = flags
-        self.loggedIn = int(unix_time())
 
-    def isAdmin(self):
+    def is_asmin(self):
         """Boolean: user is an admin"""
         return 'a' in self.flags
 
-    def isRegistered(self):
+    def is_registered(self):
         """Boolean: user is registerd"""
         if 'a' in self.flags or 'r' in self.flags:
             return True
@@ -511,7 +511,8 @@ class Admin(Base):
 
     def __init__(self, bot):
         self.bot = bot
-        self.authlib = AuthLib('%s/data/db-%s-passwd' % (bot.dir, bot.ns))
+        self.authlib = AuthLib('%s/data/db-%s-passwd' % (bot.prefix,
+            bot.namespace))
         self.users = {}
 
     def parse(self, req):
@@ -527,26 +528,26 @@ class Admin(Base):
         # register
         try:
             passwd = self._reRegister.search(command).group(1)
-            return self.registerUser(nick, passwd)
+            return self.register_user(nick, passwd)
         except:
             pass
 
         # log in
         try:
             passwd = self._reAuth.search(command).group(1)
-            return self.authenticateUser(nick, passwd)
+            return self.authuser(nick, passwd)
         except:
             pass
 
         # help
-        help = []
-        help += self._basic_usage
+        usage = []
+        usage += self._basic_usage
         if nick in self.users:
-            help += self._loggedin_usage
-            if self.users[nick].isAdmin():
-                help += self._admin_usage
+            usage += self._loggedin_usage
+            if self.users[nick].is_asmin():
+                usage += self._admin_usage
         if self._reHelp.search(command):
-            return '\n'.join(help)
+            return '\n'.join(usage)
 
         # don't pass this point unless we are logged in
         try:
@@ -560,19 +561,19 @@ class Admin(Base):
             return 'You are now logged out.'
 
         # functions past here require admin
-        if not user.isAdmin():
+        if not user.is_asmin():
             return
 
         try:
-            adduser = self._reAddUser.search(command).groups()
-            return self.addUser(*adduser)
+            adduser, flags, password = self._reAddUser.search(command).groups()
+            return self.adduser(adduser, flags, password)
         except:
             pass
 
         # be the puppetmaster
         try:
             channel, message = Admin._reFist.search(command).groups()
-            req.sendTo = channel
+            req.sendto = channel
             return message
         except:
             pass
@@ -611,11 +612,11 @@ class Admin(Base):
         # update user flags
         try:
             chuser, newflags = self._reChFlag.search(command).groups()
-            return self.changeFlags(chuser, newflags)
+            return self.change_flags(chuser, newflags)
         except:
             pass
 
-    def changeFlags(self, user, chflags):
+    def change_flags(self, user, chflags):
         """Change flags for a user"""
         curflags = self.authlib.get_flags(user)
         curflags = set(curflags)
@@ -635,7 +636,7 @@ class Admin(Base):
             self.users[user].flags = curflags
         return 'flags for %s changed to %s' % (user, curflags)
 
-    def addUser(self, user, flags, password):
+    def adduser(self, user, flags, password):
         """Add a new user"""
         if self.authlib.user_exists(user):
             return "User already registered."
@@ -643,7 +644,7 @@ class Admin(Base):
         self.authlib.add_user(user, password, flags)
         return 'user added: %s' % user
 
-    def registerUser(self, user, passwd):
+    def register_user(self, user, passwd):
         """Register with the bot"""
         if not self.bot.config.admin.allowRegistration:
             return "Registration is disabled."
@@ -659,7 +660,7 @@ class Admin(Base):
         self.authlib.add_user(user, passwd, flags)
         return "You are now registered, try logging in: login <pass>"
 
-    def authenticateUser(self, user, passwd):
+    def authuser(self, user, passwd):
         """Attempt to log in"""
         if not self.authlib.user_exists(user):
             return "You are not registered: try register <password>."
@@ -671,15 +672,13 @@ class Admin(Base):
 
 class Modules(Base):
     """This class dynamically loads plugins and instantiates them"""
-    _entry = 'Main'
     _pyext = re.compile(r'\.py$')
     _ignore_mods = ('__init__', 'template')
 
-    def __init__(self, madcow, subdir, entry=_entry, dir=None):
+    def __init__(self, madcow, subdir, prefix):
         self.madcow = madcow
         self.subdir = subdir
-        self.entry = entry
-        self.mod_dir = os.path.join(dir, self.subdir)
+        self.mod_dir = os.path.join(prefix, self.subdir)
         self.modules = {}
         self.help = []
         self.load_modules()
@@ -693,23 +692,23 @@ class Modules(Base):
         log.info('reading modules from %s' % self.mod_dir)
         try:
             filenames = os.walk(self.mod_dir).next()[2]
-        except Exception, e:
-            log.warn("Couldn't load modules from %s: %s" % (self.mod_dir, e))
+        except Exception, exc:
+            log.warn("Couldn't load modules from %s: %s" % (self.mod_dir, exc))
             return
         for filename in filenames:
             if not self._pyext.search(filename):
                 continue
             mod_name = self._pyext.sub('', filename)
             if mod_name in disabled:
-                log.info('skipping %s: disabled' % mod_name)
+                log.debug('skipping %s: disabled' % mod_name)
                 continue
             if self.modules.has_key(mod_name):
                 mod = self.modules[mod_name]['mod']
                 try:
                     reload(mod)
-                    log.info('reloaded module %s' % mod_name)
-                except Exception, e:
-                    log.warn("couldn't reload %s: %s" % (mod_name, e))
+                    log.debug('reloaded module %s' % mod_name)
+                except Exception, exc:
+                    log.warn("couldn't reload %s: %s" % (mod_name, exc))
                     del self.modules[mod_name]
                     continue
             else:
@@ -718,21 +717,20 @@ class Modules(Base):
                         '%s.%s' % (self.subdir, mod_name),
                         globals(),
                         locals(),
-                        [self.entry],
+                        ['Main'],
                     )
-                except Exception, e:
-                    log.warn("couldn't load module %s: %s" % (mod_name, e))
+                except Exception, exc:
+                    log.warn("couldn't load module %s: %s" % (mod_name, exc))
                     continue
                 self.modules[mod_name] = {'mod': mod}
             try:
-                Main = getattr(mod, self.entry)
-                obj = Main(self.madcow)
-            except Exception, e:
-                log.warn("failure loading %s: %s" % (mod_name, e))
+                obj = getattr(mod, 'Main')(self.madcow)
+            except Exception, exc:
+                log.warn("failure loading %s: %s" % (mod_name, exc))
                 del self.modules[mod_name]
                 continue
             if not obj.enabled:
-                log.info("skipped loading %s: disabled" % mod_name)
+                log.debug("skipped loading %s: disabled" % mod_name)
                 del self.modules[mod_name]
                 continue
             try:
@@ -741,9 +739,9 @@ class Modules(Base):
                 else:
                     raise Exception
             except:
-                log.info('no help for module: %s' % mod_name)
+                log.debug('no help for module: %s' % mod_name)
             self.modules[mod_name]['obj'] = obj
-            log.info('loaded module: %s' % mod_name)
+            log.debug('loaded module: %s' % mod_name)
 
         # if debug level set, show execution order/details of modules
         if log.root.level <= log.DEBUG:
@@ -835,14 +833,14 @@ def detach():
     os.setsid()
     if os.fork() != 0:
         sys.exit(0)
-    for fd in sys.stdout, sys.stderr:
-        fd.flush()
-    si = file('/dev/null', 'r')
-    so = file('/dev/null', 'a+')
-    se = file('/dev/null', 'a+', 0)
-    os.dup2(si.fileno(), sys.stdin.fileno())
-    os.dup2(so.fileno(), sys.stdout.fileno())
-    os.dup2(se.fileno(), sys.stderr.fileno())
+    for stream in sys.stdout, sys.stderr:
+        stream.flush()
+    stdin = file('/dev/null', 'r')
+    stdout = file('/dev/null', 'a+')
+    stderr = file('/dev/null', 'a+', 0)
+    os.dup2(stdin.fileno(), sys.stdin.fileno())
+    os.dup2(stdout.fileno(), sys.stdout.fileno())
+    os.dup2(stderr.fileno(), sys.stderr.fileno())
     log.info('madcow is launched as a daemon')
 
 def stop_logging(handler_name):
@@ -862,15 +860,15 @@ def main():
     """Entry point to set up bot and run it"""
 
     # where we are being run from
-    dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-    sys.path.append(dir)
-    default_config = os.path.join(dir, _config)
+    prefix = os.path.abspath(os.path.dirname(sys.argv[0]))
+    sys.path.append(prefix)
+    default_config = os.path.join(prefix, __config__)
 
     # make sure proper subdirs exist
-    datadir = os.path.join(dir, 'data')
+    datadir = os.path.join(prefix, 'data')
     if not os.path.exists(datadir):
         os.mkdir(datadir)
-    logdir = os.path.join(dir, 'logs')
+    logdir = os.path.join(prefix, 'logs')
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
@@ -890,34 +888,35 @@ def main():
             const=log.WARN, help='only show errors')
     parser.add_option('-P', '--pidfile', metavar='<file>',
             help='override pidfile')
-    opts, args = parser.parse_args()
+    opts = parser.parse_args()[0]
 
     # read config file
     if not os.path.exists(opts.config):
         if opts.config == default_config:
             shutil.copyfile(default_config + '-sample', opts.config)
-            print >> sys.stderr, _config_warning % _config
+            err = 'created config %s - edit and rerun' % __config__
+            print >> sys.stderr, err
         else:
             print >> sys.stderr, 'config not found: %s' % opts.config
-            return 1
+        return 1
 
     try:
         config = Config(opts.config)
     except FileNotFound:
         sys.stderr.write('config file not found, see README\n')
         return 1
-    except Exception, e:
-        sys.stderr.write('error parsing config: %s\n' % e)
+    except Exception, exc:
+        sys.stderr.write('error parsing config: %s\n' % exc)
         return 1
 
     # init log facility
     try:
         loglevel = getattr(log, config.main.loglevel)
     except:
-        loglevel = _loglevel
+        loglevel = __loglevel__
     if opts.loglevel is not None:
         loglevel = opts.loglevel
-    log.basicConfig(level=loglevel, format=_logformat)
+    log.basicConfig(level=loglevel, format=__logformat__)
 
     # if specified, log to file as well
     try:
@@ -925,12 +924,12 @@ def main():
         if logfile is not None and len(logfile):
             handler = log.FileHandler(filename=logfile)
             handler.setLevel(opts.loglevel)
-            formatter = log.Formatter(_logformat)
+            formatter = log.Formatter(__logformat__)
             handler.setFormatter(formatter)
             log.getLogger('').addHandler(handler)
-    except Exception, e:
-        log.warn('unable to log to file: %s' % e)
-        log.exception(e)
+    except Exception, exc:
+        log.warn('unable to log to file: %s' % exc)
+        log.exception(exc)
 
     # load specified protocol
     if opts.protocol:
@@ -938,15 +937,6 @@ def main():
         config.main.module = protocol
     else:
         protocol = config.main.module
-
-    # dynamic load protocol handler
-    try:
-        module = __import__('protocols.' + protocol, globals(), locals(),
-                ['ProtocolHandler'])
-        ProtocolHandler = getattr(module, 'ProtocolHandler')
-    except Exception, e:
-        log.exception(e)
-        return 1
 
     # daemonize if requested
     if config.main.detach or opts.detach:
@@ -964,33 +954,28 @@ def main():
             log.warn('removing stale pidfile: %s' % pidfile)
             os.remove(pidfile)
         try:
-            fo = open(pidfile, 'wb')
+            pid_fo = open(pidfile, 'wb')
             try:
-                fo.write(str(os.getpid()))
+                pid_fo.write(str(os.getpid()))
             finally:
-                fo.close()
-        except Exception, e:
+                pid_fo.close()
+        except Exception, exc:
             log.warn('filed to write %s: %s' % pidfile)
-            log.exception(e)
+            log.exception(exc)
 
-    # run bot & shut down threads when done
+    # run bot
     try:
-        bot = ProtocolHandler(config=config, dir=dir)
-    except Exception, e:
-        log.fatal("couldn't initialize bot")
-        log.exception(e)
-        return 1
-
-    try:
+        bot = __import__('protocols.' + protocol, (), (), ['ProtocolHandler'])
+        bot = getattr(bot, 'ProtocolHandler')(config, prefix)
         bot.start()
     finally:
         if pidfile and os.path.exists(pidfile):
             log.info('removing pidfile')
             try:
                 os.remove(pidfile)
-            except Exception, e:
+            except Exception, exc:
                 log.warn('failed to remove pidfile %s' % pidfile)
-                log.exception(e)
+                log.exception(exc)
         bot.stop()
 
     log.info('madcow is exiting cleanly')

@@ -19,7 +19,8 @@ class Main(Module):
     seen = re.compile('^\s*seen\s+(\S+)\s*$', re.I)
 
     def __init__(self, madcow):
-        self.dbfile = os.path.join(madcow.dir, 'data/db-%s-seen' % madcow.ns)
+        self.dbfile = os.path.join(madcow.prefix,
+                'data/db-%s-seen' % madcow.namespace)
 
     def dbm(self):
         return anydbm.open(self.dbfile, 'c', 0640)

@@ -57,8 +57,8 @@ class FigletFont(object):
     meta-data about how it should be displayed by default
     """
 
-    def __init__(self, dir='.', font='standard'):
-        self.dir = dir
+    def __init__(self, prefix='.', font='standard'):
+        self.prefix = prefix
         self.font = font
 
         self.comment = ''
@@ -77,7 +77,7 @@ class FigletFont(object):
         Load font file into memory. This can be overriden with
         a superclass to create different font sources.
         """
-        fontPath = '%s/%s.flf' % (self.dir, self.font)
+        fontPath = '%s/%s.flf' % (self.prefix, self.font)
         if os.path.exists(fontPath) is False:
             raise FontNotFound, "%s doesn't exist" % fontPath
 
@@ -90,7 +90,7 @@ class FigletFont(object):
         finally: fo.close()
 
     def getFonts(self):
-        return [font[:-4] for font in os.walk(self.dir).next()[2] if font.endswith('.flf')]
+        return [font[:-4] for font in os.walk(self.prefix).next()[2] if font.endswith('.flf')]
 
     def loadFont(self):
         """
@@ -204,9 +204,9 @@ class ZippedFigletFont(FigletFont):
     Use this Font class if it exists inside of a zipfile.
     """
 
-    def __init__(self, dir='.', font='standard', zipfile='fonts.zip'):
+    def __init__(self, prefix='.', font='standard', zipfile='fonts.zip'):
         self.zipfile = zipfile
-        FigletFont.__init__(self, dir=dir, font=font)
+        FigletFont.__init__(self, prefix=prefix, font=font)
 
     def readFontFile(self):
         if os.path.exists(self.zipfile) is False:
@@ -428,8 +428,8 @@ class Figlet(object):
     Main figlet class.
     """
 
-    def __init__(self, dir=None, zipfile=None, font='standard', direction='auto', justify='auto', width=80):
-        self.dir = dir
+    def __init__(self, prefix=None, zipfile=None, font='standard', direction='auto', justify='auto', width=80):
+        self.prefix = prefix
         self.font = font
         self._direction = direction
         self._justify = justify
@@ -439,8 +439,8 @@ class Figlet(object):
         self.engine = FigletRenderingEngine(base=self)
 
     def setFont(self, **kwargs):
-        if kwargs.has_key('dir'):
-            self.dir = kwargs['dir']
+        if kwargs.has_key('prefix'):
+            self.dir = kwargs['prefix']
 
         if kwargs.has_key('font'):
             self.font = kwargs['font']
@@ -450,11 +450,11 @@ class Figlet(object):
 
         Font = None
         if self.zipfile is not None:
-            try: Font = ZippedFigletFont(dir=self.dir, font=self.font, zipfile=self.zipfile)
+            try: Font = ZippedFigletFont(prefix=self.prefix, font=self.font, zipfile=self.zipfile)
             except: pass
 
-        if Font is None and self.dir is not None:
-            try: Font = FigletFont(dir=self.dir, font=self.font)
+        if Font is None and self.prefix is not None:
+            try: Font = FigletFont(prefix=self.prefix, font=self.font)
             except: pass
 
         if Font is None:
@@ -498,13 +498,13 @@ class Figlet(object):
 
 
 def main():
-    dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+    prefix = os.path.abspath(os.path.dirname(sys.argv[0]))
 
     parser = OptionParser(version=__version__, usage='%prog [options] text..')
     parser.add_option('-f', '--font', default='standard',
             help='font to render with (default: %default)', metavar='FONT')
     parser.add_option('-d', '--fontdir', default=None, help='location of font files', metavar='DIR')
-    parser.add_option('-z', '--zipfile', default=dir+'/fonts.zip',
+    parser.add_option('-z', '--zipfile', default=prefix+'/fonts.zip',
             help='specify a zipfile to use instead of a directory of fonts')
     parser.add_option('-D', '--direction', type='choice', choices=('auto', 'left-to-right', 'right-to-left'),
             default='auto', metavar='DIRECTION', help='set direction text will be formatted in (default: %default)')
@@ -523,7 +523,7 @@ def main():
     text = ' '.join(args)
 
     f = Figlet(
-        dir=opts.fontdir, font=opts.font, direction=opts.direction,
+        prefix=opts.fontdir, font=opts.font, direction=opts.direction,
         justify=opts.justify, width=opts.width, zipfile=opts.zipfile,
     )
 

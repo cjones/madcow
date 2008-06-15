@@ -161,10 +161,13 @@ class Factoids(Base):
     _forget = re.compile(r'^forget\s+((an?|the)\s+)?', I)
     _replace = re.compile(r'^\s*(.+?)\s*=~\s*s/(.+?)/(.*?)/\s*$')
 
+    def __init__(self, parent):
+        self.parent = parent
+
     # DBM functions
     def get_dbm(self, dbname):
-        dbfile = 'db-%s-%s' % (self.parent.madcow.ns, dbname.lower())
-        dbfile = os.path.join(self.parent.madcow.dir, 'data', dbfile)
+        dbfile = 'db-%s-%s' % (self.parent.madcow.namespace, dbname.lower())
+        dbfile = os.path.join(self.parent.madcow.prefix, 'data', dbfile)
         return anydbm.open(dbfile, 'c', 0640)
 
     def get(self, dbname, key):
@@ -233,7 +236,7 @@ class Factoids(Base):
         else:
             who = nick
         who = re.escape(who).lower()[:9].split()[0]
-        botnick = self.parent.madcow.botName()
+        botnick = self.parent.madcow.botname()
 
         # callback to interpolate the dynamic regexes
         interpolate = lambda x: x.replace('WHO', who).replace('BOTNICK',
@@ -324,12 +327,12 @@ class Factoids(Base):
         # modify output parameters for tells
         if result and tell_obj:
             result = '%s wants you to know: %s' % (nick, result)
-            req.sendTo = target
+            req.sendto = target
 
         return result
 
     def do_statement(self, message, nick, req):
-        botnick = self.parent.madcow.botName()
+        botnick = self.parent.madcow.botname()
         addressed = req.addressed
         private = req.private
         correction = req.correction

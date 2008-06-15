@@ -13,15 +13,15 @@ import logging as log
 
 class SilcPlugin(madcow.Madcow, silc.SilcClient):
 
-  def __init__(self, config=None, dir=None):
-    madcow.Madcow.__init__(self, config, dir)
+  def __init__(self, config, prefix):
+    madcow.Madcow.__init__(self, config, prefix)
     self.colorlib = ColorLib('mirc')
     keys = silc.create_key_pair("silc.pub", "silc.priv", passphrase="")
     nick = self.config.silcplugin.nick
     silc.SilcClient.__init__(self, keys, nick, nick, nick)
     self.channels = self._delim.split(self.config.silcplugin.channels)
 
-  def botName(self):
+  def botname(self):
     return self.config.silcplugin.nick
 
   def connect(self):
@@ -53,15 +53,15 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
     req.private = private
     if private:
       req.addressed = True
-      req.sendTo = sender
+      req.sendto = sender
       req.channel = 'privmsg'
     else:
       req.addressed = False
-      req.sendTo = channel
+      req.sendto = channel
       req.channel = channel.channel_name
 
     req.message = self.colorlib.strip_color(req.message)
-    self.checkAddressing(req)
+    self.check_addressing(req)
 
     if req.message.startswith('^'):
       req.message = req.message[1:]
@@ -98,9 +98,9 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
       message = self.colorlib.rainbow(message)
     
     if req.private:
-      self.send_to_user(req.sendTo, message)
+      self.send_to_user(req.sendto, message)
     else:
-      self.send_to_channel(req.sendTo, message)
+      self.send_to_channel(req.sendto, message)
 
   # should these use irc's textwrap?
   # Nah, silc doesn't have message limits like IRC, so wrapping just

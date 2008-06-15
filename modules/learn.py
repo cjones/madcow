@@ -15,11 +15,11 @@ class Main(Module):
     _allowed = ['location', 'email', 'karma']
 
     def __init__(self, madcow=None):
-        self.dir = madcow.dir
-        self.ns = madcow.ns
+        self.prefix = madcow.prefix
+        self.namespace = madcow.namespace
 
     def dbfile(self, db):
-        dbfile = '%s/data/db-%s-%s' % (self.dir, self.ns, db)
+        dbfile = '%s/data/db-%s-%s' % (self.prefix, self.namespace, db)
         return dbfile
 
     def dbm(self, db):

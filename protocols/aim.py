@@ -60,7 +60,7 @@ class OSCARConnection(BOSConnection):
         req.addressed = True
         req.aim = self
         log.info('[AIM] <%s> %s' % (req.nick, req.message))
-        self.bot.checkAddressing(req)
+        self.bot.check_addressing(req)
         self.bot.process_message(req)
 
 

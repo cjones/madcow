@@ -26,9 +26,9 @@ class Main(Module):
     def __init__(self, madcow=None):
         try:
             self.data = []
-            filename = os.path.join(madcow.dir, 'grufti-responses.txt')
+            filename = os.path.join(madcow.prefix, 'grufti-responses.txt')
             if not os.path.exists(filename):
-                sample = os.path.join(madcow.dir, self._sample)
+                sample = os.path.join(madcow.prefix, self._sample)
                 shutil.copyfile(sample, filename)
                 log.warn('created %s' % self._filename)
             doc = slurp(filename)

@@ -61,12 +61,15 @@ entityMap = {
 class Base(object):
     """Base class"""
 
+    # XXX do i ever use this?
+    """
     def __init__(self, *args, **kwargs):
         self.args = args
         self.__dict__.update(kwargs)
+    """
 
     def __str__(self):
-        return '<%s %s>' % (self.__class__.__name__, repr(self.__dict__))
+        return '<%s %s>' % (self.__class__.__name__, self.__dict__)
 
     __repr__ = __str__
 

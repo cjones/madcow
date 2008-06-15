@@ -36,7 +36,7 @@ class ProtocolHandler(Madcow):
             except Exception, e:
                 log.exception(e)
 
-    def botName(self):
+    def botname(self):
         """Should return bots real name for addressing purposes"""
         return 'madcow'
 
@@ -66,7 +66,7 @@ class ProtocolHandler(Madcow):
 
         # this sets the above flag to true if the user addresses the bot,
         # as well as strips off the bots nick.
-        self.checkAddressing(req)
+        self.check_addressing(req)
 
         # pass to substem for final processing
         Madcow.process_message(self, req)

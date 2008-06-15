@@ -13,7 +13,10 @@ __license__ = 'GPL'
 __all__ = ['Karma', 'Main']
 
 class KarmaResponse(Base):
-    pass
+
+    def __init__(self, reply, matched):
+        self.reply = reply
+        self.matched = matched
 
 
 class Karma(Base):

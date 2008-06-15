@@ -13,8 +13,8 @@ class IRCProtocol(Madcow):
 
     events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg', 'namreply']
 
-    def __init__(self, config=None, dir=None):
-        Madcow.__init__(self, config=config, dir=dir)
+    def __init__(self, config, prefix):
+        Madcow.__init__(self, config, prefix)
 
         self.colorlib = ColorLib('mirc')
         if log.root.level <= log.DEBUG:
@@ -66,7 +66,7 @@ class IRCProtocol(Madcow):
                 log.error('Error in IRC loop')
                 log.exception(e)
 
-    def botName(self):
+    def botname(self):
         return self.server.get_nickname()
 
     def on_welcome(self, server, event):
@@ -137,7 +137,7 @@ class IRCProtocol(Madcow):
 
         # send to IRC socket
         for line in output:
-            self.server.privmsg(req.sendTo, line)
+            self.server.privmsg(req.sendto, line)
 
     def on_privmsg(self, server, event):
         """private message received"""
@@ -155,17 +155,17 @@ class IRCProtocol(Madcow):
         req.private = private
 
         if private:
-            req.sendTo = req.nick
+            req.sendto = req.nick
             req.addressed = True
         else:
-            req.sendTo = req.channel
+            req.sendto = req.channel
             req.addressed = False
 
         # strip control codes from incoming lines
         req.message = self.colorlib.strip_color(req.message)
 
         # strip adressing and set req attributes
-        self.checkAddressing(req)
+        self.check_addressing(req)
 
         # lines that start with ^ will have their output rainbowed
         if req.message.startswith('^'):
