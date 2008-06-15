@@ -6,6 +6,7 @@ import re
 import logging as log
 import time
 from include.utils import stripHTML
+from time import sleep
 
 class AIMProtocol(Madcow):
 
@@ -15,12 +16,15 @@ class AIMProtocol(Madcow):
         log.info('[AIM] Logging into aol.com')
         username = self.config.aim.username
         password = self.config.aim.password
-        self.proto = OSCARAuth(username, password)
-        self.proto.connect()
-        self.proto.BOSClass._ProtocolHandler = self
-        log.info('[AIM] Connected')
-        while True:
-            time.sleep(1)
+        auth = OSCARAuth(username, password)
+        auth.bot = self
+        auth.start()
+        while auth.connected:
+            sleep(1)
+        log.info('[AIM] Connected to service')
+        while auth.proto.connected:
+            sleep(1)
+        log.info('[AIM] Connection closed')
 
     def output(self, response, req=None):
         self.handle_response(response, req)
@@ -43,7 +47,7 @@ class OSCARConnection(BOSConnection):
         self.requestSSI()
         log.info('[AIM] Retreiving buddy list')
         self.activateSSI()
-        self.setProfile(self._ProtocolHandler.config.aim.profile)
+        self.setProfile(self.bot.config.aim.profile)
         self.setIdleTime(0)
         self.clientReady()
         log.info('[AIM] Client ready')
@@ -55,10 +59,9 @@ class OSCARConnection(BOSConnection):
         req.private = True
         req.addressed = True
         req.aim = self
-        handler = self._ProtocolHandler
         log.info('[AIM] <%s> %s' % (req.nick, req.message))
-        handler.checkAddressing(req)
-        handler.process_message(req)
+        self.bot.checkAddressing(req)
+        self.bot.process_message(req)
 
 
 class OSCARAuth(OscarAuthenticator):

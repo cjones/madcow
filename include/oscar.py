@@ -21,6 +21,9 @@ class Protocol(Base):
         self.socket = self.fd = None
         self.connected = False
 
+    def start(self):
+        self.connect()
+
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
@@ -33,7 +36,7 @@ class Protocol(Base):
 
     def stop(self):
         self.disconnect()
-        self.running = False
+        self.connected = False
         self.socket.close()
         self.socket = self.fd = None
 
@@ -854,7 +857,7 @@ class ChatService(OSCARService):
                       tlvs)
 
     def leaveChat(self):
-        self.disconnect()
+        self.stop()
 
 
 class OscarAuthenticator(OscarConnection):
@@ -922,7 +925,6 @@ class OscarAuthenticator(OscarConnection):
             self.cookie=tlvs[6]
             server,port=string.split(tlvs[5],":")
             self.connectToBOS(server, int(port))
-            self.close()
         elif tlvs.has_key(8):
             errorcode=tlvs[8]
             errorurl=tlvs[4]
@@ -940,8 +942,10 @@ class OscarAuthenticator(OscarConnection):
         pass
 
     def connectToBOS(self, server, port):
-        proto = self.BOSClass(server, int(port), self.username, self.cookie)
-        proto.connect()
+        self.proto = self.BOSClass(server, port, self.username, self.cookie)
+        self.proto.bot = self.bot
+        self.proto.start()
+        self.stop()
 
     def error(self,error,url):
         if self.deferred: self.deferred.errback((error,url))
