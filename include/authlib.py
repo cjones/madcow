@@ -2,7 +2,7 @@
 
 """Handles authentication in Madcow"""
 
-from utils import Base, Error
+from utils import Error
 from random import randint
 import sha
 from base64 import b64encode, b64decode
@@ -21,7 +21,7 @@ class IllegalUserName(Error):
     pass
 
 
-class AuthLib(Base):
+class AuthLib:
 
     def __init__(self, path):
         self.path = path

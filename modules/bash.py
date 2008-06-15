@@ -4,32 +4,32 @@
 
 import re
 import random
-from include.utils import Base, Module, stripHTML
+from include.utils import Module, stripHTML
 from include.useragent import geturl
 import logging as log
 
-class Bash(Base):
+class Bash:
     random = 'http://www.bash.org/?random'
     bynum = 'http://www.bash.org/?num'
     search = 'http://www.bash.org/?search=query&show=100'
     entries = re.compile('<p class="qt">(.*?)</p>', re.DOTALL)
 
 
-class QDB(Base):
+class QDB:
     random = 'http://qdb.us/random'
     bynum = 'http://qdb.us/num'
     search = 'http://qdb.us/?search=query&limit=100&approved=1'
     entries = re.compile('<td[^>]+><p>(.*?)</p>', re.DOTALL)
 
 
-class XKCD(Base):
+class XKCD:
     random = 'http://www.chiliahedron.com/xkcdb/?random'
     bynum = 'http://www.chiliahedron.com/xkcdb/?num'
     search = 'http://www.chiliahedron.com/xkcdb/?search=query&show=100'
     entries = re.compile('<div class="quote_output">\s*(.*?)</div>', re.DOTALL)
 
 
-class Limerick(Base):
+class Limerick:
     random = 'http://www.limerickdb.com/?random'
     bynum = 'http://www.limerickdb.com/?num'
     search = 'http://www.limerickdb.com/?search=query&number=100'

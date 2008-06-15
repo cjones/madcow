@@ -11,7 +11,7 @@ import os
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
-__all__ = ['Base', 'Module', 'Error', 'cache', 'throttle', 'stripHTML',
+__all__ = ['Debug', 'Module', 'Error', 'cache', 'throttle', 'stripHTML',
         'isUTF8', 'unescape_entities', 'slurp']
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
@@ -58,15 +58,8 @@ entityMap = {
     8249: '<', 8250: '>', 8364: '$', 8482: '(tm)',
 }
 
-class Base(object):
-    """Base class"""
-
-    # XXX do i ever use this?
-    """
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.__dict__.update(kwargs)
-    """
+class Debug:
+    """Extra debugging class"""
 
     def __str__(self):
         return '<%s %s>' % (self.__class__.__name__, self.__dict__)
@@ -74,7 +67,7 @@ class Base(object):
     __repr__ = __str__
 
 
-class Module(Base):
+class Module:
     _any = re.compile(r'^(.+)$')
     pattern = re.compile('')
     enabled = True
@@ -133,7 +126,7 @@ class cache:
         return callback
 
 
-class throttle(Base):
+class throttle:
     """Decorator for throttling requests to prevent abuse/spamming"""
 
     # defaults

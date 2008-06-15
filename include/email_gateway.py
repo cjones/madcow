@@ -13,7 +13,7 @@ from email.Header import decode_header
 _basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.append(_basedir)
 
-from include.utils import Base, Error, stripHTML
+from include.utils import Error, stripHTML
 from madcow import Config
 
 __version__ = '0.2'
@@ -35,7 +35,7 @@ class ConnectionError(Error):
     """Raised when there is a problem sending to madcow listener"""
 
 
-class EmailGateway(Base):
+class EmailGateway:
     _spams = ('This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.',)
     _quoted = r'^(-+)\s*(original|forwarded)\s+(message|e?mail)\s*\1'
     _quoted = re.compile(_quoted, re.I)

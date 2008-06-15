@@ -4,7 +4,7 @@
 
 import re
 from include import rssparser
-from include.utils import Base, Module, stripHTML
+from include.utils import Module, stripHTML
 from include.useragent import geturl
 from include.BeautifulSoup import BeautifulSoup
 import logging as log
@@ -14,7 +14,7 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __format__ = 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s'
 
-class Terror(Base):
+class Terror:
     _url = 'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
     _re_level = re.compile(r'<THREAT_ADVISORY CONDITION="(\w+)" />')
     _color_map = {
@@ -37,7 +37,7 @@ class Terror(Base):
             return 'UNKNOWN'
 
 
-class DoomsDay(Base):
+class DoomsDay:
     _url = 'http://www.thebulletin.org/minutes-to-midnight/'
     _re_time = re.compile(r'<div class="module-content"><h3>(.*?)</h3>')
 
@@ -52,7 +52,7 @@ class DoomsDay(Base):
             return 'UNKNOWN'
 
 
-class IranWar(Base):
+class IranWar:
     _url = 'http://www.areweatwarwithiran.com/rss.xml'
 
     def war(self):
@@ -65,7 +65,7 @@ class IranWar(Base):
             return 'UNKNOWN'
 
 
-class IraqWar(Base):
+class IraqWar:
     _war_url = 'http://areweatwarwithiraq.com/rss.xml'
     _bodycount_url = 'http://www.iraqbodycount.org/'
     _re_whitespace = re.compile(r'\s+')

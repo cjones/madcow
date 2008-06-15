@@ -2,7 +2,7 @@
 
 """Look up song lyrics"""
 
-from include.utils import Module, Base
+from include.utils import Module
 import logging as log
 import re
 from include.useragent import geturl
@@ -20,7 +20,7 @@ __all__ = []
 whitespace = re.compile(r'\s+')
 badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
-class LyricsFreak(Base):
+class LyricsFreak:
     baseurl = 'http://www.lyricsfreak.com/'
     search = urljoin(baseurl, '/search.php')
     search_opts = {'sa.x': '0', 'sa.y': '0', 'sa': 'Search'}

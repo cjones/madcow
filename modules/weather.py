@@ -3,7 +3,7 @@
 """Get weather report"""
 
 import re
-from include.utils import stripHTML, Base, Module
+from include.utils import stripHTML, Module
 from include.useragent import geturl
 from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
@@ -17,7 +17,7 @@ __license__ = 'GPL'
 __all__ = ['Weather', 'Main']
 __usage__ = 'set location <nick> <location>'
 
-class Weather(Base):
+class Weather:
     baseurl = 'http://www.wunderground.com/'
     search = urljoin(baseurl, '/cgi-bin/findweather/getForecast')
     _rss_link = {'type': 'application/rss+xml'}

@@ -10,7 +10,7 @@ import re
 from time import sleep, strftime, time as unix_time
 import logging as log
 from include.authlib import AuthLib
-from include.utils import Base, Error
+from include.utils import Error
 import SocketServer
 from select import select
 from signal import signal, SIGHUP, SIGTERM
@@ -31,7 +31,7 @@ __loglevel__ = log.WARN
 __charset__ = 'latin1'
 __config__ = 'madcow.ini'
 
-class Madcow(Base):
+class Madcow:
     """Core bot handler, subclassed by protocols"""
 
     _delim = re.compile(r'\s*[,;]\s*')
@@ -442,7 +442,7 @@ class ConfigError(Error):
     """Raised when a required config option is missing"""
 
 
-class Request(Base):
+class Request:
     """Generic object passed in from protocol handlers for processing"""
 
     def __init__(self, message):
@@ -458,7 +458,7 @@ class Request(Base):
         self.addressed = False
 
 
-class User(Base):
+class User:
     """This class represents a logged in user"""
 
     def __init__(self, user, flags):
@@ -477,7 +477,7 @@ class User(Base):
             return False
 
 
-class Admin(Base):
+class Admin:
     """Class to handle admin interface"""
 
     _reAdminCommand = re.compile(r'^\s*admin\s+(.+?)\s*$', re.I)
@@ -670,7 +670,7 @@ class Admin(Base):
         return 'You are now logged in. Message me "admin help" for help'
 
 
-class Modules(Base):
+class Modules:
     """This class dynamically loads plugins and instantiates them"""
     _pyext = re.compile(r'\.py$')
     _ignore_mods = ('__init__', 'template')
@@ -774,10 +774,10 @@ class Modules(Base):
         return self.dict().iteritems()
 
 
-class Config(Base):
+class Config:
     """Config class that allows dot-notation namespace addressing"""
 
-    class ConfigSection(Base):
+    class ConfigSection:
         _isint = re.compile(r'^-?[0-9]+$')
         _isfloat = re.compile(r'^-?\d+\.\d+$')
         _istrue = re.compile('^(?:true|yes|on|1)$', re.I)

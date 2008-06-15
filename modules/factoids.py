@@ -2,7 +2,7 @@
 
 """Emulate Perl InfoBot's factoid feature"""
 
-from include.utils import Module, Base
+from include.utils import Module
 import logging as log
 import re
 from re import I
@@ -16,7 +16,7 @@ __license__ = 'GPL'
 __copyright__ = 'Copyright (C) 2008'
 __all__ = []
 
-class Factoids(Base):
+class Factoids:
     """
     This is a straight port of infobot.pl factoid handling.
     yes, this code is totally ridiculous, but it works pretty well. :P

@@ -8,13 +8,12 @@
 
 """Prints tweets to the channel."""
 
-from include.utils import Base
 from include.utils import stripHTML
 from include import twitter
 import time
 import logging as log
 
-class Main(Base):
+class Main:
 
   def __init__(self, madcow):
     self.madcow = madcow

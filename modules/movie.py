@@ -2,7 +2,7 @@
 
 """Module stub"""
 
-from include.utils import Module, Base
+from include.utils import Module
 import logging as log
 import re
 from include.useragent import geturl
@@ -22,7 +22,7 @@ html_title = re.compile(r'<title>(.*?)</title>', re.I)
 year = re.compile(r'\(\d{4}\)\s*$')
 badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
-class IMDB(Base):
+class IMDB:
     """Interface to IMDB"""
     baseurl = 'http://imdb.com/'
     search = urljoin(baseurl, '/find')
@@ -71,7 +71,7 @@ class IMDB(Base):
             return
 
 
-class RottenTomatoes(Base):
+class RottenTomatoes:
     """Interface to Rotten Tomatoes"""
     baseurl = 'http://www.rottentomatoes.com/'
     search = urljoin(baseurl, '/search/search.php')
@@ -121,7 +121,7 @@ class RottenTomatoes(Base):
             return
 
 
-class MetaCritic(Base):
+class MetaCritic:
     baseurl = 'http://www.metacritic.com/'
     search = urljoin(baseurl, '/search/process')
     movie_opts = {
@@ -178,7 +178,7 @@ class MetaCritic(Base):
             return
 
 
-class MovieRatings(Base):
+class MovieRatings:
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
     sources = (
         IMDB(),

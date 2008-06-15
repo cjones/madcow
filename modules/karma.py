@@ -2,7 +2,7 @@
 
 """Infobot style karma"""
 
-from include.utils import Base, Module
+from include.utils import Module
 import re
 from learn import Main as Learn
 import logging as log
@@ -12,14 +12,14 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __all__ = ['Karma', 'Main']
 
-class KarmaResponse(Base):
+class KarmaResponse:
 
     def __init__(self, reply, matched):
         self.reply = reply
         self.matched = matched
 
 
-class Karma(Base):
+class Karma:
     """Infobot style karma"""
     _adjust_pattern = re.compile(r'^\s*(.*?)[+-]([+-]+)\s*$')
     _query_pattern = re.compile(r'^\s*karma\s+(\S+)\s*\?*\s*$')

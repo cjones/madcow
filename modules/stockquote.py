@@ -3,7 +3,7 @@
 """Get stock quote from yahoo ticker"""
 
 import re
-from include.utils import Base, Module, stripHTML
+from include.utils import Module, stripHTML
 from include.useragent import geturl
 from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
@@ -16,7 +16,7 @@ __license__ = 'GPL'
 _namespace = 'madcow'
 _dir = '..'
 
-class Yahoo(Base):
+class Yahoo:
     _quote_url = 'http://finance.yahoo.com/q?s=SYMBOL'
     _isfloat = re.compile(r'^\s*-?\s*[0-9.,]+\s*$')
     _green = '\x039'

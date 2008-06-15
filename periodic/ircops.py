@@ -1,10 +1,9 @@
 """Periodically checks for people that need to be opped"""
 
-from include.utils import Base
 from time import time as unix_time, sleep
 import logging as log
 
-class Main(Base):
+class Main:
 
     def __init__(self, madcow):
         self.madcow = madcow

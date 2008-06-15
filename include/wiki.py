@@ -1,6 +1,6 @@
 """Return summary from WikiMedia projects"""
 
-from utils import stripHTML, Base
+from utils import stripHTML
 from useragent import geturl
 from BeautifulSoup import BeautifulSoup
 import re
@@ -11,7 +11,7 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __all__ = ['Wiki']
 
-class Wiki(Base):
+class Wiki:
     """Return summary from WikiMedia projects"""
 
     # site-specific details, default is english wikipedia

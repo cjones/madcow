@@ -5,11 +5,11 @@
 from include.useragent import UserAgent
 from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
-from include.utils import Module, Base, stripHTML
+from include.utils import Module, stripHTML
 import re
 import logging as log
 
-class Delicious(Base):
+class Delicious:
     """Simple API frontend"""
 
     baseurl = 'https://api.del.icio.us/'

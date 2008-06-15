@@ -9,7 +9,7 @@ import datetime
 from sqlobject import *
 import random
 from include.throttle import Throttle
-from include.utils import Base, Module
+from include.utils import Module
 import logging as log
 
 try:

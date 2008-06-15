@@ -2,7 +2,7 @@
 
 """Color Library"""
 
-from utils import Base, Error
+from utils import Error
 import re
 
 __version__ = '0.5'
@@ -23,7 +23,7 @@ class UnknownRainbowStyle(Error):
     """Raised when an invalid style is requested"""
 
 
-class ColorLib(Base):
+class ColorLib:
     _protocols = ['mirc', 'ansi', 'html']
     _codes = {
         'r': 'red',

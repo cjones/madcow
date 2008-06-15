@@ -1,8 +1,6 @@
 """Template for periodic event"""
 
-from include.utils import Base
-
-class Main(Base):
+class Main:
 
     def __init__(self, madcow):
         self.madcow = madcow

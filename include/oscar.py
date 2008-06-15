@@ -1,6 +1,5 @@
 """This was brutally ripped out of twisted"""
 
-from include.utils import Base
 import socket
 from threading import Thread
 from select import select
@@ -11,7 +10,7 @@ import string
 import random
 import types
 
-class Protocol(Base):
+class Protocol:
 
     def __init__(self, host, port, timeout=60, bufsize=60):
         self.host = host

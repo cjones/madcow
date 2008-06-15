@@ -1,7 +1,7 @@
 """Google interface"""
 
 import urllib2
-from utils import Base, Error, stripHTML
+from utils import Error, stripHTML
 from useragent import UserAgent
 from urlparse import urljoin
 import re
@@ -14,7 +14,7 @@ class NonRedirectResponse(Error):
     """Raised when google doesn't return a redirect"""
 
 
-class Response(Base):
+class Response:
 
     def __init__(self, data=''):
         self.data = data
@@ -37,7 +37,7 @@ class NoErrors(urllib2.HTTPDefaultErrorHandler):
         return Response(data=dict(headers.items())['location'])
 
 
-class Google(Base):
+class Google:
     baseurl = 'http://www.google.com/'
     search = urljoin(baseurl, '/search')
     luckyopts = {'hl': 'en', 'btnI': 'I', 'aq': 'f', 'safe': 'off'}

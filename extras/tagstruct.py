@@ -8,15 +8,7 @@ from BeautifulSoup import BeautifulSoup
 import urllib
 import re
 
-class Base(object):
-
-    def __str__(self):
-        return '<%s %s>' % (self.__class__.__name__, repr(self.__dict__))
-
-    __repr__ = __str__
-
-
-class HTMLParser(Base):
+class HTMLParser:
     _tags = re.compile(r'<(/?\w+).*?>', re.DOTALL)
     _linebreaks = re.compile(r'[\r\n]+')
     _taglinks = re.compile(r'><')
