@@ -135,6 +135,7 @@ class Madcow(Base):
             log.exception(e)
             return
         self.handle_response(response, req)
+        self.response_queue.task_done()
 
     def handle_response(self, response, req=None):
         # encode output, lock threads, and call protocol_output
@@ -149,7 +150,6 @@ class Madcow(Base):
             self.lock.release()
         except:
             pass
-        self.response_queue.task_done()
 
     def encode(self, text):
         """Force output to the bots encoding if possible"""
