@@ -48,13 +48,12 @@ REQUIREMENTS
     * python 2.4 or higher
 
     Madcow can use a variety of protocol formats.  Depending on which
-    you choose, you will need a third-party library to handle the
-    protocol.  Most of these are available from your operating systems's
-    default package/ports handler.
+    you choose, you may need a third-party library to handle the
+    protocol.
 
-    IRC  - irc uses python-irclib (included with madcow)
+    IRC  - no modules needed
     SILC - pysilc (http://cheeseshop.python.org/pypi/pysilc/0.4)
-    AIM  - twisted (http://twistedmatrix.com/trac/wiki/TwistedProjects)
+    AIM  - no modules needed
 
     Madcow also comes with a suite of plugins that provide
     functionality.  Most of these use the core Python library, however a
@@ -63,7 +62,7 @@ REQUIREMENTS
     description of each plugin in madcow.ini-sample
 
     urban.py: requires SOAPpy
-    memebot.py: requeires sqlobject, pysqlite
+    memebot.py: requeires sqlobject, pysqlite or MySQLdb
 
 WEB FRONTEND FOR MEMEBOT
 
