@@ -84,7 +84,7 @@ class Main(Module):
         engine = config.db_engine
         uri = engine + '://'
         if engine == 'sqlite':
-            uri += os.path.join(madcow.dir,
+            uri += os.path.join(madcow.prefix,
                     'data/db-%s-memes' % madcow.namespace)
         elif engine == 'mysql':
             user = config.db_user
