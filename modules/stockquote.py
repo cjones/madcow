@@ -9,6 +9,7 @@ from urlparse import urljoin
 from include.BeautifulSoup import BeautifulSoup
 import random
 import logging as log
+from include.colorlib import ColorLib
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -19,9 +20,9 @@ _dir = '..'
 class Yahoo:
     _quote_url = 'http://finance.yahoo.com/q?s=SYMBOL'
     _isfloat = re.compile(r'^\s*-?\s*[0-9.,]+\s*$')
-    _green = '\x039'
-    _red = '\x035'
-    _reset = '\x0F'
+
+    def __init__(self, colorlib):
+        self.colorlib = colorlib
 
     def get_quote(self, symbol):
         url = Yahoo._quote_url.replace('SYMBOL', symbol)
@@ -72,9 +73,11 @@ class Yahoo:
         # try and colorize the change field
         try:
             if 'Up' in data['Change:']:
-                data['Change:'] = self._green + data['Change:'] + self._reset
+                data['Change:'] = self.colorlib.get_color('green',
+                        text=data['Change:'])
             elif 'Down' in data['Change:']:
-                data['Change:'] = self._red + data['Change:'] + self._reset
+                data['Change:'] = self.colorlib.get_color('red',
+                        text=data['Change:'])
         except:
             pass
 
@@ -94,7 +97,11 @@ class Main(Module):
     help = 'quote <symbol> - get latest stock quote'
 
     def __init__(self, madcow=None):
-        self.yahoo = Yahoo()
+        if madcow is not None:
+            colorlib = madcow.colorlib
+        else:
+            colorlib = ColorLib('ansi')
+        self.yahoo = Yahoo(colorlib)
 
     def response(self, nick, args, kwargs):
         query = args[0]

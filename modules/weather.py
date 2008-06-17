@@ -10,6 +10,7 @@ from include.BeautifulSoup import BeautifulSoup
 from include import rssparser
 from learn import Main as Learn
 import logging as log
+from include.colorlib import ColorLib
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -24,6 +25,9 @@ class Weather:
     _tempF = re.compile('(-?[0-9.]+)\s*\xb0\s*F', re.I)
     _bar = re.compile(r'\s*\|\s*')
     _keyval = re.compile(r'^\s*(.*?)\s*:\s*(.*?)\s*$')
+
+    def __init__(self, colorlib):
+        self.colorlib = colorlib
 
     def forecast(self, location):
         page = geturl(url=self.search, opts={'query': location},
@@ -73,22 +77,22 @@ class Weather:
             temp = float(self._tempF.search(data['Temperature']).group(1))
             blink = False
             if temp < 0:
-                color = 6
+                color = 'magenta'
             elif temp >=0 and temp < 40:
-                color = 2
+                color = 'bue'
             elif temp >= 40 and temp < 60:
-                color = 10
+                color = 'cyan'
             elif temp >= 60 and temp < 80:
-                color = 3
+                color = 'green'
             elif temp >= 80 and temp < 90:
-                color = 7
+                color = 'yellow'
             elif temp >= 90 and temp < 100:
-                color = 5
+                color = 'red'
             elif temp >= 100:
-                color = 5
+                color = 'red'
                 blink = True
-            data['Temperature'] = '\x03%s\x16\x16%s\x0F' % (color,
-                    data['Temperature'])
+            data['Temperature'] = self.colorlib.get_color(color,
+                    text=data['Temperature'])
             if blink:
                 data['Temperature'] = '\x1b[5m' + data['Temperature'] + \
                         '\x1b[0m'
@@ -112,7 +116,11 @@ class Main(Module):
     help = 'fc [location] - look up weather forecast'
 
     def __init__(self, madcow=None):
-        self.weather = Weather()
+        if madcow is not None:
+            colorlib = madcow.colorlib
+        else:
+            colorlib = ColorLib('ansi')
+        self.weather = Weather(colorlib)
         try:
             self.learn = Learn(madcow=madcow)
         except:

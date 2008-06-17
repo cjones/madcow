@@ -14,8 +14,8 @@ import logging as log
 class SilcPlugin(madcow.Madcow, silc.SilcClient):
 
   def __init__(self, config, prefix):
-    madcow.Madcow.__init__(self, config, prefix)
     self.colorlib = ColorLib('mirc')
+    madcow.Madcow.__init__(self, config, prefix)
     keys = silc.create_key_pair("silc.pub", "silc.priv", passphrase="")
     nick = self.config.silcplugin.nick
     silc.SilcClient.__init__(self, keys, nick, nick, nick)

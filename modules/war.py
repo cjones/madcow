@@ -8,6 +8,7 @@ from include.utils import Module, stripHTML
 from include.useragent import geturl
 from include.BeautifulSoup import BeautifulSoup
 import logging as log
+from include.colorlib import ColorLib
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -18,19 +19,22 @@ class Terror:
     _url = 'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
     _re_level = re.compile(r'<THREAT_ADVISORY CONDITION="(\w+)" />')
     _color_map = {
-        'severe': 5,
-        'high': 4,
-        'elevated': 8,
-        'guarded': 12,
-        'low': 9,
+        'severe': 'red',
+        'high': 'orange',
+        'elevated': 'bright yellow',
+        'guarded': 'bright blue',
+        'low': 'bright green',
     }
+
+    def __init__(self, colorlib):
+        self.colorlib = colorlib
 
     def level(self):
         try:
             doc = geturl(Terror._url)
-            level = Terror._re_level.search(doc).group(1)
-            color = Terror._color_map[level.lower()]
-            return '\x03%s,1\x16\x16%s\x0f' % (color, level)
+            level = self._re_level.search(doc).group(1)
+            color = self._color_map[level.lower()]
+            return self.colorlib.get_color(color, text=level)
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
@@ -102,7 +106,11 @@ class Main(Module):
     help = 'terror - NEVAR FORGET'
 
     def __init__(self, madcow=None):
-        self.terror = Terror()
+        if madcow is not None:
+            colorlib = madcow.colorlib
+        else:
+            colorlib = ColorLib('ansi')
+        self.terror = Terror(colorlib)
         self.doom = DoomsDay()
         self.iran = IranWar()
         self.iraq = IraqWar()

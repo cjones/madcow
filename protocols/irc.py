@@ -14,9 +14,9 @@ class IRCProtocol(Madcow):
     events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg', 'namreply']
 
     def __init__(self, config, prefix):
+        self.colorlib = ColorLib('mirc')
         Madcow.__init__(self, config, prefix)
 
-        self.colorlib = ColorLib('mirc')
         if log.root.level <= log.DEBUG:
             irclib.DEBUG = 1
         else:

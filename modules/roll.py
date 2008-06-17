@@ -6,6 +6,7 @@ import re
 import random
 import math
 from include.utils import Module
+from include.colorlib import ColorLib
 import os
 import logging as log
 
@@ -16,7 +17,12 @@ class Main(Module):
     allow_threading = False
     require_addressing = True
     help = 'roll [<numdice>d<sides>] - roll die of the specified size'
-    _color_map = {'red': 5, 'yellow': 7, 'green': 3}
+
+    def __init__(self, madcow=None):
+        if madcow is not None:
+            self.colorlib = madcow.colorlib
+        else:
+            self.colorlib = ColorLib('ansi')
 
     def roll(self, min, max):
         if isinstance((min * max), (float, complex)):
@@ -42,8 +48,7 @@ class Main(Module):
         return val
 
     def colorize(self, text, color):
-        color_code = self._color_map[color]
-        return '\x03%d\x16\x16%s\x0f' % (color_code, text)
+        return self.colorlib.get_color(color, text=text)
 
     def response(self, nick, args, kwargs):
         num_dice = self.normalize(args[0])
