@@ -1,3 +1,7 @@
+1.3.2: Mon Jun 16 21:32:43 PDT 2008
+    * refactor code based on PyLINT feedback
+    * fix modules that use color to use colorlib instead of hard-coded ascii
+
 1.3.1: Sat Jun 14 19:13:29 PDT 2008
     * code and basedir cleanup
     * remove dependency on twisted for AIM
@@ -272,3 +276,4 @@
     * Get a rid of all the CVS Id tags
     * Clean up jesus module to not have footnotes
     * Stock module can now do mutual funds
+
