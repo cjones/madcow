@@ -262,6 +262,8 @@ class Madcow:
             self.output('yes?', req)
             return
         if req.addressed and req.message.lower() == 'help':
+            if self.config.main.module in ('irc', 'silcplugin'):
+                req.sendto = req.nick
             self.output(self.usage(), req)
             return
         if req.addressed and req.message.lower() == 'version':
