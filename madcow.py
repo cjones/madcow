@@ -10,7 +10,7 @@ import re
 from time import sleep, strftime, time as unix_time
 import logging as log
 from include.authlib import AuthLib
-from include.utils import Error
+from include.utils import Error, slurp
 import SocketServer
 from select import select
 from signal import signal, SIGHUP, SIGTERM
@@ -19,6 +19,7 @@ from threading import Thread, RLock
 from Queue import Queue, Empty
 from types import StringTypes, StringType
 from include import useragent as ua
+from md5 import new as md5sum
 
 # STATIC VARIABLES
 __version__ = '1.3.3'
@@ -31,7 +32,7 @@ __logformat__ = '[%(asctime)s] %(levelname)s: %(message)s'
 __loglevel__ = log.WARN
 __charset__ = 'latin1'
 __config__ = 'madcow.ini'
-
+__sample_hash__ = '712bc8cfe80e1bdbe1ed768cefc7fe2f'
 
 class Madcow:
     """Core bot handler, subclassed by protocols"""
@@ -828,178 +829,88 @@ class Config:
             raise ConfigError, "missing section: %s" % attr
 
 
-
-def check_config(config):
+def check_config(config, samplefile, prefix):
     """Sanity check config"""
 
-    # XXX HUGE HACK!!!
-    #
-    # I hate this, but it's been the biggest source of problems with users.
-    # This will prevent people from using outdated or malformed config files
-    # that lack important settings, and will tell them what they're missing.
-    #
-    # Yes, there's a lot of hard-coded logic here. C'est la vie. If I can
-    # think of a less hackish way of verifying config integrity, I will
-    # implement that.. until then, I'm sick of people using broken configs
-    # and complaining to me the bot is broken. So here we are.
-    #
-    # -cj
+    # verify we're using an unaltered sample file to verify against
+    hash = md5sum()
+    hash.update(slurp(samplefile))
+    hash = hash.hexdigest()
+    if hash != __sample_hash__:
+        print >> sys.stderr, 'WARNING: %s is out of date or has been altered!' \
+            % os.path.basename(samplefile)
 
-    protocols = ('irc', 'silcplugin', 'aim', 'cli')
-    required_config = (
-        # main section
-        ('main', (
-            'module',
-            'detach',
-            'workers',
-            'logpublic',
-            'ignoreList',
-            'loglevel',
-            'logfile',
-            'pidfile',
-            'charset',
-            'owner',
-        )),
+    # read sample file
+    sample = ConfigParser()
+    sample.read(samplefile)
 
-        # protocol-specific sections
-        ('irc', (
-            'host',
-            'port',
-            'nick',
-            'channels',
-            'reconnect',
-            'reconnectWait',
-            'rejoin',
-            'rejoinWait',
-            'rejoinReply',
-            'quitMessage',
-            'oper',
-            'operUser',
-            'operPass',
-            'nickServUser',
-            'nickServPass',
-            'wrapSize',
-        )),
-        ('silcplugin', (
-            'nick',
-            'channels',
-            'host',
-            'port',
-            'reconnect',
-            'reconnectWait',
-        )),
-        ('aim', (
-            'username',
-            'password',
-            'profile',
-        )),
-
-        # stuff that is only important if enabled=True
-        ('admin', (
-            'enabled',
-            'allowRegistration',
-            'defaultFlags',
-        )),
-        ('twitter', (
-            'enabled',
-            'channel',
-            'updatefreq',
-            'username',
-            'password',
-        )),
-        ('ircops', (
-            'enabled',
-            'updatefreq',
-        )),
-        ('gateway', (
-            'enabled',
-            'bind',
-            'port',
-            'channel',
-        )),
-
-        # misc. important stuff
-        ('modules', (
-            'dbNamespace',
-        )),
-        ('http', (
-            'timeout',
-            'agent',
-            'cookies',
-        )),
-
-        # these depend on modules to have any meaning..
-        # XXX either these sections need enabled = True, or smtp
-        # needs to be renamed to 'summon' so that we can assume
-        # these sections are only important if their parent module is
-        # "not disabled".
-        #
-        # since this requires some not-insignificant changes, just require
-        # these setttings for now. there's no good reason for people to use
-        # outdated ini's
-        ('smtp', (
-            'server',
-            'sender',
-            'user',
-            'password',
-        )),
-        ('delicious', (
-            'username',
-            'password',
-        )),
-        ('memebot', (
-            'db_engine',
-            'db_name',
-            'db_user',
-            'db_pass',
-            'db_host',
-            'db_port',
-        )),
-    )
-
-    missing_sections = []
-    missing_settings = {}
+    # problems stored here
     errors = []
-    protocol = None
-    for section, settings in required_config:
-        if section in protocols and protocol != section:
+    missing_sections = []
+    missing_options = {}
+
+    # look for valid protocols
+    protocols = []
+    for proto in os.walk(os.path.join(prefix, 'protocols')).next()[2]:
+        try:
+            name = re.search(r'^([^_]{2}\S+)\.py$', proto).group(1)
+            if name == 'template':
+                continue
+            protocols.append(name)
+        except AttributeError:
             continue
+
+    # determine our protocol
+    try:
+        protocol = config.main.module
+        if protocol not in protocols:
+            errors.append('Invalid protocol %s, should be one of: %s' % (
+                protocol, protocols))
+    except ConfigError:
+        errors.append('No protocol defined')
+        protocol = None
+
+    for section in sample.sections():
+        # skip protocol sections that we aren't using
+        if section in protocols and section != protocol:
+            continue
+
+        # see if the section even exists
         try:
             config_section = getattr(config, section)
-        except ConfigError, exc:
-            missing_sections.append('[%s]' % section)
-        except Exception, exc:
-            errors.append(str(exc))
+        except ConfigError:
+            missing_sections.append(section)
+            continue
 
-        req_enabled = 'enabled' in settings
-        is_enabled = True
-
-        for setting in settings:
-            if not is_enabled:
-                break
+        # if section has an enabled flag and it's set to off,
+        # then don't bother checking the other options
+        if sample.has_option(section, 'enabled'):
             try:
-                config_setting = getattr(config_section, setting)
-            except ConfigError, exc:
-                missing_settings.setdefault(section, [])
-                missing_settings[section].append(setting)
-            except Exception, exc:
-                errors.append(str(exc))
+                if not config_section.enabled:
+                    continue
+            except ConfigError:
+                missing_options[section] = ['enabled']
+                continue
 
-            if req_enabled and setting == 'enabled':
-                is_enabled = config_setting
+        # verify options exist
+        for option in sample.options(section):
+            try:
+                getattr(config_section, option)
+            except ConfigError:
+                missing_options.setdefault(section, [])
+                missing_options[section].append(option)
 
-            if section == 'main' and setting == 'module':
-                protocol = config_setting
-
+    # construct list of errors
     if missing_sections:
-        errors.append('* missing sections: %s' % ', '.join(missing_sections))
-    if missing_settings:
-        for section, settings in missing_settings.items():
-            err = '* [%s] missing settings: %s' % (section, ', '.join(settings))
-            errors.append(err)
+        missing_sections = ['[%s]' % i for i in missing_sections]
+        errors.append('Missing sections: ' + ','.join(missing_sections))
+    for section, options in missing_options.items():
+        errors.append('Section [%s] missing options: %s' % (section,
+            ', '.join(options)))
+
+    # raise exception if any errors are found
     if errors:
         raise ConfigError, '\n'.join(errors)
-
 
 def detach():
     """Daemonize on POSIX system"""
@@ -1089,7 +1000,7 @@ def main():
         return 1
 
     try:
-        check_config(config)
+        check_config(config, sample_config, prefix)
     except ConfigError, err:
         print >> sys.stderr, '%s is missing required settings, check %s' % \
             (os.path.basename(opts.config), os.path.basename(sample_config))
