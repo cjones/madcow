@@ -832,6 +832,10 @@ class Config:
 def check_config(config, samplefile, prefix):
     """Sanity check config"""
 
+    # this bloated, over-engineered routine exists because fucked up
+    # config files are the #1 source of complaints about the bot being
+    # "broken". maybe a more general solution can be done later. -CJ
+
     # verify we're using an unaltered sample file to verify against
     hash = md5sum()
     hash.update(slurp(samplefile))
