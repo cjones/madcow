@@ -42,7 +42,7 @@ class Main(Module):
     require_addressing = True
     help = '<bash|qdb|xkcdb|limerick> [#|query] - get stupid IRC quotes'
     sources = {
-        'bash': Bash(),
+        'bash': QDB(), #Bash(), XXX website seems gone
         'qdb': QDB(),
         'xkcdb': XKCD(),
         'limerick': Limerick(),

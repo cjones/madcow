@@ -30,7 +30,7 @@ tests = {
         'result': 'test: google = http://www.google.com/',
     },
     'lyrics': {
-        'request': 'sing song around the world by daft punk full',
+        'request': 'sing around the world daft punk',
         'result': re.compile(r'Around the world, around the world'),
     },
     'bbcnews': {
