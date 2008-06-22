@@ -973,17 +973,24 @@ def main():
     # run bot
     try:
         bot = __import__('protocols.' + protocol, (), (), ['ProtocolHandler'])
-        bot = getattr(bot, 'ProtocolHandler')(config, prefix)
+        bot = getattr(bot, 'ProtocolHandler')
+        bot = bot(config, prefix)
         bot.start()
-    finally:
-        if pidfile and os.path.exists(pidfile):
-            log.info('removing pidfile')
-            try:
-                os.remove(pidfile)
-            except Exception, exc:
-                log.warn('failed to remove pidfile %s' % pidfile)
-                log.exception(exc)
+    except Exception, exc:
+        log.exception(exc)
+
+    if pidfile and os.path.exists(pidfile):
+        log.info('removing pidfile')
+        try:
+            os.remove(pidfile)
+        except Exception, exc:
+            log.warn('failed to remove pidfile %s' % pidfile)
+            log.exception(exc)
+
+    try:
         bot.stop()
+    except Exception, exc:
+        log.exception(exc)
 
     log.info('madcow is exiting cleanly')
     return 0
