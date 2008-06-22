@@ -32,6 +32,7 @@ __loglevel__ = log.WARN
 __charset__ = 'latin1'
 __config__ = 'madcow.ini'
 
+
 class Madcow:
     """Core bot handler, subclassed by protocols"""
 
@@ -827,6 +828,179 @@ class Config:
             raise ConfigError, "missing section: %s" % attr
 
 
+
+def check_config(config):
+    """Sanity check config"""
+
+    # XXX HUGE HACK!!!
+    #
+    # I hate this, but it's been the biggest source of problems with users.
+    # This will prevent people from using outdated or malformed config files
+    # that lack important settings, and will tell them what they're missing.
+    #
+    # Yes, there's a lot of hard-coded logic here. C'est la vie. If I can
+    # think of a less hackish way of verifying config integrity, I will
+    # implement that.. until then, I'm sick of people using broken configs
+    # and complaining to me the bot is broken. So here we are.
+    #
+    # -cj
+
+    protocols = ('irc', 'silcplugin', 'aim', 'cli')
+    required_config = (
+        # main section
+        ('main', (
+            'module',
+            'detach',
+            'workers',
+            'logpublic',
+            'ignoreList',
+            'loglevel',
+            'logfile',
+            'pidfile',
+            'charset',
+            'owner',
+        )),
+
+        # protocol-specific sections
+        ('irc', (
+            'host',
+            'port',
+            'nick',
+            'channels',
+            'reconnect',
+            'reconnectWait',
+            'rejoin',
+            'rejoinWait',
+            'rejoinReply',
+            'quitMessage',
+            'oper',
+            'operUser',
+            'operPass',
+            'nickServUser',
+            'nickServPass',
+            'wrapSize',
+        )),
+        ('silcplugin', (
+            'nick',
+            'channels',
+            'host',
+            'port',
+            'reconnect',
+            'reconnectWait',
+        )),
+        ('aim', (
+            'username',
+            'password',
+            'profile',
+        )),
+
+        # stuff that is only important if enabled=True
+        ('admin', (
+            'enabled',
+            'allowRegistration',
+            'defaultFlags',
+        )),
+        ('twitter', (
+            'enabled',
+            'channel',
+            'updatefreq',
+            'username',
+            'password',
+        )),
+        ('ircops', (
+            'enabled',
+            'updatefreq',
+        )),
+        ('gateway', (
+            'enabled',
+            'bind',
+            'port',
+            'channel',
+        )),
+
+        # misc. important stuff
+        ('modules', (
+            'dbNamespace',
+        )),
+        ('http', (
+            'timeout',
+            'agent',
+            'cookies',
+        )),
+
+        # these depend on modules to have any meaning..
+        # XXX either these sections need enabled = True, or smtp
+        # needs to be renamed to 'summon' so that we can assume
+        # these sections are only important if their parent module is
+        # "not disabled".
+        #
+        # since this requires some not-insignificant changes, just require
+        # these setttings for now. there's no good reason for people to use
+        # outdated ini's
+        ('smtp', (
+            'server',
+            'sender',
+            'user',
+            'password',
+        )),
+        ('delicious', (
+            'username',
+            'password',
+        )),
+        ('memebot', (
+            'db_engine',
+            'db_name',
+            'db_user',
+            'db_pass',
+            'db_host',
+            'db_port',
+        )),
+    )
+
+    missing_sections = []
+    missing_settings = {}
+    errors = []
+    protocol = None
+    for section, settings in required_config:
+        if section in protocols and protocol != section:
+            continue
+        try:
+            config_section = getattr(config, section)
+        except ConfigError, exc:
+            missing_sections.append('[%s]' % section)
+        except Exception, exc:
+            errors.append(str(exc))
+
+        req_enabled = 'enabled' in settings
+        is_enabled = True
+
+        for setting in settings:
+            if not is_enabled:
+                break
+            try:
+                config_setting = getattr(config_section, setting)
+            except ConfigError, exc:
+                missing_settings.setdefault(section, [])
+                missing_settings[section].append(setting)
+            except Exception, exc:
+                errors.append(str(exc))
+
+            if req_enabled and setting == 'enabled':
+                is_enabled = config_setting
+
+            if section == 'main' and setting == 'module':
+                protocol = config_setting
+
+    if missing_sections:
+        errors.append('* missing sections: %s' % ', '.join(missing_sections))
+    if missing_settings:
+        for section, settings in missing_settings.items():
+            err = '* [%s] missing settings: %s' % (section, ', '.join(settings))
+            errors.append(err)
+    if errors:
+        raise ConfigError, '\n'.join(errors)
+
+
 def detach():
     """Daemonize on POSIX system"""
     if os.name != 'posix':
@@ -895,9 +1069,10 @@ def main():
     opts = parser.parse_args()[0]
 
     # read config file
+    sample_config = default_config + '-sample'
     if not os.path.exists(opts.config):
         if opts.config == default_config:
-            shutil.copyfile(default_config + '-sample', opts.config)
+            shutil.copyfile(sample_config, opts.config)
             err = 'created config %s - edit and rerun' % __config__
             print >> sys.stderr, err
         else:
@@ -911,6 +1086,14 @@ def main():
         return 1
     except Exception, exc:
         sys.stderr.write('error parsing config: %s\n' % exc)
+        return 1
+
+    try:
+        check_config(config)
+    except ConfigError, err:
+        print >> sys.stderr, '%s is missing required settings, check %s' % \
+            (os.path.basename(opts.config), os.path.basename(sample_config))
+        print >> sys.stderr, err
         return 1
 
     # init log facility
