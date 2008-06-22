@@ -18,6 +18,7 @@ import shutil
 from threading import Thread, RLock
 from Queue import Queue, Empty
 from types import StringTypes, StringType
+from include import useragent as ua
 
 # STATIC VARIABLES
 __version__ = '1.3.3'
@@ -101,6 +102,7 @@ class Madcow:
         # start worker threads
         for i in range(0, self.config.main.workers):
             name = 'ModuleWorker' + str(i + 1)
+            log.debug('Starting Thread: %s' % name)
             thread = Thread(target=self.request_handler, name=name)
             thread.setDaemon(True)
             thread.start()
@@ -781,7 +783,7 @@ class Config:
 
     class ConfigSection:
         _isint = re.compile(r'^-?[0-9]+$')
-        _isfloat = re.compile(r'^-?\d+\.\d+$')
+        _isfloat = re.compile(r'^\s*-?(?:\d+\.\d*|\d*\.\d+)\s*$')
         _istrue = re.compile('^(?:true|yes|on|1)$', re.I)
         _isfalse = re.compile('^(?:false|no|off|0)$', re.I)
 
@@ -964,6 +966,9 @@ def main():
         except Exception, exc:
             log.warn('filed to write %s: %s' % pidfile)
             log.exception(exc)
+
+    # setup global UserAgent
+    ua.setup(config.http.agent, config.http.cookies, [], config.http.timeout)
 
     # run bot
     try:

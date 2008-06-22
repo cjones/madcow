@@ -2,15 +2,19 @@
 
 """Library to mimic a browser"""
 
-from urllib2 import HTTPCookieProcessor, build_opener, Request
+from urllib2 import HTTPCookieProcessor, build_opener, Request, httplib
 from cookielib import CookieJar
 from urlparse import urlparse, urlunparse
 from urllib import urlencode
+import socket
 
 __version__ = '2.0'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'BSD'
 __all__ = ['UserAgent', 'geturl', 'posturl']
+
+# user agent is shared across instances
+_ua = None
 
 class UserAgent:
     """This is the class to mimic a browser"""
@@ -73,15 +77,42 @@ class UserAgent:
     __repr__ = __str__
 
 
-_ua = UserAgent()
+def settimeout(timeout):
+    """Set socket timeout for all requests"""
+
+    def connect(self):
+        msg = 'unknown socket error'
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(timeout)
+            self.sock.connect((self.host, self.port))
+        except socket.error, msg:
+            if self.sock:
+                self.sock.close()
+            self.sock = None
+        if not self.sock:
+            raise socket.error, msg
+
+    httplib.HTTPConnection.connect = connect
+
+def get_agent():
+    global _ua
+    if _ua is None:
+        _ua = UserAgent()
+    return _ua
+
+def setup(agent=UserAgent._msie, cookies=True, handlers=[], timeout=None):
+    global _ua
+    _ua = UserAgent(agent, cookies, handlers)
+    settimeout(timeout)
 
 def geturl(url, data=None, opts={}, referer=None, fo=None, size=-1):
     """Issue GET request"""
-    return _ua.openurl(url, data, opts, referer, fo, size, 'get')
+    return get_agent().openurl(url, data, opts, referer, fo, size, 'get')
 
 def posturl(url, data=None, opts={}, referer=None, fo=None, size=-1):
     """Issue POST request"""
-    return _ua.openurl(url, data, opts, referer, fo, size, 'post')
+    return get_agent().openurl(url, data, opts, referer, fo, size, 'post')
 
 def main():
     """When called from the commandline, act as a limited wget"""
@@ -97,9 +128,12 @@ def main():
     op.add_option('-r', '--referer', metavar='<url>', help='use this referer')
     op.add_option('-a', '--agent', metavar='<agent>', default=UserAgent._msie,
             help='default: %default')
+    op.add_option('-t', '--timeout', type='int', metavar='<secs>',
+            help='set request timeout (default: %default)')
     opts, args = op.parse_args()
 
-    ua = UserAgent(agent=opts.agent)
+    setup(agent=opts.timeout, cookies=True, handlers=[], timeout=opts.timeout)
+    ua = get_agent()
 
     if len(args) != 1:
         sys.stderr.write('Error: missing URL\n')

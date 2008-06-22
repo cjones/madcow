@@ -89,7 +89,7 @@ tests = {
     },
     'war': {
         'request': 'terror',
-        'result': re.compile('Terror: \x038,1\x16\x16ELEVATED\x0f'),
+        'result': re.compile('Terror: \x1b\[1;33m.*?\x1b\[0m, DoomsDay: It is \d+ Minutes to Midnight, IranWar: .*?, IraqWar: .*?, BodyCount: [0-9 ,-]+\s*$'),
     },
     'urban': {
         'request': 'urban penis',
@@ -163,7 +163,7 @@ tests = {
     },
     'movie': {
         'request': 'rate manos, the hands of fate',
-        'result': 'test: IMDB: 1.8/10, Freshness: 8%',
+        'result': 'test: IMDB: 1.8/10',
     },
     'stockquote': {
         'request': 'quote goog',
