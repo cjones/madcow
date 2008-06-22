@@ -9,6 +9,7 @@ from include.useragent import geturl
 from include.utils import stripHTML
 from include.BeautifulSoup import BeautifulSoup
 from urlparse import urljoin
+from include.google import Google
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -21,23 +22,21 @@ class Main(Module):
     help = 'sing <song/artist>'
     error = 'no results'
     baseurl = 'http://lyricwiki.org/'
-    searchurl = urljoin(baseurl, '/Special:Search')
+    advert = ' - lyrics from LyricWiki'
+    google = Google()
 
     def response(self, nick, args, kwargs):
         try:
-            opts = {'search': args[0], 'ns0': 1}
-            page = geturl(self.searchurl, referer=self.baseurl, opts=opts)
-            soup = BeautifulSoup(page)
-            url = str(soup.findAll('li')[0].find('a')['href'])
-            url = urljoin(self.baseurl, url)
+            url = self.google.lucky(args[0] + ' site:lyricwiki.org')
             page = geturl(url, referer=self.baseurl)
             soup = BeautifulSoup(page)
+            title = stripHTML(str(soup.find('title'))).replace(self.advert, '')
             lyrics = str(soup.find('div', attrs={'class': 'lyricbox'}))
             lyrics = lyrics.replace('<br />', '\n')
             lyrics = stripHTML(lyrics)
             if not lyrics or lyrics == 'None':
                 raise Exception, 'no results'
-            return lyrics
+            return title + ':\n' + lyrics
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)

@@ -58,7 +58,7 @@ class Google:
                 size=1024)
         if not result.startswith('http'):
             raise NonRedirectResponse
-        return '%s = %s' % (query, result)
+        return result
 
     def spellcheck(self, query):
         opts = dict(self.spellcheck_opts)
