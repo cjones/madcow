@@ -35,6 +35,8 @@ class Main(Module):
             lyrics = str(soup.find('div', attrs={'class': 'lyricbox'}))
             lyrics = lyrics.replace('<br />', '\n')
             lyrics = stripHTML(lyrics)
+            if not lyrics or lyrics == 'None':
+                raise Exception, 'no results'
             return lyrics
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
