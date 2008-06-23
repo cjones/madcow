@@ -22,7 +22,7 @@ from include import useragent as ua
 from md5 import new as md5sum
 
 # STATIC VARIABLES
-__version__ = '1.3.4'
+__version__ = '1.3.5'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
