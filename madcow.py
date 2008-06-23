@@ -148,7 +148,9 @@ class Madcow:
             log.exception(exc)
             return
         self.handle_response(response, req)
-        self.response_queue.task_done()
+
+        # XXX 2.5 only.. is this important then?
+        #self.response_queue.task_done()
 
     def handle_response(self, response, req=None):
         """encode output, lock threads, and call protocol_output"""
@@ -193,8 +195,11 @@ class Madcow:
             request = self.request_queue.get()
             try:
                 self.process_module_item(request)
-            finally:
-                self.request_queue.task_done()
+            except Exception, e:
+                log.exception(e)
+
+            # XXX 2.5 only.. is this important then?
+            #self.request_queue.task_done()
 
     def process_module_item(self, request):
         """Run module response method and output any response"""
