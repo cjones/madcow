@@ -30,7 +30,13 @@ class Main(Module):
             doc = geturl(url)
             result = self.joke.findall(doc)[0]
             result = stripHTML(result)
+
+            # cleanup output a bit.. some funny whitespace in it -cj
+            result = result.replace('\x14', ' ')
+            result = result.replace('\n', ' ')
+            result = re.sub(r'\s{2,}', ' ', result)
             result = result.strip()
+
             return '%s' % result
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
