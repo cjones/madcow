@@ -96,6 +96,7 @@ figlet=no              ; generate ascii fonts
 grufti=no              ; random response triggeres, like grufti bot
 hugs=no                ; random group hug confession
 jinx=no                ; someone owes you a coke for being unoriginal
+joke=no                ; random joke
 karma=no               ; keep track of karma (nick++, nick--)
 livejournal=no         ; get livejournal entries (random or by nick)
 lyrics=no              ; look up song lyrics (spammy!)
