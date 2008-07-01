@@ -1,3 +1,7 @@
+1.3.6: Mon Jun 30 20:40:09 PDT 2008
+    * add rate limiting to irc for servers which have flood protection
+    * add joke module (from james)
+
 1.3.5: Mon Jun 23 16:45:40 PDT 2008
     * FIX to make madcow work in 2.4 again (oops!)
     * make lyrics module try google site-search first (better results)
