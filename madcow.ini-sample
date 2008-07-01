@@ -140,12 +140,18 @@ operUser=
 operPass=
 nickServUser=NickServ
 nickServPass=
+;
 ; if you don't want wrapping, set this very high. the rfc has
 ; a limitation and your bot WILL get dropped for sending raw
 ; messages that exceed it. 400 is a good number if you are
 ; against wrapping
+;
 wrapSize=400
-
+;
+; if your server has flood protection, you can add a delay between each
+; line sent to the server. value is in milliseconds (1000 = 1 second)
+;
+delay=0
 
 ; settings for AIM plugin. you need to register a screenname 
 ; with AOL beforehand and plug it in here.  see aim.com

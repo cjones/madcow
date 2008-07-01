@@ -37,6 +37,10 @@ class IRCProtocol(Madcow):
         self.names = {}
         self.last_names_update = unix_time()
 
+        # throttling
+        self.delay = self.config.irc.delay / float(1000)
+        self.last_response = 0.0
+
     def connect(self):
         log.info('[IRC] * Connecting to %s:%s' % (
             self.config.irc.host, self.config.irc.port))
@@ -75,7 +79,7 @@ class IRCProtocol(Madcow):
 
         # identify with nickserv
         if self.config.irc.nickServUser and self.config.irc.nickServPass:
-            self.server.privmsg(self.config.irc.nickServUser,
+            self._privmsg(self.config.irc.nickServUser,
                     'IDENTIFY %s' % self.config.irc.nickServPass)
 
         # become an oper
@@ -104,7 +108,7 @@ class IRCProtocol(Madcow):
                 if self.config.irc.rejoinWait > 0:
                     sleep(self.config.irc.rejoinWait)
                 server.join(event.target())
-                server.privmsg(event.target(), self.config.irc.rejoinReply)
+                self._privmsg(event.target(), self.config.irc.rejoinReply)
 
     def protocol_output(self, message, req=None):
         """output to IRC"""
@@ -137,7 +141,14 @@ class IRCProtocol(Madcow):
 
         # send to IRC socket
         for line in output:
-            self.server.privmsg(req.sendto, line)
+            self._privmsg(req.sendto, line)
+
+    def _privmsg(self, sendto, line):
+        delta = unix_time() - self.last_response
+        if delta < self.delay:
+            sleep(self.delay - delta)
+        self.server.privmsg(sendto, line)
+        self.last_response = unix_time()
 
     def on_privmsg(self, server, event):
         """private message received"""
