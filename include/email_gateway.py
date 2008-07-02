@@ -94,9 +94,10 @@ class EmailGateway:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(self.service)
-            s.send('to: %s\n' % self.channel)
-            s.send('from: %s\n' % sender)
-            s.send('message: %s\n' % body)
+            s.send('to: %s\r\n' % self.channel)
+            s.send('from: %s\r\n' % sender)
+            s.send('message: %s\r\n' % body)
+            s.send('\r\n')
             s.close()
         except Exception, e:
             raise ConnectionError, 'problem injecting mail: %s' % e
