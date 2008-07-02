@@ -512,8 +512,8 @@ class ServiceHandler(Thread):
         for basedir, subdirs, filenames in os.walk(imagepath):
             for filename in filenames:
                 try:
-                    filename = filename.rsplit('.', 1)[0]
-                    seq = int(filename.split(basename, 1)[1])
+                    name = filename.rsplit('.', 1)[0]
+                    seq = int(name.split(basename + '_', 1)[1])
                     if seq > idx:
                         idx = seq
                 except:
