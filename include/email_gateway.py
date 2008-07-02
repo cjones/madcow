@@ -51,35 +51,43 @@ class EmailGateway:
 
     def parse_email(self, payload):
         try:
+            image = None
             message = email.message_from_string(payload)
+            text = None
             for part in message.walk():
                 if part.get_content_maintype() == 'multipart':
                     continue
                 mime_type = part.get_content_type()
                 body = part.get_payload(decode=True)
-                if mime_type == 'text/plain':
-                    break
-                elif mime_type == 'text/html':
-                    body = stripHTML(body)
-                    break
-
-            for spam in self._spams:
-                if spam in body:
-                    body = body.replace(spam, '')
-
-            body = body.strip()
-            cleaned = []
-            for line in body.splitlines():
-                line = line.strip()
-                if not len(line) or line.startswith('>'):
-                    continue
-                elif self._quoted.search(line) or line == self._sig:
-                    break
-                else:
-                    cleaned.append(line)
-            body = ' '.join(cleaned)
+                if mime_type == 'image/jpeg':
+                    image = body
+                elif text is None:
+                    if mime_type == 'text/plain':
+                        text = body
+                    elif mime_type == 'text/html':
+                        text = stripHTML(body)
         except Exception, e:
             raise ParsingError, "couldn't parse payload: %s" % e
+
+        if text:
+            try:
+                for spam in self._spams:
+                    if spam in text:
+                        text = text.replace(spam, '')
+
+                text = text.strip()
+                cleaned = []
+                for line in text.splitlines():
+                    line = line.strip()
+                    if not len(line) or line.startswith('>'):
+                        continue
+                    elif self._quoted.search(line) or line == self._sig:
+                        break
+                    else:
+                        cleaned.append(line)
+                text = ' '.join(cleaned)
+            except Exception, e:
+                raise ParsingError, "couldn't parse payload: %s" % e
 
         # parse base64 encoded words and work around non-rfc2047 compliant
         # formats (google/blackberry)
@@ -90,14 +98,27 @@ class EmailGateway:
                 charset in headers]
         sender = str(u' '.join(header_parts))
 
+        headers = []
+        headers.append('to: ' + self.channel)
+        headers.append('from: ' + sender)
+        if text:
+            headers.append('message: ' + text)
+        else:
+            if image is None:
+                raise ParsingError, "need a message for non-image mail"
+        if image:
+            headers.append('type: image')
+            headers.append('size: %s' % len(image))
+
+        output = '\r\n'.join(headers) + '\r\n\r\n'
+        if image:
+            output += image
+
         # send message to madcow service
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(self.service)
-            s.send('to: %s\r\n' % self.channel)
-            s.send('from: %s\r\n' % sender)
-            s.send('message: %s\r\n' % body)
-            s.send('\r\n')
+            s.send(output)
             s.close()
         except Exception, e:
             raise ConnectionError, 'problem injecting mail: %s' % e
