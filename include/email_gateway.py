@@ -16,7 +16,7 @@ sys.path.append(_basedir)
 from include.utils import Error, stripHTML
 from madcow import Config
 
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __copyright__ = 'Copyright (C) 2008 Chris Jones'

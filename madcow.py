@@ -11,7 +11,6 @@ from time import sleep, strftime, time as unix_time
 import logging as log
 from include.authlib import AuthLib
 from include.utils import Error, slurp
-import SocketServer
 from select import select
 from signal import signal, SIGHUP, SIGTERM
 import shutil
@@ -20,6 +19,9 @@ from Queue import Queue, Empty
 from types import StringTypes, StringType
 from include import useragent as ua
 from md5 import new as md5sum
+import socket
+import datetime
+from urlparse import urljoin
 
 # STATIC VARIABLES
 __version__ = '1.3.6'
@@ -113,7 +115,6 @@ class Madcow:
 
     def run(self):
         """Runs madcow loop"""
-        print 'no protocol implemented'
         while self.running:
             # this is where you do actual stuff
             sleep(1)
@@ -351,47 +352,133 @@ class GatewayService(Service):
 
     def run(self):
         """While bot is alive, listen for connections"""
-        addr = (self.bot.config.gateway.bind, self.bot.config.gateway.port)
-        server = SocketServer.ThreadingTCPServer(addr, ServiceHandler)
-        server.daemon_threads = True
-        server.bot = self.bot
-        while self.bot.running:
-            if select([server.socket], [], [], 0.25)[0]:
-                server.handle_request()
-
-
-class ServiceHandler(SocketServer.BaseRequestHandler):
-    """This class handles the listener service for message injection"""
-
-    # pre-compiled regex
-    re_payload = re.compile(r'^\s*(from|to|message)\s*:\s*(.+?)\s*$', re.I)
-
-    def setup(self):
-        """Called when a connection is created"""
-        log.info('connection from %s' % repr(self.client_address))
-
-    def handle(self):
-        """Handles a TCP connection to gateway service"""
-        data = ''
-        while self.server.bot.running:
-            read = self.request.recv(1024)
-            if len(read) == 0:
-                break
-            data += read
-        log.debug('got payload: %s' % repr(data))
-
-        payload = {}
-        for line in data.splitlines():
-            try:
-                key, val = self.re_payload.search(line).groups()
-            except:
-                continue
-            payload[key.lower()] = val
-
-        if len(payload) != 3:
-            log.warn('invalid payload')
+        if not self.bot.config.gateway.enabled:
+            log.info('GatewayService is disabled')
             return
+        addr = (self.bot.config.gateway.bind, self.bot.config.gateway.port)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind(addr)
+        sock.listen(5)
+        while self.bot.running:
+            client, addr = sock.accept()
+            log.info('connection from %s' % repr(addr))
+            handler = ServiceHandler(self, client, addr)
+            handler.start()
 
+
+class ServiceHandler(Thread):
+    """This class handles the listener service for message injection"""
+    MAXSIZE = 1 * 1024 * 1024 # 1 meg
+    BUFSIZE = 512
+    TIMEOUT = 60
+    NEWLINE = '\r\n'
+    HEADSEP = NEWLINE * 2
+    REQUIRED_HEADERS = {
+        'message': ('to', 'from', 'message'),
+        'image': ('to', 'from', 'size'),
+    }
+    SAFENICK = re.compile(r'[^0-9a-z_]', re.I)
+
+    def __init__(self, server, client, addr):
+        self.server = server
+        self.client = client
+        self.fd = client.fileno()
+        self.addr = addr
+        self.buf = ''
+        self.headers_done = False
+        self.content_type = 'message'
+        self.size = 0
+
+        Thread.__init__(self)
+        self.setDaemon(True)
+
+    def recv(self, size, timeout=TIMEOUT):
+        data = ''
+        if self.fd in select([self.fd], [], [], timeout)[0]:
+            try:
+                data = os.read(self.fd, self.BUFSIZE)
+            except OSError:
+                pass
+        return data
+
+    def read(self, size=0, timeout=TIMEOUT):
+        buf = ''
+        if size == 0:
+            while True:
+                data = self.recv(self.BUFSIZE, timeout)
+                if not len(data):
+                    break
+                buf += data
+        elif size <= self.BUFSIZE:
+            buf = self.recv(size, timeout)
+        else:
+            bufsize = self.BUFSIZE
+            while True:
+                left = size - len(buf)
+                if left < bufsize:
+                    bufsize = left
+                data = self.recv(bufsize, timeout)
+                if not len(data):
+                    break
+                buf += data
+                if len(buf) >= size:
+                    break
+        return buf
+
+    def run(self):
+        """Handles a TCP connection to gateway service"""
+        if self.headers_done:
+            bufsize = self.BUFSIZE
+        else:
+            bufsize = 1
+        while self.server.bot.running:
+            try:
+                data = self.read(1)
+                if not len(data):
+                    break
+                self.data_received(data)
+            except Exception, e:
+                print 'closing connection: %s' % e
+                break
+        self.client.close()
+
+    def data_received(self, data):
+        self.buf += data
+        if not self.headers_done:
+            if self.HEADSEP not in self.buf:
+                return
+            try:
+                hdrs, self.buf = self.buf.split(self.HEADSEP, 1)
+                hdrs = hdrs.split(self.NEWLINE)
+                hdrs = [hdr.split(':', 1) for hdr in hdrs]
+                hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]
+                hdrs = dict(hdrs)
+                self.hdrs = hdrs
+                if 'type' in self.hdrs:
+                    self.content_type = self.hdrs['type']
+                if self.content_type not in self.REQUIRED_HEADERS:
+                    raise Exception, 'unknown content type'
+                for header in self.REQUIRED_HEADERS[self.content_type]:
+                    if header not in hdrs:
+                        raise Exception, 'missing required field'
+                if 'size' in hdrs:
+                    hdrs['size'] = int(hdrs['size'])
+                self.hdrs = hdrs
+                self.headers_done = True
+            except Exception, e:
+                raise Exception, 'invalid payload: %s' % e
+
+        if self.content_type == 'image':
+            if len(self.buf) < self.hdrs['size']:
+                return
+            image = self.buf[:self.hdrs['size']]
+            self.save_image(image, self.hdrs)
+
+        self.process_message(self.hdrs)
+        raise Exception, 'close connection'
+
+    def process_message(self, payload):
         # see if we can reverse lookup sender
         modules = self.server.bot.modules.dict()
         dbm = modules['learn'].get_db('email')
@@ -400,16 +487,50 @@ class ServiceHandler(SocketServer.BaseRequestHandler):
                 payload['from'] = user
                 break
 
-        output = 'message from %s: %s' % (payload['from'], payload['message'])
+        output = 'message from %s: %s' % (
+            payload['from'], payload['message']
+        )
+
         req = Request(output)
         req.colorize = False
         req.sendto = payload['to']
         self.server.bot.output(output, req)
 
-    def finish(self):
-        """Called when connection closes"""
-        log.info('connection closed by %s' % repr(self.client_address))
-        
+    def save_image(self, image, payload):
+        imagepath = self.server.bot.config.gateway.imagepath
+        baseurl = self.server.bot.config.gateway.imageurl
+        if not imagepath or not baseurl:
+            raise Exception, 'images are not configured'
+
+        nick = self.SAFENICK.sub('', payload['from'])[:16].lower()
+        if not len(nick):
+            raise Exception, 'invalid nick'
+
+        date = datetime.date.today().strftime('%Y-%m-%d')
+        basename = '%s_%s' % (nick, date)
+        idx = 0
+        for basedir, subdirs, filenames in os.walk(imagepath):
+            for filename in filenames:
+                try:
+                    filename = filename.rsplit('.', 1)[0]
+                    seq = int(filename.split(basename, 1)[1])
+                    if seq > idx:
+                        idx = seq
+                except:
+                    continue
+        idx += 1
+
+        filename = '%s_%s.jpg' % (basename, idx)
+        fp = open(os.path.join(imagepath, filename), 'wb')
+        try:
+            fp.write(image)
+        finally:
+            fp.close()
+
+        message = urljoin(baseurl, filename)
+        if 'message' in payload and len(payload['message']):
+            message += ' (%s)' % payload['message']
+        payload['message'] = message
 
 class PeriodicEvents(Service):
     """Class to manage modules which are periodically executed"""
