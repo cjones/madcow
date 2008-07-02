@@ -49,45 +49,33 @@ class EmailGateway:
         self.service = (config.bind, config.port)
         self.channel = config.channel
 
-    def parse_email(self, payload):
+    def parse_email(self, data):
+        image = None
+        message = email.message_from_string(data)
+        text = None
+
+        for part in message.walk():
+            if part.get_content_maintype() == 'multipart':
+                continue
+            mime_type = part.get_content_type()
+            payload = part.get_payload(decode=True)
+
+            if mime_type == 'image/jpeg':
+                image = payload
+            elif text is None:
+                if mime_type == 'text/plain':
+                    text = payload
+                elif mime_type == 'text/html':
+                    text = stripHTML(payload)
+
+        # at this point, text could be None, '', or have something interesting
         try:
-            image = None
-            message = email.message_from_string(payload)
-            text = None
-            for part in message.walk():
-                if part.get_content_maintype() == 'multipart':
-                    continue
-                mime_type = part.get_content_type()
-                body = part.get_payload(decode=True)
-                if mime_type == 'image/jpeg':
-                    image = body
-                elif text is None:
-                    if mime_type == 'text/plain':
-                        text = body
-                    elif mime_type == 'text/html':
-                        text = stripHTML(body)
-        except Exception, e:
-            raise ParsingError, "couldn't parse payload: %s" % e
-
-        if text:
-            try:
-                for spam in self._spams:
-                    if spam in text:
-                        text = text.replace(spam, '')
-
-                text = text.strip()
-                cleaned = []
-                for line in text.splitlines():
-                    line = line.strip()
-                    if not len(line) or line.startswith('>'):
-                        continue
-                    elif self._quoted.search(line) or line == self._sig:
-                        break
-                    else:
-                        cleaned.append(line)
-                text = ' '.join(cleaned)
-            except Exception, e:
-                raise ParsingError, "couldn't parse payload: %s" % e
+            text = [self.clean(text), self.clean(message['subject'])]
+            text = filter(lambda x: isinstance(x, str), text)
+            text = filter(lambda x: len(x), text)
+            text = ' / '.join(text)
+        except:
+            pass
 
         # parse base64 encoded words and work around non-rfc2047 compliant
         # formats (google/blackberry)
@@ -123,6 +111,25 @@ class EmailGateway:
         except Exception, e:
             raise ConnectionError, 'problem injecting mail: %s' % e
 
+    def clean(self, text):
+        if text is None:
+            return
+
+        for spam in self._spams:
+            if spam in text:
+                text = text.replace(spam, '')
+        text = text.strip()
+        cleaned = []
+        for line in text.splitlines():
+            line = line.strip()
+            if not len(line) or line.startswith('>'):
+                continue
+            elif self._quoted.search(line) or line == self._sig:
+                break
+            else:
+                cleaned.append(line)
+        text = ' '.join(cleaned)
+        return text
 
 def main():
     op = OptionParser(version=__version__, usage=__usage__)
