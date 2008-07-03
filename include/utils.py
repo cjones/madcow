@@ -7,12 +7,13 @@ import urllib, urllib2, cookielib
 import sys
 from time import time as unix_time
 import os
+from types import StringTypes
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __license__ = 'GPL'
 __all__ = ['Debug', 'Module', 'Error', 'cache', 'throttle', 'stripHTML',
-        'isUTF8', 'unescape_entities', 'slurp']
+        'isUTF8', 'unescape_entities', 'slurp', 'Request']
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
 re_br = re.compile('<br[^>]+>', re.I)
@@ -88,13 +89,32 @@ class Module:
 class Error(Exception):
     """Base Exception class"""
 
-    def __init__(self, message=None):
-        self.message = message
+    def __init__(self, msg=''):
+        self.msg = msg
+        Exception.__init__(self)
 
     def __str__(self):
-        return str(self.message)
+        if isinstance(self.msg, StringTypes):
+            return str(self.msg)
+        return str(repr(self.msg))
 
     __repr__ = __str__
+
+
+class Request:
+    """Generic object passed in from protocol handlers for processing"""
+
+    def __init__(self, message):
+        self.message = message
+        self.sendto = None
+        self.private = False
+        self.nick = None
+        self.matched = False
+        self.feedback = False
+        self.correction = False
+        self.colorize = False
+        self.channel = None
+        self.addressed = False
 
 
 class cache:
