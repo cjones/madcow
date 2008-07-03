@@ -182,6 +182,14 @@ enabled=yes
 bind=localhost
 port=5000
 channel=#madcow
+;
+; define these if you want to capture image attachements from incoming
+; messages. they will be saved to a local directory and the message output
+; will contain a url constructed from imageURL as the base. imageURL *must*
+; have a trailing / if it is a directory.
+;
+imagePath=
+imageURL=
 
 ; twitter settings
 [twitter]

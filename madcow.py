@@ -22,19 +22,6 @@ from md5 import new as md5sum
 from urlparse import urljoin
 from include import gateway
 
-"""
-if __file__.startswith(sys.argv[0]):
-    PREFIX = sys.argv[0]
-else:
-    PREFIX = __file__
-PREFIX = os.path.abspath(os.path.dirname(PREFIX))
-sys.path.insert(0, PREFIX)
-
-try:
-except ImportError:
-    pass
-"""
-
 # STATIC VARIABLES
 __version__ = '1.3.6'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -46,7 +33,7 @@ __logformat__ = '[%(asctime)s] %(levelname)s: %(message)s'
 __loglevel__ = log.WARN
 __charset__ = 'latin1'
 __config__ = 'madcow.ini'
-__sample_hash__ = 'dc81e32a9b4e2c6c0059aa898519226c'
+__sample_hash__ = '1f1069f75db52b69f955a127fcd93388'
 
 class Madcow:
     """Core bot handler, subclassed by protocols"""
