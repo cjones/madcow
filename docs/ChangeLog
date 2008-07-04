@@ -1,3 +1,13 @@
+1.3.7: Thu Jul  3 20:04:07 PDT 2008
+    * gateway service now can capture images sent as attachments
+    * add spellcheck to module list in madcow.ini-sample
+    * update joke module's help line to be wrappable
+    * fix weather module when multiple data sources are found
+    * fix rotten tomatoes & metacritic results for movie.py
+    * add james' "topmovies" command to movie.py
+    * code cleanup & refactoring
+    * update test suite
+
 1.3.6: Mon Jun 30 20:40:09 PDT 2008
     * add rate limiting to irc for servers which have flood protection
     * add joke module (from james)
