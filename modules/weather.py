@@ -36,29 +36,23 @@ class Weather:
 
         # disambiguation page
         if 'Search Results' in str(soup):
-            table = soup.find('table', attrs={'class': 'boxB full'})
-            rows = table.findAll('tr')
-            results = []
+            table = soup.find('table', attrs={'class': 'dataTable'})
+            tbody = soup.find('tbody')
+            results = [row.findAll('td')[0].find('a')
+                       for row in tbody.findAll('tr')]
+            results = [(normalize(str(result.contents[0])),
+                        urljoin(Weather.baseurl, str(result['href'])))
+                       for result in results]
+
             match = None
-            for row in rows:
-                cells = row.findAll('td', attrs={'class': 'sortC'})
-                for cell in cells:
-                    link = cell.find('a')
-                    if link is None or 'addfav' in str(link['href']):
-                        continue
-                    city = str(link.contents[0])
-                    href = urljoin(self.baseurl, str(link['href']))
-                    results.append(city)
-                    if city.lower() == location.lower():
-                        match = urljoin(self.baseurl, href)
-                        break
-                if match:
+            for result in results:
+                if result[0] == normalize(location):
+                    match = result[1]
                     break
-            if match:
-                page = geturl(url=match)
-                soup = BeautifulSoup(page)
-            else:
-                return 'Multiple results found: %s' % ', '.join(results)
+            if match is None:
+                match = results[0][1]
+            page = geturl(url=match, referer=self.search)
+            soup = BeautifulSoup(page)
 
         rss_url = soup.find('link', attrs=self._rss_link)['href']
         rss = rssparser.parse(rss_url)
@@ -150,6 +144,20 @@ class Main(Module):
             log.exception(e)
             return "Couldn't find that place, maybe a bomb dropped on it"
 
+
+whitespace = re.compile(r'\s+')
+year = re.compile(r'\(\d{4}\)\s*$')
+badchars = re.compile(r'[^a-z0-9 ]', re.I)
+
+def normalize(name):
+    """Normalize city name for easy comparison"""
+    name = stripHTML(name)
+    name = year.sub('', name)
+    name = badchars.sub(' ', name)
+    name = name.lower()
+    name = name.strip()
+    name = whitespace.sub(' ', name)
+    return name
 
 if __name__ == '__main__':
     from include.utils import test_module
