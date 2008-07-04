@@ -8,6 +8,7 @@ import email
 import mimetypes
 import socket
 from email.Header import decode_header
+from useragent import geturl
 
 # add madcow base directory to path
 _basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
@@ -36,7 +37,7 @@ class ConnectionError(Error):
 
 
 class EmailGateway:
-    _spams = ('This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.',)
+    _spams = ('This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.', 'You have new Picture Mail!')
     _quoted = r'^(-+)\s*(original|forwarded)\s+(message|e?mail)\s*\1'
     _quoted = re.compile(_quoted, re.I)
     _sig = '--'
@@ -59,14 +60,16 @@ class EmailGateway:
                 continue
             mime_type = part.get_content_type()
             payload = part.get_payload(decode=True)
-
             if mime_type == 'image/jpeg':
                 image = payload
-            elif text is None:
-                if mime_type == 'text/plain':
-                    text = payload
-                elif mime_type == 'text/html':
+            elif mime_type == 'text/html':
+                if 'pictures.sprintpcs.com' in payload:
+                    image = getsprint(payload)
+                else:
                     text = stripHTML(payload)
+            elif mime_type == 'text/plain':
+                if 'You have new Picture Mail' not in payload:
+                    text = payload
 
         # at this point, text could be None, '', or have something interesting
         try:
@@ -130,6 +133,19 @@ class EmailGateway:
                 cleaned.append(line)
         text = ' '.join(cleaned)
         return text
+
+
+# sprint PCS bullshit
+spcs_piclink = re.compile(r'<a .*?href="(http://pictures.sprintpcs.com/share.do?.*?)">View Picture</a>', re.DOTALL)
+spcs_thepic = re.compile(r'<img class="guestMediaImg".*?src="(http://pictures.sprintpcs.com(?::80)?/mmps/.*?)(?:\.jpg)?\?', re.DOTALL + re.I)
+
+def getsprint(data):
+    link = spcs_piclink.search(data).group(1)
+    link = link.replace('&amp;', '&')
+    page = geturl(link)
+    picurl = spcs_thepic.search(page).group(1)
+    image = geturl(picurl)
+    return image
 
 def main():
     op = OptionParser(version=__version__, usage=__usage__)
