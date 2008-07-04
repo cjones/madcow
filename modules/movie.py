@@ -76,7 +76,7 @@ class RottenTomatoes:
     baseurl = 'http://www.rottentomatoes.com/'
     search = urljoin(baseurl, '/search/search.php')
     search_title = 'ROTTEN TOMATOES: Movie Reviews &amp; Previews'
-    movies = re.compile(r'<a class=movie-link href="(.*?)">(.*?)</a>', reopts)
+    movies = re.compile(r'<a href="(/m/.*?/)">(.*?)</a>', reopts)
     movie_title = re.compile(r'<h1 class="movie_title">(.*?)</h1>', reopts)
     rating = re.compile(r'<div id="bubble_allCritics".*?>\s*(\d+%)', reopts)
 
@@ -117,7 +117,8 @@ class RottenTomatoes:
             response += ': %s' % rating
             return response
 
-        except:
+        except Exception, msg:
+            log.exception(msg)
             return
 
 
@@ -132,7 +133,7 @@ class MetaCritic:
         'x': '24',
         'y': '10',
     }
-    result = re.compile(r'<strong>Film:</strong>\s+<a href="([^"]+)"><b>(.*?)</b>', re.I+re.DOTALL)
+    result = re.compile(r'<strong>(?:Film|Video):</strong>\s+<a href="([^"]+)"><b>(.*?)</b>', re.I+re.DOTALL)
     critic_rating = re.compile(r'ALT="Metascore: ([0-9.]+)"')
     user_rating = re.compile(r'<span class="subhead">([0-9.]+)</span>')
 
@@ -185,6 +186,18 @@ class MovieRatings:
         RottenTomatoes(),
         MetaCritic(),
     )
+    baseurl = 'http://videoeta.com/'
+    topurl = urljoin(baseurl, '/theaters.html')
+    movieurl = urljoin(baseurl, '/movie/')
+    movies = re.compile(r'/movie/(.*?).>(.*?)<', re.DOTALL)
+
+    def topmovies(self):
+        doc = geturl(self.topurl)
+        results = self.movies.findall(doc)[:10]
+        results = ['%2s: %s - %s%s' % (i+1, r[1], self.movieurl, r[0])
+                   for i, r in enumerate(results)]
+        results.insert(0, '>>> Top Movies At Box Office <<<')
+        return '\n'.join(results)
 
     def rate(self, movie):
         """Get movie ratings from imdb and rotten tomatoes"""
@@ -197,23 +210,30 @@ class MovieRatings:
 
 class Main(Module):
     """Autoloaded by MadCow"""
-    pattern = re.compile(r'^\s*rate\s+(.+?)\s*$', re.I)
+    pattern = re.compile(r'^\s*(?:(rate)\s+(.+?)|(topmovies))\s*$', re.I)
     error = 'does that movie even exist?'
     movie = MovieRatings()
+    help = '[rate <movie>|topmovies] - get info about movies'
 
     def response(self, nick, args, kwargs):
         try:
-            return '%s: %s' % (nick, self.movie.rate(args[0]))
+            if args[0] == 'rate':
+                response = '%s: %s' % (nick, self.movie.rate(args[1]))
+            elif args[2] == 'topmovies':
+                response = self.movie.topmovies()
+            return response
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
             return '%s: %s' % (nick, self.error)
 
 
+_reversed_article = re.compile(r'^(.*?),\s*(the|an?)\s*$', re.I)
 def normalize(name):
     """Normalize a movie title for easy comparison"""
     name = stripHTML(name)
     name = year.sub('', name)
+    name = _reversed_article.sub(r'\2 \1', name)
     name = badchars.sub(' ', name)
     name = name.lower()
     name = name.strip()

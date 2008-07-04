@@ -33,7 +33,7 @@ __logformat__ = '[%(asctime)s] %(levelname)s: %(message)s'
 __loglevel__ = log.WARN
 __charset__ = 'latin1'
 __config__ = 'madcow.ini'
-__sample_hash__ = '1f1069f75db52b69f955a127fcd93388'
+__sample_hash__ = '4161e53012512eb9e1af8ae60d8715a6'
 
 class Madcow:
     """Core bot handler, subclassed by protocols"""
@@ -837,6 +837,7 @@ def check_config(config, samplefile, prefix):
     # raise exception if any errors are found
     if errors:
         raise ConfigError, '\n'.join(errors)
+
 
 def detach():
     """Daemonize on POSIX system"""

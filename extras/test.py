@@ -97,7 +97,7 @@ tests = {
     },
     'dictionary': {
         'request': 'define penis',
-        'result': re.compile(r'test: \[1/1\] a male organ of copulation'),
+        'result': re.compile(r'test: \[1/1\] a male erectile organ'),
     },
     'conservapedia': {
         'request': 'cp penis',

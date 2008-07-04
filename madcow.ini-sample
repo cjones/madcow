@@ -73,6 +73,7 @@ learn=yes               ; used for various modules to cache per-user data
 movie=yes               ; rate movie on imdb & rotten tomatoes
 nslookup=yes            ; look up ip of hostnames
 seen=yes                ; keep track of last thing everyone in channel said
+spellcheck=yes          ; spellcheck a word/phrase using google
 stockquote=yes          ; get yahoo stock quotes
 summon=yes              ; summon users (send email/sms)
 urban=yes               ; look up word/phrase on urban dictionary

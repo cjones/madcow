@@ -12,7 +12,7 @@ import logging as log
 class Main(Module):
     pattern = re.compile(r'^\s*joke(?:\s+(.+?))?\s*$', re.I)
     require_addressing = True
-    help = 'joke <haha|oneliners|news|signs|nerd|professional|quotes|lightbulb|couples|riddles|religion|gross|blonde|politics|doit|laws|defs|dirty|ethnic|zippergate> - displays a random joke'
+    help = 'joke <oneliners | news | signs | nerd | professional | quotes | lightbulb | couples | riddles | religion | gross | blonde | politics | doit | laws | defs | dirty | ethnic | zippergate> - displays a random joke'
     baseurl = 'http://www.randomjoke.com/topic/'
     random_url = urljoin(baseurl, 'haha.php')
     joke = re.compile(r'next.joke.*?<P>(.*?)<CENTER>', re.DOTALL)
