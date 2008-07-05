@@ -3,7 +3,6 @@
 import sys
 import termios
 import tty
-import fcntl
 import os
 from select import select
 
@@ -58,7 +57,6 @@ class Shell:
         old = termios.tcgetattr(stdin)
         try:
             tty.setraw(stdin)
-            fcntl.fcntl(stdin, fcntl.F_SETFL, os.O_NONBLOCK)
             while True:
                 for poll in self.polls:
                     poll()
