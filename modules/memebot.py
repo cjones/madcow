@@ -149,7 +149,7 @@ class Main(Module):
         # and put them in order
         try:
             query = query.split('&')
-            query = [part.split('=') for part in query]
+            query = [part.split('=', 1) for part in query]
             query = [[x, y] for x, y in query if len(y)]
             query = ['='.join([x, y]) for x, y in query]
             query = sorted(query)
