@@ -33,7 +33,7 @@ __logformat__ = '[%(asctime)s] %(levelname)s: %(message)s'
 __loglevel__ = log.WARN
 __charset__ = 'latin1'
 __config__ = 'madcow.ini'
-__sample_hash__ = '79ea4653ce4fa5490b0f49ea763a26cc'
+__sample_hash__ = '319014624fb5cdb6951e303a87dc3659'
 
 class Madcow:
     """Core bot handler, subclassed by protocols"""
