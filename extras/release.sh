@@ -2,7 +2,7 @@
 # diff trunk from previous release and update ChangeLog
 # make a release tag:
 
-release="madcow-1.3.7"
+release="madcow-1.3.8"
 
 svn copy https://madcow.svn.sourceforge.net/svnroot/madcow/trunk https://madcow.svn.sourceforge.net/svnroot/madcow/tags/$release || exit
 

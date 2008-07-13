@@ -23,7 +23,7 @@ from urlparse import urljoin
 from include import gateway
 
 # STATIC VARIABLES
-__version__ = '1.3.7'
+__version__ = '1.3.8'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
 __license__ = 'GPL'
