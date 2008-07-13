@@ -876,8 +876,12 @@ def main():
     """Entry point to set up bot and run it"""
 
     # where we are being run from
-    prefix = os.path.abspath(os.path.dirname(sys.argv[0]))
-    sys.path.append(prefix)
+    if __file__.startswith(sys.argv[0]):
+        prefix = sys.argv[0]
+    else:
+        prefix = __file__
+    prefix = os.path.abspath(os.path.dirname(prefix))
+    sys.path.insert(0, prefix)
     default_config = os.path.join(prefix, __config__)
 
     # make sure proper subdirs exist
