@@ -117,10 +117,6 @@ tests = {
             'result': re.compile(r'cj_'),
         },
         {
-            'request': 'xkcdb',
-            'result': any,
-        },
-        {
             'request': 'limerick',
             'result': any,
         },
@@ -149,10 +145,6 @@ tests = {
         'request': 'summon asdf',
         'result': re.compile(r"I don't know the email for asdf"),
     },
-    'stupid': {
-        'request': 'stupid',
-        'result': any,
-    },
     'karma': {
         'request': 'karma cj_',
         'result': re.compile(r"test: cj_'s karma is \d+"),
@@ -162,8 +154,8 @@ tests = {
         'result': 'test: su mam\xc3\xa1',
     },
     'movie': {
-        'request': 'rate manos, the hands of fate',
-        'result': 'test: IMDB: 1.8/10',
+        'request': 'rate bone collector',
+        'result': 'test: IMDB: 6.3/10, Freshness: 28%, Meta - Critics: 45/100, Users: 4.1/10',
     },
     'stockquote': {
         'request': 'quote goog',

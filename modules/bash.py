@@ -22,13 +22,6 @@ class QDB:
     entries = re.compile('<td[^>]+><p>(.*?)</p>', re.DOTALL)
 
 
-class XKCD:
-    random = 'http://www.chiliahedron.com/xkcdb/?random'
-    bynum = 'http://www.chiliahedron.com/xkcdb/?num'
-    search = 'http://www.chiliahedron.com/xkcdb/?search=query&show=100'
-    entries = re.compile('<div class="quote_output">\s*(.*?)</div>', re.DOTALL)
-
-
 class Limerick:
     random = 'http://www.limerickdb.com/?random'
     bynum = 'http://www.limerickdb.com/?num'
@@ -38,13 +31,12 @@ class Limerick:
 
 
 class Main(Module):
-    pattern = re.compile('^\s*(bash|qdb|xkcdb|limerick)(?:\s+(\S+))?', re.I)
+    pattern = re.compile('^\s*(bash|qdb|limerick)(?:\s+(\S+))?', re.I)
     require_addressing = True
-    help = '<bash|qdb|xkcdb|limerick> [#|query] - get stupid IRC quotes'
+    help = '<bash|qdb|limerick> [#|query] - get stupid IRC quotes'
     sources = {
-        'bash': QDB(), #Bash(), XXX website seems gone
+        'bash': Bash(),
         'qdb': QDB(),
-        'xkcdb': XKCD(),
         'limerick': Limerick(),
     }
     _error = 'Having some issues, make some stupid quotes yourself'
