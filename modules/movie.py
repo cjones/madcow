@@ -229,11 +229,13 @@ class Main(Module):
 
 
 _reversed_article = re.compile(r'^(.*?),\s*(the|an?)\s*$', re.I)
+_articles = re.compile(r'^\s*(the|an?)\s+', re.I)
 def normalize(name):
     """Normalize a movie title for easy comparison"""
     name = stripHTML(name)
     name = year.sub('', name)
     name = _reversed_article.sub(r'\2 \1', name)
+    name = _articles.sub('', name)
     name = badchars.sub(' ', name)
     name = name.lower()
     name = name.strip()
