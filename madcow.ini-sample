@@ -195,7 +195,7 @@ imageURL=
 [twitter]
 enabled=no
 channel=#madcow
-updatefreq=60
+updatefreq=240
 username=twitterbotaccount
 password=twitterbotpassword
 
