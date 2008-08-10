@@ -42,7 +42,7 @@ class Terror:
 
 
 class DoomsDay:
-    _url = 'http://www.thebulletin.org/minutes-to-midnight/'
+    _url = 'http://www.thebulletin.org/'
     _re_time = re.compile(r'<div class="module-content"><h3>(.*?)</h3>')
 
     def time(self):
