@@ -4,6 +4,9 @@
 #
 #  Created by Bryan Burns on 2007-06-19.
 #
+# Confirmed to work with pysilc0.4 and silc-toolkit 1.0.2
+# Other versions probably won't work!
+# 
 import madcow
 import silc
 import time
