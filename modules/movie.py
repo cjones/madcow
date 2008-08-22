@@ -26,7 +26,7 @@ class IMDB:
     """Interface to IMDB"""
     baseurl = 'http://imdb.com/'
     search = urljoin(baseurl, '/find')
-    search_title = 'IMDb  Search'
+    search_title = 'IMDb Search'
     movies = re.compile('<a\s+.*?href=(["\'])(/title/tt\d+/)\\1.*?>(.*?</a>)',
             reopts)
     rating = re.compile(r'<b>User Rating:</b>.*<b>([0-9.]+)/10</b>', reopts)
