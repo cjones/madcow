@@ -1,6 +1,5 @@
 - clean up exception classes and usage
 - docstrings
-- new style classes
 - change re_ names 
 - indentation line-up rules
 - useful repr
