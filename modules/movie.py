@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """Module stub"""
 
@@ -11,8 +28,6 @@ from include.utils import stripHTML
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gmail.com>'
-__license__ = 'GPL'
-__copyright__ = 'Copyright (C) 2008 Christopher Jones'
 __all__ = ['IMDB', 'RottenTomatoes', 'MovieRatings']
 
 # global
@@ -22,7 +37,7 @@ html_title = re.compile(r'<title>(.*?)</title>', re.I)
 year = re.compile(r'\(\d{4}\)\s*$')
 badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
-class IMDB:
+class IMDB(object):
     """Interface to IMDB"""
     baseurl = 'http://imdb.com/'
     search = urljoin(baseurl, '/find')
@@ -71,7 +86,7 @@ class IMDB:
             return
 
 
-class RottenTomatoes:
+class RottenTomatoes(object):
     """Interface to Rotten Tomatoes"""
     baseurl = 'http://www.rottentomatoes.com/'
     search = urljoin(baseurl, '/search/search.php')
@@ -122,7 +137,7 @@ class RottenTomatoes:
             return
 
 
-class MetaCritic:
+class MetaCritic(object):
     baseurl = 'http://www.metacritic.com/'
     search = urljoin(baseurl, '/search/process')
     movie_opts = {
@@ -179,7 +194,7 @@ class MetaCritic:
             return
 
 
-class MovieRatings:
+class MovieRatings(object):
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
     sources = (
         IMDB(),

@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """Madcow infobot"""
 
@@ -22,20 +39,19 @@ from md5 import new as md5sum
 from urlparse import urljoin
 from include import gateway
 
-# STATIC VARIABLES
 __version__ = '1.3.8'
 __author__ = 'cj_ <cjones@gruntle.org>'
-__copyright__ = 'Copyright (C) 2007-2008 Christopher Jones'
-__license__ = 'GPL'
-__url__ = 'http://madcow.sourceforge.net/'
 __all__ = ['Request', 'Madcow', 'Config']
-__logformat__ = '[%(asctime)s] %(levelname)s: %(message)s'
-__loglevel__ = log.WARN
-__charset__ = 'latin1'
-__config__ = 'madcow.ini'
-__sample_hash__ = '319014624fb5cdb6951e303a87dc3659'
 
-class Madcow:
+MADCOW_URL = 'http://code.google.com/p/madcow/'
+LOGFORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
+LOGLEVEL = log.WARN
+CHARSET = 'latin1'
+CONFIG = 'madcow.ini'
+SAMPLE_HASH = '319014624fb5cdb6951e303a87dc3659'
+
+class Madcow(object):
+
     """Core bot handler, subclassed by protocols"""
 
     _delim = re.compile(r'\s*[,;]\s*')
@@ -73,7 +89,7 @@ class Madcow:
         if self.config.main.charset:
             self.charset = self.config.main.charset
         else:
-            self.charset = __charset__
+            self.charset = CHARSET
 
         # load modules
         self.modules = Modules(self, 'modules', self.prefix)
@@ -270,7 +286,7 @@ class Madcow:
             self.output(self.usage(), req)
             return
         if req.addressed and req.message.lower() == 'version':
-            res = 'madcow %s by %s: %s' % (__version__, __author__, __url__)
+            res = 'madcow %s by %s: %s' % (__version__, __author__, MADCOW_URL)
             self.output(res, req)
             return
         if req.private:
@@ -339,6 +355,7 @@ class Madcow:
 
 
 class Service(Thread):
+
     """Service object"""
 
     def __init__(self, bot):
@@ -347,11 +364,14 @@ class Service(Thread):
 
 
 class GatewayService(gateway.GatewayService, Service):
+
     """Gateway service spawns TCP socket and listens for requests"""
 
 
 class PeriodicEvents(Service):
+
     """Class to manage modules which are periodically executed"""
+
     _re_delim = re.compile(r'\s*[,;]\s*')
     _ignore_modules = ['__init__', 'template']
     _process_frequency = 1
@@ -379,14 +399,17 @@ class PeriodicEvents(Service):
 
 
 class FileNotFound(Error):
+
     """Raised when a file is not found"""
 
 
 class ConfigError(Error):
+
     """Raised when a required config option is missing"""
 
 
-class User:
+class User(object):
+
     """This class represents a logged in user"""
 
     def __init__(self, user, flags):
@@ -405,7 +428,8 @@ class User:
             return False
 
 
-class Admin:
+class Admin(object):
+
     """Class to handle admin interface"""
 
     _reAdminCommand = re.compile(r'^\s*admin\s+(.+?)\s*$', re.I)
@@ -598,8 +622,10 @@ class Admin:
         return 'You are now logged in. Message me "admin help" for help'
 
 
-class Modules:
+class Modules(object):
+
     """This class dynamically loads plugins and instantiates them"""
+
     _pyext = re.compile(r'\.py$')
     _ignore_mods = ('__init__', 'template')
 
@@ -702,7 +728,8 @@ class Modules:
         return self.dict().iteritems()
 
 
-class Config:
+class Config(object):
+
     """Config class that allows dot-notation namespace addressing"""
 
     class ConfigSection:
@@ -762,7 +789,7 @@ def check_config(config, samplefile, prefix):
     hash = md5sum()
     hash.update(slurp(samplefile))
     hash = hash.hexdigest()
-    if hash != __sample_hash__:
+    if hash != SAMPLE_HASH:
         print >> sys.stderr, 'WARNING: %s is out of date or has been altered!' \
             % os.path.basename(samplefile)
 
@@ -882,7 +909,7 @@ def main():
         prefix = __file__
     prefix = os.path.abspath(os.path.dirname(prefix))
     sys.path.insert(0, prefix)
-    default_config = os.path.join(prefix, __config__)
+    default_config = os.path.join(prefix, CONFIG)
 
     # make sure proper subdirs exist
     datadir = os.path.join(prefix, 'data')
@@ -915,7 +942,7 @@ def main():
     if not os.path.exists(opts.config):
         if opts.config == default_config:
             shutil.copyfile(sample_config, opts.config)
-            err = 'created config %s - edit and rerun' % __config__
+            err = 'created config %s - edit and rerun' % CONFIG
             print >> sys.stderr, err
         else:
             print >> sys.stderr, 'config not found: %s' % opts.config
@@ -942,10 +969,10 @@ def main():
     try:
         loglevel = getattr(log, config.main.loglevel)
     except:
-        loglevel = __loglevel__
+        loglevel = LOGLEVEL
     if opts.loglevel is not None:
         loglevel = opts.loglevel
-    log.basicConfig(level=loglevel, format=__logformat__)
+    log.basicConfig(level=loglevel, format=LOGFORMAT)
 
     # if specified, log to file as well
     try:
@@ -953,7 +980,7 @@ def main():
         if logfile is not None and len(logfile):
             handler = log.FileHandler(filename=logfile)
             handler.setLevel(opts.loglevel)
-            formatter = log.Formatter(__logformat__)
+            formatter = log.Formatter(LOGFORMAT)
             handler.setFormatter(formatter)
             log.getLogger('').addHandler(handler)
     except Exception, exc:

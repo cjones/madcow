@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 from optparse import OptionParser
@@ -19,9 +36,8 @@ from madcow import Config
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
-__license__ = 'GPL'
-__copyright__ = 'Copyright (C) 2008 Chris Jones'
-__usage__ = '%prog [options] < email'
+
+USAGE = '%prog [options] < email'
 _configfile = os.path.join(_basedir, 'madcow.ini')
 
 class GatewayDisabled(Error):
@@ -36,7 +52,7 @@ class ConnectionError(Error):
     """Raised when there is a problem sending to madcow listener"""
 
 
-class EmailGateway:
+class EmailGateway(object):
     _spams = ('This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.', 'You have new Picture Mail!')
     _quoted = r'^(-+)\s*(original|forwarded)\s+(message|e?mail)\s*\1'
     _quoted = re.compile(_quoted, re.I)
@@ -148,7 +164,7 @@ def getsprint(data):
     return image
 
 def main():
-    op = OptionParser(version=__version__, usage=__usage__)
+    op = OptionParser(version=__version__, usage=USAGE)
     op.add_option('-c', '--configfile', metavar='<file>', default=_configfile,
             help='default: %default')
     opts, args = op.parse_args()

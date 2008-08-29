@@ -1,3 +1,20 @@
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
+
 """This was brutally ripped out of twisted"""
 
 import socket
@@ -10,7 +27,7 @@ import string
 import random
 import types
 
-class Protocol:
+class Protocol(object):
 
     def __init__(self, host, port, timeout=60, bufsize=60):
         self.host = host
@@ -66,7 +83,7 @@ class Protocol:
     write = send
 
 
-class OSCARUser:
+class OSCARUser(object):
 
     def __init__(self, name, warn, tlvs):
         self.name = name
@@ -149,7 +166,7 @@ class OSCARUser:
         return s
 
 
-class SSIGroup:
+class SSIGroup(object):
 
     def __init__(self, name, tlvs = {}):
         self.name = name
@@ -169,7 +186,7 @@ class SSIGroup:
         return struct.pack('!H', len(self.name)) + self.name + struct.pack('!HH', groupID, buddyID) + '\000\001' + tlvData
 
 
-class SSIBuddy:
+class SSIBuddy(object):
 
     def __init__(self, name, tlvs = {}):
         self.name = name
@@ -1032,4 +1049,3 @@ def encryptPasswordICQ(password):
     for i in range(len(bytes)):
         r=r+chr(bytes[i]^key[i%len(key)])
     return r
-

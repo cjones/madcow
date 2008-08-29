@@ -1,3 +1,20 @@
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
+
 """Return summary from WikiMedia projects"""
 
 from utils import stripHTML
@@ -8,10 +25,9 @@ from urlparse import urljoin
 
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
-__license__ = 'GPL'
 __all__ = ['Wiki']
 
-class Wiki:
+class Wiki(object):
     """Return summary from WikiMedia projects"""
 
     # site-specific details, default is english wikipedia

@@ -1,3 +1,20 @@
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
+
 """Google interface"""
 
 import urllib2
@@ -8,13 +25,12 @@ import re
 
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
-__license__ = 'GPL'
 
 class NonRedirectResponse(Error):
     """Raised when google doesn't return a redirect"""
 
 
-class Response:
+class Response(object):
 
     def __init__(self, data=''):
         self.data = data
@@ -37,7 +53,7 @@ class NoErrors(urllib2.HTTPDefaultErrorHandler):
         return Response(data=dict(headers.items())['location'])
 
 
-class Google:
+class Google(object):
     baseurl = 'http://www.google.com/'
     search = urljoin(baseurl, '/search')
     luckyopts = {'hl': 'en', 'btnI': 'I', 'aq': 'f', 'safe': 'off'}
@@ -80,4 +96,3 @@ class Google:
         response = self.reConversionResult.search(doc).group(1)
         response = stripHTML(response)
         return response
-

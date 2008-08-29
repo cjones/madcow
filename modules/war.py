@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """NEVAR FORGET"""
 
@@ -12,10 +29,11 @@ from include.colorlib import ColorLib
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
-__license__ = 'GPL'
-__format__ = 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s'
+__all__ = []
 
-class Terror:
+FORMAT = 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s'
+
+class Terror(object):
     _url = 'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
     _re_level = re.compile(r'<THREAT_ADVISORY CONDITION="(\w+)" />')
     _color_map = {
@@ -41,7 +59,7 @@ class Terror:
             return 'UNKNOWN'
 
 
-class DoomsDay:
+class DoomsDay(object):
     _url = 'http://www.thebulletin.org/'
     _re_time = re.compile(r'<div class="module-content"><h3>(.*?)</h3>')
 
@@ -56,7 +74,7 @@ class DoomsDay:
             return 'UNKNOWN'
 
 
-class IranWar:
+class IranWar(object):
     _url = 'http://www.areweatwarwithiran.com/rss.xml'
 
     def war(self):
@@ -69,7 +87,7 @@ class IranWar:
             return 'UNKNOWN'
 
 
-class IraqWar:
+class IraqWar(object):
     _war_url = 'http://areweatwarwithiraq.com/rss.xml'
     _bodycount_url = 'http://www.iraqbodycount.org/'
     _re_whitespace = re.compile(r'\s+')
@@ -117,7 +135,7 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         try:
-            return __format__ % (self.terror.level(), self.doom.time(),
+            return FORMAT % (self.terror.level(), self.doom.time(),
                     self.iran.war(), self.iraq.war(), self.iraq.bodycount())
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))

@@ -155,7 +155,7 @@ tests = {
     },
     'movie': {
         'request': 'rate bone collector',
-        'result': 'test: IMDB: 6.3/10, Freshness: 28%, Meta - Critics: 45/100, Users: 4.1/10',
+        'result': 'test: IMDB: 6.3/10, Freshness: 28%, Meta - Critics: 45/100, Users: 5.0/10',
     },
     'stockquote': {
         'request': 'quote goog',

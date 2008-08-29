@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """Some helper functions"""
 
@@ -11,9 +28,8 @@ from types import StringTypes
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
-__license__ = 'GPL'
 __all__ = ['Debug', 'Module', 'Error', 'cache', 'throttle', 'stripHTML',
-        'isUTF8', 'unescape_entities', 'slurp', 'Request']
+           'isUTF8', 'unescape_entities', 'slurp', 'Request']
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
 re_br = re.compile('<br[^>]+>', re.I)
@@ -59,7 +75,7 @@ entityMap = {
     8249: '<', 8250: '>', 8364: '$', 8482: '(tm)',
 }
 
-class Debug:
+class Debug(object):
     """Extra debugging class"""
 
     def __str__(self):
@@ -68,7 +84,7 @@ class Debug:
     __repr__ = __str__
 
 
-class Module:
+class Module(object):
     _any = re.compile(r'^(.+)$')
     pattern = re.compile('')
     enabled = True
@@ -101,7 +117,7 @@ class Error(Exception):
     __repr__ = __str__
 
 
-class Request:
+class Request(object):
     """Generic object passed in from protocol handlers for processing"""
 
     def __init__(self, message):
@@ -117,7 +133,7 @@ class Request:
         self.addressed = False
 
 
-class cache:
+class cache(object):
     """Decorator for caching return values"""
     _timeout = 3600
 
@@ -146,7 +162,7 @@ class cache:
         return callback
 
 
-class throttle:
+class throttle(object):
     """Decorator for throttling requests to prevent abuse/spamming"""
 
     # defaults
@@ -242,3 +258,4 @@ def test_module(mod):
         return 1
     print main.response(nick=os.environ['USER'], args=args, kwargs={})
     return 0
+

@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2007, 2008 Christopher Jones
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """Interface for getting really stupid IRC quotes"""
 
@@ -8,21 +25,21 @@ from include.utils import Module, stripHTML
 from include.useragent import geturl
 import logging as log
 
-class Bash:
+class Bash(object):
     random = 'http://www.bash.org/?random'
     bynum = 'http://www.bash.org/?num'
     search = 'http://www.bash.org/?search=query&show=100'
     entries = re.compile('<p class="qt">(.*?)</p>', re.DOTALL)
 
 
-class QDB:
+class QDB(object):
     random = 'http://qdb.us/random'
     bynum = 'http://qdb.us/num'
     search = 'http://qdb.us/?search=query&limit=100&approved=1'
     entries = re.compile('<td[^>]+><p>(.*?)</p>', re.DOTALL)
 
 
-class Limerick:
+class Limerick(object):
     random = 'http://www.limerickdb.com/?random'
     bynum = 'http://www.limerickdb.com/?num'
     search = 'http://www.limerickdb.com/?search=query&number=100'
@@ -35,7 +52,7 @@ class Main(Module):
     require_addressing = True
     help = '<bash|qdb|limerick> [#|query] - get stupid IRC quotes'
     sources = {
-        'bash': Bash(),
+        'bash': QDB(),
         'qdb': QDB(),
         'limerick': Limerick(),
     }

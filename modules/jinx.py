@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2007, 2008 Christopher Jones And Bryan Burns
+#
+# This file is part of Madcow.
+#
+# Madcow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Madcow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 # 
 #  jinx.py
 #  madcow
@@ -13,7 +30,7 @@ import time
 from include.utils import Module
 import logging as log
 
-class ChatLine:
+class ChatLine(object):
   """Records a single line of IRC chat"""
   def __init__(self, nick, text):
     self.nick = nick
@@ -23,7 +40,7 @@ class ChatLine:
   def __str__(self):
     return "%s: <%s> %s\n" % (str(self.timestamp), self.nick, self.text)
 
-class ChatLog:
+class ChatLog(object):
   """Holds chat lines for a preconfigured duration of time"""
   def __init__(self, timeout=5):
     self.timeout = timeout
@@ -82,4 +99,3 @@ class Main(Module):
     except Exception, e:
       log.warn('error in %s: %s' % (self.__module__, e))
       log.exception(e)
-    
