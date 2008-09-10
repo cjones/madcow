@@ -24,6 +24,7 @@ from cookielib import CookieJar
 from urlparse import urlparse, urlunparse
 from urllib import urlencode
 import socket
+import logging as log
 
 __version__ = '2.0'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -54,12 +55,15 @@ class UserAgent(object):
         if method == 'get':
             query.append(url[4])
         query = '&'.join([i for i in query if i])
+        query = query.replace(' ', '%20')
         if method == 'get':
             url[4] = query
             data = None
         else:
             data = query
         url = urlunparse(url)
+
+        log.debug('fetching url: ' + url)
 
         # issue the request
         request = Request(url, data=data)
