@@ -91,8 +91,9 @@ class Main(Module):
         bonus = self._stat_gap_re.sub(r'\1\2', bonus)
         rarity, name = self._item_name_re.search(page).groups()
         color = self._rarity_colors[rarity]
-        name = self.colorlib.get_color(color, text=name)
         name = name.replace('\\', '')
+        name = name.strip()
+        name = self.colorlib.get_color(color, text=name)
         return '%s: %s' % (name, bonus)
 
     def response(self, nick, args, kwargs):
