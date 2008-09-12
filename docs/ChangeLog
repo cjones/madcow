@@ -1,3 +1,8 @@
+1.4.0: Thu Sep 11 19:05:11 PDT 2008
+    * add warhammer online item lookup module
+    * fix url escaping bug that allowed non-rfc compliant url lookups
+    * improve debug messages of useragent module
+
 1.3.9: Thu Aug 28 23:27:39 PDT 2008
     * Migrated project hosting to Google Code
     * Updated license to GPLv3
