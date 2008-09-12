@@ -89,6 +89,8 @@ class Main(Module):
             page = geturl(url)
         bonus = ', '.join(self._bonus_re.findall(page))
         bonus = self._stat_gap_re.sub(r'\1\2', bonus)
+        if not bonus:
+            bonus = 'No bonuses'
         rarity, name = self._item_name_re.search(page).groups()
         color = self._rarity_colors[rarity]
         name = name.replace('\\', '')
