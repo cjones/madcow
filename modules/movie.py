@@ -44,7 +44,7 @@ class IMDB(object):
     search_title = 'IMDb Search'
     movies = re.compile('<a\s+.*?href=(["\'])(/title/tt\d+/)\\1.*?>(.*?</a>)',
             reopts)
-    rating = re.compile(r'<b>User Rating:</b>.*<b>([0-9.]+)/10</b>', reopts)
+    rating = re.compile(r'<div class="meta">.*?<b>([0-9.]+)/10</b>', reopts)
 
     def rate(self, movie):
         """Get the rating for a movie"""
