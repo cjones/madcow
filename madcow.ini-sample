@@ -68,6 +68,7 @@ babel=yes               ; language translations
 bbcnews=yes             ; bbc news headlines
 calc=yes                ; google calculator
 dictionary=yes          ; definition of words
+election2008=yes        ; current electoral vote predictor for 2008 US election
 google=yes              ; i'm feeling lucky query
 learn=yes               ; used for various modules to cache per-user data
 movie=yes               ; rate movie on imdb & rotten tomatoes

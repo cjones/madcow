@@ -72,7 +72,7 @@ class Main(Module):
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
-            return '%s: %s' % (nick, self.error)
+            return '%s: %s' % (nick, e)
 
 
 if __name__ == '__main__':
