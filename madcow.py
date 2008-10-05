@@ -379,8 +379,11 @@ class PeriodicEvents(Service):
 
     def run(self):
         """While bot is alive, process periodic event queue"""
-        self.last_run = dict.fromkeys(self.bot.periodics.dict().keys(),
-                unix_time())
+        delay = 5
+        now = unix_time()
+        for mod_name, obj in self.bot.periodics.dict().items():
+            self.last_run[mod_name] = now - obj.frequency + delay
+
         while self.bot.running:
             self.process_queue()
             sleep(self._process_frequency)
