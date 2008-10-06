@@ -64,15 +64,6 @@ REQUIREMENTS
     urban.py: requires SOAPpy
     memebot.py: requeires sqlobject, pysqlite or MySQLdb
 
-WEB FRONTEND FOR MEMEBOT
-
-    The builtin module memebot.py will track URLs posted to various
-    channels. If you wish, you can enable a web frontend to display
-    these links.  An example can be found here:
-    http://memebot.gruntle.org/
-
-    Please see README.django for full instructions on enabling this.
-
 ADVANCED USAGE
 
     By default, the bot will use IRC. If you wish to use SILC or AIM,
