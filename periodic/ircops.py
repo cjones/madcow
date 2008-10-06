@@ -36,7 +36,7 @@ class Main(object):
         passwd = self.madcow.admin.authlib.get_passwd()
         for nick, data in passwd.items():
             if 'o' in data['flags']:
-                auto_op.append(nick)
+                auto_op.append(nick.lower())
 
         # issue NAMES update and wait for it to refresh (handled in irc.py)
         self.madcow.server.names(self.madcow.channels)
