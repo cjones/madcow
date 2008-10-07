@@ -21,7 +21,7 @@
 
 import re
 import SOAPpy
-from include.utils import Module
+from include.utils import Module, stripHTML
 import logging as log
 
 class Main(Module):
@@ -57,6 +57,7 @@ class Main(Module):
             item = items[i - 1]
             response = '%s: [%s/%s] %s - Example: %s' % (nick, i, max,
                     item.definition, item.example)
+            response = stripHTML(response)
             return response.encode("utf-8")
 
         except Exception, e:
