@@ -61,11 +61,8 @@ class IRCProtocol(Madcow):
     def connect(self):
         log.info('[IRC] * Connecting to %s:%s' % (
             self.config.irc.host, self.config.irc.port))
-        self.server.connect(
-            self.config.irc.host,
-            self.config.irc.port,
-            self.config.irc.nick
-        )
+        self.server.connect(self.config.irc.host, self.config.irc.port,
+                            self.config.irc.nick, ssl=self.config.irc.ssl)
 
     def stop(self):
         Madcow.stop(self)

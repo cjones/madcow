@@ -129,6 +129,7 @@ defaultFlags=r
 [irc]
 host=localhost
 port=6667
+ssl=no
 nick=madcow
 channels=#madcow
 reconnect=yes
