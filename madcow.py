@@ -39,7 +39,7 @@ from md5 import new as md5sum
 from urlparse import urljoin
 from include import gateway
 
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = ['Request', 'Madcow', 'Config']
 

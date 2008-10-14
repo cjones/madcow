@@ -1,3 +1,13 @@
+1.4.1: Mon Oct 13 18:15:50 PDT 2008
+    * add SSL support for irc
+    * add electoral-vote predictor module for 2008 election
+    * make periodics execute once on startup
+    * add CGI script extras/memecheck to see if a URL has been posted
+    * strip HTML from urban dictionary responses
+    * fix broken Rotten Tomatoes search in rate.py
+    * fix auto-ops bug where capitalized nicks would be ignored
+    * remove documentation cruft for deprecated django app
+
 1.4.0: Thu Sep 11 19:05:11 PDT 2008
     * add warhammer online item lookup module
     * fix url escaping bug that allowed non-rfc compliant url lookups
