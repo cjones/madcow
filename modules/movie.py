@@ -92,8 +92,9 @@ class RottenTomatoes(object):
     search = urljoin(baseurl, '/search/search.php')
     search_title = 'ROTTEN TOMATOES: Movie Reviews &amp; Previews'
     movies = re.compile(r'<a href="(/m/.*?/)">(.*?)</a>', reopts)
-    movie_title = re.compile(r'<h1 class="movie_title">(.*?)</h1>', reopts)
-    rating = re.compile(r'<div id="bubble_allCritics".*?>\s*(\d+%)', reopts)
+    movie_title = re.compile(r'<h1 class="movie_title clearfix">(.*?)</h1>',
+                             reopts)
+    rating = re.compile('<div id="tomatometer_score".*?>.*?>([0-9.]+)', reopts)
 
     def rate(self, movie):
         """Get the freshness rating of a movie"""
@@ -129,7 +130,7 @@ class RottenTomatoes(object):
             response = 'Freshness'
             if normalize(title) != movie:
                 response += ' [%s]' % stripHTML(title)
-            response += ': %s' % rating
+            response += ': %s%%' % rating
             return response
 
         except Exception, msg:
@@ -196,11 +197,10 @@ class MetaCritic(object):
 
 class MovieRatings(object):
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
-    sources = (
-        IMDB(),
-        RottenTomatoes(),
-        MetaCritic(),
-    )
+    sources = (IMDB(),
+               RottenTomatoes(),
+               MetaCritic(),
+               )
     baseurl = 'http://videoeta.com/'
     topurl = urljoin(baseurl, '/theaters.html')
     movieurl = urljoin(baseurl, '/movie/')
