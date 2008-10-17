@@ -36,7 +36,6 @@ re_br = re.compile('<br[^>]+>', re.I)
 re_tags = re.compile('<[^>]+>')
 re_newlines = re.compile('[\r\n]+')
 re_highascii = re.compile('([\x80-\xff])')
-re_entity = re.compile(r'(&([^;]+);)')
 
 entityNames = {
     'quot': 34, 'amp': 38, 'apos': 39, 'lt': 60, 'gt': 62, 'nbsp': 32,
@@ -220,14 +219,20 @@ def isUTF8(data = None, threshold = .25):
     else:
         return False
 
+re_entity = re.compile(r'(&([^;]+);)')
+_entity_re = re.compile(r'^&#(x)?(\d+);$', re.I)
+
 def unescape_entities(text):
     for entity, entityName in re_entity.findall(text):
         if entityNames.has_key(entityName):
             val = entityNames[entityName]
-        elif entityName.startswith('#') and entityName[1:].isdigit():
-            val = int(entityName[1:])
         else:
-            continue
+            try:
+                ishex, val = _entity_re.search(entity).groups()
+            except AttributeError:
+                continue
+            base = 16 if ishex else 10
+            val = int(val, base)
 
         if val < 256:
             converted = chr(val)
