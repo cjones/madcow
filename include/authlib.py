@@ -21,7 +21,7 @@
 
 from utils import Error
 from random import randint
-import sha
+from hashlib import sha1
 from base64 import b64encode, b64decode
 
 __version__ = '0.2'
@@ -128,7 +128,7 @@ class AuthLib(object):
     def get_digest(self, plain, salt=None):
         if salt is None:
             salt = ''.join([chr(randint(0, 255)) for i in range(4)])
-        return sha.new(salt + plain).digest(), salt
+        return sha1(salt + plain).digest(), salt
 
     def check(self, encrypted, plain):
         if encrypted == '*':

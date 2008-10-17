@@ -35,7 +35,7 @@ from threading import Thread, RLock
 from Queue import Queue, Empty
 from types import StringTypes, StringType
 from include import useragent as ua
-from md5 import new as md5sum
+from hashlib import md5
 from urlparse import urljoin
 from include import gateway
 
@@ -789,7 +789,7 @@ def check_config(config, samplefile, prefix):
     # "broken". maybe a more general solution can be done later. -CJ
 
     # verify we're using an unaltered sample file to verify against
-    hash = md5sum()
+    hash = md5()
     hash.update(slurp(samplefile))
     hash = hash.hexdigest()
     if hash != SAMPLE_HASH:
