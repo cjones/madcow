@@ -26,7 +26,7 @@ from urlparse import urljoin
 import logging as log
 
 class Main(Module):
-    pattern = re.compile('^\s*(list languages|translate)(?:\s+from\s+(\w+)\s+to\s+(\w+)\s*[-:]\s*(.+))?$', re.I)
+    pattern = re.compile('^\s*(list languages|translate)(?:\s+from\s+(\S+)\s+to\s+(\S+)\s*[-:]\s*(.+))?$', re.I)
     require_addressing = True
     help = 'list languages - list translate languages available\n'
     help += 'translate from <lang> to <lang>: text'
