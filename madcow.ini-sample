@@ -1,34 +1,42 @@
 [main]
 ;
-; specify protocol module to use. you can override this with the -p
-; switch when run from the commandline
+; specify protocol module to use.  by default, madcow runs as a local
+; shell-like client, which is not very useful.  if you choose
+; irc/silc/aim, you must edit the corresponding section (e.g. [irc]) to
+; set connection settings.  you may override the protocol with the -p
+; flag on the commandline.  note you may only specifiy one protocol,
+; madcow does not support multiple connections from one running process.
 ;
 module=cli
 ;module=irc
 ;module=aim
 ;module=silcplugin
 ;
-; whether to daemonize when run (POSIX only). you can force the bot to
+; whether to daemonize when run (POSIX only).  you can force the bot to
 ; detach by specifying -d on the commandline.
 ;
 detach=no
 ;
-; how many worker threads to spawn for module handling
+; how many worker threads to spawn for module handling.  don't set this
+; too high.
 ;
 workers=5
 ;
 ; setting this to yes will log public chatter in the logs directory
-; (IRC and SILC)
+; (IRC and SILC only).  set this to no for better privacy.
 ;
 logpublic=yes
 ;
 ; these nicks will be completely ignored in public settings such as
 ; IRC or SILC. you should put other bots that reside in the channel
-; in this list to prevent feedback loops. comma-delimited
+; in this list to prevent feedback loops. comma-delimited.  note that
+; any messages that contain the string NOBOT in them will also be
+; ignored by madcow.
 ;
 ignoreList=
 ;
 ; set this to log console output to a file in madcow base directory
+;
 loglevel=WARN           ; default level, valid options are DEBUG, INFO, WARN
 logfile=logs/madcow.log ; leave blank for no file-level logging
 ;
@@ -36,20 +44,20 @@ logfile=logs/madcow.log ; leave blank for no file-level logging
 ;
 pidfile=madcow.pid
 ;
-; encode output to this format (latin1, utf8, ascii, etc.)
-; most common terminals default to latin1, so this is the default of madcow.
-; encoding to utf8 will allow you to support a wider range of output,
-; such as cyrillics, japanese etc. if you set this to ascii, any values
-; from 128-255 will be set to '?'. this is not recommended, as many of the
-; modules (such as weather, wikipedia, etc) that retrieve from the web make
-; use of unicode characters.
-charset=latin1
+; character set to output in.  utf-8 is recommended as it allows you to
+; use the babelfish translation feature in unicode (greek alphabet,
+; traditional chinese, etc).  you can also set this to ascii or latin1,
+; but certain modules will output garbage or ?'s
+;
+charset=utf-8
 ;
 ; nickname of the bot owner. when you first register with the bot, if the
 ; nick matches, you will be granted admin privileges.
+;
 owner=nick
 
 [modules]
+;
 ; if you wish to run multiple bots from the same directory you should
 ; give them a unique namespace. this is used to name the db files
 ; something unique. if you do not change this, then multiple bots will
@@ -63,6 +71,7 @@ dbNamespace=madcow
 ;
 ; these are the standard information modules, which you'll probably
 ; want enabled as they are quite useful.
+; ;
 area=yes                ; look up area codes
 babel=yes               ; language translations
 bbcnews=yes             ; bbc news headlines
@@ -172,14 +181,33 @@ port=706
 reconnect=yes
 reconnectWait=3
 
-; smtp settings for summon module
+; smtp settings for summon module.  the outgoing smtp server will be
+; used to send out a text message.  if you wish to be able to reply from
+; your phone and have the message be sent to the channel, you must set
+; the sender to a routable mailing address and configure the [gateway]
+; section below.
+;
+; see http://en.wikipedia.org/wiki/SMS_gateway#Carrier-provided_Email_or_Web_to_SMS_gateways for email addresses that act as your phone's sms gateway and
+; set your email to this in channel or privmsg like so:
+;
+; /msg bot set email <nick> <email address>
+;
+; after this, bot: summon <nick> <reason> will send a text message to
+; your phone.
+;
 [smtp]
 server=localhost
 sender=madcow@example.com
 user=
 password=
 
-; service for email gateway (sms, etc)
+; service for email gateway (sms, images, etc).  to make this actually
+; do anything you will need to set up an email account that sends its
+; email to $BOTDIR/include/email_gateway.py in either an aliases file,
+; .forward, or procmail.  sms/picture messages sent from phones to this
+; email address will then be displayed in channel.  if you are unable to
+; set up incoming email in this way, you should disable this.
+; 
 [gateway]
 enabled=yes
 bind=localhost
@@ -194,7 +222,13 @@ channel=#madcow
 imagePath=
 imageURL=
 
-; twitter settings
+; twitter settings.  if enabled, madcow will contact twitter every 4
+; minutes with the specified user/pass and check if that person's
+; friends have any new "tweets", displaying them to the specified
+; channel.  the best way to use this is to create an account for your
+; channel and follow all the people whose updates you would like to see
+; relayed to the channel.
+;
 [twitter]
 enabled=no
 channel=#madcow
@@ -231,12 +265,14 @@ updatefreq=30
 ; up. if you set timeout too high or unset it, multiple requests to a slow
 ; or unresponsive website could cause all worker threads to block and deadlock
 ; the bot. if you wish to increase it, consider increasing your worker threads
-; to compensate.
+; to compensate, but beware that the potential for abuse is increased.
 ;
 timeout=10
 ;
 ; user agent to masquerade as. this is set to a generic "real" browser agent
-; because many websites deny bot access, such as google.
+; because many websites deny bot access, such as google.  if you change
+; this, many modules will stop working since they are designed to block
+; bots or serve up different information to spiders.
 ;
 agent=Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)
 ;

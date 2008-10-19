@@ -3,3 +3,6 @@
 - change re_ names 
 - indentation line-up rules
 - useful repr
+- better ignore functionality
+- improve anti-abuse settings
+- make irc logging show both events and bots own output

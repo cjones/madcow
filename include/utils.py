@@ -151,7 +151,7 @@ class cache(object):
                     del self.cached[key]
 
             # run wrapped function if there is no cached data
-            if not self.cached.has_key(args):
+            if args not in self.cached:
                 value = function(*args, **kwargs)
                 self.cached[args] = {'created': now, 'value': value}
 
@@ -224,7 +224,7 @@ _entity_re = re.compile(r'^&#(x)?(\d+);$', re.I)
 
 def unescape_entities(text):
     for entity, entityName in re_entity.findall(text):
-        if entityNames.has_key(entityName):
+        if entityName in entityNames:
             val = entityNames[entityName]
         else:
             try:
@@ -236,7 +236,7 @@ def unescape_entities(text):
 
         if val < 256:
             converted = chr(val)
-        elif entityMap.has_key(val):
+        elif val in entityMap:
             converted = entityMap[val]
         else:
             converted = ''

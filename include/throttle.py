@@ -83,7 +83,7 @@ class ThrottleEvent(object):
         self.cache = {}
 
     def status(self, user=None):
-        if self.cache.has_key(user):
+        if user in self.cache:
             status = self.cache[user]
         else:
             status = ThrottleStatus(user=user, name=self.name, parent=self.parent)
@@ -103,7 +103,7 @@ class Throttle(object):
         self.cache = {}
 
     def event(self, name=None):
-        if self.cache.has_key(name):
+        if name in self.cache:
             event = self.cache[name]
         else:
             event = ThrottleEvent(name=name, parent=self)

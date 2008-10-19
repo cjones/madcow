@@ -368,7 +368,7 @@ class FigletRenderingEngine(object):
         buffer = []
 
         for c in map(ord, list(text)):
-            if self.base.Font.chars.has_key(c) is False: continue
+            if c in self.base.Font.chars is False: continue
             curChar = self.base.Font.chars[c]
             self.curCharWidth = self.base.Font.width[c]
             if len(buffer) == 0: buffer = ['' for i in range(self.base.Font.height)]
@@ -436,13 +436,13 @@ class Figlet(object):
         self.engine = FigletRenderingEngine(base=self)
 
     def setFont(self, **kwargs):
-        if kwargs.has_key('prefix'):
+        if 'prefix' in kwargs:
             self.dir = kwargs['prefix']
 
-        if kwargs.has_key('font'):
+        if 'font' in kwargs:
             self.font = kwargs['font']
 
-        if kwargs.has_key('zipfile'):
+        if 'zipfile' in kwargs:
             self.zipfile = kwargs['zipfile']
 
         Font = None

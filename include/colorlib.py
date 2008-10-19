@@ -199,7 +199,7 @@ class ColorLib(object):
             return '</span>'
 
     def rainbow(self, text, style='rainbow'):
-        if not self._rainbow_map.has_key(style):
+        if style not in self._rainbow_map:
             raise UnknownRainbowStyle, style
         self.rainbow_offset.setdefault(style, 0)
         offset = self.rainbow_offset[style]

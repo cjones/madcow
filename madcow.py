@@ -38,6 +38,8 @@ from include import useragent as ua
 from hashlib import md5
 from urlparse import urljoin
 from include import gateway
+from include import chardet
+import codecs
 
 __version__ = '1.4.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -46,16 +48,15 @@ __all__ = ['Request', 'Madcow', 'Config']
 MADCOW_URL = 'http://code.google.com/p/madcow/'
 LOGFORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
 LOGLEVEL = log.WARN
-CHARSET = 'latin1'
+CHARSET = 'utf-8'
 CONFIG = 'madcow.ini'
-SAMPLE_HASH = 'b1dd42c276abdf59f5f494dd7dbbb714'
+SAMPLE_HASH = '4fde57eaee4efead5db65151db48c15e'
 
 class Madcow(object):
 
     """Core bot handler, subclassed by protocols"""
 
     _delim = re.compile(r'\s*[,;]\s*')
-    _codecs = ('ascii', 'utf8', 'latin1')
     _botname = 'madcow'
     re_cor1 = None
     re_addrend = None
@@ -86,10 +87,13 @@ class Madcow(object):
         self.admin = Admin(self)
 
         # set encoding
+        self.charset = CHARSET
         if self.config.main.charset:
-            self.charset = self.config.main.charset
-        else:
-            self.charset = CHARSET
+            try:
+                self.charset = codecs.lookup(self.config.main.charset).name
+            except LookupError:
+                log.warn('unknown charset %s, using default %s' % (
+                    self.config.main.charset, self.charset))
 
         # load modules
         self.modules = Modules(self, 'modules', self.prefix)
@@ -180,21 +184,10 @@ class Madcow(object):
 
     def encode(self, text):
         """Force output to the bots encoding if possible"""
-        if isinstance(text, StringTypes):
-            for charset in self._codecs:
-                try:
-                    text = unicode(text, charset)
-                    break
-                except:
-                    pass
-
-            if isinstance(text, StringType):
-                text = unicode(text, 'ascii', 'replace')
-        try:
-            text = text.encode(self.charset)
-        except:
-            text = text.encode('ascii', 'replace')
-        return text
+        charset = chardet.detect(text)['encoding']
+        decoder = codecs.lookup(charset)
+        text = decoder.decode(text, 'replace')[0]
+        return text.encode(self.charset, 'replace')
 
     def protocol_output(self, message, req=None):
         """Override with protocol-specific output method"""
@@ -537,7 +530,7 @@ class Admin(object):
         try:
             deluser = self._reDelUser.search(command).group(1)
             self.authlib.delete_user(deluser)
-            if self.users.has_key(deluser):
+            if deluser in self.users:
                 del self.users[deluser]
             return 'User deleted: %s' % deluser
         except:
@@ -556,7 +549,7 @@ class Admin(object):
                         flags.append('registered')
                     if 'o' in data['flags']:
                         flags.append('autoop')
-                    if self.users.has_key(luser):
+                    if luser in self.users:
                         flags.append('loggedin')
                     flags = ' '.join(flags)
                     output.append('%s: %s' % (luser, flags))
@@ -587,7 +580,7 @@ class Admin(object):
                     curflags.add(flag)
         curflags = ''.join(curflags)
         self.authlib.change_flags(user, curflags)
-        if self.users.has_key(user):
+        if user in self.users:
             self.users[user].flags = curflags
         return 'flags for %s changed to %s' % (user, curflags)
 
@@ -659,7 +652,7 @@ class Modules(object):
             if mod_name in disabled:
                 log.debug('skipping %s: disabled' % mod_name)
                 continue
-            if self.modules.has_key(mod_name):
+            if mod_name in self.modules:
                 mod = self.modules[mod_name]['mod']
                 try:
                     reload(mod)
@@ -757,7 +750,7 @@ class Config(object):
 
         def __getattr__(self, attr):
             attr = attr.lower()
-            if self.settings.has_key(attr):
+            if attr in self.settings:
                 return self.settings[attr]
             else:
                 raise ConfigError, 'missing setting %s in section %s' % (
@@ -775,7 +768,7 @@ class Config(object):
 
     def __getattr__(self, attr):
         attr = attr.lower()
-        if self.sections.has_key(attr):
+        if attr in self.sections:
             return self.sections[attr]
         else:
             raise ConfigError, "missing section: %s" % attr

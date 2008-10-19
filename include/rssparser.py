@@ -134,7 +134,7 @@ class RSSParser(sgmllib.SGMLParser):
             if prefix.find('backend.userland.com/rss') <> -1:
                 # match any backend.userland.com namespace
                 prefix = 'http://backend.userland.com/rss'
-            if self.namespaces.has_key(value):
+            if value in self.namespaces:
                 self.namespacemap[prefix] = self.namespaces[value]
 
     def _mapToStandardPrefix(self, name):
@@ -226,7 +226,7 @@ class RSSParser(sgmllib.SGMLParser):
     def end_guid(self):
         self.pop('guid')
         if self.guidislink:
-            if not self.items[-1].has_key('link'):
+            if 'link' not in self.items[-1]:
                 # guid acts as link, but only if "ispermalink" is not present or is "true",
                 # and only if the item doesn't already have a link element
                 self.items[-1]['link'] = self.items[-1]['guid']

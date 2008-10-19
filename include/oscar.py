@@ -299,7 +299,7 @@ class SNACBased(OscarConnection):
 
     def oscar_Data(self,data):
         snac=readSNAC(data[1])
-        if self.requestCallbacks.has_key(snac[4]):
+        if snac[4] in self.requestCallbacks:
             d = self.requestCallbacks[snac[4]]
             del self.requestCallbacks[snac[4]]
             if snac[1]!=1:
@@ -322,7 +322,7 @@ class SNACBased(OscarConnection):
         self.supportedFamilies = struct.unpack("!"+str(numFamilies)+'H', snac[3])
         d = ''
         for fam in self.supportedFamilies:
-            if self.snacFamilies.has_key(fam):
+            if fam in self.snacFamilies:
                 d=d+struct.pack('!2H',fam,self.snacFamilies[fam][0])
         self.sendSNACnr(0x01,0x17, d)
 
@@ -335,7 +335,7 @@ class SNACBased(OscarConnection):
     def clientReady(self):
         d = ''
         for fam in self.supportedFamilies:
-            if self.snacFamilies.has_key(fam):
+            if fam in self.snacFamilies:
                 version, toolID, toolVersion = self.snacFamilies[fam]
                 d = d + struct.pack('!4H',fam,version,toolID,toolVersion)
         self.sendSNACnr(0x01,0x02,d)
@@ -491,12 +491,12 @@ class BOSConnection(SNACBased):
                 exchange = struct.unpack('!H',moreTLVs[10001][:2])[0]
                 name = moreTLVs[10001][3:-2]
                 instance = struct.unpack('!H',moreTLVs[10001][-2:])[0]
-                if not self.services.has_key(SERVICE_CHATNAV):
+                if SERVICE_CHATNAV not in self.services:
                     self.connectService(SERVICE_CHATNAV,1)
                 else:
                     self.services[SERVICE_CHATNAV].getChatInfo(exchange, name, instance)
             elif requestClass == CAP_SEND_FILE:
-                if moreTLVs.has_key(11):
+                if 11 in moreTLVs:
                     return
                 name = moreTLVs[10001][9:-7]
                 desc = moreTLVs[12]
@@ -559,14 +559,14 @@ class BOSConnection(SNACBased):
                 groups[groupID].addUser(buddyID, SSIBuddy(name, tlvs))
             elif itemType == 1:
                 g = SSIGroup(name, tlvs)
-                if groups.has_key(0): groups[0].addUser(groupID, g)
+                if 0 in groups: groups[0].addUser(groupID, g)
                 groups[groupID] = g
             elif itemType == 2:
                 permit.append(name)
             elif itemType == 3:
                 deny.append(name)
             elif itemType == 4:
-                if not tlvs.has_key(0xcb):
+                if 0xcb not in tlvs:
                     continue
                 permitMode = {1:'permitall',2:'denyall',3:'permitsome',4:'denysome',5:'permitbuddies'}[ord(tlvs[0xca])]
                 visibility = {'\xff\xff\xff\xff':'all','\x00\x00\x00\x04':'notaim'}[tlvs[0xcb]]
@@ -683,7 +683,7 @@ class BOSConnection(SNACBased):
         self.oscar_01_05(snac[2:], d)
 
     def createChat(self, shortName):
-        if self.services.has_key(SERVICE_CHATNAV):
+        if SERVICE_CHATNAV in self.services:
             return self.services[SERVICE_CHATNAV].createChat(shortName)
         else:
             pass
@@ -937,11 +937,11 @@ class OscarAuthenticator(OscarConnection):
             i=snac[5].find("\000")
             snac[5]=snac[5][i:]
         tlvs=readTLVs(snac[5])
-        if tlvs.has_key(6):
+        if 6 in tlvs:
             self.cookie=tlvs[6]
             server,port=string.split(tlvs[5],":")
             self.connectToBOS(server, int(port))
-        elif tlvs.has_key(8):
+        elif 8 in tlvs:
             errorcode=tlvs[8]
             errorurl=tlvs[4]
             if errorcode=='\000\030':
