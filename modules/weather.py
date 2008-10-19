@@ -90,7 +90,7 @@ class Weather(object):
             if temp < 0:
                 color = 'magenta'
             elif temp >=0 and temp < 40:
-                color = 'bue'
+                color = 'blue'
             elif temp >= 40 and temp < 60:
                 color = 'cyan'
             elif temp >= 60 and temp < 80:
@@ -104,6 +104,7 @@ class Weather(object):
                 blink = True
             data['Temperature'] = self.colorlib.get_color(color,
                     text=data['Temperature'])
+
             if blink:
                 data['Temperature'] = '\x1b[5m' + data['Temperature'] + \
                         '\x1b[0m'
