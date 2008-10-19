@@ -184,9 +184,36 @@ class Madcow(object):
 
     def encode(self, text):
         """Force output to the bots encoding if possible"""
-        charset = chardet.detect(text)['encoding']
-        decoder = codecs.lookup(charset)
-        text = decoder.decode(text, 'replace')[0]
+
+        # see if we can figure out what this is string is encoded as
+        try:
+            detected = chardet.detect(text)['encoding']
+        except Exception, error:
+            log.warn('error detecting charset for: %s' % repr(text))
+            log.exception(error)
+
+        # try to convert to unicode, using utf8/windows/latin1 as failback
+        for charset in detected, 'utf-8', 'cp1252', 'iso8859-1':
+            if not charset:
+                continue
+            try:
+                decoder = codecs.lookup(charset)
+            except LookupError, error:
+                log.warn("couldn't find codec for " + charset)
+                log.exception(error)
+                continue
+            try:
+                text = decoder.decode(text)[0]
+                break
+            except UnicodeError, error:
+                log.warn('failed encoding to ' + charset)
+                log.exception(error)
+
+        # if all that failed, who knows. ascii with ?'s is better than nothing
+        if isinstance(text, str):
+            text = text.decode('ascii', 'replace')
+
+        # return bytes encoded in the bot's character set
         return text.encode(self.charset, 'replace')
 
     def protocol_output(self, message, req=None):
