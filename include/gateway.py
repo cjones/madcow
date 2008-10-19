@@ -26,6 +26,7 @@ import socket
 import logging as log
 import datetime
 from urlparse import urljoin
+import errno
 
 class InvalidPayload(Error):
     """Raised when invalid payload is received by gateway"""
@@ -44,6 +45,7 @@ class ConnectionClosed(Error):
 
 
 class GatewayService(object):
+
     """Gateway service spawns TCP socket and listens for requests"""
 
     def run(self):
@@ -63,12 +65,14 @@ class GatewayService(object):
 
 
 class GatewayServiceHandler(Thread):
+
     """This class handles the listener service for message injection"""
+
     maxsize = 1 * 1024 * 1024 # 1 meg
-    bufsize = 512
+    bufsize = 8 * 1024
     timeout = 60
-    newline = '\r\n'
-    headsep = newline * 2
+    newline = re.compile(r'\r?\n')
+    headsep = re.compile(r'\r?\n\r?\n')
     required_headers = {
         'message': ('to', 'from', 'message'),
         'image': ('to', 'from', 'size'),
@@ -89,15 +93,16 @@ class GatewayServiceHandler(Thread):
         self.setDaemon(True)
 
     def recv(self, size):
-        data = ''
         if self.fd in select([self.fd], [], [], self.timeout)[0]:
             try:
                 data = os.read(self.fd, size)
-            except OSError:
-                pass
-            if not len(data):
-                raise ConnectionClosed
-            return data
+            except OSError, error:
+                if error.errno != errno.EIO:
+                    raise error
+                data = ''
+            if data:
+                return data
+            raise ConnectionClosed
         raise ConnectionTimeout
 
     def run(self):
@@ -127,12 +132,12 @@ class GatewayServiceHandler(Thread):
     def data_received(self, data):
         self.buf += data
         if not self.headers_done:
-            if self.headsep not in self.buf:
+            if not self.headsep.search(self.buf):
                 return
             try:
                 # parse headers
-                hdrs, self.buf = self.buf.split(self.headsep, 1)
-                hdrs = hdrs.split(self.newline)
+                hdrs, self.buf = self.headsep.split(self.buf, 1)
+                hdrs = self.newline.split(hdrs)
                 hdrs = [hdr.split(':', 1) for hdr in hdrs]
                 hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]
                 hdrs = dict(hdrs)
@@ -144,11 +149,11 @@ class GatewayServiceHandler(Thread):
                     content_type = 'message'
                 if content_type not in self.required_headers:
                     raise InvalidPayload, \
-                        'unknown content type: ' % content_type
+                        'unknown content type: ' + content_type
                 for header in self.required_headers[content_type]:
                     if header not in hdrs:
                         raise InvalidPayload, \
-                            'missing required field %s' + header
+                            'missing required field ' + header
                 if 'size' in hdrs:
                     hdrs['size'] = int(hdrs['size'])
 
