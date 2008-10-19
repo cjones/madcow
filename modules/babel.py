@@ -39,10 +39,10 @@ class Main(Module):
 
     """Translation service using Google Translate"""
 
-    pattern = Module._any
-    help = 'translate <lang> to <lang> [to <lang> ...]: text'
     pattern = r'^\s*(trans(?:late)?(.+?)|list\s+lang(s|uages))\s*$'
     pattern = re.compile(pattern, re.I)
+    help = 'translate <lang> to <lang> [to <lang> ...]: text'
+    help += '\nlist languages - show all translate languages'
     _baseurl = 'http://translate.google.com/'
     _translate = urlparse.urljoin(_baseurl, '/translate_a/t')
     _langs_re = re.compile(r'<select name=sl.*?>(.*?)</select>')
@@ -51,6 +51,7 @@ class Main(Module):
     _default_lang = 'english'
 
     def response(self, nick, args, kwargs):
+        """Return a response to the bot to display"""
         if args[0].startswith('trans'):
             try:
                 message = self.parse(args[1])
