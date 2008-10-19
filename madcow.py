@@ -50,7 +50,7 @@ LOGFORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
 LOGLEVEL = log.WARN
 CHARSET = 'utf-8'
 CONFIG = 'madcow.ini'
-SAMPLE_HASH = '4fde57eaee4efead5db65151db48c15e'
+SAMPLE_HASH = 'fdb9fb43226e6990dd31b59dcd297ec7'
 
 class Madcow(object):
 
