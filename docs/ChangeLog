@@ -1,3 +1,12 @@
+1.4.2: Sat Oct 18 23:17:40 PDT 2008
+    * rewrite babel module to use google translator
+    * 2.6 compatibility changes to silence some DeprecationWarnings
+    * improve character set detection/support
+    * default character set is now utf-8
+    * support for hex-encoded html entities in HTML stripping
+    * improved documentation in sample config file
+    * fix bug in weather module for temps between 0-40F not showing blue
+
 1.4.1: Mon Oct 13 18:15:50 PDT 2008
     * add SSL support for irc
     * add electoral-vote predictor module for 2008 election
