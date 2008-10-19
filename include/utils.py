@@ -26,10 +26,10 @@ from time import time as unix_time
 import os
 from types import StringTypes
 
-__version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = ['Debug', 'Module', 'Error', 'cache', 'throttle', 'stripHTML',
-           'isUTF8', 'unescape_entities', 'slurp', 'Request']
+           'isUTF8', 'unescape_entities', 'slurp', 'Request',
+           'cache_property']
 
 re_sup = re.compile('<sup>(.*?)</sup>', re.I)
 re_br = re.compile('<br[^>]+>', re.I)
@@ -130,6 +130,28 @@ class Request(object):
         self.colorize = False
         self.channel = None
         self.addressed = False
+
+
+def cache_property(timeout=None):
+
+    """Caching property decorator"""
+
+    cache = {}
+
+    def decorator(method):
+
+        def inner(*args, **kwargs):
+            if method in cache:
+                if unix_time() - cache[method]['lastrun'] > timeout:
+                    del cache[method]
+            if method not in cache:
+                cache[method] = dict(lastrun=unix_time(),
+                                     result=method(*args, **kwargs))
+            return cache[method]['result']
+
+        return property(inner)
+
+    return decorator
 
 
 class cache(object):
