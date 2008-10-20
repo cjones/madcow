@@ -431,8 +431,12 @@ class ServerConnection(Connection):
             raise ServerConnectionError, "Couldn't connect to socket: %s" % x
         if ssl:
             self.transport = socket.ssl(self.socket)
+            self.sock_read = self.transport.read
+            self.sock_write = self.transport.write
         else:
             self.transport = self.socket
+            self.sock_read = self.transport.recv
+            self.sock_write = self.transport.send
         self.connected = 1
         if self.irclibobj.fn_to_add_socket:
             self.irclibobj.fn_to_add_socket(self.socket)
@@ -483,7 +487,7 @@ class ServerConnection(Connection):
         """[Internal]"""
 
         try:
-            new_data = self.transport.read(2**14)
+            new_data = self.sock_read(2**14)
         except socket.error, x:
             # The server hung up.
             self.disconnect("Connection reset by peer")
@@ -784,7 +788,7 @@ class ServerConnection(Connection):
         if self.socket is None:
             raise ServerNotConnectedError, "Not connected."
         try:
-            self.transport.write(string + "\r\n")
+            self.sock_write(string + "\r\n")
             if DEBUG:
                 print "TO SERVER:", string
         except socket.error, x:
@@ -953,7 +957,7 @@ class DCCConnection(Connection):
             return
 
         try:
-            new_data = self.transport.read(2**14)
+            new_data = self.sock_read(2**14)
         except socket.error, x:
             # The server hung up.
             self.disconnect("Connection reset by peer")
@@ -1003,9 +1007,9 @@ class DCCConnection(Connection):
         CHAT session.
         """
         try:
-            self.transport.write(string)
+            self.sock_write(string)
             if self.dcctype == "chat":
-                self.transport.write("\n")
+                self.sock_write("\n")
             if DEBUG:
                 print "TO PEER: %s\n" % string
         except socket.error, x:
