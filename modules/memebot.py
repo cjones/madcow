@@ -275,7 +275,7 @@ class Main(Module):
                 comments(url=old, text=comment2, author=me)
 
             # chew them out unless its my own
-            if old.author.name != nick:
+            if old.author.name.lower() != nick.lower():
                 response = 'first posted by %s on %s' % (old.author.name,
                         old.posted)
                 riff = random.choice(self.riffs)
