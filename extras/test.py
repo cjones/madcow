@@ -103,7 +103,7 @@ tests = {
                 },
         'dictionary': {
                 'request': 'define penis',
-                'result': re.compile(r'test: \[1/1\] a male erectile organ'),
+                'result': re.compile(r'a male erectile organ'),
                 },
         'conservapedia': {
                 'request': 'cp penis',
@@ -160,7 +160,7 @@ tests = {
                 },
         'babel': {
                 'request': 'translate from english to spanish: your mom',
-                'result': 'test: su mam\xc3\xa1',
+                'result': 'test: tu madre',
                 },
         'movie': {
                 'request': 'rate bone collector',
