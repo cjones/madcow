@@ -44,22 +44,21 @@ http://www.crummy.com/software/BeautifulSoup/documentation.html
 from __future__ import generators
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "3.0.4"
+__version__ = "3.0.4b"  # convert to use HTMLParser -cj 2008
 __copyright__ = "Copyright (c) 2004-2007 Leonard Richardson"
 __license__ = "PSF"
 
-from sgmllib import SGMLParser, SGMLParseError
+import HTMLParser
 import codecs
 import types
 import re
-import sgmllib
 try:
   from htmlentitydefs import name2codepoint
 except ImportError:
   name2codepoint = {}
 
 #This hack makes Beautiful Soup able to parse XML with namespaces
-sgmllib.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
+HTMLParser.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
 
 DEFAULT_OUTPUT_ENCODING = "utf-8"
 
@@ -860,7 +859,7 @@ def buildTagMap(default, *args):
 
 # Now, the parser classes.
 
-class BeautifulStoneSoup(Tag, SGMLParser):
+class BeautifulStoneSoup(Tag, HTMLParser.HTMLParser):
 
     """This class contains the basic parser and search code. It defines
     a parser that knows nothing about tag behavior except for the
@@ -905,9 +904,9 @@ class BeautifulStoneSoup(Tag, SGMLParser):
         provided markup (which can be a string or a file-like object)
         is fed into the underlying parser. 
 
-        sgmllib will process most bad HTML, and the BeautifulSoup
+        HTMLParser will process most bad HTML, and the BeautifulSoup
         class has some tricks for dealing with some HTML that kills
-        sgmllib, but Beautiful Soup can nonetheless choke or lose data
+        HTMLParser, but Beautiful Soup can nonetheless choke or lose data
         if your data uses self-closing tags or declarations
         incorrectly.
 
@@ -917,7 +916,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
         you'll get better performance.
 
         The default parser massage techniques fix the two most common
-        instances of invalid HTML that choke sgmllib:
+        instances of invalid HTML that choke HTMLParser:
 
          <br/> (No space between name of closing tag and tag close)
          <! --Comment--> (Extraneous whitespace in declaration)
@@ -936,7 +935,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
             # Just convert it all to Unicode.
             self.smartQuotesTo = None
         self.instanceSelfClosingTags = buildTagMap(None, selfClosingTags)
-        SGMLParser.__init__(self)
+        HTMLParser.HTMLParser.__init__(self)
             
         if hasattr(markup, 'read'):        # It's a file-type object.
             markup = markup.read()
@@ -968,20 +967,20 @@ class BeautifulStoneSoup(Tag, SGMLParser):
                     markup = fix.sub(m, markup)
         self.reset()
 
-        SGMLParser.feed(self, markup)
+        HTMLParser.HTMLParser.feed(self, markup)
         # Close out any unfinished strings and close all the open tags.
         self.endData()
         while self.currentTag.name != self.ROOT_TAG_NAME:
             self.popTag()
 
     def __getattr__(self, methodName):
-        """This method routes method call requests to either the SGMLParser
+        """This method routes method call requests to either the HTMLParser.HTMLParser
         superclass or the Tag superclass, depending on the method name."""
         #print "__getattr__ called on %s.%s" % (self.__class__, methodName)
 
         if methodName.find('start_') == 0 or methodName.find('end_') == 0 \
                or methodName.find('do_') == 0:
-            return SGMLParser.__getattr__(self, methodName)
+            return HTMLParser.HTMLParser.__getattr__(self, methodName)
         elif methodName.find('__') != 0:
             return Tag.__getattr__(self, methodName)
         else:
@@ -997,7 +996,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
     def reset(self):
         Tag.__init__(self, self, self.ROOT_TAG_NAME)
         self.hidden = 1
-        SGMLParser.reset(self)
+        HTMLParser.HTMLParser.reset(self)
         self.currentData = []
         self.currentTag = None
         self.tagStack = []
@@ -1158,6 +1157,25 @@ class BeautifulStoneSoup(Tag, SGMLParser):
             self.quoteStack.pop()
             self.literal = (len(self.quoteStack) > 0)
 
+    ### start: added to emulate sgmllib behavior -cj 2008
+
+    def handle_starttag(self, tag, attrs):
+        for action in ('start', 'do'):
+            try:
+                return getattr(self, '%s_%s' % (action, tag))(attrs)
+            except AttributeError:
+                pass
+        return self.unknown_starttag(tag, attrs)
+
+    def handle_endtag(self, tag):
+        try:
+            return getattr(self, 'end_' + tag)()
+        except AttributeError:
+            pass
+        self.unknown_endtag(tag)
+
+    ### end: added to emulate sgmllib behavior -cj 2008
+
     def handle_data(self, data):
         self.currentData.append(data)
 
@@ -1222,8 +1240,8 @@ class BeautifulStoneSoup(Tag, SGMLParser):
              self._toStringSubclass(data, CData)
         else:
             try:
-                j = SGMLParser.parse_declaration(self, i)
-            except SGMLParseError:
+                j = HTMLParser.HTMLParser.parse_declaration(self, i)
+            except HTMLParser.HTMLParseError:
                 toHandle = self.rawdata[i:]
                 self.handle_data(toHandle)
                 j = i + len(toHandle)
