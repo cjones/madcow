@@ -47,7 +47,8 @@ class Main(Module):
                 price = ''
 
             longdescription = feed['items'][0]['description']
-            page = feed['items'][0]['link']
+            longdescription = longdescription.encode('ascii', 'replace')
+            page = feed['items'][0]['link'].encode('ascii', 'replace')
 
             # strip out html
             longdescription = stripHTML(longdescription).strip()
