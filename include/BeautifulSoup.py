@@ -83,12 +83,11 @@ __version__ = "3.0.7a"
 __copyright__ = "Copyright (c) 2004-2008 Leonard Richardson"
 __license__ = "New-style BSD"
 
-from sgmllib import SGMLParser, SGMLParseError
+import HTMLParser
 import codecs
 import markupbase
 import types
 import re
-import sgmllib
 try:
   from htmlentitydefs import name2codepoint
 except ImportError:
@@ -99,12 +98,41 @@ except NameError:
     from sets import Set as set
 
 #These hacks make Beautiful Soup able to parse XML with namespaces
-sgmllib.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
+HTMLParser.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
 markupbase._declname_match = re.compile(r'[a-zA-Z][-_.:a-zA-Z0-9]*\s*').match
 
 DEFAULT_OUTPUT_ENCODING = "utf-8"
 
 # First, the classes that represent markup elements.
+
+class SGMLParser(HTMLParser.HTMLParser):
+
+    def handle_starttag(self, name, attrs):
+        for i, item in enumerate(attrs):
+            if item[1] is None:
+                attrs[i] = (item[0], item[0].upper())
+        for cmd in ('start', 'do'):
+            try:
+                return getattr(self, '%s_%s' % (cmd, name))(attrs)
+            except AttributeError:
+                pass
+        return self.unknown_starttag(name, attrs)
+
+    def handle_endtag(self, name):
+        try:
+            return getattr(self, 'end_' + name)()
+        except AttributeError:
+            return self.unknown_endtag(name)
+
+    def feed(self, data):
+        while data:
+            try:
+                return HTMLParser.HTMLParser.feed(self, data)
+            except HTMLParser.HTMLParseError, error:
+                data = data.splitlines()[error.lineno - 1:]
+                data = '\n'.join(data)[error.offset + 1:]
+                HTMLParser.HTMLParser.reset(self)
+
 
 class PageElement:
     """Contains the navigational information for some part of the page
@@ -1409,7 +1437,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
         else:
             try:
                 j = SGMLParser.parse_declaration(self, i)
-            except SGMLParseError:
+            except HTMLParser.HTMLParseError:
                 toHandle = self.rawdata[i:]
                 self.handle_data(toHandle)
                 j = i + len(toHandle)
