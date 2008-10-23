@@ -38,7 +38,8 @@ class Main(Module):
         try:
             doc = geturl(self.random)
             soup = BeautifulSoup(doc)
-            confs = soup.findAll('div', attrs={'class': 'content'})[3:]
+            main = soup.find('div', attrs={'id': 'main'})
+            confs = main.findAll('div', attrs={'class': 'content'})
             conf = random.choice(confs)
             conf = [str(p) for p in conf.findAll('p')]
             conf = ' '.join(conf)
