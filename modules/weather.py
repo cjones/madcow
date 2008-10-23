@@ -74,7 +74,11 @@ class Weather(object):
         rss_url = soup.find('link', attrs=self._rss_link)['href']
         rss = rssparser.parse(rss_url)
         title = str(soup.find('h1').string).strip()
-        conditions = stripHTML(str(rss['items'][0]['description']))
+        # XXX this is really problematic.
+        conditions = rss['items'][0]['description']
+        conditions = conditions.encode('utf-8')
+        conditions = conditions.replace('\xc2', '')
+        conditions = stripHTML(conditions)
         fields = self._bar.split(conditions)
         data = {}
         for field in fields:

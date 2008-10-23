@@ -56,6 +56,8 @@ class Main(Module):
                 score = self._score_re.search(page).group(1)
                 dem = self._dem_re.search(score).groups()
                 gop = self._gop_re.search(score).groups()
+                # XXX diebold patch :D
+                #dem, gop = (dem[0], gop[1]), (gop[0], dem[1])
                 tie = None
                 try:
                     tie = self._tie_re.search(score).groups()
