@@ -897,6 +897,10 @@ class BeautifulStoneSoup(Tag, HTMLParser.HTMLParser):
     HTML_ENTITIES = "html"
     XML_ENTITIES = "xml"
 
+    _comments_re = re.compile(r'<\s*!\s*-\s*-.*?-\s*-\s*>', re.DOTALL)
+    _javascript_re = re.compile(r'<script[^>]*(?:/\s*|>.*?</script.*?)>',
+                                re.I | re.DOTALL)
+
     def __init__(self, markup="", parseOnlyThese=None, fromEncoding=None,
                  markupMassage=True, smartQuotesTo=XML_ENTITIES,
                  convertEntities=None, selfClosingTags=None):
@@ -924,6 +928,12 @@ class BeautifulStoneSoup(Tag, HTMLParser.HTMLParser):
         You can pass in a custom list of (RE object, replace method)
         tuples to get Beautiful Soup to scrub your input the way you
         want."""
+
+        # HTMLParser chokees on javascript that has quoted tags, so
+        # just nuke it (and also comments that may have commented-out
+        # javascript)
+        markup = self._comments_re.sub('', markup)
+        markup = self._javascript_re.sub('', markup)
 
         self.parseOnlyThese = parseOnlyThese
         self.fromEncoding = fromEncoding
@@ -967,7 +977,17 @@ class BeautifulStoneSoup(Tag, HTMLParser.HTMLParser):
                     markup = fix.sub(m, markup)
         self.reset()
 
-        HTMLParser.HTMLParser.feed(self, markup)
+        # XXX feed it in slowly so we can recover from crap html..
+        # the smaller this is the less chance of data loss, but the slower
+        # the routine becomes.   -cj
+        step = 32
+        for i in range(0, len(markup), step):
+            substr = markup[i:i + step]
+            try:
+                HTMLParser.HTMLParser.feed(self, substr)
+            except HTMLParser.HTMLParseError, error:
+                self.rawdata = ''
+
         # Close out any unfinished strings and close all the open tags.
         self.endData()
         while self.currentTag.name != self.ROOT_TAG_NAME:
