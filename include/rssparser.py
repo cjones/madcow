@@ -80,8 +80,8 @@ try:
     timeoutsocket.setDefaultSocketTimeout(10)
 except ImportError:
     pass
-import cgi, re, sgmllib, string, StringIO, urllib, gzip
-sgmllib.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
+import cgi, re, HTMLParser, string, StringIO, urllib, gzip
+HTMLParser.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
 
 USER_AGENT = "UltraLiberalRSSParser/%s +http://diveintomark.org/projects/rss_parser/" % __version__
 
@@ -94,7 +94,7 @@ def decodeEntities(data):
     data = data.replace('&amp;', '&')
     return data
 
-class RSSParser(sgmllib.SGMLParser):
+class RSSParser(HTMLParser.HTMLParser):
     namespaces = {"http://backend.userland.com/rss": "",
                   "http://purl.org/rss/1.0/": "",
                   "http://purl.org/rss/1.0/modules/textinput/": "ti",
@@ -103,6 +103,21 @@ class RSSParser(sgmllib.SGMLParser):
                   "http://purl.org/dc/elements/1.1/": "dc",
                   "http://webns.net/mvcb/": "admin"}
 
+    def handle_starttag(self, tag, attrs):
+        for action in ('start', 'do'):
+            try:
+                return getattr(self, '%s_%s' % (action, tag))(attrs)
+            except AttributeError:
+                pass
+        return self.unknown_starttag(tag, attrs)
+
+    def handle_endtag(self, tag):
+        try:
+            return getattr(self, 'end_' + tag)()
+        except AttributeError:
+            pass
+        self.unknown_endtag(tag)
+
     def reset(self):
         self.channel = {}
         self.items = []
@@ -110,7 +125,7 @@ class RSSParser(sgmllib.SGMLParser):
         self.inchannel = 0
         self.initem = 0
         self.namespacemap = {}
-        sgmllib.SGMLParser.reset(self)
+        HTMLParser.HTMLParser.reset(self)
 
     def push(self, element, expectingText):
         self.elementstack.append([element, expectingText, []])
@@ -341,7 +356,7 @@ class RSSParser(sgmllib.SGMLParser):
             if k == -1: k = len(self.rawdata)
             self.handle_data(cgi.escape(self.rawdata[i+9:k]))
             return k+3
-        return sgmllib.SGMLParser.parse_declaration(self, i)
+        return HTMLParser.HTMLParser.parse_declaration(self, i)
 
 def open_resource(source, etag=None, modified=None, agent=None, referrer=None):
     """
