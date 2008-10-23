@@ -66,11 +66,41 @@ TIDY_MARKUP = 0
 PREFERRED_TIDY_INTERFACES = ["uTidy", "mxTidy"]
 
 # ---------- required modules (should come with any Python distribution) ----------
-import sgmllib, re, sys, copy, urlparse, time, rfc822, types, cgi, urllib, urllib2
+import HTMLParser
+import re, sys, copy, urlparse, time, rfc822, types, cgi, urllib, urllib2
 try:
     from cStringIO import StringIO as _StringIO
 except:
     from StringIO import StringIO as _StringIO
+
+class SGMLParser(HTMLParser.HTMLParser):
+
+    def handle_starttag(self, name, attrs):
+        for i, item in enumerate(attrs):
+            if item[1] is None:
+                attrs[i] = (item[0], item[0].upper())
+        for cmd in ('start', 'do'):
+            try:
+                return getattr(self, '%s_%s' % (cmd, name))(attrs)
+            except AttributeError:
+                pass
+        return self.unknown_starttag(name, attrs)
+
+    def handle_endtag(self, name):
+        try:
+            return getattr(self, 'end_' + name)()
+        except AttributeError:
+            return self.unknown_endtag(name)
+
+    def feed(self, data):
+        while data:
+            try:
+                return HTMLParser.HTMLParser.feed(self, data)
+            except HTMLParser.HTMLParseError, error:
+                data = data.splitlines()[error.lineno - 1:]
+                data = '\n'.join(data)[error.offset + 1:]
+                HTMLParser.HTMLParser.reset(self)
+
 
 # ---------- optional modules (feedparser will work without these, but with reduced functionality) ----------
 
@@ -135,9 +165,9 @@ class CharacterEncodingUnknown(ThingsNobodyCaresAboutButMe): pass
 class NonXMLContentType(ThingsNobodyCaresAboutButMe): pass
 class UndeclaredNamespace(Exception): pass
 
-sgmllib.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
-sgmllib.special = re.compile('<!')
-sgmllib.charref = re.compile('&#(x?[0-9A-Fa-f]+)[^0-9A-Fa-f]')
+HTMLParser.tagfind = re.compile('[a-zA-Z][-_.:a-zA-Z0-9]*')
+HTMLParser.special = re.compile('<!')
+HTMLParser.charref = re.compile('&#(x?[0-9A-Fa-f]+)[^0-9A-Fa-f]')
 
 SUPPORTED_VERSIONS = {'': 'unknown',
                       'rss090': 'RSS 0.90',
@@ -1410,18 +1440,18 @@ if _XML_AVAILABLE:
             self.error(exc)
             raise exc
 
-class _BaseHTMLProcessor(sgmllib.SGMLParser):
+class _BaseHTMLProcessor(SGMLParser):
     elements_no_end_tag = ['area', 'base', 'basefont', 'br', 'col', 'frame', 'hr',
       'img', 'input', 'isindex', 'link', 'meta', 'param']
     
     def __init__(self, encoding):
         self.encoding = encoding
         if _debug: sys.stderr.write('entering BaseHTMLProcessor, encoding=%s\n' % self.encoding)
-        sgmllib.SGMLParser.__init__(self)
+        SGMLParser.__init__(self)
         
     def reset(self):
         self.pieces = []
-        sgmllib.SGMLParser.reset(self)
+        SGMLParser.reset(self)
 
     def _shorttag_replace(self, match):
         tag = match.group(1)
@@ -1438,7 +1468,7 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
         data = data.replace('&#34;', '"')
         if self.encoding and type(data) == type(u''):
             data = data.encode(self.encoding)
-        sgmllib.SGMLParser.feed(self, data)
+        SGMLParser.feed(self, data)
 
     def normalize_attrs(self, attrs):
         # utility method to be called by descendants
@@ -1527,7 +1557,7 @@ class _BaseHTMLProcessor(sgmllib.SGMLParser):
 
 class _LooseFeedParser(_FeedParserMixin, _BaseHTMLProcessor):
     def __init__(self, baseuri, baselang, encoding):
-        sgmllib.SGMLParser.__init__(self)
+        SGMLParser.__init__(self)
         _FeedParserMixin.__init__(self, baseuri, baselang, encoding)
 
     def decodeEntities(self, element, data):
@@ -2776,7 +2806,7 @@ if __name__ == '__main__':
 #  is wrong, try several common ones before falling back to regexes (if this
 #  works, bozo_exception is set to CharacterEncodingOverride); fixed character
 #  encoding issues in BaseHTMLProcessor by tracking encoding and converting
-#  from Unicode to raw strings before feeding data to sgmllib.SGMLParser;
+#  from Unicode to raw strings before feeding data to SGMLParser;
 #  convert each value in results to Unicode (if possible), even if using
 #  regex-based parsing
 #3.0b23 - 4/21/2004 - MAP - fixed UnicodeDecodeError for feeds that contain
