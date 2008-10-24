@@ -27,6 +27,7 @@ from include.BeautifulSoup import BeautifulSoup
 import random
 import logging as log
 from include.colorlib import ColorLib
+import locale
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -51,61 +52,50 @@ class Yahoo(object):
         table = tables[0]
         rows = table.findAll('tr')
         data = {}
-        current_value = 0.0
-        open_value = 0.0
+        current_price = 0.0
+        last_price = 0.0
+        locale.setlocale(locale.LC_NUMERIC, "en_US") # Yahoo emits numbers in the US format of course..
         for row in rows:
             key, val = row.findAll('td')
             key = str(key.contents[0])
-            if key == 'Change:':
-                try:
-                    img = val.find('img')
-                    alt = str(img['alt'])
-                    val = alt + stripHTML(str(val.contents[0]))
-                except:
-                    val = '0.00%'
-            elif key == 'Ask:':
-                continue
-            else:
-                val = stripHTML(str(val.contents[0]))
-
-            val = val.replace(',', '')
-            if Yahoo._isfloat.search(val):
-                val = float(val)
-
-            data[key] = val
-
-            if key == 'Last Trade:' or key == 'Index Value:':
-                current_value = val
-
+            
+            if key in ('Last Trade:', 'Index Value:'):
+                current_price = locale.atof(stripHTML(str(val)))
             elif key == 'Prev Close:':
-                open_value = val
+                last_price = locale.atof(stripHTML(str(val)))
+        
+        # calculate change
+        delta = current_price - last_price
+        delta_perc = 100 * delta / last_price
+        
+        otext = "Open: %.2f" % last_price
+        ptext = "%.2f (%+.2f %+.2f%%)" % (current_price, delta, delta_perc)
+        if delta > 0:
+            ptext = self.colorlib.get_color('green', text=ptext)
+        elif delta < 0:
+            ptext = self.colorlib.get_color('red', text=ptext)
+        ptext = "Current: " + ptext
+        
+        data = [otext, ptext]
+        
+        # grab after hours data if it's available
+        quotepara = soup.findAll('p')[1]
+        if "After Hours:" in quotepara.contents[0]:
+            try:
+                after_hours = float(quotepara.findAll('span')[0].contents[0])
+                ah_delta = after_hours - current_price
+                ah_delta_perc = ah_delta / current_price * 100
+                ahtext = '%.2f (%+.2f %+.2f%%)' % (after_hours, ah_delta, ah_delta_perc)
+                if ah_delta > 0:
+                    ahtext = self.colorlib.get_color('green', text=ahtext)
+                elif ah_delta < 0:
+                    ahtext = self.colorlib.get_color('red', text=ahtext)
+                ahtext = "After Hours: " + ahtext
+                data.append(ahtext)
+            except ValueError:
+                pass
 
-        # see if we can calculate percentage
-        try:
-            change = 100 * (current_value - open_value) / open_value
-            data['Change:'] += ' (%.2f%%)' % change
-        except:
-            pass
-
-        # try and colorize the change field
-        try:
-            if 'Up' in data['Change:']:
-                data['Change:'] = self.colorlib.get_color('green',
-                        text=data['Change:'])
-            elif 'Down' in data['Change:']:
-                data['Change:'] = self.colorlib.get_color('red',
-                        text=data['Change:'])
-        except:
-            pass
-
-        # build friendly output
-        output = []
-        for key, val in data.items():
-            if isinstance(val, float):
-                val = '%.2f' % val
-            output.append('%s %s' % (key, val))
-
-        return '%s - ' % company + ' | '.join(output)
+        return '%s - ' % company + ' | '.join(data)
 
 
 class Main(Module):
