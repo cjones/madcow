@@ -54,7 +54,7 @@ class Yahoo(object):
         data = {}
         current_price = 0.0
         last_price = 0.0
-        locale.setlocale(locale.LC_NUMERIC, "en_US") # Yahoo emits numbers in the US format of course..
+        locale.setlocale(locale.LC_NUMERIC, "en_US.UTF-8") # Yahoo emits numbers in the US format of course..
         for row in rows:
             key, val = row.findAll('td')
             key = str(key.contents[0])
