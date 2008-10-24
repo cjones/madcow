@@ -71,13 +71,10 @@ class Weather(object):
             page = geturl(url=match, referer=self.search)
             soup = BeautifulSoup(page)
 
+        title = str(soup.find('h1').string).strip()
         rss_url = soup.find('link', attrs=self._rss_link)['href']
         rss = rssparser.parse(rss_url)
-        title = str(soup.find('h1').string).strip()
-        # XXX this is really problematic.
-        conditions = rss['items'][0]['description']
-        conditions = conditions.encode('utf-8')
-        conditions = conditions.replace('\xc2', '')
+        conditions = rss.entries[0].description.encode('raw-unicode-escape')
         conditions = stripHTML(conditions)
         fields = self._bar.split(conditions)
         data = {}

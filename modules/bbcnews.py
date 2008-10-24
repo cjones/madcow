@@ -27,10 +27,10 @@ from urlparse import urljoin
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*bbcnews(?:\s+(.+))?', re.I)
     require_addressing = True
     help = 'bbcnews <string> - Searches the BBC News Website'
-
     _error = 'Looks like the BBC aren\'t co-operating today.'
     _api_url = 'http://newsapi.bbc.co.uk/'
     _search_url = urljoin(_api_url, '/feeds/search/news/')
@@ -39,23 +39,18 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         query = args[0]
-
         try:
             if not query or query == 'headline':
                 url = self._world_url
             else:
                 url = self._search_url + urllib.quote(query)
-                            
-            feed = rssparser.parse(url)
-            item = feed['items'][0]
-            url = item['link']
-            title = stripHTML(item['title'])
-            sum = stripHTML(item['description'])
-            return '\n'.join((url, title, sum))
-            
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+            item = rssparser.parse(url).entries[0]
+            return ' | '.join(map(stripHTML, map(
+                lambda x: x.encode('raw-unicode-escape'),
+                [item.link, item.title, item.description])))
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return '%s: %s' % (nick, self._error)
 
 

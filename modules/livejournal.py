@@ -27,6 +27,7 @@ from urlparse import urljoin
 import logging as log
 
 class Main(Module):
+
     enabled = True
     pattern = re.compile('^\s*(?:livejournal|lj)(?:\s+(\S+))?')
     require_addressing = True
@@ -41,24 +42,16 @@ class Main(Module):
                 user = args[0]
             except:
                 user = None
-
             if user is None or user == '':
                 doc = geturl(self.randomURL)
                 user = re.search('"currentJournal": "(.*?)"', doc).group(1)
-
             url = urljoin(self.baseURL, '/users/%s/data/rss' % user)
             feed = rssparser.parse(url)
 
             # get latest entry and their homepage url
-            entry = feed['items'][0]['description']
-            page = feed['channel']['link']
-
-            # strip out html
-            entry = stripHTML(entry)
-
-            # detect unusual amounts of high ascii, probably russian journal
-            if isUTF8(entry):
-                return '%s: Russian LJ :(' % nick
+            entry, page = map(stripHTML, map(
+                lambda x: x.encode(feed.encoding),
+                [feed.entries[0].description, feed.channel.link]))
 
             # these can get absurdly long
             entry = entry[:self.max]

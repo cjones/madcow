@@ -80,7 +80,7 @@ class IranWar(object):
     def war(self):
         try:
             rss = rssparser.parse(IranWar._url)
-            return rss['items'].pop(0)['title']
+            return rss.entries[0].title.encode(rss.encoding)
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
@@ -95,7 +95,7 @@ class IraqWar(object):
     def war(self):
         try:
             rss = rssparser.parse(IraqWar._war_url)
-            return rss['items'].pop(0)['title']
+            return rss.entries[0].title.encode(rss.encoding)
         except Exception, e:
             log.warn('error in %s: %s' % (self.__module__, e))
             log.exception(e)
