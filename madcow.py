@@ -323,8 +323,13 @@ class Madcow(object):
             self.output('yes?', req)
             return
         if req.addressed and req.message.lower() == 'help':
-            if self.config.main.module in ('irc', 'silcplugin'):
+            if self.config.main.module == 'irc':
                 req.sendto = req.nick
+            elif self.config.main.module == 'silcplugin':
+                with self.lock:
+                    req.sendto = req.silc_sender
+                    req.private = True
+                    req.channel = 'privmsg'
             self.output(self.usage(), req)
             return
         if req.addressed and req.message.lower() == 'version':

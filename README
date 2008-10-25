@@ -7,7 +7,7 @@ REQUIREMENTS
     protocol.
 
     IRC, AIM, and CLI: no modules needed
-    SILC: pysilc-0.4/silc-toolkit-1.0.2 -- YOU MUST USE THESE VERSIONS
+    SILC: pysilc-0.5/silc-toolkit-1.1.8 -- Other versions may not work!
 
     Madcow also comes with a suite of plugins that provide
     functionality.  Most of these use the core Python library, however

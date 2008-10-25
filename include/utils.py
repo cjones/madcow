@@ -117,6 +117,7 @@ class Error(Exception):
 
 
 class Request(object):
+
     """Generic object passed in from protocol handlers for processing"""
 
     def __init__(self, message):
