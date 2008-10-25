@@ -26,31 +26,27 @@ from optparse import OptionParser
 import re
 from time import sleep, strftime, time as unix_time
 import logging as log
-from include.authlib import AuthLib
-from include.utils import Error, slurp, Request
 from select import select
 from signal import signal, SIGHUP, SIGTERM
 import shutil
 from threading import Thread, RLock
 from Queue import Queue, Empty
-from types import StringTypes, StringType
-from include import useragent as ua
 from hashlib import md5
-from urlparse import urljoin
-from include import gateway
-from include import chardet
 import codecs
+from include.authlib import AuthLib
+from include.utils import Error, slurp, Request
+from include import useragent as ua, gateway, chardet
 
 __version__ = '1.4.2'
-__author__ = 'cj_ <cjones@gruntle.org>'
-__all__ = ['Request', 'Madcow', 'Config']
+__author__ = 'Chris Jones <cjones@gruntle.org>'
+__all__ = ['Madcow']
 
 MADCOW_URL = 'http://code.google.com/p/madcow/'
-LOGFORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
-LOGLEVEL = log.WARN
 CHARSET = 'utf-8'
 CONFIG = 'madcow.ini'
 SAMPLE_HASH = 'fdb9fb43226e6990dd31b59dcd297ec7'
+LOG = dict(level=log.WARN, stream=sys.stderr, datefmt='%x %X',
+           format='[%(asctime)s] %(levelname)s: %(message)s')
 
 class Madcow(object):
 
@@ -889,41 +885,10 @@ def check_config(config, samplefile, prefix):
         raise ConfigError, '\n'.join(errors)
 
 
-def detach():
-    """Daemonize on POSIX system"""
-    if os.name != 'posix':
-        return
-    stop_logging('StreamHandler') # kind of pointless if we're daemonized
-    if os.fork() != 0:
-        sys.exit(0)
-    os.setsid()
-    if os.fork() != 0:
-        sys.exit(0)
-    for stream in sys.stdout, sys.stderr:
-        stream.flush()
-    stdin = file('/dev/null', 'r')
-    stdout = file('/dev/null', 'a+')
-    stderr = file('/dev/null', 'a+', 0)
-    os.dup2(stdin.fileno(), sys.stdin.fileno())
-    os.dup2(stdout.fileno(), sys.stdout.fileno())
-    os.dup2(stderr.fileno(), sys.stderr.fileno())
-    log.info('madcow is launched as a daemon')
-
-def stop_logging(handler_name):
-    """
-    Stops a specified logging handler by name (e.g. StreamHandler), why
-    there's no way to do this in the logging class I do not know.
-    """
-    logger = log.getLogger('')
-    for handler in logger.handlers:
-        if handler.__class__.__name__ == handler_name:
-            handler.flush()
-            handler.close()
-            logger.removeHandler(handler)
-    log.info('stopped logging to console')
-
 def main():
     """Entry point to set up bot and run it"""
+
+    log.basicConfig(**LOG)
 
     # where we are being run from
     if __file__.startswith(sys.argv[0]):
@@ -935,57 +900,70 @@ def main():
     default_config = os.path.join(prefix, CONFIG)
 
     # make sure proper subdirs exist
-    datadir = os.path.join(prefix, 'data')
-    if not os.path.exists(datadir):
-        os.mkdir(datadir)
-    logdir = os.path.join(prefix, 'logs')
-    if not os.path.exists(logdir):
-        os.mkdir(logdir)
+    for subdir in 'data', 'logs':
+        path = os.path.join(prefix, subdir)
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+    # find available protocols
+    protos = [proto.replace('.py', '')
+              for proto in os.listdir(os.path.join(prefix, 'protocols'))
+              if proto.endswith('.py')]
 
     # parse commandline options
     parser = OptionParser(version=__version__)
-    parser.add_option('-c', '--config', default=default_config,
-            help='default: %default', metavar='FILE')
-    parser.add_option('-d', '--detach', action='store_true', default=False,
-            help='detach when run')
-    parser.add_option('-p', '--protocol',
+    parser.add_option(
+            '-c', '--config', metavar='<file>', default=default_config,
+            help='use config file (default: %default)')
+    parser.add_option(
+            '-d', '--detach', default=False, action='store_true',
+            help='run process in the background')
+    parser.add_option(
+            '-p', '--protocol', metavar='<%s>' % '|'.join(protos),
+            type='choice', choices=protos,
             help='force the use of this output protocol')
-    parser.add_option('-D', '--debug', dest='loglevel', action='store_const',
-            const=log.DEBUG,help='turn on debugging output')
-    parser.add_option('-v', '--verbose', dest='loglevel', action='store_const',
-            const=log.INFO, help='increase logging output')
-    parser.add_option('-q', '--quiet', dest='loglevel', action='store_const',
-            const=log.WARN, help='only show errors')
-    parser.add_option('-P', '--pidfile', metavar='<file>',
-            help='override pidfile')
-    opts = parser.parse_args()[0]
+    parser.add_option(
+            '-D', '--debug', dest='loglevel', action='store_const',
+            const=log.DEBUG, help='show debug messages')
+    parser.add_option(
+            '-v', '--verbose', dest='loglevel', action='store_const',
+            const=log.INFO, help='show info messages')
+    parser.add_option(
+            '-q', '--quiet', dest='loglevel', action='store_const',
+            const=log.WARN, help='show only error messages')
+    parser.add_option(
+            '-P', '--pidfile', metavar='<file>',
+            help='override pidfile (default: %default)')
+    opts, args = parser.parse_args()
+
+    if args:
+        parser.error('invalid arguments')
 
     # read config file
     sample_config = default_config + '-sample'
     if not os.path.exists(opts.config):
         if opts.config == default_config:
             shutil.copyfile(sample_config, opts.config)
-            err = 'created config %s - edit and rerun' % CONFIG
-            print >> sys.stderr, err
+            log.error('created config %s - edit and rerun' % CONFIG)
         else:
-            print >> sys.stderr, 'config not found: %s' % opts.config
+            log.error('config not found: %s' % opts.config)
         return 1
 
     try:
         config = Config(opts.config)
     except FileNotFound:
-        sys.stderr.write('config file not found, see README\n')
+        log.error('config file not found, see README')
         return 1
-    except Exception, exc:
-        sys.stderr.write('error parsing config: %s\n' % exc)
+    except Exception, error:
+        log.error('error parsing config: %s' % error)
         return 1
 
     try:
         check_config(config, sample_config, prefix)
-    except ConfigError, err:
-        print >> sys.stderr, '%s is missing required settings, check %s' % \
-            (os.path.basename(opts.config), os.path.basename(sample_config))
-        print >> sys.stderr, err
+    except ConfigError, error:
+        log.error('%s is missing required settings, check %s' % (
+                os.path.basename(opts.config),
+                os.path.basename(sample_config)))
         return 1
 
     # init log facility
@@ -995,79 +973,101 @@ def main():
         loglevel = LOGLEVEL
     if opts.loglevel is not None:
         loglevel = opts.loglevel
-    log.basicConfig(level=loglevel, format=LOGFORMAT)
+    log.root.setLevel(loglevel)
 
     # if specified, log to file as well
-    try:
-        logfile = config.main.logfile
-        if logfile is not None and len(logfile):
-            handler = log.FileHandler(filename=logfile)
-            handler.setLevel(opts.loglevel)
-            formatter = log.Formatter(LOGFORMAT)
-            handler.setFormatter(formatter)
-            log.getLogger('').addHandler(handler)
-    except Exception, exc:
-        log.warn('unable to log to file: %s' % exc)
-        log.exception(exc)
+    if config.main.logfile:
+        handler = log.FileHandler(config.main.logfile)
+        handler.setFormatter(log.Formatter(LOG['format'], LOG['datefmt']))
+        log.root.addHandler(handler)
 
     # load specified protocol
     if opts.protocol:
-        protocol = opts.protocol
-        config.main.module = protocol
+        protocol = config.main.module = opts.protocol
     else:
         protocol = config.main.module
 
-    # daemonize if requested
-    if config.main.detach or opts.detach:
-        detach()
-    
+    # setup global UserAgent
+    ua.setup(config.http.agent, config.http.cookies, [], config.http.timeout)
+
     # determine pidfile to use (commandline overrides config)
     if opts.pidfile:
         pidfile = opts.pidfile
     else:
         pidfile = config.main.pidfile
 
-    # write pidfile
+    # write pidfile. from this point on, capture ALL exceptions
+    # so that the pidfile can be removed when we're done
     if pidfile:
         if os.path.exists(pidfile):
             log.warn('removing stale pidfile: %s' % pidfile)
             os.remove(pidfile)
         try:
-            pid_fo = open(pidfile, 'wb')
+            file = open(pidfile, 'wb')
             try:
-                pid_fo.write(str(os.getpid()))
+                file.write(str(os.getpid()))
             finally:
-                pid_fo.close()
-        except Exception, exc:
-            log.warn('filed to write %s: %s' % pidfile)
-            log.exception(exc)
+                file.close()
+        except Exception, error:
+            log.warn('failed to write %s: %s' % (pidfile, error))
+            log.exception(error)
 
-    # setup global UserAgent
-    ua.setup(config.http.agent, config.http.cookies, [], config.http.timeout)
-
-    # run bot
+    # import protocol handler
+    handler = None
     try:
-        bot = __import__('protocols.' + protocol, (), (), ['ProtocolHandler'])
-        bot = getattr(bot, 'ProtocolHandler')
-        bot = bot(config, prefix)
-        bot.start()
-    except Exception, exc:
-        log.exception(exc)
+        module = __import__('protocols', globals(), locals(), [protocol])
+        module = getattr(module, protocol)
+        handler = getattr(module, 'ProtocolHandler')
+    except ImportError:
+        log.error('unknown protocol: ' + protocol)
+    except AttributeError:
+        log.error('no handler found for protocol: ' + protocol)
+    except Exception, error:
+        log.exception(error)
+
+    if handler:
+        # daemonize if requested, but not when interactive!
+        if config.main.detach or opts.detach:
+            if __name__ == '__main__':
+                log.warn('not detaching in interactive shell')
+            elif protocol == 'cli':
+                log.warn('not detaching for commandline client')
+            else:
+                if os.fork():
+                    sys.exit(0)
+                os.setsid()
+                if os.fork():
+                    sys.exit(0)
+                for stream in sys.stdout, sys.stderr:
+                    stream.flush()
+                devnull = file('/dev/null', 'a+', 0)
+                for fd in range(3):
+                    os.dup2(fd, devnull.fileno())
+                log.info('madcow is launched as a daemon')
+
+        # actually run bot
+        try:
+            bot = handler(config, prefix)
+            bot.start()
+        except Exception, error:
+            log.error('fatal error in bot, shutting down')
+            log.exception(error)
+
+        # this would be in a finally block, but 2.4 compatibility :/
+        try:
+            bot.stop()
+        except Exception, error:
+            log.exception(error)
 
     if pidfile and os.path.exists(pidfile):
         log.info('removing pidfile')
         try:
             os.remove(pidfile)
-        except Exception, exc:
+        except Exception, error:
             log.warn('failed to remove pidfile %s' % pidfile)
-            log.exception(exc)
+            log.exception(error)
 
-    try:
-        bot.stop()
-    except Exception, exc:
-        log.exception(exc)
-
-    log.info('madcow is exiting cleanly')
+    log.info('madcow is shutting down')
     return 0
 
 if __name__ == '__main__':
