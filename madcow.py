@@ -24,7 +24,8 @@ import sys
 # verify python version is high enough
 # XXX some syntax features introduced later will cause an exception before
 # this code is run; so in this file, avoid using with-statement and
-# try/except/finally constructs.
+# try/except/finally constructs, guess.  whenever i get sick of that
+# limitation, this chunk of code can go.
 
 if sys.version_info[0] * 10 + sys.version_info[1] < 25:
     error = RuntimeError('madcow requires python 2.5 or higher')
@@ -61,6 +62,17 @@ CONFIG = 'madcow.ini'
 SAMPLE_HASH = 'fdb9fb43226e6990dd31b59dcd297ec7'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt='%x %X',
            format='[%(asctime)s] %(levelname)s: %(message)s')
+
+
+class FileNotFound(Error):
+
+    """Raised when a file is not found"""
+
+
+class ConfigError(Error):
+
+    """Raised when a required config option is missing"""
+
 
 class Madcow(object):
 
@@ -429,16 +441,6 @@ class PeriodicEvents(Service):
             req.sendto = obj.output
             request = (obj, None, None, {'req': req})
             self.bot.request_queue.put(request)
-
-
-class FileNotFound(Error):
-
-    """Raised when a file is not found"""
-
-
-class ConfigError(Error):
-
-    """Raised when a required config option is missing"""
 
 
 class User(object):
@@ -1083,6 +1085,7 @@ def main():
 
     log.info('madcow is shutting down')
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main())
