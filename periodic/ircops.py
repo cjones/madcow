@@ -47,6 +47,7 @@ class Main(object):
                 break
             if delta >= (self.frequency * 2 -1):
                 return
+            sleep(.25)
 
         for channel, names in self.madcow.names.items():
             nicks = [nick for nick, opped in names.items() if not opped]

@@ -1091,14 +1091,10 @@ def main():
 
 if __name__ == '__main__':
     # try psyco optimization
-    # XXX something is goign VERY WRONG with psyco, uses 50-75% cpu while idle
-    # seems to come and go in waves, might be caused by a periodic?  also,
-    # it doesn't seem to be sleeping at all but constantly calling kse_release
-    # try:
-    #     import psyco
-    #     psyco.full()
-    #     psyco.cannotcompile(re.compile)  # re.py does not benefit
-    # except ImportError:
-    #     pass
-
+    try:
+        import psyco
+        psyco.cannotcompile(re.compile)
+        psyco.full()
+    except ImportError:
+        pass
     sys.exit(main())
