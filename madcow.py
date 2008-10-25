@@ -1024,7 +1024,7 @@ def main():
                 stream.flush()
             devnull = file('/dev/null', 'a+', 0)
             for fd in range(3):
-                os.dup2(fd, devnull.fileno())
+                os.dup2(devnull.fileno(), fd)
             log.info('madcow is launched as a daemon')
 
     # determine pidfile to use (commandline overrides config)
