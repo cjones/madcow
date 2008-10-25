@@ -48,6 +48,7 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
     self.connect_to_server(self.config.silcplugin.host, self.config.silcplugin.port)
 
   def run(self):
+    self.run_one()
     self.connect()
     while self.running:
       self.check_response_queue()
@@ -55,9 +56,9 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
         self.run_one()
       except KeyboardInterrupt:
         self.running = False
-      except Exception, e:
+      except Exception, error:
         log.error('exception caught in silc loop')
-        log.exception(e)
+        log.exception(error)
       time.sleep(0.2)
 
   def private_message(self, sender, flags, message):

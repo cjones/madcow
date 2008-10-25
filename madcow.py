@@ -1055,8 +1055,19 @@ def main():
         module = __import__('protocols', globals(), locals(), [protocol])
         module = getattr(module, protocol)
         handler = getattr(module, 'ProtocolHandler')
-    except ImportError:
-        log.error('unknown protocol: ' + protocol)
+    except ImportError, error:
+        # give useful error messages for some known failures (*cough* piece
+        # of shit SILC *cough*)
+        if str(error) == 'No module named silc':
+            log.error('you must install silc-toolkit and pysilc!')
+        else:
+            try:
+                so = re.search(r'Shared object "(libsilc.*?)" not found',
+                               str(error)).group(1)
+                log.error('pysilc cannot find silc-toolkit, try setting '
+                          'LD_LIBRARY_PATH to the location of ' + so)
+            except AttributeError:
+                log.error('error loading protocol %s: %s' % (protocol, error))
     except AttributeError:
         log.error('no handler found for protocol: ' + protocol)
     except Exception, error:
