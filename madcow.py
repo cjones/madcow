@@ -1006,6 +1006,27 @@ def main():
     # setup global UserAgent
     ua.setup(config.http.agent, config.http.cookies, [], config.http.timeout)
 
+    # daemonize if requested, but not when interactive!
+    # note: this must happen BEFORE forking, otherwise the pid it
+    # records will be incorrect and fuck up any rc scripts.
+    if config.main.detach or opts.detach:
+        if __name__ != '__main__':
+            log.warn('not detaching in interactive shell')
+        elif protocol == 'cli':
+            log.warn('not detaching for commandline client')
+        else:
+            if os.fork():
+                sys.exit(0)
+            os.setsid()
+            if os.fork():
+                sys.exit(0)
+            for stream in sys.stdout, sys.stderr:
+                stream.flush()
+            devnull = file('/dev/null', 'a+', 0)
+            for fd in range(3):
+                os.dup2(fd, devnull.fileno())
+            log.info('madcow is launched as a daemon')
+
     # determine pidfile to use (commandline overrides config)
     if opts.pidfile:
         pidfile = opts.pidfile
@@ -1042,25 +1063,6 @@ def main():
         log.exception(error)
 
     if handler:
-        # daemonize if requested, but not when interactive!
-        if config.main.detach or opts.detach:
-            if __name__ != '__main__':
-                log.warn('not detaching in interactive shell')
-            elif protocol == 'cli':
-                log.warn('not detaching for commandline client')
-            else:
-                if os.fork():
-                    sys.exit(0)
-                os.setsid()
-                if os.fork():
-                    sys.exit(0)
-                for stream in sys.stdout, sys.stderr:
-                    stream.flush()
-                devnull = file('/dev/null', 'a+', 0)
-                for fd in range(3):
-                    os.dup2(fd, devnull.fileno())
-                log.info('madcow is launched as a daemon')
-
         # actually run bot
         try:
             bot = handler(config, prefix)
