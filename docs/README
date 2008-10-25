@@ -45,7 +45,7 @@ AUTO-OPS / ADMIN
 
 REQUIREMENTS
 
-    * python 2.4 or higher
+    * python 2.5 or higher
 
     Madcow can use a variety of protocol formats.  Depending on which
     you choose, you may need a third-party library to handle the
@@ -62,7 +62,7 @@ REQUIREMENTS
     description of each plugin in madcow.ini-sample
 
     urban.py: requires SOAPpy
-    memebot.py: requeires sqlobject, pysqlite or MySQLdb
+    memebot.py: requires sqlobject, pysqlite or MySQLdb
 
 ADVANCED USAGE
 
