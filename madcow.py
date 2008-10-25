@@ -35,15 +35,6 @@ if sys.version_info[0] * 10 + sys.version_info[1] < 25:
     else:
         raise error
 
-# try psyco optimization
-try:
-    import psyco
-    psyco.full()
-except ImportError:
-    pass
-except Exception, error:
-    print >> sys.stderr, 'psyco profiling error: %s' % error
-
 import os
 from ConfigParser import ConfigParser
 from optparse import OptionParser
@@ -1097,4 +1088,12 @@ def main():
 
 
 if __name__ == '__main__':
+    # try psyco optimization
+    try:
+        import psyco
+        psyco.full()
+        psyco.cannotcompile(re.compile)  # re.py does not benefit
+    except ImportError:
+        pass
+
     sys.exit(main())
