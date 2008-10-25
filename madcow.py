@@ -22,6 +22,10 @@
 import sys
 
 # verify python version is high enough
+# XXX some syntax features introduced later will cause an exception before
+# this code is run; so in this file, avoid using with-statement and
+# try/except/finally constructs.
+
 if sys.version_info[0] * 10 + sys.version_info[1] < 25:
     error = RuntimeError('madcow requires python 2.5 or higher')
     if __name__ == '__main__':
