@@ -1038,7 +1038,7 @@ def main():
     if handler:
         # daemonize if requested, but not when interactive!
         if config.main.detach or opts.detach:
-            if __name__ == '__main__':
+            if __name__ != '__main__':
                 log.warn('not detaching in interactive shell')
             elif protocol == 'cli':
                 log.warn('not detaching for commandline client')
