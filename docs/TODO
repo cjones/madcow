@@ -25,6 +25,11 @@
   that the various modules work is not enough anymore.  Too much stuff can
   break with small changes.
 
+*** SILC
+
+- this module is pretty ghetto.. doesn't support everything that irc does
+  for no good reason than no one really cares..
+
 *** 2to3
 
 - wiki.py is returning unicode instead of raw data.  For consistency, in
