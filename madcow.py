@@ -361,7 +361,7 @@ class Madcow(object):
             kwargs.update(req.__dict__)
             request = (obj, req.nick, args, kwargs,)
 
-            if self.config.main.module == 'cli' or not obj.allow_threading:
+            if self.config.main.module in ('cli', 'ipython') or not obj.allow_threading:
                 log.debug('running non-threaded code for module %s' % mod_name)
                 self.process_module_item(request)
             else:
