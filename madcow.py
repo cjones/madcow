@@ -20,6 +20,16 @@
 """Madcow infobot"""
 
 import sys
+
+# verify python version is high enough
+if sys.version_info[0] * 10 + sys.version_info[1] < 25:
+    error = RuntimeError('madcow requires python 2.5 or higher')
+    if __name__ == '__main__':
+        print >> sys.stderr, error
+        sys.exit(1)
+    else:
+        raise error
+
 import os
 from ConfigParser import ConfigParser
 from optparse import OptionParser
