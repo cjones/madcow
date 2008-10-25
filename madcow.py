@@ -1019,11 +1019,11 @@ def main():
             log.warn('removing stale pidfile: %s' % pidfile)
             os.remove(pidfile)
         try:
-            file = open(pidfile, 'wb')
+            pidfp = open(pidfile, 'wb')
             try:
-                file.write(str(os.getpid()))
+                pidfp.write(str(os.getpid()))
             finally:
-                file.close()
+                pidfp.close()
         except Exception, error:
             log.warn('failed to write %s: %s' % (pidfile, error))
             log.exception(error)
