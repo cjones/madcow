@@ -41,6 +41,8 @@ try:
     psyco.full()
 except ImportError:
     pass
+except Exception, error:
+    print >> sys.stderr, 'psyco profiling error: %s' % error
 
 import os
 from ConfigParser import ConfigParser
