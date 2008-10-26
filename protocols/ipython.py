@@ -38,7 +38,7 @@ class IPShellMadcow(IPShellEmbed):
                                embedded=True,
                                user_ns=user_ns,
                                shell_class=InteractiveShellMadcow)
-        self.IP.callback = bot
+        self.IP.callback = callback
         ip = ipapi.IPApi(self.IP)
         ip.expose_magic("kill_embedded",kill_embedded)
         self.sys_displayhook_embed = sys.displayhook
@@ -64,10 +64,9 @@ class IPythonHandler(Madcow):
 
     def run(self):
         """Protocol-specific loop"""
-        global bot
-        bot = self  # XXX don't remove this..
         print 'Prepend any messages you wish to pass to the both with a "$"'
-        print 'bot = %s' % bot
+        print 'self = %s' % self
+        sys.argv = []
         shell = IPShellMadcow(callback=self)
         shell()
 
