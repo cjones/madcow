@@ -20,7 +20,7 @@
 from threading import Thread
 import os
 from select import select
-from utils import Error, Request
+from utils import Request
 import re
 import socket
 import logging as log
@@ -28,19 +28,19 @@ import datetime
 from urlparse import urljoin
 import errno
 
-class InvalidPayload(Error):
+class InvalidPayload(Exception):
     """Raised when invalid payload is received by gateway"""
 
 
-class CloseConnection(Error):
+class CloseConnection(Exception):
     """Raised to indicate gateway service should shut down connection"""
 
 
-class ConnectionTimeout(Error):
+class ConnectionTimeout(Exception):
     """Raised when connection times out on read/write"""
 
 
-class ConnectionClosed(Error):
+class ConnectionClosed(Exception):
     """Raised when client closes their end"""
 
 

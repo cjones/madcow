@@ -11,6 +11,7 @@ module=cli
 ;module=irc
 ;module=aim
 ;module=silcplugin
+;module=ipython
 ;
 ; whether to daemonize when run (POSIX only).  you can force the bot to
 ; detach by specifying -d on the commandline.

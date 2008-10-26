@@ -19,7 +19,6 @@
 
 """Handles authentication in Madcow"""
 
-from utils import Error
 from random import randint
 from hashlib import sha1
 from base64 import b64encode, b64decode
@@ -28,12 +27,12 @@ __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = ['UserNotFound', 'IllegalUserName', 'AuthLib']
 
-class UserNotFound(Error):
+class UserNotFound(Exception):
 
     pass
 
 
-class IllegalUserName(Error):
+class IllegalUserName(Exception):
 
     pass
 

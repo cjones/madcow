@@ -18,7 +18,7 @@
 """Google interface"""
 
 import urllib2
-from utils import Error, stripHTML
+from utils import stripHTML
 from useragent import UserAgent
 from urlparse import urljoin
 import re
@@ -26,7 +26,7 @@ import re
 __version__ = '0.1'
 __author__ = 'cj_ <cjones@gruntle.org>'
 
-class NonRedirectResponse(Error):
+class NonRedirectResponse(Exception):
     """Raised when google doesn't return a redirect"""
 
 

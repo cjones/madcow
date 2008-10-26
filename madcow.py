@@ -49,7 +49,7 @@ from Queue import Queue, Empty
 from hashlib import md5
 import codecs
 from include.authlib import AuthLib
-from include.utils import Error, slurp, Request
+from include.utils import slurp, Request
 from include import useragent as ua, gateway, chardet
 
 __version__ = '1.4.2'
@@ -59,17 +59,17 @@ __all__ = ['Madcow']
 MADCOW_URL = 'http://code.google.com/p/madcow/'
 CHARSET = 'utf-8'
 CONFIG = 'madcow.ini'
-SAMPLE_HASH = 'fdb9fb43226e6990dd31b59dcd297ec7'
+SAMPLE_HASH = '5e145f052daf79926809c3dea703e968'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt='%x %X',
            format='[%(asctime)s] %(levelname)s: %(message)s')
 
 
-class FileNotFound(Error):
+class FileNotFound(Exception):
 
     """Raised when a file is not found"""
 
 
-class ConfigError(Error):
+class ConfigError(Exception):
 
     """Raised when a required config option is missing"""
 
@@ -361,7 +361,8 @@ class Madcow(object):
             kwargs.update(req.__dict__)
             request = (obj, req.nick, args, kwargs,)
 
-            if self.config.main.module in ('cli', 'ipython') or not obj.allow_threading:
+            if (self.config.main.module in ('cli', 'ipython') or
+                not obj.allow_threading):
                 log.debug('running non-threaded code for module %s' % mod_name)
                 self.process_module_item(request)
             else:
@@ -1078,6 +1079,15 @@ def main():
     except Exception, error:
         log.exception(error)
 
+    # try psyco optimization
+    if protocol != 'ipython':
+        try:
+            import psyco
+            psyco.cannotcompile(re.compile)
+            psyco.full()
+        except ImportError:
+            pass
+
     if handler:
         # actually run bot
         try:
@@ -1106,11 +1116,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # try psyco optimization
-    try:
-        import psyco
-        psyco.cannotcompile(re.compile)
-        psyco.full()
-    except ImportError:
-        pass
     sys.exit(main())

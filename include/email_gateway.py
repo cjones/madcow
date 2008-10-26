@@ -31,7 +31,7 @@ from useragent import geturl
 _basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.append(_basedir)
 
-from include.utils import Error, stripHTML
+from include.utils import stripHTML
 from madcow import Config
 
 __version__ = '0.3'
@@ -40,15 +40,15 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 USAGE = '%prog [options] < email'
 _configfile = os.path.join(_basedir, 'madcow.ini')
 
-class GatewayDisabled(Error):
+class GatewayDisabled(Exception):
     """Raised when gateway is disabled"""
 
 
-class ParsingError(Error):
+class ParsingError(Exception):
     """Raised when email can't be parsed properly"""
 
 
-class ConnectionError(Error):
+class ConnectionError(Exception):
     """Raised when there is a problem sending to madcow listener"""
 
 

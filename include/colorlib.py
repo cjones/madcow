@@ -19,22 +19,21 @@
 
 """Color Library"""
 
-from utils import Error
 import re
 
 __version__ = '0.5'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = ['ColorLib']
 
-class UnknownProtocol(Error):
+class UnknownProtocol(Exception):
     """Raised when protocol is not supported"""
 
 
-class UnknownColor(Error):
+class UnknownColor(Exception):
     """Raised when an unknown color is requested"""
 
 
-class UnknownRainbowStyle(Error):
+class UnknownRainbowStyle(Exception):
     """Raised when an invalid style is requested"""
 
 
