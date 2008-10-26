@@ -1,11 +1,6 @@
 
 *** general
 
-- clean up exception classes and usage.  we need to subclass Exception
-  and use consistent catches (Exception as error instead of Exception as e)
-- docstrings on any function or class missing them.
-- change re_ names to use _re at the end, for consistency.
-- indentation line-up rules based on PEP8
 - improve anti-abuse settings.. need to keep track of global module
   invocations and throttle people who spam the bot.  Right now, a malicious
   user can use the bot to DDOS various websites, burn all cpu/bandwidth on
@@ -16,14 +11,19 @@
   haphazardly between madcow.py, include/utils.py, and include/gateway.py.
   Need to make more sense of this.  Perhaps move EVERYTHING but Madcow
   base class into a separate module?
+- better testing framework, perhaps even proper unit testing.  Just testing
+  that the various modules work is not enough anymore.  Too much stuff can
+  break with small changes.
+
+*** style
+
+- change re_ names to use _re at the end, for consistency.
+- indentation line-up rules based on PEP8
 - variable naming: many functions have camel casing for no good reason other
   than halfway through writing madcow I changed my preference for variable
   naming.  Need to go through and make this consistent, aka nuke camelCases.
 - Line length:  another mid-write preference change.  Need to go through code
   and make it 80-column friendly as per PEP8.
-- better testing framework, perhaps even proper unit testing.  Just testing
-  that the various modules work is not enough anymore.  Too much stuff can
-  break with small changes.
 
 *** SILC
 
