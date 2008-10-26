@@ -30,6 +30,7 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
+
     pattern = re.compile(r'^\s*traffic\s+from\s+(.+?)\s+to\s+(.+?)\s*$', re.I)
     help = 'traffic from <loc> to <loc> - get report'
     error = "couldn't look that up"
@@ -39,9 +40,11 @@ class Main(Module):
     report_url = urljoin(base_url, '/traffic_text3.asp')
     re_loc = re.compile(r"([cmx])\('([^']+)'\);")
     re_origin = re.compile(r'<input name="origin" type="hidden" value="(\d+)">')
-    re_trip = re.compile(r'<p><b>Trip \S:\s+([0-9.]+)\s+min\.</b>\s+.*?\(([0-9.]+)\s+miles\).*?(<table.*?</table>)', re.I+re.DOTALL)
-    re_rows = re.compile(r'<tr.*?</tr>', re.I+re.DOTALL)
-    re_cells = re.compile(r'<td.*?</td>', re.I+re.DOTALL)
+    re_trip = re.compile(r'<p><b>Trip \S:\s+([0-9.]+)\s+min\.</b>\s+.*?\(([0-'
+                         r'9.]+)\s+miles\).*?(<table.*?</table>)',
+                         re.I | re.DOTALL)
+    re_rows = re.compile(r'<tr.*?</tr>', re.I | re.DOTALL)
+    re_cells = re.compile(r'<td.*?</td>', re.I | +re.DOTALL)
     re_tags = re.compile(r'<.*?>', re.DOTALL)
 
     def __init__(self, madcow=None):
@@ -108,9 +111,9 @@ class Main(Module):
                     continue
             speeds = ', '.join(speeds)
             return '%s: %s mins. (%s miles) [%s]' % (nick, time, miles, speeds)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return '%s: %s' % (nick, self.error)
 
 

@@ -186,8 +186,8 @@ class Madcow(object):
             response, req = self.response_queue.get_nowait()
         except Empty:
             return
-        except Exception, exc:
-            log.exception(exc)
+        except Exception, error:
+            log.exception(error)
             return
         self.handle_response(response, req)
 
@@ -198,9 +198,9 @@ class Madcow(object):
             self.lock.acquire()
             try:
                 self.protocol_output(response, req)
-            except Exception, exc:
+            except Exception, error:
                 log.error('error in output: %s' % repr(response))
-                log.exception(exc)
+                log.exception(error)
         finally:
             self.lock.release()
 
@@ -250,17 +250,17 @@ class Madcow(object):
             request = self.request_queue.get()
             try:
                 self.process_module_item(request)
-            except Exception, e:
-                log.exception(e)
+            except Exception, error:
+                log.exception(error)
 
     def process_module_item(self, request):
         """Run module response method and output any response"""
         obj, nick, args, kwargs = request
         try:
             response = obj.response(nick, args, kwargs)
-        except Exception, exc:
+        except Exception, error:
             log.warn('Uncaught module exception')
-            log.exception(exc)
+            log.exception(error)
             return
 
         if response is not None and len(response) > 0:
@@ -690,8 +690,9 @@ class Modules(object):
         log.info('reading modules from %s' % self.mod_dir)
         try:
             filenames = os.walk(self.mod_dir).next()[2]
-        except Exception, exc:
-            log.warn("Couldn't load modules from %s: %s" % (self.mod_dir, exc))
+        except Exception, error:
+            log.warn("Couldn't load modules from %s: %s" % (
+                    self.mod_dir, error))
             return
         for filename in filenames:
             if not self._pyext.search(filename):
@@ -705,8 +706,8 @@ class Modules(object):
                 try:
                     reload(mod)
                     log.debug('reloaded module %s' % mod_name)
-                except Exception, exc:
-                    log.warn("couldn't reload %s: %s" % (mod_name, exc))
+                except Exception, error:
+                    log.warn("couldn't reload %s: %s" % (mod_name, error))
                     del self.modules[mod_name]
                     continue
             else:
@@ -717,14 +718,14 @@ class Modules(object):
                         locals(),
                         ['Main'],
                     )
-                except Exception, exc:
-                    log.warn("couldn't load module %s: %s" % (mod_name, exc))
+                except Exception, error:
+                    log.warn("couldn't load module %s: %s" % (mod_name, error))
                     continue
                 self.modules[mod_name] = {'mod': mod}
             try:
                 obj = getattr(mod, 'Main')(self.madcow)
-            except Exception, exc:
-                log.warn("failure loading %s: %s" % (mod_name, exc))
+            except Exception, error:
+                log.warn("failure loading %s: %s" % (mod_name, error))
                 del self.modules[mod_name]
                 continue
             if not obj.enabled:

@@ -315,17 +315,6 @@ class Factoids(object):
             result = result.replace('$who', nick)
             result = result.strip()
 
-        """
-        # XXX this seems horribly flawed.........
-        # XXX fix outgoing name purification
-        if not short:
-            result = re.sub(r'%s is' % who, 'you are', result)
-            result = re.sub(r'%s is' % botnick, 'i am', result)
-            result = re.sub(r'%s was' % botnick, 'i was', result)
-            if addressed:
-                result = re.sub(r'you are', 'i am') # XXX ?? wtf
-        """
-
         # so.. should we really send it or not?
         if not final_qmark and not addressed and not tell_obj:
             result = None
@@ -477,9 +466,9 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         try:
             return self.factoids.parse(args[0], nick, kwargs['req'])
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return '%s: %s' % (nick, self.error)
 
 

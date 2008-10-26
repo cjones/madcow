@@ -29,6 +29,7 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
+
     pattern = None
     pattern = re.compile(r'^\s*care(?:(?:[- ]?o)?[- ]?meter)?\s+(.+)\s*$', re.I)
     help = 'care <#> - display a care-o-meter'
@@ -76,10 +77,10 @@ class Main(Module):
             bar = '|' + bar + '|'
             response = '%s: %s' % (self.title, bar)
             return response
-                
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return '%s: %s' % (nick, self.error)
 
 

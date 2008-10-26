@@ -36,6 +36,7 @@ _namespace = 'madcow'
 _dir = '..'
 
 class Yahoo(object):
+
     _quote_url = 'http://finance.yahoo.com/q?s=SYMBOL'
     _isfloat = re.compile(r'^\s*-?\s*[0-9.,]+\s*$')
 
@@ -54,20 +55,22 @@ class Yahoo(object):
         data = {}
         current_price = 0.0
         last_price = 0.0
-        locale.setlocale(locale.LC_NUMERIC, "en_US.UTF-8") # Yahoo emits numbers in the US format of course..
+
+        # Yahoo emits numbers in the US format of course..
+        locale.setlocale(locale.LC_NUMERIC, "en_US.UTF-8")
         for row in rows:
             key, val = row.findAll('td')
             key = str(key.contents[0])
-            
+
             if key in ('Last Trade:', 'Index Value:'):
                 current_price = locale.atof(stripHTML(str(val)))
             elif key == 'Prev Close:':
                 last_price = locale.atof(stripHTML(str(val)))
-        
+
         # calculate change
         delta = current_price - last_price
         delta_perc = 100 * delta / last_price
-        
+
         otext = "Open: %.2f" % last_price
         ptext = "%.2f (%+.2f %+.2f%%)" % (current_price, delta, delta_perc)
         if delta > 0:
@@ -75,9 +78,9 @@ class Yahoo(object):
         elif delta < 0:
             ptext = self.colorlib.get_color('red', text=ptext)
         ptext = "Current: " + ptext
-        
+
         data = [otext, ptext]
-        
+
         # grab after hours data if it's available
         quotepara = soup.findAll('p')[1]
         if "After Hours:" in quotepara.contents[0]:
@@ -85,7 +88,8 @@ class Yahoo(object):
                 after_hours = float(quotepara.findAll('span')[0].contents[0])
                 ah_delta = after_hours - current_price
                 ah_delta_perc = ah_delta / current_price * 100
-                ahtext = '%.2f (%+.2f %+.2f%%)' % (after_hours, ah_delta, ah_delta_perc)
+                ahtext = '%.2f (%+.2f %+.2f%%)' % (
+                        after_hours, ah_delta, ah_delta_perc)
                 if ah_delta > 0:
                     ahtext = self.colorlib.get_color('green', text=ahtext)
                 elif ah_delta < 0:
@@ -99,6 +103,7 @@ class Yahoo(object):
 
 
 class Main(Module):
+
     pattern = re.compile('^\s*(?:stocks?|quote)\s+(\S+)', re.I)
     require_addressing = True
     help = 'quote <symbol> - get latest stock quote'
@@ -114,9 +119,9 @@ class Main(Module):
         query = args[0]
         try:
             return self.yahoo.get_quote(query)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return "Symbol not found, market may have crashed"
 
 

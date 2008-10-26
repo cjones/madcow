@@ -57,6 +57,7 @@ class Delicious(object):
 
 
 class Main(Module):
+
     priority = 11
     terminate = False
     pattern = Module._any
@@ -79,6 +80,6 @@ class Main(Module):
         try:
             for url in self.url.findall(args[0]):
                 self.delicious.post(url, tags=['madcow', nick])
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)

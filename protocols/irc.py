@@ -80,9 +80,9 @@ class IRCProtocol(Madcow):
                 self.irc.process_once(0.2)
             except KeyboardInterrupt:
                 self.running = False
-            except Exception, e:
+            except Exception, error:
                 log.error('Error in IRC loop')
-                log.exception(e)
+                log.exception(error)
 
     def botname(self):
         return self.server.get_nickname()

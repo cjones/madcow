@@ -28,12 +28,14 @@ import urllib
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile(r'^\s*artfart(?:\s+(.+?))?\s*$', re.I)
     require_addressing = True
     help = 'artfart - displays some offensive ascii art'
     baseurl = 'http://www.asciiartfarts.com/'
     random_url = urljoin(baseurl, 'random.cgi')
-    artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre>(.*?)</pre>', re.DOTALL)
+    artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre'
+                         r'>(.*?)</pre>', re.DOTALL)
 
     def response(self, nick, args, kwargs):
         query = args[0]
@@ -51,9 +53,9 @@ class Main(Module):
             title, art = result
             art = stripHTML(art)
             return '>>> %s <<<\n%s' % (title, art)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return "%s: I had a problem with that, sorry." % nick
 
 

@@ -27,6 +27,7 @@ from include.utils import Module
 import logging as log
 
 class Main(Module):
+
     pattern = Module._any
     priority = 0
     terminate = False
@@ -45,7 +46,6 @@ class Main(Module):
     def get(self, user):
         user = user.lower()
         db = self.dbm()
-
         try:
             packed = db[user]
             db.close()
@@ -67,7 +67,7 @@ class Main(Module):
             if days: last = '%s day%s' % (days, 's' * (days != 1))
 
             return message, channel, last
-        except Exception, e:
+        except:
             return None, None, None
 
     def set(self, nick, channel, message):
@@ -82,18 +82,15 @@ class Main(Module):
 
         try:
             self.set(nick, channel, line)
-
             match = self.seen.search(line)
-            if not match: return
-
+            if not match:
+                return
             user = match.group(1)
             message, channel, last = self.get(user)
             if not message:
                 return "%s: I haven't seen %s say anything plz" % (nick, user)
-
             return '%s: %s was last seen %s ago on %s saying "%s"' % (nick,
                     user, last, channel, message)
-
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)

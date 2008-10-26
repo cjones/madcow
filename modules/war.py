@@ -53,9 +53,9 @@ class Terror(object):
             level = self._re_level.search(doc).group(1)
             color = self._color_map[level.lower()]
             return self.colorlib.get_color(color, text=level)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return 'UNKNOWN'
 
 
@@ -68,9 +68,9 @@ class DoomsDay(object):
             doc = geturl(DoomsDay._url)
             time = DoomsDay._re_time.search(doc).group(1)
             return time
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return 'UNKNOWN'
 
 
@@ -81,9 +81,9 @@ class IranWar(object):
         try:
             rss = rssparser.parse(IranWar._url)
             return rss.entries[0].title.encode(rss.encoding)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return 'UNKNOWN'
 
 
@@ -96,9 +96,9 @@ class IraqWar(object):
         try:
             rss = rssparser.parse(IraqWar._war_url)
             return rss.entries[0].title.encode(rss.encoding)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return 'UNKNOWN'
 
     def bodycount(self):
@@ -112,9 +112,9 @@ class IraqWar(object):
             data = IraqWar._re_whitespace.sub(' ', data)
             data = data.strip()
             return data
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return 'UNKNOWN'
 
 
@@ -137,10 +137,10 @@ class Main(Module):
         try:
             return FORMAT % (self.terror.level(), self.doom.time(),
                     self.iran.war(), self.iraq.war(), self.iraq.bodycount())
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
-            return '%s: problem with query: %s' % (nick, e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
+            return '%s: problem with query: %s' % (nick, error)
 
 
 if __name__ == '__main__':

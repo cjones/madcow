@@ -127,8 +127,8 @@ class EmailGateway(object):
             s.connect(self.service)
             s.send(output)
             s.close()
-        except Exception, e:
-            raise ConnectionError, 'problem injecting mail: %s' % e
+        except Exception, error:
+            raise ConnectionError, 'problem injecting mail: %s' % error
 
     def clean(self, text):
         if text is None:

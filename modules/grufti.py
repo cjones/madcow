@@ -27,6 +27,7 @@ import logging as log
 import shutil
 
 class Main(Module):
+
     pattern = Module._any
     allow_threading = False
     priority = 100
@@ -69,9 +70,9 @@ class Main(Module):
                         regex = re.compile(regex, re.I)
                     matches.append(regex)
                 self.data.append((matches, responses))
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             self.enabled = False
 
     def parseTokens(self, response):
@@ -88,6 +89,6 @@ class Main(Module):
                     if match.search(args[0]) is not None:
                         return self.parseTokens(random.choice(responses))
 
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)

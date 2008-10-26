@@ -116,16 +116,16 @@ class GatewayServiceHandler(Thread):
                 data = self.recv(size)
                 self.data_received(data)
                 continue
-            except InvalidPayload, msg:
-                log.info('invalid payload from %s: %s' % (self.addr, msg))
+            except InvalidPayload, error:
+                log.info('invalid payload from %s: %s' % (self.addr, error))
             except CloseConnection:
                 log.info('closing connection to %s' % repr(self.addr))
             except ConnectionTimeout:
                 log.info('connection timeout to %s' % repr(self.addr))
             except ConnectionClosed:
                 log.info('connection closed by %s' % repr(self.addr))
-            except Exception, msg:
-                log.warn('uncaught exception from %s: %s' % (self.addr, msg))
+            except Exception, error:
+                log.warn('uncaught exception from %s: %s' % (self.addr, error))
             break
         self.client.close()
 
@@ -148,12 +148,12 @@ class GatewayServiceHandler(Thread):
                 else:
                     content_type = 'message'
                 if content_type not in self.required_headers:
-                    raise InvalidPayload, \
-                        'unknown content type: ' + content_type
+                    raise InvalidPayload(
+                            'unknown content type: ' + content_type)
                 for header in self.required_headers[content_type]:
                     if header not in hdrs:
-                        raise InvalidPayload, \
-                            'missing required field ' + header
+                        raise InvalidPayload(
+                                'missing required field ' + header)
                 if 'size' in hdrs:
                     hdrs['size'] = int(hdrs['size'])
 
@@ -161,8 +161,8 @@ class GatewayServiceHandler(Thread):
                 self.content_type = content_type
                 self.hdrs = hdrs
                 self.headers_done = True
-            except Exception, msg:
-                raise InvalidPayload, 'invalid payload: %s' % msg
+            except Exception, error:
+                raise InvalidPayload, 'invalid payload: %s' % error
 
         if self.content_type == 'image':
             if len(self.buf) < self.hdrs['size']:

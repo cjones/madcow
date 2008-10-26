@@ -26,6 +26,7 @@ from urlparse import urljoin
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*drinks?\s+(.+)', re.I)
     require_addressing = True
     help = 'drinks <drink name> - look up mixing instructions'
@@ -34,7 +35,8 @@ class Main(Module):
     drink = re.compile('<A HREF="(/db/drink/\d+)">')
     title = re.compile('<H1>(.*?)<HR></H1>')
     ingredients = re.compile('<LI>(.*?CLASS=ingr.+)')
-    instructions = re.compile('<H3>Mixing instructions:</H3>.*?<P>(.*?)</P>', re.DOTALL)
+    instructions = re.compile('<H3>Mixing instructions:</H3>.*?<P>(.*?)</P>',
+                              re.DOTALL)
 
     def response(self, nick, args, kwargs):
         query = args[0]
@@ -50,9 +52,9 @@ class Main(Module):
                     ', '.join(ingredients), instructions)
             response = stripHTML(response)
             return response
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return "%s: Something ungood happened looking that up, sry" % nick
 
 

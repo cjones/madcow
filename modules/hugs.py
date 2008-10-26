@@ -28,6 +28,7 @@ import random
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*hugs\s*$', re.I)
     require_addressing = True
     help = 'hugs - random confession'
@@ -46,9 +47,9 @@ class Main(Module):
             conf = stripHTML(conf)
             conf = conf.strip()
             return conf
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return '%s: I had some issues with that..' % nick
 
 

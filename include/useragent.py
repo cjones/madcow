@@ -101,19 +101,19 @@ def settimeout(timeout):
     """Set socket timeout for all requests"""
 
     def connect(self):
-        msg = 'unknown socket error'
+        error = 'unknown socket error'
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(timeout)
             self.sock.connect((self.host, self.port))
-        except socket.error, msg:
+        except socket.error, error:
             if self.sock:
                 self.sock.close()
             self.sock = None
-        if not self.sock:
-            raise socket.error, msg
+            raise error
 
     httplib.HTTPConnection.connect = connect
+
 
 def get_agent():
     global _ua

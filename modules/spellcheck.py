@@ -29,6 +29,7 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
+
     pattern = re.compile(r'^\s*spell(?:\s*check)?\s+(.+?)\s*$', re.I)
     help = 'spellcheck <word> - use google to spellcheck'
 
@@ -44,9 +45,9 @@ class Main(Module):
             else:
                 result = corrected
             return '%s: %s' % (nick, result)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return '%s: %s' % (nick, self.error)
 
 

@@ -36,6 +36,7 @@ __all__ = ['Weather', 'Main']
 USAGE = 'set location <nick> <location>'
 
 class Weather(object):
+
     baseurl = 'http://www.wunderground.com/'
     search = urljoin(baseurl, '/cgi-bin/findweather/getForecast')
     _rss_link = {'type': 'application/rss+xml'}
@@ -158,9 +159,9 @@ class Main(Module):
 
         try:
             return '%s: %s' % (nick, self.weather.forecast(query))
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return "Couldn't find that place, maybe a bomb dropped on it"
 
 

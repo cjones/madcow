@@ -36,7 +36,9 @@ class KarmaResponse(object):
 
 
 class Karma(object):
+
     """Infobot style karma"""
+
     _adjust_pattern = re.compile(r'^\s*(.*?)[+-]([+-]+)\s*$')
     _query_pattern = re.compile(r'^\s*karma\s+(\S+)\s*\?*\s*$')
     _dbname = 'karma'
@@ -65,7 +67,6 @@ class Karma(object):
             kr.reply = "%s: %s's karma is %s" % (nick, target, karma)
         except:
             pass
-
         return kr
 
     def set(self, nick, karma):
@@ -102,7 +103,7 @@ class Main(Module):
             kr = self.karma.process(nick, input)
             kwargs['req'].matched = kr.matched
             return kr.reply
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
-            return '%s: problem with command: %s' % (nick, e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
+            return '%s: problem with command: %s' % (nick, error)

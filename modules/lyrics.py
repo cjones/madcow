@@ -33,6 +33,7 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
+
     pattern = re.compile(r'^\s*sing\s+(.+?)\s*$', re.I)
     help = 'sing <song/artist>'
     error = 'no results'
@@ -40,7 +41,6 @@ class Main(Module):
     searchurl = urljoin(baseurl, '/Special:Search')
     advert = ' - lyrics from LyricWiki'
     google = Google()
-
     _br = r'\s*<br\s*/?\s*>\s*'
     _line_break = re.compile(_br, re.I)
     _verse_break = re.compile(_br * 2, re.I)
@@ -69,10 +69,10 @@ class Main(Module):
             if not lyrics or lyrics == 'None':
                 raise Exception, 'no results'
             return title + ':\n' + lyrics
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
-            return '%s: %s' % (nick, e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
+            return '%s: %s' % (nick, error)
 
 
 if __name__ == '__main__':

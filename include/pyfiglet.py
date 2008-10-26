@@ -29,26 +29,22 @@ __version__ = '0.5'
 __author__ = 'cj_<cjones@gruntle.org>'
 
 class FigletError(Exception):
-    def __init__(self, error):
-        self.error = error
 
-    def __str__(self):
-        return self.error
+    """Base figlet error"""
 
 
 class FontNotFound(FigletError):
-    """
-    Raised when a font can't be located
-    """
+
+    """Raised when a font can't be located"""
 
 
 class FontError(FigletError):
-    """
-    Raised when there is a problem parsing a font file
-    """
+
+    """Raised when there is a problem parsing a font file"""
 
 
 class FigletFont(object):
+
     """
     This class represents the currently loaded font, including
     meta-data about how it should be displayed by default
@@ -57,15 +53,12 @@ class FigletFont(object):
     def __init__(self, prefix='.', font='standard'):
         self.prefix = prefix
         self.font = font
-
         self.comment = ''
         self.chars = {}
         self.width = {}
         self.data = None
-
         self.reMagicNumber = re.compile(r'^flf2.')
         self.reEndMarker = re.compile(r'(.)\s*$')
-
         self.readFontFile()
         self.loadFont()
 
@@ -80,8 +73,8 @@ class FigletFont(object):
 
         try:
             fo = open(fontPath, 'rb')
-        except Exception, e:
-            raise FontError, "couldn't open %s: %s" % (fontPath, e)
+        except Exception, error:
+            raise FontError("couldn't open %s: %s" % (fontPath, error))
 
         try: self.data = fo.read()
         finally: fo.close()
@@ -157,8 +150,8 @@ class FigletFont(object):
                     self.chars[i] = chars
                     self.width[i] = width
 
-        except Exception, e:
-            raise FontError, 'problem parsing %s font: %s' % (self.font, e)
+        except Exception, error:
+            raise FontError('problem parsing %s font: %s' % (self.font, error))
 
     def __str__(self):
         return '<FigletFont object: %s>' % self.font
@@ -218,8 +211,8 @@ class ZippedFigletFont(FigletFont):
 
             self.data = z.read(fontPath)
 
-        except Exception, e:
-            raise FontError, "couldn't open %s: %s" % (fontPath, e)
+        except Exception, error:
+            raise FontError("couldn't open %s: %s" % (fontPath, error))
 
     def getFonts(self):
         if os.path.exists(self.zipfile) is False:
@@ -316,14 +309,15 @@ class FigletRenderingEngine(object):
 
     def smushAmount(self, left=None, right=None, buffer=[], curChar=[]):
         """
-        Calculate the amount of smushing we can do between this char and the last
-        If this is the first char it will throw a series of exceptions which
-        are caught and cause appropriate values to be set for later.
-
-        This differs from C figlet which will just get bogus values from
-        memory and then discard them after.
+        Calculate the amount of smushing we can do between this char and
+        the last.  If this is the first char it will throw a series of
+        exceptions which are caught and cause appropriate values to be
+        set for later.  This differs from C figlet which will just get
+        bogus values from memory and then discard them after.
         """
-        if (self.base.Font.smushMode & (self.SM_SMUSH | self.SM_KERN)) == 0: return 0
+
+        if (self.base.Font.smushMode & (self.SM_SMUSH | self.SM_KERN)) == 0:
+            return 0
 
         maxSmush = self.curCharWidth
         for row in range(0, self.base.Font.height):
@@ -446,15 +440,22 @@ class Figlet(object):
 
         Font = None
         if self.zipfile is not None:
-            try: Font = ZippedFigletFont(prefix=self.prefix, font=self.font, zipfile=self.zipfile)
-            except: pass
+            try:
+                Font = ZippedFigletFont(
+                        prefix=self.prefix,
+                        font=self.font,
+                        zipfile=self.zipfile)
+            except:
+                pass
 
         if Font is None and self.prefix is not None:
-            try: Font = FigletFont(prefix=self.prefix, font=self.font)
-            except: pass
+            try:
+                Font = FigletFont(prefix=self.prefix, font=self.font)
+            except:
+                pass
 
         if Font is None:
-            raise FontNotFound, "Couldn't load font %s: Not found" % self.font
+            raise FontNotFound("Couldn't load font %s: Not found" % self.font)
 
         self.Font = Font
 

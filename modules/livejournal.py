@@ -58,9 +58,9 @@ class Main(Module):
 
             return '%s: [%s] %s' % (nick, page, entry)
 
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return "%s: Couldn't load the page LJ returned D:" % nick
 
 

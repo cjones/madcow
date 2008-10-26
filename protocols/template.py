@@ -33,8 +33,8 @@ class ProtocolHandler(Madcow):
                 self.running = False
             except EOFError:
                 self.running = False
-            except Exception, e:
-                log.exception(e)
+            except Exception, error:
+                log.exception(error)
 
     def botname(self):
         """Should return bots real name for addressing purposes"""

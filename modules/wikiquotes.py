@@ -34,6 +34,7 @@ _author = 'random'
 _max = 10
 
 class Main(Module):
+
     pattern = _pattern
     require_addressing = True
     help = 'wikiquote - get random quote from wikiquotes'
@@ -47,7 +48,7 @@ class Main(Module):
                 return self._get_random_quote(author=author)
             except:
                 pass
-        raise Exception, 'no parseable page found :('
+        raise Exception('no parseable page found :(')
 
     def extract_quote(self, obj):
         li = obj.find('li')
@@ -89,10 +90,10 @@ class Main(Module):
                 author = _author
                 max = _max
             return self.get_random_quote(author=author, max=max)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
-            return '%s: problem with query: %s' % (nick, e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
+            return '%s: problem with query: %s' % (nick, error)
 
 
 if __name__ == '__main__':

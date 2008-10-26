@@ -25,6 +25,7 @@ from include.utils import Module
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
     require_addressing = True
     allow_threading = False
@@ -72,7 +73,7 @@ class Main(Module):
                 return '%s: unknown database' % nick
             self.set(db, key, val)
             return '%s: set %s\'s %s to %s' % (nick, key, db, val)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return "%s: couldn't set that" % nick

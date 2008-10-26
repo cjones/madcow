@@ -25,6 +25,7 @@ from include.useragent import geturl
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*chp\s+(.+)', re.I)
     require_addressing = True
     help = 'chp <highway> - look for CHP reports for highway, such as 101'
@@ -38,7 +39,6 @@ class Main(Module):
         try:
             check = self.clean.sub('', query)
             check = re.compile(check, re.I)
-
             results = []
             doc = geturl(self.url)
             for i in self.incidents.findall(doc):
@@ -53,10 +53,9 @@ class Main(Module):
                 return '\n'.join(results)
             else:
                 return '%s: No incidents found' % nick
-
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return '%s: I failed to perform that lookup' % nick
 
 

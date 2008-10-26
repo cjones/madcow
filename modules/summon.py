@@ -26,6 +26,7 @@ from smtplib import SMTP
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile(r'^\s*summons?\s+(\S+)(?:\s+(.*?))?\s*$')
     require_addressing = True
     help = 'summon <nick> [reason] - summon user'
@@ -53,7 +54,7 @@ class Main(Module):
 
             return "%s: summoned %s" % (nick, sendto)
 
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
-            return "%s: I couldn't make that summon: %s" % (nick, e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
+            return "%s: I couldn't make that summon: %s" % (nick, error)

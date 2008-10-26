@@ -55,9 +55,9 @@ class Main(Module):
             result = result.strip()
 
             return '%s' % result
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return "%s: I had a problem with that, sorry." % nick
 
 

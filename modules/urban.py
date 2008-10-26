@@ -25,6 +25,7 @@ from include.utils import Module, stripHTML
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*urban\s+(.+)')
     require_addressing = True
     help = 'urban <phrase> - look up a word/phrase on urban dictionary'
@@ -60,10 +61,10 @@ class Main(Module):
             response = stripHTML(response)
             return response.encode("utf-8")
 
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
-            return "%s: Serious problems: %s" % (nick, e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
+            return "%s: Serious problems: %s" % (nick, error)
 
 
 if __name__ == '__main__':

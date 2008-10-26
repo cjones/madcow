@@ -31,19 +31,23 @@ __author__ = 'cj_ <cjones@gmail.com>'
 __all__ = ['IMDB', 'RottenTomatoes', 'MovieRatings']
 
 # global
-reopts = re.I + re.DOTALL
+reopts = re.I | re.DOTALL
 whitespace = re.compile(r'\s+')
 html_title = re.compile(r'<title>(.*?)</title>', re.I)
 year = re.compile(r'\(\d{4}\)\s*$')
 badchars = re.compile(r'[^a-z0-9 ]', re.I)
+_reversed_article = re.compile(r'^(.*?),\s*(the|an?)\s*$', re.I)
+_articles = re.compile(r'^\s*(the|an?)\s+', re.I)
 
 class IMDB(object):
+
     """Interface to IMDB"""
+
     baseurl = 'http://imdb.com/'
     search = urljoin(baseurl, '/find')
     search_title = 'IMDb Search'
     movies = re.compile('<a\s+.*?href=(["\'])(/title/tt\d+/)\\1.*?>(.*?</a>)',
-            reopts)
+                        reopts)
     rating = re.compile(r'<div class="meta">.*?<b>([0-9.]+)/10</b>', reopts)
 
     def rate(self, movie):
@@ -87,7 +91,9 @@ class IMDB(object):
 
 
 class RottenTomatoes(object):
+
     """Interface to Rotten Tomatoes"""
+
     baseurl = 'http://www.rottentomatoes.com/'
     search = urljoin(baseurl, '/search/search.php')
     search_title = 'ROTTEN TOMATOES: Movie Reviews &amp; Previews'
@@ -133,23 +139,23 @@ class RottenTomatoes(object):
             response += ': %s%%' % rating
             return response
 
-        except Exception, msg:
-            log.exception(msg)
-            return
+        except Exception, error:
+            log.exception(error)
 
 
 class MetaCritic(object):
+
     baseurl = 'http://www.metacritic.com/'
     search = urljoin(baseurl, '/search/process')
-    movie_opts = {
-        'sort': 'relevance',
-        'termType': 'all',
-        'ts': None,
-        'ty': '1',
-        'x': '24',
-        'y': '10',
-    }
-    result = re.compile(r'<strong>(?:Film|Video):</strong>\s+<a href="([^"]+)"><b>(.*?)</b>', re.I+re.DOTALL)
+    movie_opts = {'sort': 'relevance',
+                  'termType': 'all',
+                  'ts': None,
+                  'ty': '1',
+                  'x': '24',
+                  'y': '10',
+                  }
+    result = re.compile(r'<strong>(?:Film|Video):</strong>\s+<a href="([^"]+)'
+                        r'"><b>(.*?)</b>', reopts)
     critic_rating = re.compile(r'ALT="Metascore: ([0-9.]+)"')
     user_rating = re.compile(r'<span class="subhead">([0-9.]+)</span>')
 
@@ -192,11 +198,13 @@ class MetaCritic(object):
                 response += ' - %s' % ratings
             return response
         except:
-            return
+            pass
 
 
 class MovieRatings(object):
+
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
+
     sources = (IMDB(),
                RottenTomatoes(),
                MetaCritic(),
@@ -224,7 +232,9 @@ class MovieRatings(object):
 
 
 class Main(Module):
+
     """Autoloaded by MadCow"""
+
     pattern = re.compile(r'^\s*(?:(rate)\s+(.+?)|(topmovies))\s*$', re.I)
     error = 'does that movie even exist?'
     movie = MovieRatings()
@@ -237,14 +247,12 @@ class Main(Module):
             elif args[2] == 'topmovies':
                 response = self.movie.topmovies()
             return response
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return '%s: %s' % (nick, self.error)
 
 
-_reversed_article = re.compile(r'^(.*?),\s*(the|an?)\s*$', re.I)
-_articles = re.compile(r'^\s*(the|an?)\s+', re.I)
 def normalize(name):
     """Normalize a movie title for easy comparison"""
     name = stripHTML(name)

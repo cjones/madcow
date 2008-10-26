@@ -29,6 +29,7 @@ import logging as log
 __author__ = 'James Johnston <jjohnston@email4life.com>'
 
 class Main(Module):
+
     pattern = re.compile('^\s*figlet\s+(.+?)\s*$')
     require_addressing = True
     allow_threading = False
@@ -59,9 +60,9 @@ class Main(Module):
             text = self.figlet.renderText(args[0])
             return text
 
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return '%s: figlet :(' % nick
 
 

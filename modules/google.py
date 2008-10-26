@@ -28,6 +28,7 @@ __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
 
 class Main(Module):
+
     pattern = re.compile('^\s*google\s+(.*?)\s*$')
     require_addressing = True
     help = "google <query> - i'm feeling lucky"
@@ -39,9 +40,9 @@ class Main(Module):
         try:
             query = args[0]
             return '%s: %s = %s' % (nick, query, self.google.lucky(query))
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return '%s: Not so lucky today..' % nick
 
 

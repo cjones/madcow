@@ -30,21 +30,22 @@ _random_path = '/Special:Random'
 _advert = ' - Conservapedia'
 
 class Main(Module):
+
     pattern = re.compile('^\s*(?:cp)\s+(.*?)\s*$', re.I)
     require_addressing = True
     help = 'cp <term> - look up summary of term on conservapedia'
 
     def __init__(self, madcow=None):
         self.wiki = Wiki(base_url=_baseurl, random_path=_random_path,
-                advert=_advert)
+                         advert=_advert)
 
     def response(self, nick, args, kwargs):
         try:
             return self.wiki.get_summary(args)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
-            return '%s: problem with query: %s' % (nick, e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
+            return '%s: problem with query: %s' % (nick, error)
 
 
 if __name__ == '__main__':

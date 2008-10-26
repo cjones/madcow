@@ -115,8 +115,8 @@ class Main(Module):
             uri += '%s@%s/%s' % (user, host, config.db_name)
         try:
             sqlhub.processConnection = connectionForURI(uri)
-        except Exception, e:
-            log.warn('invalid uri: %s (%s)' % (uri, e))
+        except Exception, error:
+            log.warn('invalid uri: %s (%s)' % (uri, error))
             self.enabled = False
             return
 
@@ -300,6 +300,6 @@ class Main(Module):
 
             me.pointsNew = me.pointsNew + 1
 
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)

@@ -25,6 +25,7 @@ from include.google import Google
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*calc\s+(.+)', re.I)
     require_addressing = True
     help = 'calc <expression> - pass expression to google calculator'
@@ -37,9 +38,9 @@ class Main(Module):
             query = args[0]
             response = self.google.calculator(query)
             return '%s: %s' % (nick, response)
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in module %s' % self.__module__)
+            log.exception(error)
             return '%s: No results (bad syntax?)' % nick
 
 

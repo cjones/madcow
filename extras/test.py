@@ -239,8 +239,8 @@ class Main(Module):
                             passed = False
                             print "\n* regex didn't match"
                             break
-                except Exception, e:
-                    print "\n* exception: %s" % e
+                except Exception, error:
+                    print "\n* exception: %s" % error
                     passed = False
             if passed:
                 sys.stderr.write('ok\r\n')

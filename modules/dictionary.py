@@ -26,10 +26,10 @@ from urlparse import urljoin
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile('^\s*define\s+(\S+)(?:\s+(\d+))?$')
     require_addressing = True
     help = 'define <word/phrase> [#] - get a definition from merriam-webster'
-
     re_defs = re.compile(r'<div class="defs">(.*?)</div>', re.DOTALL)
     re_newline = re.compile(r'[\r\n]+')
     re_def_break = re.compile(r'<span class="sense_break"/>')
@@ -59,9 +59,9 @@ class Main(Module):
 
             return '%s: [%s/%s] %s' % (nick, num, len(defs), definition)
 
-        except Exception, e:
-            log.warn('error in %s: %s' % (self.__module__, e))
-            log.exception(e)
+        except Exception, error:
+            log.warn('error in %s: %s' % (self.__module__, error))
+            log.exception(error)
             return "%s: I couldn't look that up for some reason.  D:" % nick
 
 
