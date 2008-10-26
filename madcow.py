@@ -59,7 +59,7 @@ __all__ = ['Madcow']
 MADCOW_URL = 'http://code.google.com/p/madcow/'
 CHARSET = 'utf-8'
 CONFIG = 'madcow.ini'
-SAMPLE_HASH = '5e145f052daf79926809c3dea703e968'
+SAMPLE_HASH = '232404989928b7bc308e61b2cc58d7bc'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt='%x %X',
            format='[%(asctime)s] %(levelname)s: %(message)s')
 
@@ -1080,11 +1080,12 @@ def main():
         log.exception(error)
 
     # try psyco optimization
-    if protocol != 'ipython':
+    if config.main.psyco and protocol != 'ipython':
         try:
             import psyco
             psyco.cannotcompile(re.compile)
             psyco.full()
+            log.info('psyco full scan complete')
         except ImportError:
             pass
 

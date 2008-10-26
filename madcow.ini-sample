@@ -56,6 +56,11 @@ charset=utf-8
 ; nick matches, you will be granted admin privileges.
 ;
 owner=nick
+;
+; normally madcow will try to import psyco and do a full profile.  if you
+; don't want it to do this or it is causing trouble, set this to no
+;
+psyco=yes
 
 [modules]
 ;
