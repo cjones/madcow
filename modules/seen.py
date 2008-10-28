@@ -29,7 +29,7 @@ import logging as log
 class Main(Module):
 
     pattern = Module._any
-    priority = 0
+    priority = 1
     terminate = False
     allow_threading = False
     require_addressing = False

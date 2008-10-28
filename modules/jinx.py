@@ -82,7 +82,7 @@ class ChatLog(object):
 
 class Main(Module):
 
-    priority = 0
+    priority = 1
     terminate = False
     allow_threading = False
 

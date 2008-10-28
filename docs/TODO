@@ -5,6 +5,12 @@
   invocations and throttle people who spam the bot.  Right now, a malicious
   user can use the bot to DDOS various websites, burn all cpu/bandwidth on
   the machine, or just annoy people in general.
+
+  * problem:  where to throttle?  we can only deign to care about what
+    the user is doing *if* they trigger something, but this can happen
+    inside of threads or serial code.  There's really no entirely safe
+    global place to handle this....  hurr.
+
 - make irc logging show both events and bots own output.
 - support postgres!
 - currently, various classes and functions madcow relies on are split
@@ -28,13 +34,13 @@
 *** SILC
 
 - this module is pretty ghetto.. doesn't support everything that irc does
-  for no good reason than no one really cares..
+  for no good reason other than no one really cares, including me..
 
 *** 2to3
 
 - wiki.py is returning unicode instead of raw data.  For consistency, in
   2.x, we need ALL modules to return raw bytes.  This will of course change
-  in 3.0.
+  in 3.0. er, or do i mean they should all return unicode? fuck me
 - SQLObject is still using deprecated code.  Do we really need
   an object model for ONE small application, or would using raw
   SQL be acceptable just to remove a third-party dependency?  It would
