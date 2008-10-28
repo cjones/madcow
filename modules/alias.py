@@ -92,7 +92,7 @@ class AliasDB(object):
 class Main(Module):
 
     pattern = Module._any
-    require_addressing = False
+    require_addressing = True
     help = 'alias [ add <key> <val> | del <#> | list ] - manage aliases'
     priority = 0
     terminate = False
