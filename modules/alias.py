@@ -112,7 +112,7 @@ class Main(Module):
                 command, args = self.command_re.search(line).groups()
                 kwargs['req'].matched = True
                 return self.runcommand(command, args)
-            except (AssertionError, AliasError), error:
+            except AliasError, error:
                 return '%s: %s' % (nick, error)
             except AttributeError:
                 self.checkalias(line, kwargs)
@@ -128,7 +128,8 @@ class Main(Module):
         command = command.lower()
         args = args.split(None, 1)
         if command == 'add':
-            assert len(args) == 2, self.help
+            if len(args) != 2:
+                raise AliasError(self.help)
             for name, obj in self.madcow.modules.by_priority():
                 if obj.pattern is Module._any:
                     continue
@@ -140,7 +141,8 @@ class Main(Module):
             self.db.add(*args)
             return 'alias added'
         elif command == 'list':
-            assert len(args) == 0, self.help
+            if len(args):
+                raise AliasError(self.help)
             output = []
             for i, alias in enumerate(self.db):
                 output.append('[%d] %s => %s' % (i + 1, alias.key, alias.val))
@@ -148,11 +150,16 @@ class Main(Module):
                 return '\n'.join(output)
             return 'no aliases defined'
         elif command == 'del':
-            assert len(args) == 1, self.help
+            if len(args) != 1:
+                raise AliasError(self.help)
             index = args[0]
-            assert index.isdigit(), 'alias must be a #'
+            if not index.isdigit():
+                raise AliasError('alias must be a #')
             index = int(index)
-            assert index >= 1 and index <= len(self.db), 'invalid alias key'
+            if not len(self.db):
+                raise AliasError('no aliases to remove')
+            if index < 1 or index > len(self.db):
+                raise AliasError('invalid alias key')
             index -= 1
             key = self.db[index].key
             self.db.delete(index)
