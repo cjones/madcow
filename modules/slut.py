@@ -108,7 +108,6 @@ class Main(Module):
             rating = slutrating(query)
             return "%s is %.2f%% slutty." % (query, rating * 100)
         except TypeError, error:
-            raise error
             return "%s: Sorry, google isn't being cooperative.." % nick
         except WordFiltered, error:
             return "%s: Hmm, google is filtering the word '%s'.." % (
