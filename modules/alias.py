@@ -152,9 +152,7 @@ class Main(Module):
             index = args[0]
             assert index.isdigit(), 'alias must be a #'
             index = int(index)
-            print repr(index)
             assert index >= 1 and index <= len(self.db), 'invalid alias key'
-            print 'still here'
             index -= 1
             key = self.db[index].key
             self.db.delete(index)
