@@ -145,6 +145,7 @@ defaultFlags=r
 host=localhost
 port=6667
 ssl=no
+password=
 nick=madcow
 channels=#madcow
 reconnect=yes
