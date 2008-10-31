@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Closely mimic a browser"""
+
 import sys
 import urllib2
 import urlparse
@@ -29,12 +31,11 @@ import logging as log
 
 AGENT = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 VERSION = sys.version_info[0] * 10 + sys.version_info[1]
-
-LOG = dict(level=log.DEBUG, stream=sys.stderr, datefmt='%x %X',
-           format='[%(asctime)s] %(levelname)s: %(message)s')
-log.basicConfig(**LOG)
+UA = None
 
 class UserAgent(object):
+
+    """Closely mimic a browser"""
 
     meta_re = re.compile(r'<meta\s+(.*?)\s*>', re.I | re.DOTALL)
     attr_re = re.compile(r'\s*([a-zA-Z_][-.:a-zA-Z_0-9]*)(\s*=\s*(\'[^\']*\'|'
@@ -52,6 +53,7 @@ class UserAgent(object):
 
     def open(self, url, opts=None, data=None, referer=None, size=-1,
              timeout=-1):
+        """Open URL and return unicode content"""
         url = list(urlparse.urlparse(url))
         if opts:
             query = [urllib.urlencode(opts)]
@@ -59,6 +61,8 @@ class UserAgent(object):
                 query.append(url[4])
             url[4] = '&'.join(query)
         request = urllib2.Request(urlparse.urlunparse(url), data)
+        if referer:
+            request.add_header('Referer', referer)
         if timeout == -1:
             timeout = self.timeout
         args = [request]
@@ -99,6 +103,7 @@ class UserAgent(object):
 
     @staticmethod
     def lookup(charset):
+        """Lookup codec"""
         try:
             return codecs.lookup(charset).name
         except LookupError:
@@ -106,6 +111,7 @@ class UserAgent(object):
 
     @classmethod
     def metacharset(cls, data):
+        """Parse data for HTML meta character encoding"""
         for meta in cls.meta_re.findall(data):
             attrs = cls.parseattrs(meta)
             if ('http-equiv' in attrs and
@@ -118,6 +124,7 @@ class UserAgent(object):
 
     @classmethod
     def parseattrs(cls, data):
+        """Parse key=val attributes"""
         attrs = {}
         for key, rest, val in cls.attr_re.findall(data):
             if not rest:
@@ -147,8 +154,22 @@ class UserAgent(object):
         httplib.HTTPConnection.connect = connect
 
 
-def main():
-    return 0
+def getua():
+    """Returns global user agent instance"""
+    global UA
+    if UA is None:
+        UA = UserAgent()
+    return UA
 
-if __name__ == '__main__':
-    sys.exit(main())
+
+def setup(handlers=None, cookies=True, agent=AGENT, timeout=None):
+    """Create global user agent instance"""
+    global UA
+    UA = UserAgent(handlers, cookies, agent, timeout)
+
+
+def geturl(url, opts=None, data=None, referer=None, size=-1, timeout=-1):
+    return getua().open(url, opts, data, referer, size, timeout)
+
+geturl.__doc__ = UserAgent.open.__doc__
+
