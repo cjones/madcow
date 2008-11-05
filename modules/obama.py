@@ -31,7 +31,12 @@ class Main(Module):
 
     pattern = re.compile(r'^\s*obama\s*$', re.I)
     oday = 1232470800  # jan 20, 2009 @ 9pm
-    units = [('second', 60), ('minute', 60), ('hour', 24), ('day', 0)]
+    units = [('second', 60),
+             ('minute', 60),
+             ('hour', 24),
+             ('day', 7),
+             ('week', 4),
+             ('month', 0)]
 
     def response(self, nick, args, kwargs):
         try:
