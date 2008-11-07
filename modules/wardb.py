@@ -33,11 +33,9 @@ __all__ = []
 
 class Main(Module):
 
-    pattern = Module._any
-    require_addressing = False
-    help = u'[item] - look up warhammer item stats'
-    priority = 5
-    terminate = False
+    pattern = re.compile(r'^\s*wardb\s+(.+?)\s*$', re.I)
+    require_addressing = True
+    help = u'wardb <item> - look up warhammer item stats'
 
     _base_url = u'http://www.wardb.com/'
     _search_url = urljoin(_base_url, u'/search.aspx')
@@ -99,18 +97,8 @@ class Main(Module):
         return u'%s: %s' % (name, bonus)
 
     def response(self, nick, args, kwargs):
-
-        def output(response):
-            if self.madcow:
-                self.madcow.output(response, kwargs['req'])
-            else:
-                print response
-
         try:
-            for item in self._items_re.findall(args[0]):
-                response = self.lookup_item(item)
-                if response:
-                    output(response)
+            return self.lookup_item(args[0])
         except Exception, error:
             log.warn('error in module %s' % self.__module__)
             log.exception(error)
