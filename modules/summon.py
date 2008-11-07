@@ -29,7 +29,7 @@ class Main(Module):
 
     pattern = re.compile(r'^\s*summons?\s+(\S+)(?:\s+(.*?))?\s*$')
     require_addressing = True
-    help = 'summon <nick> [reason] - summon user'
+    help = u'summon <nick> [reason] - summon user'
 
     def __init__(self, madcow):
         self.learn = Learn(madcow)
@@ -38,23 +38,30 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         try:
             sendto, reason = args
-            email = self.learn.lookup('email', sendto)
+            email = self.learn.lookup(u'email', sendto)
             if email is None:
-                return "%s: I don't know the email for %s" % (nick, sendto)
-            body = 'To: %s <%s>\n' % (sendto, email)
+                return u"%s: I don't know the email for %s" % (nick, sendto)
+
+            # just make all this shit ASCII, email is best that way...
+            email = email.encode('ascii', 'replace')
+            if reason:
+                reason = reason.encode('ascii', 'replace')
+            anick = nick.encode('ascii', 'replace')
+
+            body = 'To: %s <%s>\n' % (sendto.encode('ascii', 'replace'), email)
             body += 'From: %s\n' % (self.config.smtp.sender)
-            body += 'Subject: Summon from %s' % nick
+            body += 'Subject: Summon from %s' % anick
             body += '\n'
-            body += 'You were summoned by %s. Reason: %s' % (nick, reason)
+            body += 'You were summoned by %s. Reason: %s' % (anick, reason)
 
             smtp = SMTP(self.config.smtp.server)
             if len(self.config.smtp.user):
                 smtp.login(self.config.smtp.user, self.config.smtp.password)
             smtp.sendmail(self.config.smtp.sender, [email], body)
 
-            return "%s: summoned %s" % (nick, sendto)
+            return u"%s: summoned %s" % (nick, sendto)
 
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return "%s: I couldn't make that summon: %s" % (nick, error)
+            return u"%s: I couldn't make that summon: %s" % (nick, error)

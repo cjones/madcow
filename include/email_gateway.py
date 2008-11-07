@@ -28,17 +28,17 @@ from email.Header import decode_header
 from useragent import geturl
 
 # add madcow base directory to path
-_basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+_basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), u'..'))
 sys.path.append(_basedir)
 
 from include.utils import stripHTML
 from madcow import Config
 
-__version__ = '0.3'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.3'
+__author__ = u'cj_ <cjones@gruntle.org>'
 
-USAGE = '%prog [options] < email'
-_configfile = os.path.join(_basedir, 'madcow.ini')
+USAGE = u'%prog [options] < email'
+_configfile = os.path.join(_basedir, u'madcow.ini')
 
 class GatewayDisabled(Exception):
     """Raised when gateway is disabled"""
@@ -53,11 +53,11 @@ class ConnectionError(Exception):
 
 
 class EmailGateway(object):
-    _spams = ('This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.', 'You have new Picture Mail!')
+    _spams = (u'This is an MMS message. Please go to http://mms.telusmobility.com/do/LegacyLogin to view the message.', u'You have new Picture Mail!')
     _quoted = r'^(-+)\s*(original|forwarded)\s+(message|e?mail)\s*\1'
     _quoted = re.compile(_quoted, re.I)
-    _sig = '--'
-    _remove_quotes = re.compile('([\'"])(=\\?(?:[^\x00- ()<>@,;:"/\\[\\]?.=]+\\?){2}[!->@-~]+\\?=)\\1')
+    _sig = u'--'
+    _remove_quotes = re.compile(u'([\'"])(=\\?(?:[^\x00- ()<>@,;:"/\\[\\]?.=]+\\?){2}[!->@-~]+\\?=)\\1')
 
     def __init__(self, configfile=_configfile):
         config = Config(configfile).gateway
@@ -72,52 +72,52 @@ class EmailGateway(object):
         text = None
 
         for part in message.walk():
-            if part.get_content_maintype() == 'multipart':
+            if part.get_content_maintype() == u'multipart':
                 continue
             mime_type = part.get_content_type()
             payload = part.get_payload(decode=True)
-            if mime_type == 'image/jpeg':
+            if mime_type == u'image/jpeg':
                 image = payload
-            elif mime_type == 'text/html':
-                if 'pictures.sprintpcs.com' in payload:
+            elif mime_type == u'text/html':
+                if u'pictures.sprintpcs.com' in payload:
                     image = getsprint(payload)
                 else:
                     text = stripHTML(payload)
-            elif mime_type == 'text/plain':
-                if 'You have new Picture Mail' not in payload:
+            elif mime_type == u'text/plain':
+                if u'You have new Picture Mail' not in payload:
                     text = payload
 
-        # at this point, text could be None, '', or have something interesting
+        # at this point, text could be None, u'', or have something interesting
         try:
-            text = [self.clean(text), self.clean(message['subject'])]
+            text = [self.clean(text), self.clean(message[u'subject'])]
             text = filter(lambda x: isinstance(x, str), text)
             text = filter(lambda x: len(x), text)
-            text = ' / '.join(text)
+            text = u' / '.join(text)
         except:
             pass
 
         # parse base64 encoded words and work around non-rfc2047 compliant
         # formats (google/blackberry)
-        sender = message['from']
+        sender = message[u'from']
         sender = self._remove_quotes.sub(r'\2', sender)
         headers = decode_header(sender)
-        header_parts = [unicode(part, charset or 'ascii') for part,
+        header_parts = [unicode(part, charset or u'ascii') for part,
                 charset in headers]
-        sender = str(u' '.join(header_parts))
+        sender = unicode(u' '.join(header_parts))
 
         headers = []
-        headers.append('to: ' + self.channel)
-        headers.append('from: ' + sender)
+        headers.append(u'to: ' + self.channel)
+        headers.append(u'from: ' + sender)
         if text:
-            headers.append('message: ' + text)
+            headers.append(u'message: ' + text)
         else:
             if image is None:
-                raise ParsingError, "need a message for non-image mail"
+                raise ParsingError, u"need a message for non-image mail"
         if image:
-            headers.append('type: image')
-            headers.append('size: %s' % len(image))
+            headers.append(u'type: image')
+            headers.append(u'size: %s' % len(image))
 
-        output = '\r\n'.join(headers) + '\r\n\r\n'
+        output = u'\r\n'.join(headers) + u'\r\n\r\n'
         if image:
             output += image
 
@@ -128,7 +128,7 @@ class EmailGateway(object):
             s.send(output)
             s.close()
         except Exception, error:
-            raise ConnectionError, 'problem injecting mail: %s' % error
+            raise ConnectionError, u'problem injecting mail: %s' % error
 
     def clean(self, text):
         if text is None:
@@ -136,18 +136,18 @@ class EmailGateway(object):
 
         for spam in self._spams:
             if spam in text:
-                text = text.replace(spam, '')
+                text = text.replace(spam, u'')
         text = text.strip()
         cleaned = []
         for line in text.splitlines():
             line = line.strip()
-            if not len(line) or line.startswith('>'):
+            if not len(line) or line.startswith(u'>'):
                 continue
             elif self._quoted.search(line) or line == self._sig:
                 break
             else:
                 cleaned.append(line)
-        text = ' '.join(cleaned)
+        text = u' '.join(cleaned)
         return text
 
 
@@ -157,7 +157,7 @@ spcs_thepic = re.compile(r'<img class="guestMediaImg".*?src="(http://pictures.sp
 
 def getsprint(data):
     link = spcs_piclink.search(data).group(1)
-    link = link.replace('&amp;', '&')
+    link = link.replace(u'&amp;', u'&')
     page = geturl(link)
     picurl = spcs_thepic.search(page).group(1)
     image = geturl(picurl)
@@ -165,13 +165,13 @@ def getsprint(data):
 
 def main():
     op = OptionParser(version=__version__, usage=USAGE)
-    op.add_option('-c', '--configfile', metavar='<file>', default=_configfile,
-            help='default: %default')
+    op.add_option(u'-c', u'--configfile', metavar=u'<file>', default=_configfile,
+            help=u'default: %default')
     opts, args = op.parse_args()
 
     EmailGateway(configfile=opts.configfile).parse_email(sys.stdin.read())
 
     return 0
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     sys.exit(main())

@@ -27,33 +27,33 @@ import logging as log
 
 class Main(Module):
 
-    pattern = re.compile('^\s*bible\s+(\S+\s+\d+:[0-9-]+)', re.I)
+    pattern = re.compile(u'^\s*bible\s+(\S+\s+\d+:[0-9-]+)', re.I)
     require_addressing = True
-    help = 'bible <book> <chp>:<verse>[-<verse>] - spam jesus stuff'
-    baseurl = 'http://www.biblegateway.com/'
-    passage = urljoin(baseurl, '/passage/')
-    verse = re.compile('<div class="result-text-style-normal">(.*?)</div>',
+    help = u'bible <book> <chp>:<verse>[-<verse>] - spam jesus stuff'
+    baseurl = u'http://www.biblegateway.com/'
+    passage = urljoin(baseurl, u'/passage/')
+    verse = re.compile(u'<div class="result-text-style-normal">(.*?)</div>',
                        re.DOTALL)
-    footnotes = re.compile('<strong>Footnotes:</strong>.*$', re.DOTALL)
+    footnotes = re.compile(u'<strong>Footnotes:</strong>.*$', re.DOTALL)
     junk_html = re.compile(r'<(h4|h5|span|sup|strong|ol|a).*?</\1>', re.I)
     max = 800
 
     def response(self, nick, args, kwargs):
         query = args[0]
         try:
-            doc = geturl(self.passage, opts={'search': query, 'version': 31})
+            doc = geturl(self.passage, opts={u'search': query, u'version': 31})
             response = self.verse.search(doc).group(1)
-            response = self.footnotes.sub('', response)
-            response = self.junk_html.sub('', response)
+            response = self.footnotes.sub(u'', response)
+            response = self.junk_html.sub(u'', response)
             response = stripHTML(response)
             response = response.strip()
             return response[:self.max]
         except Exception, error:
-            log.warn('error in module %s: %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return "%s: God didn't like that." % nick
+            return u"%s: God didn't like that." % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

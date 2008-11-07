@@ -25,15 +25,15 @@ import re
 import logging as log
 
 # these differ from wikipedia:
-_baseurl = 'http://www.conservapedia.com/'
-_random_path = '/Special:Random'
-_advert = ' - Conservapedia'
+_baseurl = u'http://www.conservapedia.com/'
+_random_path = u'/Special:Random'
+_advert = u' - Conservapedia'
 
 class Main(Module):
 
-    pattern = re.compile('^\s*(?:cp)\s+(.*?)\s*$', re.I)
+    pattern = re.compile(u'^\s*(?:cp)\s+(.*?)\s*$', re.I)
     require_addressing = True
-    help = 'cp <term> - look up summary of term on conservapedia'
+    help = u'cp <term> - look up summary of term on conservapedia'
 
     def __init__(self, madcow=None):
         self.wiki = Wiki(base_url=_baseurl, random_path=_random_path,
@@ -43,11 +43,11 @@ class Main(Module):
         try:
             return self.wiki.get_summary(args)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: problem with query: %s' % (nick, error)
+            return u'%s: problem with query: %s' % (nick, error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

@@ -24,20 +24,20 @@ import logging as log
 import re
 from include.google import Google
 
-__version__ = '0.1'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.1'
+__author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
 
     pattern = None
     pattern = re.compile(r'^\s*care(?:(?:[- ]?o)?[- ]?meter)?\s+(.+)\s*$', re.I)
-    help = 'care <#> - display a care-o-meter'
-    error = 'invalid care factor'
+    help = u'care <#> - display a care-o-meter'
+    error = u'invalid care factor'
     isnum = re.compile(r'^\s*[0-9.]+\s*$')
     sep = re.compile(r'\s*=\s*')
     numsep = re.compile(r'(\d)\s+(\d)')
-    title = 'CARE-O-METER'
+    title = u'CARE-O-METER'
 
     # settings
     size = 40
@@ -46,7 +46,7 @@ class Main(Module):
 
     def __init__(self, madcow=None):
         self.google = Google()
-        self.bar = [i for i in '.' * self.size]
+        self.bar = [i for i in u'.' * self.size]
         self.size = float(self.size)
         self.min = float(self.min)
         self.max = float(self.max)
@@ -72,18 +72,17 @@ class Main(Module):
             # create bar
             pos = int(round((self.size - 1) * ((val - self.min) / self.range)))
             bar = list(self.bar)
-            bar[pos] = 'o'
-            bar = ''.join(bar)
-            bar = '|' + bar + '|'
-            response = '%s: %s' % (self.title, bar)
-            return response
+            bar[pos] = u'o'
+            bar = u''.join(bar)
+            bar = u'|' + bar + u'|'
+            return u'%s: %s' % (self.title, bar)
 
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, self.error)
+            return u'%s: %s' % (nick, self.error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

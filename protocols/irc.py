@@ -26,12 +26,14 @@ import logging as log
 from time import sleep, time as unix_time
 
 class IRCProtocol(Madcow):
+
     """Implements IRC protocol for madcow"""
 
-    events = ['welcome', 'disconnect', 'kick', 'privmsg', 'pubmsg', 'namreply']
+    events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg',
+              u'namreply']
 
     def __init__(self, config, prefix):
-        self.colorlib = ColorLib('mirc')
+        self.colorlib = ColorLib(u'mirc')
         Madcow.__init__(self, config, prefix)
 
         if log.root.level <= log.DEBUG:
@@ -41,10 +43,10 @@ class IRCProtocol(Madcow):
         self.irc = irclib.IRC()
         self.server = self.irc.server()
         for event in self.events:
-            log.info('[IRC] * Registering event: %s' % event)
+            log.info(u'[IRC] * Registering event: %s' % event)
             self.server.add_global_handler(
                 event,
-                getattr(self, 'on_' + event),
+                getattr(self, u'on_' + event),
                 0,
             )
         if self.config.irc.channels is not None:
@@ -59,7 +61,7 @@ class IRCProtocol(Madcow):
         self.last_response = 0.0
 
     def connect(self):
-        log.info('[IRC] * Connecting to %s:%s' % (
+        log.info(u'[IRC] * Connecting to %s:%s' % (
             self.config.irc.host, self.config.irc.port))
         self.server.connect(self.config.irc.host, self.config.irc.port,
                             self.config.irc.nick, ssl=self.config.irc.ssl,
@@ -67,10 +69,10 @@ class IRCProtocol(Madcow):
 
     def stop(self):
         Madcow.stop(self)
-        log.info('[IRC] * Quitting IRC')
+        log.info(u'[IRC] * Quitting IRC')
         message = self.config.irc.quitMessage
         if message is None:
-            message = 'no reason'
+            message = u'no reason'
         self.server.disconnect(message)
 
     def run(self):
@@ -82,7 +84,7 @@ class IRCProtocol(Madcow):
             except KeyboardInterrupt:
                 self.running = False
             except Exception, error:
-                log.error('Error in IRC loop')
+                log.error(u'Error in IRC loop')
                 log.exception(error)
 
     def botname(self):
@@ -90,33 +92,33 @@ class IRCProtocol(Madcow):
 
     def on_welcome(self, server, event):
         """welcome event triggers startup sequence"""
-        log.info('[IRC] * Connected')
+        log.info(u'[IRC] * Connected')
 
         # identify with nickserv
         if self.config.irc.nickServUser and self.config.irc.nickServPass:
             self._privmsg(self.config.irc.nickServUser,
-                    'IDENTIFY %s' % self.config.irc.nickServPass)
+                    u'IDENTIFY %s' % self.config.irc.nickServPass)
 
         # become an oper
         if self.config.irc.oper:
-            log.info('[IRC] * Becoming an OPER')
+            log.info(u'[IRC] * Becoming an OPER')
             self.server.oper(self.config.irc.operUser, self.config.irc.operPass)
 
         # join all channels
         for channel in self.channels:
-            log.info('[IRC] * Joining: %s' % channel)
+            log.info(u'[IRC] * Joining: %s' % channel)
             self.server.join(channel)
 
     def on_disconnect(self, server, event):
         """disconnected from IRC"""
-        log.warn('[IRC] * Disconnected from server')
+        log.warn(u'[IRC] * Disconnected from server')
         if self.config.irc.reconnect and self.running:
             sleep(self.config.irc.reconnectWait)
             self.connect()
 
     def on_kick(self, server, event):
         """kicked from channel"""
-        log.warn('[IRC] * Kicked from %s by %s' % (event.arguments()[0],
+        log.warn(u'[IRC] * Kicked from %s by %s' % (event.arguments()[0],
             event.target()))
         if event.arguments()[0].lower() == server.get_nickname().lower():
             if self.config.irc.rejoin:
@@ -127,12 +129,7 @@ class IRCProtocol(Madcow):
 
     def protocol_output(self, message, req=None):
         """output to IRC"""
-        if message is None:
-            return
-
-        # IRC really doesn't like null characters
-        message = message.replace('\x00', '')
-        if not len(message):
+        if not message:
             return
 
         # color output if requested
@@ -142,21 +139,29 @@ class IRCProtocol(Madcow):
 
         # MUST wrap if unset because irc will boot you for exceeding maxlen
         wrap = self.config.irc.wrapsize
-        if wrap is None or wrap > 400:
+        if not wrap or wrap > 400:
             wrap = 400
 
         # each line gets its own privmsg
         output = []
         for line in message.splitlines():
+            line = line.rstrip()
             if len(line) > wrap:
                 for wrapped in textwrap.wrap(line, wrap):
                     output.append(wrapped)
             else:
                 output.append(line)
 
+        for i in range(len(output)):
+            # now we can encode it properly
+            output[i] = output[i].encode(self.charset, 'replace')
+            # IRC really doesn't like null characters
+            output[i] = output[i].replace('\x00', '')
+
         # send to IRC socket
         for line in output:
-            self._privmsg(req.sendto, line)
+            if line:
+                self._privmsg(req.sendto, line)
 
     def _privmsg(self, sendto, line):
         delta = unix_time() - self.last_response
@@ -187,6 +192,8 @@ class IRCProtocol(Madcow):
             req.sendto = req.channel
             req.addressed = False
 
+        req.message = req.message.decode(self.config.main.charset, 'replace')
+
         # strip control codes from incoming lines
         req.message = self.colorlib.strip_color(req.message)
 
@@ -194,7 +201,7 @@ class IRCProtocol(Madcow):
         self.check_addressing(req)
 
         # lines that start with ^ will have their output rainbowed
-        if req.message.startswith('^'):
+        if req.message.startswith(u'^'):
             req.message = req.message[1:]
             req.colorize = True
         else:
@@ -205,17 +212,17 @@ class IRCProtocol(Madcow):
 
     def on_namreply(self, server, event):
         """NAMES requested, cache their opped status"""
-        log.debug('[IRC] Updating NAMES list')
+        log.debug(u'[IRC] Updating NAMES list')
         args = event.arguments()
         channel = args[1]
         nicks = {}
         for nick in args[2].split():
             nick = nick.lower()
             opped = False
-            if nick.startswith('@'):
+            if nick.startswith(u'@'):
                 opped = True
                 nick = nick[1:]
-            elif nick.startswith('+'):
+            elif nick.startswith(u'+'):
                 nick = nick[1:]
             nicks[nick] = opped
         self.names[channel] = nicks

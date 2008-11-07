@@ -26,18 +26,18 @@ import random
 import logging as log
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
-_base_url = 'http://en.wikiquote.org/'
-_advert = ' - Wikiquote'
+_base_url = u'http://en.wikiquote.org/'
+_advert = u' - Wikiquote'
 _linebreak = re.compile(r'[\r\n]+')
 _whitespace = re.compile(r'\s{2,}')
-_author = 'random'
+_author = u'random'
 _max = 10
 
 class Main(Module):
 
     pattern = _pattern
     require_addressing = True
-    help = 'wikiquote - get random quote from wikiquotes'
+    help = u'wikiquote - get random quote from wikiquotes'
 
     def __init__(self, madcow=None):
         self.wiki = Wiki(base_url=_base_url, advert=_advert)
@@ -48,37 +48,37 @@ class Main(Module):
                 return self._get_random_quote(author=author)
             except:
                 pass
-        raise Exception('no parseable page found :(')
+        raise Exception(u'no parseable page found :(')
 
     def extract_quote(self, obj):
-        li = obj.find('li')
+        li = obj.find(u'li')
         contents = li.contents
-        contents = [str(part) for part in contents]
-        quote = ' '.join(contents)
+        contents = [unicode(part) for part in contents]
+        quote = u' '.join(contents)
         quote = stripHTML(quote)
-        quote = _linebreak.sub(' ', quote)
-        quote = _whitespace.sub(' ', quote)
+        quote = _linebreak.sub(u' ', quote)
+        quote = _whitespace.sub(u' ', quote)
         quote = quote.strip()
         return quote
 
     def _get_random_quote(self, author=_author):
         soup, title = self.wiki.get_soup(author)
         if title == Wiki._error:
-            return "Couldn't find quotes for that.."
-        content = soup.find('div', attrs={'id': 'bodyContent'})
-        uls = content.findAll('ul', recursive=False)
+            return u"Couldn't find quotes for that.."
+        content = soup.find(u'div', attrs={u'id': u'bodyContent'})
+        uls = content.findAll(u'ul', recursive=False)
         quotes = []
         for ul in uls:
-            note = ul.find('ul')
+            note = ul.find(u'ul')
             if note:
                 note.extract()
                 note = self.extract_quote(note)
             quote = self.extract_quote(ul)
             if note:
-                quote = '%s -- %s' % (quote, note)
+                quote = u'%s -- %s' % (quote, note)
             quotes.append(quote)
         quote = random.choice(quotes)
-        quote = '%s: %s' % (title, quote)
+        quote = u'%s: %s' % (title, quote)
         return quote
 
     def response(self, nick, args, kwargs):
@@ -91,11 +91,11 @@ class Main(Module):
                 max = _max
             return self.get_random_quote(author=author, max=max)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: problem with query: %s' % (nick, error)
+            return u'%s: problem with query: %s' % (nick, error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

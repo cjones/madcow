@@ -12,17 +12,17 @@ _splitext_re = re.compile(r'^(.+)\.([^.]+)$')
 _haskey_re = re.compile(r'(if\s+(not\s+)?(\S+?)\.has_key\((.*?)\))')
 
 def fix(path):
-    with open(path, 'rb') as file:
+    with open(path, u'rb') as file:
         data = file.read()
     for match, hasnot, obj, key in _haskey_re.findall(data):
-        new = ['if', key, 'in', obj]
+        new = [u'if', key, u'in', obj]
         if hasnot:
-            new.insert(2, 'not')
-        data = data.replace(match, ' '.join(new))
-        shutil.copy(path, path + '.orig')
-        with open(path, 'wb') as file:
+            new.insert(2, u'not')
+        data = data.replace(match, u' '.join(new))
+        shutil.copy(path, path + u'.orig')
+        with open(path, u'wb') as file:
             file.write(data)
-        print >> sys.stderr, 'fixed ' + path
+        print >> sys.stderr, u'fixed ' + path
 
 def walk(dir):
     for basedir, subdirs, filenames in os.walk(dir):
@@ -35,11 +35,11 @@ def walk(dir):
 
 def python_files(dir):
     for path, ext in walk(dir):
-        if ext == 'py':
+        if ext == u'py':
             yield path
 
 def main():
-    parser = OptionParser(usage='%prog <dir, ...>')
+    parser = OptionParser(usage=u'%prog <dir, ...>')
     paths = []
     for arg in parser.parse_args()[1]:
         if os.path.isdir(arg):
@@ -48,10 +48,10 @@ def main():
             paths.append(arg)
     for path in paths:
         if os.path.abspath(path) == os.path.abspath(__file__):
-            print >> sys.stderr, 'skipping clobber of source file'
+            print >> sys.stderr, u'skipping clobber of source file'
             continue
         fix(path)
     return 0
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     sys.exit(main())

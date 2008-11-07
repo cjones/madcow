@@ -24,14 +24,14 @@ import logging as log
 import re
 from include.google import Google
 
-__version__ = '0.1'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.1'
+__author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*spell(?:\s*check)?\s+(.+?)\s*$', re.I)
-    help = 'spellcheck <word> - use google to spellcheck'
+    help = u'spellcheck <word> - use google to spellcheck'
 
     def __init__(self, madcow=None):
         self.google = Google()
@@ -41,16 +41,16 @@ class Main(Module):
             query = args[0]
             corrected = self.google.spellcheck(query)
             if query.lower() == corrected.lower():
-                result = 'spelled correctly'
+                result = u'spelled correctly'
             else:
                 result = corrected
-            return '%s: %s' % (nick, result)
+            return u'%s: %s' % (nick, result)
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, self.error)
+            return u'%s: %s' % (nick, self.error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

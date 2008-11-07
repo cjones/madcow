@@ -31,20 +31,20 @@ class Main(Module):
 
     pattern = re.compile(r'^\s*artfart(?:\s+(.+?))?\s*$', re.I)
     require_addressing = True
-    help = 'artfart - displays some offensive ascii art'
-    baseurl = 'http://www.asciiartfarts.com/'
-    random_url = urljoin(baseurl, 'random.cgi')
+    help = u'artfart - displays some offensive ascii art'
+    baseurl = u'http://www.asciiartfarts.com/'
+    random_url = urljoin(baseurl, u'random.cgi')
     artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre'
                          r'>(.*?)</pre>', re.DOTALL)
 
     def response(self, nick, args, kwargs):
         query = args[0]
-        if query is None or query == '':
+        if query is None or query == u'':
             url = self.random_url
         else:
-            query = ' '.join(query.split())
-            query = query.replace(' ', '_')
-            query = urllib.quote(query) + '.html'
+            query = u' '.join(query.split())
+            query = query.replace(u' ', u'_')
+            query = urllib.quote(query) + u'.html'
             url = urljoin(self.baseurl, query)
         try:
             doc = geturl(url)
@@ -52,13 +52,13 @@ class Main(Module):
             result = random.choice(results)
             title, art = result
             art = stripHTML(art)
-            return '>>> %s <<<\n%s' % (title, art)
+            return u'>>> %s <<<\n%s' % (title, art)
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return "%s: I had a problem with that, sorry." % nick
+            return u"%s: I had a problem with that, sorry." % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

@@ -27,20 +27,20 @@ from include.utils import stripHTML
 from urlparse import urljoin
 from include.colorlib import ColorLib
 
-__version__ = '0.1'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.1'
+__author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
 
     pattern = Module._any
     require_addressing = False
-    help = '[item] - look up warhammer item stats'
+    help = u'[item] - look up warhammer item stats'
     priority = 5
     terminate = False
 
-    _base_url = 'http://www.wardb.com/'
-    _search_url = urljoin(_base_url, '/search.aspx')
+    _base_url = u'http://www.wardb.com/'
+    _search_url = urljoin(_base_url, u'/search.aspx')
     _items_re = re.compile(r'\[([^\]]+)\]')
     _results_re = re.compile(
             r'<a href="([^"]+/item\.aspx[^"]+)">\s*(.+?)\s*</a>')
@@ -54,28 +54,28 @@ class Main(Module):
             r'<span class="r(\d+) item-name">([^<]+)</span>')
 
     _rarity_colors = {
-            '6': 'orange',
-            '5': 'bright magenta',
-            '4': 'bright blue',
-            '3': 'bright green',
-            '2': 'white',
-            '1': 'light gray'}
+            u'6': u'orange',
+            u'5': u'bright magenta',
+            u'4': u'bright blue',
+            u'3': u'bright green',
+            u'2': u'white',
+            u'1': u'light gray'}
 
     def __init__(self, madcow=None):
         self.madcow = madcow
         if madcow:
             self.colorlib = madcow.colorlib
         else:
-            self.colorlib = ColorLib('ansi')
+            self.colorlib = ColorLib(u'ansi')
 
     def lookup_item(self, item):
-        page = geturl(self._search_url, opts={'search_text': item})
+        page = geturl(self._search_url, opts={u'search_text': item})
         item = item.lower()
         redirect = self._redirect_re.search(page)
         if redirect:
             url = urljoin(self._base_url, redirect.group(1))
             page = geturl(url)
-        elif 'Search results for' in page:
+        elif u'Search results for' in page:
             items = self._results_re.findall(page)
             if not items:
                 return
@@ -87,16 +87,16 @@ class Main(Module):
             else:
                 url = items[0][1]
             page = geturl(url)
-        bonus = ', '.join(self._bonus_re.findall(page))
+        bonus = u', '.join(self._bonus_re.findall(page))
         bonus = self._stat_gap_re.sub(r'\1\2', bonus)
         if not bonus:
-            bonus = 'No bonuses'
+            bonus = u'No bonuses'
         rarity, name = self._item_name_re.search(page).groups()
         color = self._rarity_colors[rarity]
         name = name.replace('\\', '')
         name = name.strip()
         name = self.colorlib.get_color(color, text=name)
-        return '%s: %s' % (name, bonus)
+        return u'%s: %s' % (name, bonus)
 
     def response(self, nick, args, kwargs):
 
@@ -112,7 +112,7 @@ class Main(Module):
                 if response:
                     output(response)
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn('error in module %s' % self.__module__)
             log.exception(error)
 
 

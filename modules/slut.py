@@ -44,8 +44,8 @@ from urlparse import urljoin
 match_re = re.compile(r'Results .* of about <b>([\d,]+)</b> for')
 filter_re = re.compile(
         r'The word <b>"(\w+)"</b> has been filtered from the search')
-baseURL = 'http://www.google.com/'
-searchURL = urljoin(baseURL, '/search')
+baseURL = u'http://www.google.com/'
+searchURL = urljoin(baseURL, u'/search')
 
 class WordFiltered(Exception):
 
@@ -59,7 +59,7 @@ class WordFiltered(Exception):
 
 
 def cleanurl(url):
-    return url.replace(" ", "+")
+    return url.replace(u" ", u"+")
 
 
 def slutrating(phrase):
@@ -68,19 +68,19 @@ def slutrating(phrase):
 
     for i in range(5):  # Try up to 5 times to get a good result
         try:
-            data = geturl(searchURL, opts={'q': phrase, 'safe': 'off'})
-            unsafe = int(match_re.search(data).group(1).replace(',', ''))
+            data = geturl(searchURL, opts={u'q': phrase, u'safe': u'off'})
+            unsafe = int(match_re.search(data).group(1).replace(u',', u''))
         except AttributeError:
             unsafe = 0
 
         try:
-            data = geturl(searchURL, opts={'q': phrase, 'safe': 'active'})
+            data = geturl(searchURL, opts={u'q': phrase, u'safe': u'active'})
             try:
                 filtered = filter_re.search(data).group(1)
                 raise WordFiltered(filtered)
             except AttributeError:
                 pass
-            safe = int(match_re.search(data).group(1).replace(',', ''))
+            safe = int(match_re.search(data).group(1).replace(u',', u''))
         except AttributeError:
             safe = 0
 
@@ -98,26 +98,26 @@ def slutrating(phrase):
 class Main(Module):
 
     enabled = True
-    pattern = re.compile('^\s*slutcheck\s+(.+)')
+    pattern = re.compile(u'^\s*slutcheck\s+(.+)')
     require_addressing = True
-    help = "slutcheck <phrase> - see how slutty the phrase is"
+    help = u"slutcheck <phrase> - see how slutty the phrase is"
 
     def response(self, nick, args, kwargs):
         try:
-            query = " ".join(args)
+            query = u" ".join(args)
             rating = slutrating(query)
-            return "%s is %.2f%% slutty." % (query, rating * 100)
+            return u"%s is %.2f%% slutty." % (query, rating * 100)
         except TypeError, error:
-            return "%s: Sorry, google isn't being cooperative.." % nick
+            return u"%s: Sorry, google isn't being cooperative.." % nick
         except WordFiltered, error:
-            return "%s: Hmm, google is filtering the word '%s'.." % (
+            return u"%s: Hmm, google is filtering the word '%s'.." % (
                     nick, error.word)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: I failed to perform that lookup' % nick
+            return u'%s: I failed to perform that lookup' % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

@@ -28,18 +28,19 @@ import os
 import logging as log
 
 class Main(Module):
-    _allow = '-?(?:[0-9.]+j?|pi|e)'
-    _regex = '^\s*roll\s+(%s?)d(%s)\s*$' % (_allow, _allow)
+
+    _allow = u'-?(?:[0-9.]+j?|pi|e)'
+    _regex = u'^\s*roll\s+(%s?)d(%s)\s*$' % (_allow, _allow)
     pattern = re.compile(_regex, re.I)
     allow_threading = False
     require_addressing = True
-    help = 'roll [<numdice>d<sides>] - roll die of the specified size'
+    help = u'roll [<numdice>d<sides>] - roll die of the specified size'
 
     def __init__(self, madcow=None):
         if madcow is not None:
             self.colorlib = madcow.colorlib
         else:
-            self.colorlib = ColorLib('ansi')
+            self.colorlib = ColorLib(u'ansi')
 
     def roll(self, min, max):
         if isinstance((min * max), (float, complex)):
@@ -50,13 +51,13 @@ class Main(Module):
     def normalize(self, val):
         try:
             val = val.lower()
-            if val == 'pi':
+            if val == u'pi':
                 val = math.pi
-            elif val == 'e':
+            elif val == u'e':
                 val = math.e
-            elif val.endswith('j'):
+            elif val.endswith(u'j'):
                 val = complex(val)
-            elif '.' in val:
+            elif u'.' in val:
                 val = float(val)
             else:
                 val = int(val)
@@ -72,10 +73,10 @@ class Main(Module):
         sides = self.normalize(args[1])
 
         if sides == 0 or num_dice == 0:
-            return 'GOOD JOB, UNIVERSE %s' % self.colorize('EXPLODES', 'red')
+            return u'GOOD JOB, UNIVERSE %s' % self.colorize(u'EXPLODES', u'red')
 
         if sides == 1 and num_dice == 1:
-            return 'CHEATING DETECTED, YOU %s' % self.colorize('DIE', 'red')
+            return u'CHEATING DETECTED, YOU %s' % self.colorize(u'DIE', u'red')
 
         min = num_dice
         max = num_dice * sides
@@ -84,16 +85,16 @@ class Main(Module):
 
         try:
             if saving_throw >= save_versus:
-                result = self.colorize('LIVES', 'green')
+                result = self.colorize(u'LIVES', u'green')
             else:
-                result = self.colorize('DIES', 'red')
+                result = self.colorize(u'DIES', u'red')
         except:
-            result = self.colorize('IS TOO COMPLEX', 'yellow')
+            result = self.colorize(u'IS TOO COMPLEX', u'yellow')
 
-        return '%s rolls %s, needs %s, %s %s' % (nick, saving_throw,
+        return u'%s rolls %s, needs %s, %s %s' % (nick, saving_throw,
                 save_versus, nick, result)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

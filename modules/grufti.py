@@ -25,6 +25,7 @@ import random
 from include.utils import Module, slurp
 import logging as log
 import shutil
+from include import encoding
 
 class Main(Module):
 
@@ -33,22 +34,22 @@ class Main(Module):
     priority = 100
     terminate = False
     require_addressing = False
-    reMatchBlocks = re.compile('%match\s+(.*?)%end', re.DOTALL)
-    reCommaDelim = re.compile('\s*,\s*')
-    rePipeDelim = re.compile('\s*\|\s*')
-    reToken = re.compile('({{\s*(.*?)\s*}})')
-    reIsRegex = re.compile('^/(.+)/$')
-    _filename = 'grufti-responses.txt'
-    _sample = _filename + '-sample'
+    reMatchBlocks = re.compile(u'%match\s+(.*?)%end', re.DOTALL)
+    reCommaDelim = re.compile(u'\s*,\s*')
+    rePipeDelim = re.compile(u'\s*\|\s*')
+    reToken = re.compile(u'({{\s*(.*?)\s*}})')
+    reIsRegex = re.compile(u'^/(.+)/$')
+    _filename = u'grufti-responses.txt'
+    _sample = _filename + u'-sample'
 
     def __init__(self, madcow=None):
         try:
             self.data = []
-            filename = os.path.join(madcow.prefix, 'grufti-responses.txt')
+            filename = os.path.join(madcow.prefix, u'grufti-responses.txt')
             if not os.path.exists(filename):
                 sample = os.path.join(madcow.prefix, self._sample)
                 shutil.copyfile(sample, filename)
-                log.warn('created %s' % self._filename)
+                log.warn(u'created %s' % self._filename)
             doc = slurp(filename)
             for block in self.reMatchBlocks.findall(doc):
                 responses = block.splitlines()
@@ -61,7 +62,7 @@ class Main(Module):
                     if isRegex is not None:
                         regex = re.compile(isRegex.group(1), re.I)
                     else:
-                        regex = ''
+                        regex = u''
                         if match[0].isalnum():
                             regex += r'\b'
                         regex += re.escape(match)
@@ -71,7 +72,7 @@ class Main(Module):
                     matches.append(regex)
                 self.data.append((matches, responses))
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
             self.enabled = False
 
@@ -86,9 +87,10 @@ class Main(Module):
         try:
             for matches, responses in self.data:
                 for match in matches:
-                    if match.search(args[0]) is not None:
-                        return self.parseTokens(random.choice(responses))
+                    if match.search(args[0]):
+                        result = self.parseTokens(random.choice(responses))
+                        return encoding.convert(result)
 
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in %s: %s' % (self.__module__, error))
             log.exception(error)

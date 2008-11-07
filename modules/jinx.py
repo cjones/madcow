@@ -36,7 +36,8 @@ class ChatLine(object):
         self.timestamp = time.time()
 
     def __str__(self):
-        return "%s: <%s> %s\n" % (str(self.timestamp), self.nick, self.text)
+        return u"%s: <%s> %s\n" % (unicode(self.timestamp), self.nick,
+                                   self.text)
 
 
 class ChatLog(object):
@@ -61,9 +62,9 @@ class ChatLog(object):
         """
 
         # easy way to ignore case and whitespace
-        tokens = map(str.lower, line.text.split())
+        tokens = map(unicode.lower, line.text.split())
         for l in self.lines:
-            if map(str.lower, l.text.split()) == tokens:
+            if map(unicode.lower, l.text.split()) == tokens:
                 return l  # found a match
 
         return None  # no matches found
@@ -74,9 +75,9 @@ class ChatLog(object):
         self.lines.append(line)
 
     def __str__(self):
-        s = ""
-        for line in self.lines: 
-            s += str(line)
+        s = u""
+        for line in self.lines:
+            s += unicode(line)
         return s
 
 
@@ -99,7 +100,7 @@ class Main(Module):
             self.log.add(cl)
             oldline = self.log.getMatchingLine(cl)
             if oldline and oldline.nick != nick:
-                return "Jinx! %s owes %s a coke!" % (nick, oldline.nick)
+                return u"Jinx! %s owes %s a coke!" % (nick, oldline.nick)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)

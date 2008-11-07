@@ -69,6 +69,7 @@ import string
 import sys
 import time
 import types
+import warnings
 
 VERSION = 0, 4, 6
 DEBUG = 0
@@ -430,7 +431,9 @@ class ServerConnection(Connection):
             self.socket = None
             raise ServerConnectionError, "Couldn't connect to socket: %s" % x
         if ssl:
-            self.transport = socket.ssl(self.socket)
+            with warnings.catch_warnings():
+                warnings.simplefilter(u'ignore')
+                self.transport = socket.ssl(self.socket)
             self.sock_read = self.transport.read
             self.sock_write = self.transport.write
         else:

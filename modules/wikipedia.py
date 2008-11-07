@@ -26,22 +26,22 @@ import logging as log
 
 class Main(Module):
 
-    pattern = re.compile('^\s*(?:wp|wiki|wikipedia)\s+(.*?)\s*$', re.I)
+    pattern = re.compile(u'^\s*(?:wp|wiki|wikipedia)\s+(.*?)\s*$', re.I)
     require_addressing = True
-    help = 'wiki <term> - look up summary of term on wikipedia'
+    help = u'wiki <term> - look up summary of term on wikipedia'
 
     def __init__(self, *args, **kwargs):
         self.wiki = Wiki()
 
     def response(self, nick, args, kwargs):
         try:
-            return self.wiki.get_summary(args)
+            return unicode(self.wiki.get_summary(args))
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: problem with query: %s' % (nick, error)
+            return u'%s: problem with query: %s' % (nick, error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

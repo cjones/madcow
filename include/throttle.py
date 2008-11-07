@@ -67,7 +67,7 @@ class ThrottleStatus(object):
         if self.warned is True:
             return False
         else:
-            log.info('Throttling user %s for %s' % (self.user, self.name))
+            log.info(u'Throttling user %s for %s' % (self.user, self.name))
             self.warned = True
             return True
 

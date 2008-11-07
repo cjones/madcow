@@ -25,15 +25,15 @@ import re
 from include.useragent import geturl
 from include.colorlib import ColorLib
 
-__version__ = '0.1'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
+__version__ = u'0.1'
+__author__ = u'Chris Jones <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*(election|ev)\s*$', re.I)
-    help = 'ev - current election 2008 vote prediction'
-    _baseurl = 'http://www.electoral-vote.com/'
+    help = u'ev - current election 2008 vote prediction'
+    _baseurl = u'http://www.electoral-vote.com/'
     _score_re = re.compile(r'<td class="score">(.*?)</td>', re.DOTALL)
     _dem_re = re.compile(r'<span class="dem">(.*?)\s+(\d+)')
     _gop_re = re.compile(r'<span class="gop">(.*?)\s+(\d+)')
@@ -43,11 +43,11 @@ class Main(Module):
         if madcow is not None:
             self.colorlib = madcow.colorlib
         else:
-            self.colorlib = ColorLib('ansi')
+            self.colorlib = ColorLib(u'ansi')
 
     def colorize(self, color, key, val):
         key = self.colorlib.get_color(color, text=key)
-        return '%s: %s' % (key, val)
+        return u'%s: %s' % (key, val)
 
     def response(self, nick, args, kwargs):
         try:
@@ -64,17 +64,17 @@ class Main(Module):
                 except AttributeError:
                     pass
             except AttributeError:
-                raise Exception("couldn't parse page")
-            output = [self.colorize('blue', *dem), self.colorize('red', *gop)]
+                raise Exception(u"couldn't parse page")
+            output = [self.colorize(u'blue', *dem), self.colorize(u'red', *gop)]
             if tie:
-                output.append(self.colorize('white', *tie))
-            return '%s: %s' % (nick, ', '.join(output))
+                output.append(self.colorize(u'white', *tie))
+            return u'%s: %s' % (nick, u', '.join(output))
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, error)
+            return u'%s: %s' % (nick, error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

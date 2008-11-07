@@ -18,14 +18,14 @@ class RedentError(Exception):
 
 def main():
     data = sys.stdin.read()
-    if '\t' in data:
-        raise RedentError('omg tabs detected, fix that before running this')
+    if u'\t' in data:
+        raise RedentError(u'omg tabs detected, fix that before running this')
     lines = data.splitlines()
     changes = defaultdict(int)
     last_indent = None
     parsed = []
     for line in lines:
-        line = _blank_re.sub('', line)
+        line = _blank_re.sub(u'', line)
         indent = len(_whitespace_re.match(line).group(0))
         tail = line[indent:]
         parsed.append((indent, tail))
@@ -40,14 +40,14 @@ def main():
                      reverse=True)
     detected_indent = changes[0][0]
     if detected_indent == INDENT:
-        raise RedentError('no work needs to be done, indent level is same')
+        raise RedentError(u'no work needs to be done, indent level is same')
     for i, line in enumerate(parsed):
         indent, tail = line
         if indent % detected_indent:
-            raise RedentError('uneven indentation detected')
+            raise RedentError(u'uneven indentation detected')
         level = indent / detected_indent
-        print (' ' * INDENT * level) + tail
+        print (u' ' * INDENT * level) + tail
     return 0
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     sys.exit(main())

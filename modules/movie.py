@@ -26,9 +26,9 @@ from include.useragent import geturl
 from urlparse import urljoin
 from include.utils import stripHTML
 
-__version__ = '0.2'
-__author__ = 'cj_ <cjones@gmail.com>'
-__all__ = ['IMDB', 'RottenTomatoes', 'MovieRatings']
+__version__ = u'0.2'
+__author__ = u'cj_ <cjones@gmail.com>'
+__all__ = [u'IMDB', u'RottenTomatoes', u'MovieRatings']
 
 # global
 reopts = re.I | re.DOTALL
@@ -43,17 +43,17 @@ class IMDB(object):
 
     """Interface to IMDB"""
 
-    baseurl = 'http://imdb.com/'
-    search = urljoin(baseurl, '/find')
-    search_title = 'IMDb Search'
-    movies = re.compile('<a\s+.*?href=(["\'])(/title/tt\d+/)\\1.*?>(.*?</a>)',
+    baseurl = u'http://imdb.com/'
+    search = urljoin(baseurl, u'/find')
+    search_title = u'IMDb Search'
+    movies = re.compile(u'<a\s+.*?href=(["\'])(/title/tt\d+/)\\1.*?>(.*?</a>)',
                         reopts)
     rating = re.compile(r'<div class="meta">.*?<b>([0-9.]+)/10</b>', reopts)
 
     def rate(self, movie):
         """Get the rating for a movie"""
         try:
-            page = geturl(self.search, opts={'s': 'all', 'q': movie})
+            page = geturl(self.search, opts={u's': u'all', u'q': movie})
             movie = normalize(movie)
             title = html_title.search(page).group(1)
             if title == self.search_title:
@@ -80,10 +80,10 @@ class IMDB(object):
 
             # get rating and generate response
             rating = self.rating.search(page).group(1)
-            response = 'IMDB'
+            response = u'IMDB'
             if normalize(title) != movie:
-                response += ' [%s]' % stripHTML(title)
-            response += ': %s/10' % rating
+                response += u' [%s]' % stripHTML(title)
+            response += u': %s/10' % rating
             return response
 
         except:
@@ -94,18 +94,18 @@ class RottenTomatoes(object):
 
     """Interface to Rotten Tomatoes"""
 
-    baseurl = 'http://www.rottentomatoes.com/'
-    search = urljoin(baseurl, '/search/search.php')
-    search_title = 'ROTTEN TOMATOES: Movie Reviews &amp; Previews'
+    baseurl = u'http://www.rottentomatoes.com/'
+    search = urljoin(baseurl, u'/search/search.php')
+    search_title = u'ROTTEN TOMATOES: Movie Reviews &amp; Previews'
     movies = re.compile(r'<a href="(/m/.*?/)">(.*?)</a>', reopts)
     movie_title = re.compile(r'<h1 class="movie_title clearfix">(.*?)</h1>',
                              reopts)
-    rating = re.compile('<div id="tomatometer_score".*?>.*?>([0-9.]+)', reopts)
+    rating = re.compile(u'<div id="tomatometer_score".*?>.*?>([0-9.]+)', reopts)
 
     def rate(self, movie):
         """Get the freshness rating of a movie"""
         try:
-            opts={'sitesearch': 'rt', 'search': movie}
+            opts={u'sitesearch': u'rt', u'search': movie}
             page = geturl(self.search, opts=opts, referer=self.baseurl)
             movie = normalize(movie)
             title = html_title.search(page).group(1)
@@ -133,10 +133,10 @@ class RottenTomatoes(object):
             rating = self.rating.search(page).group(1)
 
             # construct response
-            response = 'Freshness'
+            response = u'Freshness'
             if normalize(title) != movie:
-                response += ' [%s]' % stripHTML(title)
-            response += ': %s%%' % rating
+                response += u' [%s]' % stripHTML(title)
+            response += u': %s%%' % rating
             return response
 
         except Exception, error:
@@ -145,14 +145,14 @@ class RottenTomatoes(object):
 
 class MetaCritic(object):
 
-    baseurl = 'http://www.metacritic.com/'
-    search = urljoin(baseurl, '/search/process')
-    movie_opts = {'sort': 'relevance',
-                  'termType': 'all',
-                  'ts': None,
-                  'ty': '1',
-                  'x': '24',
-                  'y': '10',
+    baseurl = u'http://www.metacritic.com/'
+    search = urljoin(baseurl, u'/search/process')
+    movie_opts = {u'sort': u'relevance',
+                  u'termType': u'all',
+                  u'ts': None,
+                  u'ty': u'1',
+                  u'x': u'24',
+                  u'y': u'10',
                   }
     result = re.compile(r'<strong>(?:Film|Video):</strong>\s+<a href="([^"]+)'
                         r'"><b>(.*?)</b>', reopts)
@@ -162,7 +162,7 @@ class MetaCritic(object):
     def rate(self, movie):
         try:
             opts = dict(self.movie_opts)
-            opts['ts'] = movie
+            opts[u'ts'] = movie
             page = geturl(self.search, opts=opts)
             movie = normalize(movie)
             movies = self.result.findall(page)
@@ -177,25 +177,25 @@ class MetaCritic(object):
             page = geturl(url, referer=self.search)
             try:
                 critic_rating = self.critic_rating.search(page).group(1)
-                critic_rating = 'Critics: ' + critic_rating + '/100'
+                critic_rating = u'Critics: ' + critic_rating + u'/100'
             except:
                 critic_rating = None
             try:
                 user_rating = self.user_rating.search(page).group(1)
-                user_rating = 'Users: ' + user_rating + '/10'
+                user_rating = u'Users: ' + user_rating + u'/10'
             except:
                 user_rating = None
 
             title = html_title.search(page).group(1)
-            title = title.replace(': Reviews', '')
+            title = title.replace(u': Reviews', u'')
 
-            response = 'Meta'
+            response = u'Meta'
             if normalize(title) != movie:
-                response += ' [%s]' % stripHTML(title)
+                response += u' [%s]' % stripHTML(title)
             ratings = [i for i in (critic_rating, user_rating) if i is not None]
-            ratings = ', '.join(ratings)
+            ratings = u', '.join(ratings)
             if ratings:
-                response += ' - %s' % ratings
+                response += u' - %s' % ratings
             return response
         except:
             pass
@@ -209,26 +209,26 @@ class MovieRatings(object):
                RottenTomatoes(),
                MetaCritic(),
                )
-    baseurl = 'http://videoeta.com/'
-    topurl = urljoin(baseurl, '/theaters.html')
-    movieurl = urljoin(baseurl, '/movie/')
+    baseurl = u'http://videoeta.com/'
+    topurl = urljoin(baseurl, u'/theaters.html')
+    movieurl = urljoin(baseurl, u'/movie/')
     movies = re.compile(r'/movie/(.*?).>(.*?)<', re.DOTALL)
 
     def topmovies(self):
         doc = geturl(self.topurl)
         results = self.movies.findall(doc)[:10]
-        results = ['%2s: %s - %s%s' % (i+1, r[1], self.movieurl, r[0])
+        results = [u'%2s: %s - %s%s' % (i+1, r[1], self.movieurl, r[0])
                    for i, r in enumerate(results)]
-        results.insert(0, '>>> Top Movies At Box Office <<<')
-        return '\n'.join(results)
+        results.insert(0, u'>>> Top Movies At Box Office <<<')
+        return u'\n'.join(results)
 
     def rate(self, movie):
         """Get movie ratings from imdb and rotten tomatoes"""
         ratings = [source.rate(movie) for source in self.sources]
         ratings = [rating for rating in ratings if rating is not None]
         if ratings:
-            return ', '.join(ratings)
-        return 'movie not found'
+            return u', '.join(ratings)
+        return u'movie not found'
 
 
 class Main(Module):
@@ -236,35 +236,35 @@ class Main(Module):
     """Autoloaded by MadCow"""
 
     pattern = re.compile(r'^\s*(?:(rate)\s+(.+?)|(topmovies))\s*$', re.I)
-    error = 'does that movie even exist?'
+    error = u'does that movie even exist?'
     movie = MovieRatings()
-    help = '[rate <movie>|topmovies] - get info about movies'
+    help = u'[rate <movie>|topmovies] - get info about movies'
 
     def response(self, nick, args, kwargs):
         try:
-            if args[0] == 'rate':
-                response = '%s: %s' % (nick, self.movie.rate(args[1]))
-            elif args[2] == 'topmovies':
+            if args[0] == u'rate':
+                response = u'%s: %s' % (nick, self.movie.rate(args[1]))
+            elif args[2] == u'topmovies':
                 response = self.movie.topmovies()
-            return response
+            return unicode(response)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, self.error)
+            return u'%s: %s' % (nick, self.error)
 
 
 def normalize(name):
     """Normalize a movie title for easy comparison"""
     name = stripHTML(name)
-    name = year.sub('', name)
+    name = year.sub(u'', name)
     name = _reversed_article.sub(r'\2 \1', name)
-    name = _articles.sub('', name)
-    name = badchars.sub(' ', name)
+    name = _articles.sub(u'', name)
+    name = badchars.sub(u' ', name)
     name = name.lower()
     name = name.strip()
-    name = whitespace.sub(' ', name)
+    name = whitespace.sub(u' ', name)
     return name
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

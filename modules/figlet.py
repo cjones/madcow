@@ -25,47 +25,48 @@ from include.utils import Module
 import random
 import os
 import logging as log
+from include import encoding
 
-__author__ = 'James Johnston <jjohnston@email4life.com>'
+__author__ = u'James Johnston <jjohnston@email4life.com>'
 
 class Main(Module):
 
-    pattern = re.compile('^\s*figlet\s+(.+?)\s*$')
+    pattern = re.compile(u'^\s*figlet\s+(.+?)\s*$')
     require_addressing = True
     allow_threading = False
-    help = 'figlet <text> - ASCII text generator'
+    help = u'figlet <text> - ASCII text generator'
 
     def __init__(self, madcow=None):
-        zipfile = os.path.join(madcow.prefix, 'include/fonts.zip')
+        zipfile = os.path.join(madcow.prefix, u'include/fonts.zip')
         self.figlet = Figlet(zipfile=zipfile)
 
         # pre-approved list of fonts to use
         self.fonts = (
-            '5lineoblique', 'acrobatic', 'alligator', 'alligator2', 'asc_____',
-            'ascii___', 'avatar', 'big', 'bigchief', 'block', 'bubble',
-            'bulbhead', 'chunky', 'colossal', 'computer', 'cosmic',
-            'crawford', 'cursive', 'digital', 'dotmatrix', 'double',
-            'drpepper', 'eftifont', 'eftirobot', 'eftiwall', 'eftiwater',
-            'epic', 'fourtops', 'fuzzy', 'goofy', 'graceful', 'gradient',
-            'graffiti', 'hollywood', 'invita', 'italic', 'larry3d', 'lean',
-            'maxfour', 'mini', 'nvscript', 'o8', 'pawp', 'pepper', 'puffy',
-            'rectangles', 'shadow', 'slant', 'small', 'smkeyboard',
-            'smshadow', 'smslant', 'speed', 'stampatello', 'standard',
-            'straight', 'twopoint'
+            u'5lineoblique', u'acrobatic', u'alligator', u'alligator2', u'asc_____',
+            u'ascii___', u'avatar', u'big', u'bigchief', u'block', u'bubble',
+            u'bulbhead', u'chunky', u'colossal', u'computer', u'cosmic',
+            u'crawford', u'cursive', u'digital', u'dotmatrix', u'double',
+            u'drpepper', u'eftifont', u'eftirobot', u'eftiwall', u'eftiwater',
+            u'epic', u'fourtops', u'fuzzy', u'goofy', u'graceful', u'gradient',
+            u'graffiti', u'hollywood', u'invita', u'italic', u'larry3d', u'lean',
+            u'maxfour', u'mini', u'nvscript', u'o8', u'pawp', u'pepper', u'puffy',
+            u'rectangles', u'shadow', u'slant', u'small', u'smkeyboard',
+            u'smshadow', u'smslant', u'speed', u'stampatello', u'standard',
+            u'straight', u'twopoint'
         )
 
     def response(self, nick, args, kwargs):
         try:
             self.figlet.setFont(font=random.choice(self.fonts))
             text = self.figlet.renderText(args[0])
-            return text
+            return encoding.convert(text)
 
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: figlet :(' % nick
+            return u'%s: figlet :(' % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

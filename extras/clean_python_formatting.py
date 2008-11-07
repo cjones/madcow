@@ -3,8 +3,8 @@
 import sys
 
 def main():
-    assert len(sys.argv) == 2, 'need a filename'
-    f = open(sys.argv[1], 'rb')
+    assert len(sys.argv) == 2, u'need a filename'
+    f = open(sys.argv[1], u'rb')
     try:
         data = f.read()
     finally:
@@ -18,15 +18,15 @@ def main():
     fixed = []
     for line in lines:
         fixed.append(line)
-        if line.strip().startswith('def '):
-            fixed.append('')
-        elif line.strip().startswith('class '):
-            fixed += ['', '']
+        if line.strip().startswith(u'def '):
+            fixed.append(u'')
+        elif line.strip().startswith(u'class '):
+            fixed += [u'', u'']
     fixed.reverse()
 
-    print '\n'.join(fixed)
+    print u'\n'.join(fixed)
 
     return 0
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     sys.exit(main())

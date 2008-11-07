@@ -21,10 +21,10 @@ class ProtocolHandler(Madcow):
             try:
                 # in a real protocol, this should not block, otherwise
                 # incoming messages do not get processed
-                line = raw_input('>>> ')
+                line = raw_input(u'>>> ')
 
                 # send message to bot subsystem for processing
-                self.process_message(line, os.environ['USER'])
+                self.process_message(line, os.environ[u'USER'])
 
                 # check if we have any responses
                 self.check_response_queue()
@@ -38,7 +38,7 @@ class ProtocolHandler(Madcow):
 
     def botname(self):
         """Should return bots real name for addressing purposes"""
-        return 'madcow'
+        return u'madcow'
 
     def protocol_output(self, message, req=None):
         """Protocol-specific output method"""
@@ -58,7 +58,7 @@ class ProtocolHandler(Madcow):
         req.nick = nick
 
         # some modules expect this to be set as well as logging facility
-        req.channel = 'console'
+        req.channel = u'console'
 
         # force bot into addressed mode
         # many modules require the bot is addressed before triggering.

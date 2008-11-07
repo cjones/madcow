@@ -17,11 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
-"""get a random lj"""
+"""Read from LiveJournal"""
 
 import re
-from include import rssparser
-from include.utils import Module, stripHTML, isUTF8
+from include import feedparser
+from include.utils import Module, stripHTML
 from include.useragent import geturl
 from urlparse import urljoin
 import logging as log
@@ -29,11 +29,11 @@ import logging as log
 class Main(Module):
 
     enabled = True
-    pattern = re.compile('^\s*(?:livejournal|lj)(?:\s+(\S+))?')
+    pattern = re.compile(u'^\s*(?:livejournal|lj)(?:\s+(\S+))?')
     require_addressing = True
-    help = 'lj [user] - get latest entry to an lj, omit user for a random one'
-    baseURL = 'http://livejournal.com'
-    randomURL = urljoin(baseURL, '/random.bml')
+    help = u'lj [user] - get latest entry to an lj, omit user for a random one'
+    baseURL = u'http://livejournal.com'
+    randomURL = urljoin(baseURL, u'/random.bml')
     max = 800
 
     def response(self, nick, args, kwargs):
@@ -42,28 +42,20 @@ class Main(Module):
                 user = args[0]
             except:
                 user = None
-            if user is None or user == '':
+            if user is None or user == u'':
                 doc = geturl(self.randomURL)
-                user = re.search('"currentJournal": "(.*?)"', doc).group(1)
-            url = urljoin(self.baseURL, '/users/%s/data/rss' % user)
-            feed = rssparser.parse(url)
-
-            # get latest entry and their homepage url
-            entry, page = map(stripHTML, map(
-                lambda x: x.encode(feed.encoding),
-                [feed.entries[0].description, feed.channel.link]))
-
-            # these can get absurdly long
-            entry = entry[:self.max]
-
-            return '%s: [%s] %s' % (nick, page, entry)
-
+                user = re.search(u'"currentJournal": "(.*?)"', doc).group(1)
+            url = urljoin(self.baseURL, u'/users/%s/data/rss' % user)
+            rss = feedparser.parse(url)
+            entry = stripHTML(rss.entries[0].description)[:self.max]
+            page = stripHTML(rss.channel.link)
+            return u'%s: [%s] %s' % (nick, page, entry)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return "%s: Couldn't load the page LJ returned D:" % nick
+            return u"%s: Couldn't load the page LJ returned D:" % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

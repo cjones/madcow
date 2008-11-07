@@ -19,20 +19,21 @@
 
 import urllib2
 from utils import stripHTML
-from useragent import UserAgent
+import useragent
 from urlparse import urljoin
 import re
 
-__version__ = '0.1'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.1'
+__author__ = u'cj_ <cjones@gruntle.org>'
 
 class NonRedirectResponse(Exception):
+
     """Raised when google doesn't return a redirect"""
 
 
 class Response(object):
 
-    def __init__(self, data=''):
+    def __init__(self, data=u''):
         self.data = data
 
     def read(self, *args, **kwargs):
@@ -40,59 +41,63 @@ class Response(object):
 
 
 class NoRedirects(urllib2.HTTPRedirectHandler):
+
     """Override auto-follow of redirects"""
 
     def redirect_request(self, *args, **kwargs):
         pass
 
 
-class NoErrors(urllib2.HTTPDefaultErrorHandler):    
+class NoErrors(urllib2.HTTPDefaultErrorHandler):
+
     """Don't allow urllib to throw an error on 30x code"""
 
-    def http_error_default(self, req, fp, code, msg, headers): 
-        return Response(data=dict(headers.items())['location'])
+    def http_error_default(self, req, fp, code, msg, headers):
+        return Response(data=dict(headers.items())[u'location'])
 
 
 class Google(object):
-    baseurl = 'http://www.google.com/'
-    search = urljoin(baseurl, '/search')
-    luckyopts = {'hl': 'en', 'btnI': 'I', 'aq': 'f', 'safe': 'off'}
-    calcopts = {'hl': 'en', 'safe': 'off', 'c2coff': 1, 'btnG': 'Search'}
-    spellcheck_opts = {'hl': 'en', 'aq': 'f', 'safe': 'off'}
+
+    baseurl = u'http://www.google.com/'
+    search = urljoin(baseurl, u'/search')
+    luckyopts = {u'hl': u'en', u'btnI': u'I', u'aq': u'f', u'safe': u'off'}
+    calcopts = {u'hl': u'en', u'safe': u'off', u'c2coff': 1, u'btnG': u'Search'}
+    spellcheck_opts = {u'hl': u'en', u'aq': u'f', u'safe': u'off'}
     correct = re.compile(r'Did you mean.*?:.*?</font>.*?<a.*?>\s*(.*?)\s*</a>',
-            re.I + re.DOTALL)
-    reConversionDetected = re.compile('More about (calculator|currency)')
-    reConversionResult = re.compile('<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
+                         re.I | re.DOTALL)
+    reConversionDetected = re.compile(u'More about (calculator|currency)')
+    reConversionResult = re.compile(u'<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
 
     def __init__(self):
-        self.ua = UserAgent(handlers=[NoRedirects, NoErrors])
+        self.ua = useragent.UserAgent(handlers=[NoRedirects, NoErrors])
 
     def lucky(self, query):
         opts = dict(self.luckyopts.items())
-        opts['q'] = query
-        result = self.ua.openurl(self.search, opts=opts, referer=self.baseurl,
-                size=1024)
-        if not result.startswith('http'):
+        opts[u'q'] = query
+        result = self.ua.open(self.search, opts=opts, referer=self.baseurl,
+                              size=1024)
+        if not result.startswith(u'http'):
             raise NonRedirectResponse
         return result
 
     def spellcheck(self, query):
         opts = dict(self.spellcheck_opts)
-        opts['q'] = query
-        result = self.ua.openurl(self.search, opts=opts, referer=self.baseurl)
+        opts[u'q'] = query
+        result = self.ua.open(self.search, opts=opts, referer=self.baseurl)
         try:
             result = self.correct.search(result).group(1)
             result = stripHTML(result)
-        except:
+        except AttributeError:
             result = query
         return result
 
     def calculator(self, query):
         opts = dict(self.calcopts)
-        opts['q'] = query
-        doc = self.ua.openurl(self.search, opts=opts)
+        opts[u'q'] = query
+        doc = self.ua.open(self.search, opts=opts)
         if not self.reConversionDetected.search(doc):
-            raise Exception, 'no conversion detected'
+            raise Exception, u'no conversion detected'
         response = self.reConversionResult.search(doc).group(1)
         response = stripHTML(response)
         return response
+

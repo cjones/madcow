@@ -21,9 +21,9 @@
 
 import re
 
-__version__ = '0.5'
-__author__ = 'cj_ <cjones@gruntle.org>'
-__all__ = ['ColorLib']
+__version__ = u'0.5'
+__author__ = u'cj_ <cjones@gruntle.org>'
+__all__ = [u'ColorLib']
 
 class UnknownProtocol(Exception):
     """Raised when protocol is not supported"""
@@ -38,95 +38,95 @@ class UnknownRainbowStyle(Exception):
 
 
 class ColorLib(object):
-    _protocols = ['mirc', 'ansi', 'html']
+    _protocols = [u'mirc', u'ansi', u'html']
     _codes = {
-        'r': 'red',
-        'o': 'orange',
-        'y': 'yellow',
-        'Y': 'bright yellow',
-        'g': 'green',
-        'G': 'bright green',
-        'c': 'cyan',
-        'C': 'bright cyan',
-        'b': 'blue',
-        'B': 'bright blue',
-        'm': 'magenta',
-        'M': 'bright magenta',
-        '0': 'black',
-        '1': 'dark gray',
-        '2': 'light gray',
-        'w': 'white',
+        u'r': u'red',
+        u'o': u'orange',
+        u'y': u'yellow',
+        u'Y': u'bright yellow',
+        u'g': u'green',
+        u'G': u'bright green',
+        u'c': u'cyan',
+        u'C': u'bright cyan',
+        u'b': u'blue',
+        u'B': u'bright blue',
+        u'm': u'magenta',
+        u'M': u'bright magenta',
+        u'0': u'black',
+        u'1': u'dark gray',
+        u'2': u'light gray',
+        u'w': u'white',
     }
 
     _color_map = {
-        'mirc': {
-            'red': '5',
-            'orange': '4',
-            'yellow': '7',
-            'bright yellow': '8',
-            'green': '3',
-            'bright green': '9',
-            'cyan': '10',
-            'bright cyan': '11',
-            'blue': '2',
-            'bright blue': '12',
-            'magenta': '6',
-            'bright magenta': '13',
-            'black': '1',
-            'dark gray': '14',
-            'light gray': '15',
-            'white': '0',
+        u'mirc': {
+            u'red': u'5',
+            u'orange': u'4',
+            u'yellow': u'7',
+            u'bright yellow': u'8',
+            u'green': u'3',
+            u'bright green': u'9',
+            u'cyan': u'10',
+            u'bright cyan': u'11',
+            u'blue': u'2',
+            u'bright blue': u'12',
+            u'magenta': u'6',
+            u'bright magenta': u'13',
+            u'black': u'1',
+            u'dark gray': u'14',
+            u'light gray': u'15',
+            u'white': u'0',
         },
-        'ansi': {
-            'red': '1',
-            'orange': '1b',
-            'yellow': '3',
-            'bright yellow': '3b',
-            'green': '2',
-            'bright green': '2b',
-            'cyan': '6',
-            'bright cyan': '6b',
-            'blue': '4',
-            'bright blue': '4b',
-            'magenta': '5',
-            'bright magenta': '5b',
-            'black': '0',
-            'dark gray': '0b',
-            'light gray': '7',
-            'white': '7b',
+        u'ansi': {
+            u'red': u'1',
+            u'orange': u'1b',
+            u'yellow': u'3',
+            u'bright yellow': u'3b',
+            u'green': u'2',
+            u'bright green': u'2b',
+            u'cyan': u'6',
+            u'bright cyan': u'6b',
+            u'blue': u'4',
+            u'bright blue': u'4b',
+            u'magenta': u'5',
+            u'bright magenta': u'5b',
+            u'black': u'0',
+            u'dark gray': u'0b',
+            u'light gray': u'7',
+            u'white': u'7b',
         },
-        'html': {
-            'red': '#DF0009',
-            'orange': '#FF000B',
-            'yellow': '#C9D000',
-            'bright yellow': '#FBFF00',
-            'green': '#00D100',
-            'bright green': '#00FF00',
-            'cyan': '#00CECC',
-            'bright cyan': '#00FFFE',
-            'blue': '#1A00D1',
-            'bright blue': '#2100FF',
-            'magenta': '#E200D2',
-            'bright magenta': '#FF00FF',
-            'black': '#000000',
-            'dark gray': '#808080',
-            'light gray': '#CCCCCC',
-            'white': '#FFFFFF',
+        u'html': {
+            u'red': u'#DF0009',
+            u'orange': u'#FF000B',
+            u'yellow': u'#C9D000',
+            u'bright yellow': u'#FBFF00',
+            u'green': u'#00D100',
+            u'bright green': u'#00FF00',
+            u'cyan': u'#00CECC',
+            u'bright cyan': u'#00FFFE',
+            u'blue': u'#1A00D1',
+            u'bright blue': u'#2100FF',
+            u'magenta': u'#E200D2',
+            u'bright magenta': u'#FF00FF',
+            u'black': u'#000000',
+            u'dark gray': u'#808080',
+            u'light gray': u'#CCCCCC',
+            u'white': u'#FFFFFF',
         },
     }
-    
+
     _rainbow_map = {
-        'rainbow': 'rryyggccbbmm',
-        'usa': 'ooowwwBBB',
-        'gray': '111222',
-        'scale': 'ww22CC11CC22',
-        'xmas': 'rrgg',
-        'canada': 'ooowww',
+        u'rainbow': u'rryyggccbbmm',
+        u'usa': u'ooowwwBBB',
+        u'gray': u'111222',
+        u'scale': u'ww22CC11CC22',
+        u'xmas': u'rrgg',
+        u'canada': u'ooowww',
     }
 
     # regex for stripping color codes
     _ansi_color = re.compile(r'\x1b\[[0-9;]+m')
-    _mirc_color = re.compile(r"([\x02\x0F\x1F\x0E\x16\x1B]|\x03([0-9]{0,2})(,([0-9]{0,2}))?|\x04[0-9A-Fa-f]{6}(,([0-9A-Fa-f]){6})?)*")  
+    _mirc_color = re.compile(r"([\x02\x0F\x1F\x0E\x16\x1B]|\x03([0-9]{0,2})(,([0-9]{0,2}))?|\x04[0-9A-Fa-f]{6}(,([0-9A-Fa-f]){6})?)*")
     _html_color = re.compile(r'<span style=".*">')
 
     def __init__(self, protocol):
@@ -139,11 +139,11 @@ class ColorLib(object):
         color = color.lower().strip()
         if color in self._codes:
             color = self._codes[color]
-        color = color.replace('bold', 'bright')
-        color = color.replace('grey', 'gray')
-        color = color.replace('purple', 'magenta')
-        if color == 'gray':
-            color = 'light gray'
+        color = color.replace(u'bold', u'bright')
+        color = color.replace(u'grey', u'gray')
+        color = color.replace(u'purple', u'magenta')
+        if color == u'gray':
+            color = u'light gray'
         if color not in self._color_map[self.protocol]:
             raise UnknownColor, color
         return color
@@ -155,54 +155,54 @@ class ColorLib(object):
             fg = self._color_map[self.protocol][self._normalize_color(fg)]
         if bg:
             bg = self._color_map[self.protocol][self._normalize_color(bg)]
-        if self.protocol == 'ansi':
+        if self.protocol == u'ansi':
             codes = []
             if fg is not None:
-                if 'b' in fg:
-                    codes.append('1')
-                    fg = fg.replace('b', '')
-                codes.append('3' + fg)
+                if u'b' in fg:
+                    codes.append(u'1')
+                    fg = fg.replace(u'b', u'')
+                codes.append(u'3' + fg)
             if bg is not None:
-                bg = bg.replace('b', '')
-                codes.append('4' + bg)
-            color = '\x1b[%sm' % ';'.join(codes)
-        elif self.protocol == 'mirc':
+                bg = bg.replace(u'b', u'')
+                codes.append(u'4' + bg)
+            color = u'\x1b[%sm' % u';'.join(codes)
+        elif self.protocol == u'mirc':
             codes = []
             if fg is None:
-                codes.append('')
+                codes.append(u'')
             else:
                 codes.append(fg)
             if bg is not None:
                 codes.append(bg)
-            color = '\x03' + ','.join(codes)
+            color = u'\x03' + u','.join(codes)
             if text is not None and text[0].isdigit():
-                color += '\x16\x16'
-        elif self.protocol == 'html':
+                color += u'\x16\x16'
+        elif self.protocol == u'html':
             codes = []
             if fg is not None:
-                codes.append('color:' + fg)
+                codes.append(u'color:' + fg)
             if bg is not None:
-                codes.append('background-color:' + bg)
-            color = '<span style="%s">' % ';'.join(codes)
+                codes.append(u'background-color:' + bg)
+            color = u'<span style="%s">' % u';'.join(codes)
         if text is not None:
-            return '%s%s%s' % (color, text, self.reset())
+            return u'%s%s%s' % (color, text, self.reset())
         else:
             return color
 
     def reset(self):
-        if self.protocol == 'ansi':
-            return '\x1b[0m'
-        elif self.protocol == 'mirc':
-            return '\x0f'
-        elif self.protocol == 'html':
-            return '</span>'
+        if self.protocol == u'ansi':
+            return u'\x1b[0m'
+        elif self.protocol == u'mirc':
+            return u'\x0f'
+        elif self.protocol == u'html':
+            return u'</span>'
 
-    def rainbow(self, text, style='rainbow'):
+    def rainbow(self, text, style=u'rainbow'):
         if style not in self._rainbow_map:
             raise UnknownRainbowStyle, style
         self.rainbow_offset.setdefault(style, 0)
         offset = self.rainbow_offset[style]
-        output = ''
+        output = u''
         colmap = self._rainbow_map[style]
         for line in text.splitlines():
             for i, ch in enumerate(line):
@@ -212,17 +212,17 @@ class ColorLib(object):
                     color = colmap[(offset + i) % len(colmap)]
                     output += self.get_color(color, text=ch)
             offset += 1
-            output += '\n'
+            output += u'\n'
         self.rainbow_offset[style] = offset % 256
         return output
 
     def strip_color(self, text):
-        if self.protocol == 'ansi':
-            text = self._ansi_color.sub('', text)
-        elif self.protocol == 'mirc':
-            text = self._mirc_color.sub('', text)
-        elif self.protocol == 'html':
-            text = self._html_color.sub('', text)
-        text = text.replace(self.reset(), '')
+        if self.protocol == u'ansi':
+            text = self._ansi_color.sub(u'', text)
+        elif self.protocol == u'mirc':
+            text = self._mirc_color.sub(u'', text)
+        elif self.protocol == u'html':
+            text = self._html_color.sub(u'', text)
+        text = text.replace(self.reset(), u'')
         return text
 

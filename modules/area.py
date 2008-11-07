@@ -27,27 +27,27 @@ import logging as log
 
 class Main(Module):
 
-    pattern = re.compile('^\s*area(?:\s+code)?\s+(\d+)\s*', re.I)
+    pattern = re.compile(u'^\s*area(?:\s+code)?\s+(\d+)\s*', re.I)
     require_addressing = True
-    help = 'area <areacode> - what city does it belong to'
-    baseurl = 'http://www.melissadata.com/'
-    searchurl = urljoin(baseurl, '/lookups/phonelocation.asp')
+    help = u'area <areacode> - what city does it belong to'
+    baseurl = u'http://www.melissadata.com/'
+    searchurl = urljoin(baseurl, u'/lookups/phonelocation.asp')
     city = re.compile(r'<tr><td><A[^>]+>(.*?)</a></td><td>(.*?)</td><td align'
                       r'=center>\d+</td></tr>')
 
     def response(self, nick, args, kwargs):
         try:
             geturl(self.baseurl)
-            doc = geturl(self.searchurl, opts={'number': args[0]})
+            doc = geturl(self.searchurl, opts={u'number': args[0]})
             city, state = self.city.search(doc).groups()
-            city = ' '.join([x.lower().capitalize() for x in city.split()])
-            return '%s: %s = %s, %s' % (nick, args[0], city, state)
+            city = u' '.join([x.lower().capitalize() for x in city.split()])
+            return u'%s: %s = %s, %s' % (nick, args[0], city, state)
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return "%s: I couldn't look that up for some reason.  D:" % nick
+            return u"%s: I couldn't look that up for some reason.  D:" % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

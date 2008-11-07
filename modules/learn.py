@@ -26,54 +26,58 @@ import logging as log
 
 class Main(Module):
 
-    pattern = re.compile('^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
+    pattern = re.compile(u'^\s*set\s+(\S+)\s+(\S+)\s+(.+)$', re.I)
     require_addressing = True
     allow_threading = False
-    help = 'set <location|email> <nick> <val> - set db attribs'
-    _allowed = ['location', 'email', 'karma']
+    help = u'set <location|email> <nick> <val> - set db attribs'
+    _allowed = [u'location', u'email', u'karma']
 
     def __init__(self, madcow=None):
+        self.charset = madcow.charset
         self.prefix = madcow.prefix
         self.namespace = madcow.namespace
 
     def dbfile(self, db):
-        dbfile = '%s/data/db-%s-%s' % (self.prefix, self.namespace, db)
+        dbfile = u'%s/data/db-%s-%s' % (self.prefix, self.namespace, db)
         return dbfile
 
     def dbm(self, db):
         dbfile = self.dbfile(db)
-        return anydbm.open(dbfile, 'c', 0640)
+        return anydbm.open(dbfile, u'c', 0640)
 
     def get_db(self, db):
         dbm = self.dbm(db)
-        db = {}
-        for key in dbm.keys():
-            db[key] = dbm[key]
-        dbm.close()
-        return db
+        try:
+            return dict(dbm)
+        finally:
+            dbm.close()
 
     def lookup(self, db, key):
         dbm = self.dbm(db)
         try:
-            val = dbm[key.lower()]
-        except:
-            val = None
-        dbm.close()
-        return val
+            key = key.lower().encode(self.charset, 'replace')
+            if key in dbm:
+                return dbm[key].decode(self.charset, 'replace')
+        finally:
+            dbm.close()
 
     def set(self, db, key, val):
         dbm = self.dbm(db)
-        dbm[key.lower()] = val
-        dbm.close()
+        try:
+            key = key.lower().encode(self.charset, 'replace')
+            val = val.encode(self.charset, 'replace')
+            dbm[key] = val
+        finally:
+            dbm.close()
 
     def response(self, nick, args, kwargs):
         try:
             db, key, val = args
             if db not in self._allowed:
-                return '%s: unknown database' % nick
+                return u'%s: unknown database' % nick
             self.set(db, key, val)
-            return '%s: set %s\'s %s to %s' % (nick, key, db, val)
+            return u'%s: set %s\'s %s to %s' % (nick, key, db, val)
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in %s: %s' % (self.__module__, error))
             log.exception(error)
-            return "%s: couldn't set that" % nick
+            return u"%s: couldn't set that" % nick

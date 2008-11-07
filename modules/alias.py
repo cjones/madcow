@@ -25,9 +25,9 @@ import logging as log
 import re
 import os
 
-__version__ = '0.1'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
-__all__ = ['Main']
+__version__ = u'0.1'
+__author__ = u'Chris Jones <cjones@gruntle.org>'
+__all__ = [u'Main']
 
 class AliasError(Exception):
 
@@ -41,31 +41,36 @@ class Alias(object):
     def __init__(self, key, val):
         self.key = key
         self.val = val
-        self.pattern = re.compile(r'\b%s\b' % re.escape(key), re.I)
+        self.pattern = re.compile(re.escape(key), re.I)
 
 
 class AliasDB(object):
 
     """Interface to alias flat file database"""
 
-    def __init__(self, path):
+    def __init__(self, path, charset='ascii'):
         self.path = path
+        self.charset = charset
         self.aliases = []
         if not os.path.exists(path):
-            with open(path, 'wb') as file:
+            with open(path, u'wb') as file:
                 pass
-        with open(path, 'rb') as file:
+        with open(path, u'rb') as file:
             for line in file:
                 try:
                     key, val = line.strip().split(None, 1)
+                    key = key.decode(self.charset, 'replace')
+                    val = val.decode(self.charset, 'replace')
                     self.aliases.append(Alias(key, val))
                 except Exception, error:
-                    raise AliasError('problem parsing db: %s' % error)
+                    raise AliasError(u'problem parsing db: %s' % error)
 
     def save(self):
-        with open(self.path, 'wb') as file:
+        with open(self.path, u'wb') as file:
             for alias in self:
-                print >> file, '%s %s' % (alias.key, alias.val)
+                key = alias.key.encode(self.charset, 'replace')
+                val = alias.val.encode(self.charset, 'replace')
+                print >> file, '%s %s' % (key, val)
 
     def delete(self, index):
         self.aliases.pop(index)
@@ -93,7 +98,7 @@ class Main(Module):
 
     pattern = Module._any
     require_addressing = True
-    help = 'alias [ add <key> <val> | del <#> | list ] - manage aliases'
+    help = u'alias [ add <key> <val> | del <#> | list ] - manage aliases'
     priority = 0
     terminate = False
     allow_threading = False
@@ -102,74 +107,75 @@ class Main(Module):
 
     def __init__(self, madcow=None):
         self.madcow = madcow
-        self.db = AliasDB(os.path.join(madcow.prefix, 'data',
-                                       'db-%s-alias' % madcow.namespace))
+        self.db = AliasDB(os.path.join(madcow.prefix, u'data',
+                                       u'db-%s-alias' % madcow.namespace),
+                          charset=madcow.charset)
 
     def response(self, nick, args, kwargs):
         try:
             line = args[0]
             try:
                 command, args = self.command_re.search(line).groups()
-                kwargs['req'].matched = True
+                kwargs[u'req'].matched = True
                 return self.runcommand(command, args)
             except AliasError, error:
-                return '%s: %s' % (nick, error)
+                return u'%s: %s' % (nick, error)
             except AttributeError:
                 self.checkalias(line, kwargs)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, error)
+            return u'%s: %s' % (nick, error)
 
     def runcommand(self, command, args):
         """User invoked alias command"""
         if args is None:
-            args = ''
+            args = u''
         command = command.lower()
         args = args.split(None, 1)
-        if command == 'add':
+        if command == u'add':
             if len(args) != 2:
                 raise AliasError(self.help)
             for name, obj in self.madcow.modules.by_priority():
                 if obj.pattern is Module._any:
                     continue
                 if obj.pattern.search(args[0]):
-                    raise AliasError('that pattern would override %s' % name)
+                    raise AliasError(u'that pattern would override %s' % name)
             for alias in self.db:
                 if alias.key == args[0]:
-                    raise AliasError('that alias already exists')
+                    raise AliasError(u'that alias already exists')
             self.db.add(*args)
-            return 'alias added'
-        elif command == 'list':
+            return u'alias added'
+        elif command == u'list':
             if len(args):
                 raise AliasError(self.help)
             output = []
             for i, alias in enumerate(self.db):
-                output.append('[%d] %s => %s' % (i + 1, alias.key, alias.val))
+                output.append(u'[%d] %s => %s' % (i + 1, alias.key, alias.val))
             if output:
-                return '\n'.join(output)
-            return 'no aliases defined'
-        elif command == 'del':
+                return u'\n'.join(output)
+            return u'no aliases defined'
+        elif command == u'del':
             if len(args) != 1:
                 raise AliasError(self.help)
             index = args[0]
             if not index.isdigit():
-                raise AliasError('alias must be a #')
+                raise AliasError(u'alias must be a #')
             index = int(index)
             if not len(self.db):
-                raise AliasError('no aliases to remove')
+                raise AliasError(u'no aliases to remove')
             if index < 1 or index > len(self.db):
-                raise AliasError('invalid alias key')
+                raise AliasError(u'invalid alias key')
             index -= 1
             key = self.db[index].key
             self.db.delete(index)
-            return 'deleted alias: %s' % key
+            return u'deleted alias: %s' % key
 
     def checkalias(self, line, kwargs):
         """Check for alias substitution"""
         for alias in self.db:
             new = alias.pattern.sub(alias.val, line, 1)
             if new != line:
-                kwargs['req'].message = new
+                kwargs[u'req'].message = new
                 break
 

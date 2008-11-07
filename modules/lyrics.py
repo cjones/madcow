@@ -28,18 +28,18 @@ from include.BeautifulSoup import BeautifulSoup
 from urlparse import urljoin
 from include.google import Google, NonRedirectResponse
 
-__version__ = '0.2'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.2'
+__author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*sing\s+(.+?)\s*$', re.I)
-    help = 'sing <song/artist>'
-    error = 'no results'
-    baseurl = 'http://lyricwiki.org/'
-    searchurl = urljoin(baseurl, '/Special:Search')
-    advert = ' - lyrics from LyricWiki'
+    help = u'sing <song/artist>'
+    error = u'no results'
+    baseurl = u'http://lyricwiki.org/'
+    searchurl = urljoin(baseurl, u'/Special:Search')
+    advert = u' - lyrics from LyricWiki'
     google = Google()
     _br = r'\s*<br\s*/?\s*>\s*'
     _line_break = re.compile(_br, re.I)
@@ -47,34 +47,34 @@ class Main(Module):
 
     def normalize(self, lyrics):
         verses = self._verse_break.split(lyrics)
-        verses = [self._line_break.sub(' / ', verse) for verse in verses]
+        verses = [self._line_break.sub(u' / ', verse) for verse in verses]
         verses = [stripHTML(verse) for verse in verses]
-        return '\n'.join(verses)
+        return u'\n'.join(verses).strip()
 
     def response(self, nick, args, kwargs):
         try:
             try:
-                url = self.google.lucky(args[0] + ' site:lyricwiki.org')
+                url = self.google.lucky(args[0] + u' site:lyricwiki.org')
             except NonRedirectResponse:
-                opts = {'search': args[0], 'ns0': 1}
+                opts = {u'search': args[0], u'ns0': 1}
                 page = geturl(self.searchurl, referer=self.baseurl, opts=opts)
                 soup = BeautifulSoup(page)
-                url = str(soup.findAll('li')[0].find('a')['href'])
+                url = unicode(soup.findAll(u'li')[0].find(u'a')[u'href'])
                 url = urljoin(self.baseurl, url)
             page = geturl(url, referer=self.baseurl)
             soup = BeautifulSoup(page)
-            title = stripHTML(str(soup.find('title'))).replace(self.advert, '')
-            lyrics = str(soup.find('div', attrs={'class': 'lyricbox'}))
+            title = soup.find(u'title').string.replace(self.advert, u'')
+            lyrics = unicode(soup.find(u'div', attrs={u'class': u'lyricbox'}))
             lyrics = self.normalize(lyrics)
-            if not lyrics or lyrics == 'None':
-                raise Exception, 'no results'
-            return title + ':\n' + lyrics
+            if not lyrics or lyrics == u'None':
+                raise Exception, u'no results'
+            return u'%s:\n%s' % (title, lyrics)
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, error)
+            return u'%s: %s' % (nick, error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

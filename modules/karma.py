@@ -24,9 +24,9 @@ import re
 from learn import Main as Learn
 import logging as log
 
-__version__ = '0.1'
-__author__ = 'cj_ <cjones@gruntle.org>'
-__all__ = ['Karma', 'Main']
+__version__ = u'0.1'
+__author__ = u'cj_ <cjones@gruntle.org>'
+__all__ = [u'Karma', u'Main']
 
 class KarmaResponse(object):
 
@@ -41,7 +41,7 @@ class Karma(object):
 
     _adjust_pattern = re.compile(r'^\s*(.*?)[+-]([+-]+)\s*$')
     _query_pattern = re.compile(r'^\s*karma\s+(\S+)\s*\?*\s*$')
-    _dbname = 'karma'
+    _dbname = u'karma'
 
     def __init__(self, madcow):
         self.learn = Learn(madcow)
@@ -56,7 +56,7 @@ class Karma(object):
             if nick.lower() != target.lower():
                 self.adjust(nick=target, adjustment=adjustment)
             kr.matched = True
-        except:
+        except AttributeError:
             pass
 
         # detect a query for someone's karma
@@ -64,18 +64,18 @@ class Karma(object):
             target = Karma._query_pattern.search(input).group(1)
             karma = self.query(nick=target)
             kr.matched = True
-            kr.reply = "%s: %s's karma is %s" % (nick, target, karma)
-        except:
+            kr.reply = u"%s: %s's karma is %s" % (nick, target, karma)
+        except AttributeError:
             pass
         return kr
 
     def set(self, nick, karma):
-        self.learn.set(Karma._dbname, nick.lower(), str(karma))
+        self.learn.set(Karma._dbname, nick.lower(), unicode(karma))
 
     def adjust(self, nick, adjustment):
         karma = self.query(nick)
         adjustment, size = adjustment[0], len(adjustment)
-        exec('karma ' + adjustment + '= size')
+        exec(u'karma ' + adjustment + u'= size')
         self.set(nick=nick, karma=karma)
 
     def query(self, nick):
@@ -87,10 +87,12 @@ class Karma(object):
 
 
 class Main(Module):
+
     """This object is autoloaded by the bot"""
+
     pattern = Module._any
     require_addressing = False
-    help = "<nick>[++/--] - adjust someone's karma"
+    help = u"<nick>[++/--] - adjust someone's karma"
     allow_threading = False
 
     def __init__(self, madcow=None):
@@ -101,9 +103,10 @@ class Main(Module):
         input = args[0]
         try:
             kr = self.karma.process(nick, input)
-            kwargs['req'].matched = kr.matched
-            return kr.reply
+            kwargs[u'req'].matched = kr.matched
+            if kr.reply:
+                return unicode(kr.reply)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: problem with command: %s' % (nick, error)
+            return u'%s: problem with command: %s' % (nick, error)

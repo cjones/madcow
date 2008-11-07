@@ -25,8 +25,8 @@ import re
 #from include.useragent import geturl   # mimic browser
 #from include.utils import stripHTML    # strip HTML/unescape entities
 
-__version__ = '0.1'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
+__version__ = u'0.1'
+__author__ = u'Chris Jones <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
@@ -52,7 +52,7 @@ class Main(Module):
     # most modules are priority 50, and grufti/factoids is 100.
     #
     # you may also set it to terminate and change this after the fact
-    # by updating the kwargs['req'].matched object to False, based on logic
+    # by updating the kwargs[u'req'].matched object to False, based on logic
     # in the module code. WARNING -- IF YOU DO THIS, you MUST disable
     # threading (allow_threading=False)!!! Otherwise it will
     # already have terminated before you get a chance to update the request
@@ -67,17 +67,17 @@ class Main(Module):
         self.madcow = madcow
 
     def response(self, nick, args, kwargs):
-        # this function should return a response or None
+        # this function should return a unicode response or None
         # - args is a list that matches the matched parts of the pattern
         # - kwargs give you access to the details of the request from the bot
         try:
-            raise NotImplementedError
+            return u'module not implemented'
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, error)
+            return u'%s: %s' % (nick, error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

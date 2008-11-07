@@ -92,36 +92,36 @@ class OSCARUser(object):
         self.caps = []
         for k,v in tlvs.items():
             if k == 1:
-                v=struct.unpack('!H',v)[0]
-                for o, f in [(1,'trial'),
-                             (2,'unknown bit 2'),
-                             (4,'aol'),
-                             (8,'unknown bit 4'),
-                             (16,'aim'),
-                             (32,'away'),
-                             (1024,'activebuddy')]:
+                v=struct.unpack(u'!H',v)[0]
+                for o, f in [(1,u'trial'),
+                             (2,u'unknown bit 2'),
+                             (4,u'aol'),
+                             (8,u'unknown bit 4'),
+                             (16,u'aim'),
+                             (32,u'away'),
+                             (1024,u'activebuddy')]:
                     if v&o: self.flags.append(f)
             elif k == 2:
-                self.memberSince = struct.unpack('!L',v)[0]
+                self.memberSince = struct.unpack(u'!L',v)[0]
             elif k == 3:
-                self.onSince = struct.unpack('!L',v)[0]
+                self.onSince = struct.unpack(u'!L',v)[0]
             elif k == 4:
-                self.idleTime = struct.unpack('!H',v)[0]
+                self.idleTime = struct.unpack(u'!H',v)[0]
             elif k == 5:
                 pass
             elif k == 6:
-                if v[2] == '\x00':
-                    self.icqStatus = 'online'
-                elif v[2] == '\x01':
-                    self.icqStatus = 'away'
-                elif v[2] == '\x02':
-                    self.icqStatus = 'dnd'
-                elif v[2] == '\x04':
-                    self.icqStatus = 'out'
-                elif v[2] == '\x10':
-                    self.icqStatus = 'busy'
+                if v[2] == u'\x00':
+                    self.icqStatus = u'online'
+                elif v[2] == u'\x01':
+                    self.icqStatus = u'away'
+                elif v[2] == u'\x02':
+                    self.icqStatus = u'dnd'
+                elif v[2] == u'\x04':
+                    self.icqStatus = u'out'
+                elif v[2] == u'\x10':
+                    self.icqStatus = u'busy'
                 else:
-                    self.icqStatus = 'unknown'
+                    self.icqStatus = u'unknown'
             elif k == 10:
                 self.icqIPaddy = socket.inet_ntoa(v)
             elif k == 12:
@@ -130,39 +130,39 @@ class OSCARUser(object):
                 caps=[]
                 while v:
                     c=v[:16]
-                    if c==CAP_ICON: caps.append("icon")
-                    elif c==CAP_IMAGE: caps.append("image")
-                    elif c==CAP_VOICE: caps.append("voice")
-                    elif c==CAP_CHAT: caps.append("chat")
-                    elif c==CAP_GET_FILE: caps.append("getfile")
-                    elif c==CAP_SEND_FILE: caps.append("sendfile")
-                    elif c==CAP_SEND_LIST: caps.append("sendlist")
-                    elif c==CAP_GAMES: caps.append("games")
-                    else: caps.append(("unknown",c))
+                    if c==CAP_ICON: caps.append(u"icon")
+                    elif c==CAP_IMAGE: caps.append(u"image")
+                    elif c==CAP_VOICE: caps.append(u"voice")
+                    elif c==CAP_CHAT: caps.append(u"chat")
+                    elif c==CAP_GET_FILE: caps.append(u"getfile")
+                    elif c==CAP_SEND_FILE: caps.append(u"sendfile")
+                    elif c==CAP_SEND_LIST: caps.append(u"sendlist")
+                    elif c==CAP_GAMES: caps.append(u"games")
+                    else: caps.append((u"unknown",c))
                     v=v[16:]
                 caps.sort()
                 self.caps=caps
             elif k == 14: pass
             elif k == 15:
-                self.sessionLength = struct.unpack('!L',v)[0]
+                self.sessionLength = struct.unpack(u'!L',v)[0]
             elif k == 16:
-                self.sessionLength = struct.unpack('!L',v)[0]
+                self.sessionLength = struct.unpack(u'!L',v)[0]
             elif k == 30:
                 pass
             else:
                 pass
 
     def __str__(self):
-        s = '<OSCARUser %s' % self.name
+        s = u'<OSCARUser %s' % self.name
         o = []
-        if self.warning!=0: o.append('warning level %s'%self.warning)
-        if hasattr(self, 'flags'): o.append('flags %s'%self.flags)
-        if hasattr(self, 'sessionLength'): o.append('online for %i minutes' % (self.sessionLength/60,))
-        if hasattr(self, 'idleTime'): o.append('idle for %i minutes' % self.idleTime)
-        if self.caps: o.append('caps %s'%self.caps)
+        if self.warning!=0: o.append(u'warning level %s'%self.warning)
+        if hasattr(self, u'flags'): o.append(u'flags %s'%self.flags)
+        if hasattr(self, u'sessionLength'): o.append(u'online for %i minutes' % (self.sessionLength/60,))
+        if hasattr(self, u'idleTime'): o.append(u'idle for %i minutes' % self.idleTime)
+        if self.caps: o.append(u'caps %s'%self.caps)
         if o:
-            s=s+', '+', '.join(o)
-        s=s+'>'
+            s=s+u', '+u', '.join(o)
+        s=s+u'>'
         return s
 
 
@@ -182,8 +182,8 @@ class SSIGroup(object):
         user.group = self
 
     def oscarRep(self, groupID, buddyID):
-        tlvData = TLV(0xc8, reduce(lambda x,y:x+y, [struct.pack('!H',self.usersToID[x]) for x in self.users]))
-        return struct.pack('!H', len(self.name)) + self.name + struct.pack('!HH', groupID, buddyID) + '\000\001' + tlvData
+        tlvData = TLV(0xc8, reduce(lambda x,y:x+y, [struct.pack(u'!H',self.usersToID[x]) for x in self.users]))
+        return struct.pack(u'!H', len(self.name)) + self.name + struct.pack(u'!HH', groupID, buddyID) + u'\000\001' + tlvData
 
 
 class SSIBuddy(object):
@@ -200,29 +200,29 @@ class SSIBuddy(object):
                 self.alertActions = []
                 self.alertWhen = []
                 if actionFlag&1:
-                    self.alertActions.append('popup')
+                    self.alertActions.append(u'popup')
                 if actionFlag&2:
-                    self.alertActions.append('sound')
+                    self.alertActions.append(u'sound')
                 if whenFlag&1:
-                    self.alertWhen.append('online')
+                    self.alertWhen.append(u'online')
                 if whenFlag&2:
-                    self.alertWhen.append('unidle')
+                    self.alertWhen.append(u'unidle')
                 if whenFlag&4:
-                    self.alertWhen.append('unaway')
+                    self.alertWhen.append(u'unaway')
             elif k == 0x013e:
                 self.alertSound = v
 
     def oscarRep(self, groupID, buddyID):
-        tlvData = reduce(lambda x,y: x+y, map(lambda (k,v):TLV(k,v), self.tlvs.items())) or '\000\000'
-        return struct.pack('!H', len(self.name)) + self.name + struct.pack('!HH', groupID, buddyID) + '\000\000' + tlvData
+        tlvData = reduce(lambda x,y: x+y, map(lambda (k,v):TLV(k,v), self.tlvs.items())) or u'\000\000'
+        return struct.pack(u'!H', len(self.name)) + self.name + struct.pack(u'!HH', groupID, buddyID) + u'\000\000' + tlvData
 
 
 class OscarConnection(Protocol):
 
     def connectionMade(self):
-        self.state=""
+        self.state=u""
         self.seqnum=0
-        self.buf=''
+        self.buf=u''
         self.stopKeepAliveID = None
         self.setKeepAlive(4*60)
 
@@ -230,15 +230,15 @@ class OscarConnection(Protocol):
         self.stopKeepAlive()
 
     def sendFLAP(self,data,channel = 0x02):
-        header="!cBHH"
+        header=u"!cBHH"
         self.seqnum=(self.seqnum+1)%0xFFFF
         seqnum=self.seqnum
-        head=struct.pack(header,'*', channel,
+        head=struct.pack(header,u'*', channel,
                          seqnum, len(data))
-        self.write(head+str(data))
+        self.write(head+unicode(data))
 
     def readFlap(self):
-        header="!cBHH"
+        header=u"!cBHH"
         if len(self.buf)<6: return
         flap=struct.unpack(header,self.buf[:6])
         if len(self.buf)<6+flap[3]: return
@@ -249,7 +249,7 @@ class OscarConnection(Protocol):
         self.buf=self.buf+data
         flap=self.readFlap()
         while flap:
-            func=getattr(self,"oscar_%s"%self.state,None)
+            func=getattr(self,u"oscar_%s"%self.state,None)
             state=func(flap)
             if state:
                 self.state=state
@@ -260,7 +260,7 @@ class OscarConnection(Protocol):
         self.stopKeepAlive()
 
     def sendKeepAlive(self):
-        self.sendFLAP("",0x05)
+        self.sendFLAP(u"",0x05)
         #self.stopKeepAliveID = reactor.callLater(self.keepAliveDelay, self.sendKeepAlive)
 
     def stopKeepAlive(self):
@@ -269,7 +269,7 @@ class OscarConnection(Protocol):
             self.stopKeepAliveID = None
 
     def disconnect(self):
-        self.sendFLAP('', 0x04)
+        self.sendFLAP(u'', 0x04)
 
 
 class SNACBased(OscarConnection):
@@ -294,8 +294,8 @@ class SNACBased(OscarConnection):
         self.sendFLAP(SNAC(fam,sub,0x10000*fam+sub,data))
 
     def oscar_(self,data):
-        self.sendFLAP("\000\000\000\001"+TLV(6,self.cookie), 0x01)
-        return "Data"
+        self.sendFLAP(u"\000\000\000\001"+TLV(6,self.cookie), 0x01)
+        return u"Data"
 
     def oscar_Data(self,data):
         snac=readSNAC(data[1])
@@ -307,37 +307,37 @@ class SNACBased(OscarConnection):
             else:
                 d.errback(snac)
             return
-        func=getattr(self,'oscar_%02X_%02X'%(snac[0],snac[1]),None)
+        func=getattr(self,u'oscar_%02X_%02X'%(snac[0],snac[1]),None)
         if not func:
             self.oscar_unknown(snac)
         else:
             func(snac[2:])
-        return "Data"
+        return u"Data"
 
     def oscar_unknown(self,snac):
         pass
 
     def oscar_01_03(self, snac):
         numFamilies = len(snac[3])/2
-        self.supportedFamilies = struct.unpack("!"+str(numFamilies)+'H', snac[3])
-        d = ''
+        self.supportedFamilies = struct.unpack(u"!"+unicode(numFamilies)+u'H', snac[3])
+        d = u''
         for fam in self.supportedFamilies:
             if fam in self.snacFamilies:
-                d=d+struct.pack('!2H',fam,self.snacFamilies[fam][0])
+                d=d+struct.pack(u'!2H',fam,self.snacFamilies[fam][0])
         self.sendSNACnr(0x01,0x17, d)
 
     def oscar_01_0A(self,snac):
         pass
 
     def oscar_01_18(self,snac):
-        self.sendSNACnr(0x01,0x06,"")
+        self.sendSNACnr(0x01,0x06,u"")
 
     def clientReady(self):
-        d = ''
+        d = u''
         for fam in self.supportedFamilies:
             if fam in self.snacFamilies:
                 version, toolID, toolVersion = self.snacFamilies[fam]
-                d = d + struct.pack('!4H',fam,version,toolID,toolVersion)
+                d = d + struct.pack(u'!4H',fam,version,toolID,toolVersion)
         self.sendSNACnr(0x01,0x02,d)
 
 
@@ -370,7 +370,7 @@ class BOSConnection(SNACBased):
     def parseUser(self,data,count=None):
         l=ord(data[0])
         name=data[1:1+l]
-        warn,foo=struct.unpack("!HH",data[1+l:5+l])
+        warn,foo=struct.unpack(u"!HH",data[1+l:5+l])
         warn=int(warn/10)
         tlvs=data[5+l:]
         if count:
@@ -385,7 +385,7 @@ class BOSConnection(SNACBased):
 
     def oscar_01_05(self, snac, d = None):
         tlvs = readTLVs(snac[3][2:])
-        service = struct.unpack('!H',tlvs[0x0d])[0]
+        service = struct.unpack(u'!H',tlvs[0x0d])[0]
         ip = tlvs[5]
         cookie = tlvs[6]
         #c = protocol.ClientCreator(reactor, serviceClasses[service], self, cookie, d)
@@ -395,17 +395,17 @@ class BOSConnection(SNACBased):
         c.connectTCP(ip, 5190)
 
     def oscar_01_07(self,snac):
-        self.sendSNACnr(0x01,0x08,"\x00\x01\x00\x02\x00\x03\x00\x04\x00\x05")
+        self.sendSNACnr(0x01,0x08,u"\x00\x01\x00\x02\x00\x03\x00\x04\x00\x05")
         self.initDone()
-        self.sendSNACnr(0x13,0x02,'')
-        self.sendSNACnr(0x02,0x02,'')
-        self.sendSNACnr(0x03,0x02,'')
-        self.sendSNACnr(0x04,0x04,'')
-        self.sendSNACnr(0x09,0x02,'')
+        self.sendSNACnr(0x13,0x02,u'')
+        self.sendSNACnr(0x02,0x02,u'')
+        self.sendSNACnr(0x03,0x02,u'')
+        self.sendSNACnr(0x04,0x04,u'')
+        self.sendSNACnr(0x09,0x02,u'')
 
     def oscar_01_10(self,snac):
-        skip = struct.unpack('!H',snac[3][:2])[0]
-        newLevel = struct.unpack('!H',snac[3][2+skip:4+skip])[0]/10
+        skip = struct.unpack(u'!H',snac[3][:2])[0]
+        newLevel = struct.unpack(u'!H',snac[3][2+skip:4+skip])[0]/10
         if len(snac[3])>4+skip:
             by = self.parseUser(snac[3][4+skip:])
         else:
@@ -431,12 +431,12 @@ class BOSConnection(SNACBased):
         self.offlineBuddy(self.parseUser(snac[3]))
 
     def oscar_04_05(self, snac):
-        self.sendSNACnr(0x04,0x02,'\x00\x00\x00\x00\x00\x0b\x1f@\x03\xe7\x03\xe7\x00\x00\x00\x00')
+        self.sendSNACnr(0x04,0x02,u'\x00\x00\x00\x00\x00\x0b\x1f@\x03\xe7\x03\xe7\x00\x00\x00\x00')
 
     def oscar_04_07(self, snac):
         data = snac[3]
         cookie, data = data[:8], data[8:]
-        channel = struct.unpack('!H',data[:2])[0]
+        channel = struct.unpack(u'!H',data[:2])[0]
         data = data[2:]
         user, data = self.parseUser(data, 1)
         tlvs = readTLVs(data)
@@ -447,50 +447,50 @@ class BOSConnection(SNACBased):
                 if k == 2:
                     while v:
                         v = v[2:]
-                        messageLength, charSet, charSubSet = struct.unpack('!3H', v[:6])
+                        messageLength, charSet, charSubSet = struct.unpack(u'!3H', v[:6])
                         messageLength -= 4
                         message = [v[6:6+messageLength]]
                         if charSet == 0:
                             pass
                         elif charSet == 2:
-                            message.append('unicode')
+                            message.append(u'unicode')
                         elif charSet == 3:
-                            message.append('iso-8859-1')
+                            message.append(u'iso-8859-1')
                         elif charSet == 0xffff:
-                            message.append('none')
+                            message.append(u'none')
                         if charSubSet == 0xb:
-                            message.append('macintosh')
+                            message.append(u'macintosh')
                         if messageLength > 0: multiparts.append(tuple(message))
                         v = v[6+messageLength:]
                 elif k == 3:
-                    flags.append('acknowledge')
+                    flags.append(u'acknowledge')
                 elif k == 4:
-                    flags.append('auto')
+                    flags.append(u'auto')
                 elif k == 6:
-                    flags.append('offline')
+                    flags.append(u'offline')
                 elif k == 8:
-                    iconLength, foo, iconSum, iconStamp = struct.unpack('!LHHL',v)
+                    iconLength, foo, iconSum, iconStamp = struct.unpack(u'!LHHL',v)
                     if iconLength:
-                        flags.append('icon')
+                        flags.append(u'icon')
                         flags.append((iconLength, iconSum, iconStamp))
                 elif k == 9:
-                    flags.append('buddyrequest')
+                    flags.append(u'buddyrequest')
                 elif k == 0xb:
                     pass
                 elif k == 0x17:
-                    flags.append('extradata')
+                    flags.append(u'extradata')
                     flags.append(v)
                 else:
                     pass
             self.receiveMessage(user, multiparts, flags)
         elif channel == 2:
-            status = struct.unpack('!H',tlvs[5][:2])[0]
+            status = struct.unpack(u'!H',tlvs[5][:2])[0]
             requestClass = tlvs[5][10:26]
             moreTLVs = readTLVs(tlvs[5][26:])
             if requestClass == CAP_CHAT:
-                exchange = struct.unpack('!H',moreTLVs[10001][:2])[0]
+                exchange = struct.unpack(u'!H',moreTLVs[10001][:2])[0]
                 name = moreTLVs[10001][3:-2]
-                instance = struct.unpack('!H',moreTLVs[10001][-2:])[0]
+                instance = struct.unpack(u'!H',moreTLVs[10001][-2:])[0]
                 if SERVICE_CHATNAV not in self.services:
                     self.connectService(SERVICE_CHATNAV,1)
                 else:
@@ -515,26 +515,26 @@ class BOSConnection(SNACBased):
         self.maxDenyList = tlvs[2]
 
     def oscar_0B_02(self, snac):
-        self.reportingInterval = struct.unpack('!H',snac[3][:2])[0]
+        self.reportingInterval = struct.unpack(u'!H',snac[3][:2])[0]
 
     def oscar_13_03(self, snac):
         pass
 
     def requestSelfInfo(self):
-        self.sendSNAC(0x01, 0x0E, '')
+        self.sendSNAC(0x01, 0x0E, u'')
 
     def _cbRequestSelfInfo(self, snac, d):
         d.callback(self.parseUser(snac[5]))
 
     def initSSI(self):
-        return self.sendSNAC(0x13, 0x02, '')
+        return self.sendSNAC(0x13, 0x02, u'')
 
     def _cbInitSSI(self, snac, d):
         return {}
 
     def requestSSI(self, timestamp = 0, revision = 0):
         return self.sendSNAC(0x13, 0x05,
-            struct.pack('!LH',timestamp,revision))
+            struct.pack(u'!LH',timestamp,revision))
 
     def _cbRequestSSI(self, snac, args = ()):
         if snac[1] == 0x0f:
@@ -543,16 +543,16 @@ class BOSConnection(SNACBased):
         if args:
             revision, groups, permit, deny, permitMode, visibility = args
         else:
-            version, revision = struct.unpack('!BH', snac[5][:3])
+            version, revision = struct.unpack(u'!BH', snac[5][:3])
             groups = {}
             permit = []
             deny = []
             permitMode = None
             visibility = None
         while len(itemdata)>4:
-            nameLength = struct.unpack('!H', itemdata[:2])[0]
+            nameLength = struct.unpack(u'!H', itemdata[:2])[0]
             name = itemdata[2:2+nameLength]
-            groupID, buddyID, itemType, restLength = struct.unpack('!4H', itemdata[2+nameLength:10+nameLength])
+            groupID, buddyID, itemType, restLength = struct.unpack(u'!4H', itemdata[2+nameLength:10+nameLength])
             tlvs = readTLVs(itemdata[10+nameLength:10+nameLength+restLength])
             itemdata = itemdata[10+nameLength+restLength:]
             if itemType == 0:
@@ -568,25 +568,25 @@ class BOSConnection(SNACBased):
             elif itemType == 4:
                 if 0xcb not in tlvs:
                     continue
-                permitMode = {1:'permitall',2:'denyall',3:'permitsome',4:'denysome',5:'permitbuddies'}[ord(tlvs[0xca])]
-                visibility = {'\xff\xff\xff\xff':'all','\x00\x00\x00\x04':'notaim'}[tlvs[0xcb]]
+                permitMode = {1:u'permitall',2:u'denyall',3:u'permitsome',4:u'denysome',5:u'permitbuddies'}[ord(tlvs[0xca])]
+                visibility = {u'\xff\xff\xff\xff':u'all',u'\x00\x00\x00\x04':u'notaim'}[tlvs[0xcb]]
             elif itemType == 5:
                 pass
             else:
                 pass
-        timestamp = struct.unpack('!L',itemdata)[0]
+        timestamp = struct.unpack(u'!L',itemdata)[0]
         if not timestamp:
             pass
         return (groups[0].users,permit,deny,permitMode,visibility,timestamp,revision)
 
     def activateSSI(self):
-        self.sendSNACnr(0x13,0x07,'')
+        self.sendSNACnr(0x13,0x07,u'')
 
     def startModifySSI(self):
         """
         tell the OSCAR server to be on the lookout for SSI modifications
         """
-        self.sendSNACnr(0x13,0x11,'')
+        self.sendSNACnr(0x13,0x11,u'')
 
     def addItemSSI(self, item, groupID = None, buddyID = None):
         """
@@ -614,7 +614,7 @@ class BOSConnection(SNACBased):
         return self.sendSNAC(0x13,0x0A, item.oscarRep(groupID, buddyID))
 
     def endModifySSI(self):
-        self.sendSNACnr(0x13,0x12,'')
+        self.sendSNACnr(0x13,0x12,u'')
 
     def setProfile(self, profile):
         """
@@ -622,49 +622,49 @@ class BOSConnection(SNACBased):
         send None to not set a profile (different from '' for a blank one)
         """
         self.profile = profile
-        tlvs = ''
+        tlvs = u''
         if self.profile:
-            tlvs =  TLV(1,'text/aolrtf; charset="us-ascii"') + TLV(2,self.profile)
-        tlvs = tlvs + TLV(5, ''.join(self.capabilities))
+            tlvs =  TLV(1,u'text/aolrtf; charset="us-ascii"') + TLV(2,self.profile)
+        tlvs = tlvs + TLV(5, u''.join(self.capabilities))
         self.sendSNACnr(0x02, 0x04, tlvs)
 
     def setAway(self, away = None):
         self.awayMessage = away
-        tlvs = TLV(3,'text/aolrtf; charset="us-ascii"') + TLV(4,away or '')
+        tlvs = TLV(3,u'text/aolrtf; charset="us-ascii"') + TLV(4,away or u'')
         self.sendSNACnr(0x02, 0x04, tlvs)
 
     def setIdleTime(self, idleTime):
-        self.sendSNACnr(0x01, 0x11, struct.pack('!L',idleTime))
+        self.sendSNACnr(0x01, 0x11, struct.pack(u'!L',idleTime))
 
     def sendMessage(self, user, message, wantAck = 0, autoResponse = 0, offline = 0 ):
-        data = ''.join([chr(random.randrange(0, 127)) for i in range(8)])
-        data = data + '\x00\x01' + chr(len(user)) + user
+        data = u''.join([chr(random.randrange(0, 127)) for i in range(8)])
+        data = data + u'\x00\x01' + chr(len(user)) + user
         if not type(message) in (types.TupleType, types.ListType):
             message = [[message,]]
             if type(message[0][0]) == types.UnicodeType:
-                message[0].append('unicode')
-        messageData = ''
+                message[0].append(u'unicode')
+        messageData = u''
         for part in message:
             charSet = 0
-            if 'unicode' in part[1:]:
+            if u'unicode' in part[1:]:
                 charSet = 2
-            elif 'iso-8859-1' in part[1:]:
+            elif u'iso-8859-1' in part[1:]:
                 charSet = 3
-            elif 'none' in part[1:]:
+            elif u'none' in part[1:]:
                 charSet = 0xffff
-            if 'macintosh' in part[1:]:
+            if u'macintosh' in part[1:]:
                 charSubSet = 0xb
             else:
                 charSubSet = 0
-            messageData = messageData + '\x01\x01' + struct.pack('!3H',len(part[0])+4,charSet,charSubSet)
+            messageData = messageData + u'\x01\x01' + struct.pack(u'!3H',len(part[0])+4,charSet,charSubSet)
             messageData = messageData + part[0]
-        data = data + TLV(2, '\x05\x01\x00\x03\x01\x01\x02'+messageData)
+        data = data + TLV(2, u'\x05\x01\x00\x03\x01\x01\x02'+messageData)
         if wantAck:
-            data = data + TLV(3,'')
+            data = data + TLV(3,u'')
         if autoResponse:
-            data = data + TLV(4,'')
+            data = data + TLV(4,u'')
         if offline:
-            data = data + TLV(6,'')
+            data = data + TLV(6,u'')
         if wantAck:
             return self.sendSNAC(0x04, 0x06, data)
         self.sendSNACnr(0x04, 0x06, data)
@@ -672,11 +672,11 @@ class BOSConnection(SNACBased):
     def _cbSendMessageAck(self, snac, user, message):
         return user, message
 
-    def connectService(self, service, wantCallback = 0, extraData = ''):
+    def connectService(self, service, wantCallback = 0, extraData = u''):
         if wantCallback:
-            self.sendSNAC(0x01,0x04,struct.pack('!H',service) + extraData)
+            self.sendSNAC(0x01,0x04,struct.pack(u'!H',service) + extraData)
         else:
-            self.sendSNACnr(0x01,0x04,struct.pack('!H',service))
+            self.sendSNACnr(0x01,0x04,struct.pack(u'!H',service))
 
     def _cbConnectService(self, snac, d):
         d.arm()
@@ -689,22 +689,22 @@ class BOSConnection(SNACBased):
             pass
 
     def joinChat(self, exchange, fullName, instance):
-        return self.connectService(0x0e, 1, TLV(0x01, struct.pack('!HB',exchange, len(fullName)) + fullName +
-                          struct.pack('!H', instance)))
+        return self.connectService(0x0e, 1, TLV(0x01, struct.pack(u'!HB',exchange, len(fullName)) + fullName +
+                          struct.pack(u'!H', instance)))
 
     def _cbJoinChat(self, chat):
         del self.services[SERVICE_CHAT]
         return chat
 
     def warnUser(self, user, anon = 0):
-        return self.sendSNAC(0x04, 0x08, '\x00'+chr(anon)+chr(len(user))+user)
+        return self.sendSNAC(0x04, 0x08, u'\x00'+chr(anon)+chr(len(user))+user)
 
     def _cbWarnUser(self, snac):
-        oldLevel, newLevel = struct.unpack('!2H', snac[5])
+        oldLevel, newLevel = struct.unpack(u'!2H', snac[5])
         return oldLevel, newLevel
 
     def getInfo(self, user):
-        return self.sendSNAC(0x02, 0x05, '\x00\x01'+chr(len(user))+user)
+        return self.sendSNAC(0x02, 0x05, u'\x00\x01'+chr(len(user))+user)
 
     def _cbGetInfo(self, snac):
         user, rest = self.parseUser(snac[5],1)
@@ -712,7 +712,7 @@ class BOSConnection(SNACBased):
         return tlvs.get(0x02,None)
 
     def getAway(self, user):
-        return self.sendSNAC(0x02, 0x05, '\x00\x03'+chr(len(user))+user)
+        return self.sendSNAC(0x02, 0x05, u'\x00\x03'+chr(len(user))+user)
 
     def _cbGetAway(self, snac):
         user, rest = self.parseUser(snac[5],1)
@@ -777,37 +777,37 @@ class ChatNavService(OSCARService):
     }
 
     def oscar_01_07(self, snac):
-        self.sendSNACnr(0x01, 0x08, '\000\001\000\002\000\003\000\004\000\005')
-        self.sendSNACnr(0x0d, 0x02, '')
+        self.sendSNACnr(0x01, 0x08, u'\000\001\000\002\000\003\000\004\000\005')
+        self.sendSNACnr(0x0d, 0x02, u'')
 
     def oscar_0D_09(self, snac):
         self.clientReady()
 
     def getChatInfo(self, exchange, name, instance):
-        self.sendSNAC(0x0d,0x04,struct.pack('!HB',exchange,len(name)) + name + struct.pack('!HB',instance,2))
+        self.sendSNAC(0x0d,0x04,struct.pack(u'!HB',exchange,len(name)) + name + struct.pack(u'!HB',instance,2))
 
     def _cbGetChatInfo(self, snac, d):
         data = snac[5][4:]
-        exchange, length = struct.unpack('!HB',data[:3])
+        exchange, length = struct.unpack(u'!HB',data[:3])
         fullName = data[3:3+length]
-        instance = struct.unpack('!H',data[3+length:5+length])[0]
+        instance = struct.unpack(u'!H',data[3+length:5+length])[0]
         tlvs = readTLVs(data[8+length:])
         shortName = tlvs[0x6a]
-        inviteTime = struct.unpack('!L',tlvs[0xca])[0]
+        inviteTime = struct.unpack(u'!L',tlvs[0xca])[0]
         info = (exchange,fullName,instance,shortName,inviteTime)
         d.callback(info)
 
     def createChat(self, shortName):
-        data = '\x00\x04\x06create\xff\xff\x01\x00\x03'
-        data = data + TLV(0xd7, 'en')
-        data = data + TLV(0xd6, 'us-ascii')
+        data = u'\x00\x04\x06create\xff\xff\x01\x00\x03'
+        data = data + TLV(0xd7, u'en')
+        data = data + TLV(0xd6, u'us-ascii')
         data = data + TLV(0xd3, shortName)
         return self.sendSNAC(0x0d, 0x08, data)
 
     def _cbCreateChat(self, snac):
-        exchange, length = struct.unpack('!HB',snac[5][4:7])
+        exchange, length = struct.unpack(u'!HB',snac[5][4:7])
         fullName = snac[5][7:7+length]
-        instance = struct.unpack('!H',snac[5][7+length:9+length])[0]
+        instance = struct.unpack(u'!H',snac[5][7+length:9+length])[0]
         return exchange, fullName, instance
 
 
@@ -827,14 +827,14 @@ class ChatService(OSCARService):
     clientReady = SNACBased.clientReady
 
     def oscar_01_07(self,snac):
-        self.sendSNAC(0x01,0x08,"\000\001\000\002\000\003\000\004\000\005")
+        self.sendSNAC(0x01,0x08,u"\000\001\000\002\000\003\000\004\000\005")
         self.clientReady()
 
     def oscar_0E_02(self, snac):
         data = snac[3]
-        self.exchange, length = struct.unpack('!HB',data[:3])
+        self.exchange, length = struct.unpack(u'!HB',data[:3])
         self.fullName = data[3:3+length]
-        self.instance = struct.unpack('!H',data[3+length:5+length])[0]
+        self.instance = struct.unpack(u'!H',data[3+length:5+length])[0]
         tlvs = readTLVs(data[8+length:])
         self.name = tlvs[0xd3]
         self.d.callback(self)
@@ -866,10 +866,10 @@ class ChatService(OSCARService):
         self.bos.chatReceiveMessage(self,user,message)
 
     def sendMessage(self,message):
-        tlvs=TLV(0x02,"us-ascii")+TLV(0x03,"en")+TLV(0x01,message)
+        tlvs=TLV(0x02,u"us-ascii")+TLV(0x03,u"en")+TLV(0x01,message)
         self.sendSNAC(0x0e,0x05,
-                      "\x46\x30\x38\x30\x44\x00\x63\x00\x00\x03\x00\x01\x00\x00\x00\x06\x00\x00\x00\x05"+
-                      struct.pack("!H",len(tlvs))+
+                      u"\x46\x30\x38\x30\x44\x00\x63\x00\x00\x03\x00\x01\x00\x00\x00\x06\x00\x00\x00\x05"+
+                      struct.pack(u"!H",len(tlvs))+
                       tlvs)
 
     def leaveChat(self):
@@ -877,7 +877,7 @@ class ChatService(OSCARService):
 
 
 class OscarAuthenticator(OscarConnection):
-    host = 'login.oscar.aol.com'
+    host = u'login.oscar.aol.com'
     port = 5190
     BOSClass = BOSConnection
 
@@ -890,26 +890,26 @@ class OscarAuthenticator(OscarConnection):
 
     def oscar_(self,flap):
         if not self.icq:
-            self.sendFLAP("\000\000\000\001", 0x01)
+            self.sendFLAP(u"\000\000\000\001", 0x01)
             self.sendFLAP(SNAC(0x17,0x06,0,
                                TLV(TLV_USERNAME,self.username)+
-                               TLV(0x004B,'')))
-            self.state="Key"
+                               TLV(0x004B,u'')))
+            self.state=u"Key"
         else:
             encpass=encryptPasswordICQ(self.password)
-            self.sendFLAP('\000\000\000\001'+
+            self.sendFLAP(u'\000\000\000\001'+
                           TLV(0x01,self.username)+
                           TLV(0x02,encpass)+
-                          TLV(0x03,'ICQ Inc. - Product of ICQ (TM).2001b.5.18.1.3659.85')+
-                          TLV(0x16,"\x01\x0a")+
-                          TLV(0x17,"\x00\x05")+
-                          TLV(0x18,"\x00\x12")+
-                          TLV(0x19,"\000\001")+
-                          TLV(0x1a,"\x0eK")+
-                          TLV(0x14,"\x00\x00\x00U")+
-                          TLV(0x0f,"en")+
-                          TLV(0x0e,"us"),0x01)
-            self.state="Cookie"
+                          TLV(0x03,u'ICQ Inc. - Product of ICQ (TM).2001b.5.18.1.3659.85')+
+                          TLV(0x16,u"\x01\x0a")+
+                          TLV(0x17,u"\x00\x05")+
+                          TLV(0x18,u"\x00\x12")+
+                          TLV(0x19,u"\000\001")+
+                          TLV(0x1a,u"\x0eK")+
+                          TLV(0x14,u"\x00\x00\x00U")+
+                          TLV(0x0f,u"en")+
+                          TLV(0x0e,u"us"),0x01)
+            self.state=u"Cookie"
 
     def oscar_Key(self,data):
         snac=readSNAC(data[1])
@@ -918,41 +918,41 @@ class OscarAuthenticator(OscarConnection):
         self.sendFLAP(SNAC(0x17,0x02,0,
                            TLV(TLV_USERNAME,self.username)+
                            TLV(TLV_PASSWORD,encpass)+
-                           TLV(0x004C, '')+
-                           TLV(TLV_CLIENTNAME,"AOL Instant Messenger (SM), version 4.8.2790/WIN32")+
-                           TLV(0x0016,"\x01\x09")+
-                           TLV(TLV_CLIENTMAJOR,"\000\004")+
-                           TLV(TLV_CLIENTMINOR,"\000\010")+
-                           TLV(0x0019,"\000\000")+
-                           TLV(TLV_CLIENTSUB,"\x0A\xE6")+
-                           TLV(0x0014,"\x00\x00\x00\xBB")+
-                           TLV(TLV_LANG,"en")+
-                           TLV(TLV_COUNTRY,"us")+
-                           TLV(TLV_USESSI,"\001")))
-        return "Cookie"
+                           TLV(0x004C, u'')+
+                           TLV(TLV_CLIENTNAME,u"AOL Instant Messenger (SM), version 4.8.2790/WIN32")+
+                           TLV(0x0016,u"\x01\x09")+
+                           TLV(TLV_CLIENTMAJOR,u"\000\004")+
+                           TLV(TLV_CLIENTMINOR,u"\000\010")+
+                           TLV(0x0019,u"\000\000")+
+                           TLV(TLV_CLIENTSUB,u"\x0A\xE6")+
+                           TLV(0x0014,u"\x00\x00\x00\xBB")+
+                           TLV(TLV_LANG,u"en")+
+                           TLV(TLV_COUNTRY,u"us")+
+                           TLV(TLV_USESSI,u"\001")))
+        return u"Cookie"
 
     def oscar_Cookie(self,data):
         snac=readSNAC(data[1])
         if self.icq:
-            i=snac[5].find("\000")
+            i=snac[5].find(u"\000")
             snac[5]=snac[5][i:]
         tlvs=readTLVs(snac[5])
         if 6 in tlvs:
             self.cookie=tlvs[6]
-            server,port=string.split(tlvs[5],":")
+            server,port=string.split(tlvs[5],u":")
             self.connectToBOS(server, int(port))
         elif 8 in tlvs:
             errorcode=tlvs[8]
             errorurl=tlvs[4]
-            if errorcode=='\000\030':
-                error="You are attempting to sign on again too soon.  Please try again later."
-            elif errorcode=='\000\005':
-                error="Invalid Username or Password."
+            if errorcode==u'\000\030':
+                error=u"You are attempting to sign on again too soon.  Please try again later."
+            elif errorcode==u'\000\005':
+                error=u"Invalid Username or Password."
             else: error=repr(errorcode)
             self.error(error,errorurl)
         else:
             pass
-        return "None"
+        return u"None"
 
     def oscar_None(self,data):
         pass
@@ -965,7 +965,7 @@ class OscarAuthenticator(OscarConnection):
 
     def error(self,error,url):
         if self.deferred: self.deferred.errback((error,url))
-        print 'stopping because of error()'
+        print u'stopping because of error()'
         self.stop()
 
 
@@ -988,15 +988,15 @@ TLV_CLIENTMINOR = 0x0018
 TLV_CLIENTSUB = 0x001A
 TLV_PASSWORD = 0x0025
 TLV_USESSI = 0x004A
-CAP_ICON = '\011F\023FL\177\021\321\202"DEST\000\000'
-CAP_VOICE = '\011F\023AL\177\021\321\202"DEST\000\000'
-CAP_IMAGE = '\011F\023EL\177\021\321\202"DEST\000\000'
-CAP_CHAT = 't\217$ b\207\021\321\202"DEST\000\000'
-CAP_GET_FILE = '\011F\023HL\177\021\321\202"DEST\000\000'
-CAP_SEND_FILE = '\011F\023CL\177\021\321\202"DEST\000\000'
-CAP_GAMES = '\011F\023GL\177\021\321\202"DEST\000\000'
-CAP_SEND_LIST = '\011F\023KL\177\021\321\202"DEST\000\000'
-CAP_SERV_REL = '\011F\023IL\177\021\321\202"DEST\000\000'
+CAP_ICON = u'\011F\023FL\177\021\321\202"DEST\000\000'
+CAP_VOICE = u'\011F\023AL\177\021\321\202"DEST\000\000'
+CAP_IMAGE = u'\011F\023EL\177\021\321\202"DEST\000\000'
+CAP_CHAT = u't\217$ b\207\021\321\202"DEST\000\000'
+CAP_GET_FILE = u'\011F\023HL\177\021\321\202"DEST\000\000'
+CAP_SEND_FILE = u'\011F\023CL\177\021\321\202"DEST\000\000'
+CAP_GAMES = u'\011F\023GL\177\021\321\202"DEST\000\000'
+CAP_SEND_LIST = u'\011F\023KL\177\021\321\202"DEST\000\000'
+CAP_SERV_REL = u'\011F\023IL\177\021\321\202"DEST\000\000'
 
 
 def logPacketData(data):
@@ -1004,28 +1004,28 @@ def logPacketData(data):
     if lines*16 != len(data): lines=lines+1
     for i in range(lines):
         d = tuple(data[16*i:16*i+16])
-        hex = map(lambda x: "%02X"%ord(x),d)
-        text = map(lambda x: (len(repr(x))>3 and '.') or x, d)
+        hex = map(lambda x: u"%02X"%ord(x),d)
+        text = map(lambda x: (len(repr(x))>3 and u'.') or x, d)
 
 def SNAC(fam,sub,id,data,flags=[0,0]):
-    header="!HHBBL"
+    header=u"!HHBBL"
     head=struct.pack(header,fam,sub,
                      flags[0],flags[1],
                      id)
-    return head+str(data)
+    return head+unicode(data)
 
 def readSNAC(data):
-    header="!HHBBL"
+    header=u"!HHBBL"
     head=list(struct.unpack(header,data[:10]))
     return head+[data[10:]]
 
 def TLV(type,value):
-    header="!HH"
+    header=u"!HH"
     head=struct.pack(header,type,len(value))
-    return head+str(value)
+    return head+unicode(value)
 
 def readTLVs(data,count=None):
-    header="!HH"
+    header=u"!HH"
     dict={}
     while data and len(dict)!=count:
         head=struct.unpack(header,data[:4])
@@ -1039,13 +1039,13 @@ def encryptPasswordMD5(password,key):
     m=md5.new()
     m.update(key)
     m.update(md5.new(password).digest())
-    m.update("AOL Instant Messenger (SM)")
+    m.update(u"AOL Instant Messenger (SM)")
     return m.digest()
 
 def encryptPasswordICQ(password):
     key=[0xF3,0x26,0x81,0xC4,0x39,0x86,0xDB,0x92,0x71,0xA3,0xB9,0xE6,0x53,0x7A,0x95,0x7C]
     bytes=map(ord,password)
-    r=""
+    r=u""
     for i in range(len(bytes)):
         r=r+chr(bytes[i]^key[i%len(key)])
     return r

@@ -20,29 +20,28 @@
 """NEVAR FORGET"""
 
 import re
-from include import rssparser
+from include import feedparser
 from include.utils import Module, stripHTML
 from include.useragent import geturl
 from include.BeautifulSoup import BeautifulSoup
 import logging as log
 from include.colorlib import ColorLib
 
-__version__ = '0.3'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.3'
+__author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
-FORMAT = 'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s'
+FORMAT = u'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s'
 
 class Terror(object):
-    _url = 'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
+
+    _url = u'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
     _re_level = re.compile(r'<THREAT_ADVISORY CONDITION="(\w+)" />')
-    _color_map = {
-        'severe': 'red',
-        'high': 'orange',
-        'elevated': 'bright yellow',
-        'guarded': 'bright blue',
-        'low': 'bright green',
-    }
+    _color_map = {u'severe': u'red',
+                  u'high': u'orange',
+                  u'elevated': u'bright yellow',
+                  u'guarded': u'bright blue',
+                  u'low': u'bright green'}
 
     def __init__(self, colorlib):
         self.colorlib = colorlib
@@ -54,80 +53,84 @@ class Terror(object):
             color = self._color_map[level.lower()]
             return self.colorlib.get_color(color, text=level)
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return 'UNKNOWN'
+            return u'UNKNOWN'
 
 
 class DoomsDay(object):
-    _url = 'http://www.thebulletin.org/'
+
+    _url = u'http://www.thebulletin.org/'
     _re_time = re.compile(r'<div class="module-content"><h3>(.*?)</h3>')
 
     def time(self):
         try:
             doc = geturl(DoomsDay._url)
-            time = DoomsDay._re_time.search(doc).group(1)
+            time = self._re_time.search(doc).group(1)
             return time
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return 'UNKNOWN'
+            return u'UNKNOWN'
 
 
 class IranWar(object):
-    _url = 'http://www.areweatwarwithiran.com/rss.xml'
+
+    _url = u'http://www.areweatwarwithiran.com/rss.xml'
 
     def war(self):
         try:
-            rss = rssparser.parse(IranWar._url)
-            return rss.entries[0].title.encode(rss.encoding)
+            rss = feedparser.parse(self._url)
+            return rss.entries[0].title
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return 'UNKNOWN'
+            return u'UNKNOWN'
 
 
 class IraqWar(object):
-    _war_url = 'http://areweatwarwithiraq.com/rss.xml'
-    _bodycount_url = 'http://www.iraqbodycount.org/'
+
+    _war_url = u'http://areweatwarwithiraq.com/rss.xml'
+    _bodycount_url = u'http://www.iraqbodycount.org/'
     _re_whitespace = re.compile(r'\s+')
 
     def war(self):
         try:
-            rss = rssparser.parse(IraqWar._war_url)
-            return rss.entries[0].title.encode(rss.encoding)
+            rss = feedparser.parse(self._war_url)
+            return rss.entries[0].title
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return 'UNKNOWN'
+            return u'UNKNOWN'
 
     def bodycount(self):
         try:
-            doc = geturl(IraqWar._bodycount_url)
+            doc = geturl(self._bodycount_url)
             soup = BeautifulSoup(doc)
-            data = soup.find('td', attrs={'class': 'main-num'})
-            data = data.find('a')
-            data = str(data.contents[0])
+            data = soup.find(u'td', attrs={u'class': u'main-num'})
+            data = data.find(u'a')
+            data = unicode(data.contents[0])
             data = stripHTML(data)
-            data = IraqWar._re_whitespace.sub(' ', data)
+            data = self._re_whitespace.sub(u' ', data)
             data = data.strip()
             return data
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return 'UNKNOWN'
+            return u'UNKNOWN'
 
 
 class Main(Module):
-    pattern = re.compile('^\s*(?:terror|doomsday|war)\s*$', re.I)
+
+    pattern = re.compile(u'^\s*(?:terror|doomsday|war)\s*$', re.I)
     require_addressing = True
-    help = 'terror - NEVAR FORGET'
+    help = u'terror - NEVAR FORGET'
 
     def __init__(self, madcow=None):
         if madcow is not None:
             colorlib = madcow.colorlib
         else:
-            colorlib = ColorLib('ansi')
+            colorlib = ColorLib(u'ansi')
         self.terror = Terror(colorlib)
         self.doom = DoomsDay()
         self.iran = IranWar()
@@ -136,13 +139,14 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         try:
             return FORMAT % (self.terror.level(), self.doom.time(),
-                    self.iran.war(), self.iraq.war(), self.iraq.bodycount())
+                             self.iran.war(), self.iraq.war(),
+                             self.iraq.bodycount())
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: problem with query: %s' % (nick, error)
+            return u'%s: problem with query: %s' % (nick, error)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

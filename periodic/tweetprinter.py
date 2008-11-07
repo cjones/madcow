@@ -17,7 +17,7 @@
 #
 # Created by toast on 2008-04-21.
 #
-# Periodically checks for fresh 'tweets' from friends and prints them
+# Periodically checks for fresh u'tweets' from friends and prints them
 # to the channel
 
 """Prints tweets to the channel."""
@@ -29,7 +29,7 @@ import logging as log
 
 class Main(object):
 
-    _agent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
+    _agent = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 
     def __init__(self, madcow):
         self.madcow = madcow
@@ -47,39 +47,39 @@ class Main(object):
         """Updates timestamp of last update."""
         self.lastupdate = time.gmtime()
 
-    def __get_update_str(self):
-        return time.strftime("%a, %d %b %Y %X GMT", self.lastupdate)
+    def __get_update_unicode(self):
+        return time.strftime(u"%a, %d %b %Y %X GMT", self.lastupdate)
 
     def response(self, *args):
         """This is called by madcow, should return a string or None"""
         try:
-            log.debug('getting tweets...')
-            tweets = self.api.GetFriendsTimeline(since=self.__get_update_str())
+            log.debug(u'getting tweets...')
+            tweets = self.api.GetFriendsTimeline(since=self.__get_update_unicode())
         except Exception, error:
             try:
                 if error.code == 304:
-                    log.debug('no new tweets')
+                    log.debug(u'no new tweets')
                     return
             except:
                 pass
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
             return
 
-        log.debug('found %d tweets, parsing' % len(tweets))
+        log.debug(u'found %d tweets, parsing' % len(tweets))
         lines = []
 
         for t in reversed(tweets):
             # twitter fails sometimes, so we do our own filter..
             if time.localtime(t.GetCreatedAtInSeconds()) < self.lastupdate:
-                log.debug('ignoring old tweet')
+                log.debug(u'ignoring old tweet')
                 continue
-            lines.append(">> tweet from %s: %s <<" % (
+            lines.append(u">> tweet from %s: %s <<" % (
                     t.user.screen_name, stripHTML(t.text)))
 
         self.__updatelast()
 
         if lines:
-            return "\n".join(lines)
+            return u"\n".join(lines)
         else:
             return None

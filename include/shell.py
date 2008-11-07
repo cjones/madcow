@@ -28,8 +28,9 @@ __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = ['Shell']
 
 class Shell(object):
+
     """Simple shell emulation.. might not work everywhere"""
-    
+
     linefeed = '\r\n'
     backspace = '\x08\x7f'
     quit = '\x03\x04'

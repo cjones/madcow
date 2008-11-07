@@ -11,10 +11,10 @@ def main():
     op = OptionParser()
     opts, args = op.parse_args()
     if len(args) != 1:
-        op.error('missing file to modify')
+        op.error(u'missing file to modify')
 
     # read file
-    fo = open(args[0], 'rb')
+    fo = open(args[0], u'rb')
     try:
         data = fo.read()
     finally:
@@ -31,7 +31,7 @@ def main():
     for line in data.splitlines():
 
         # display the line
-        sys.stdout.write(line + '\n')
+        sys.stdout.write(line + u'\n')
         linenum += 1
 
         # classline?
@@ -57,14 +57,14 @@ def main():
         indent = 4
 
         # construct new line
-        ipadding = ' ' * (padding + indent)
-        name = '.'.join([i for i in class_name, funcname if i is not None])
-        new = "%sprint 'DEBUG [%s] %s'\n" % (ipadding, linenum, name)
+        ipadding = u' ' * (padding + indent)
+        name = u'.'.join([i for i in class_name, funcname if i is not None])
+        new = u"%sprint 'DEBUG [%s] %s'\n" % (ipadding, linenum, name)
         sys.stdout.write(new)
         sys.stdout.flush()
         linenum += 1
 
     return 0
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     sys.exit(main())

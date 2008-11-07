@@ -18,12 +18,12 @@ class HTMLParser:
     def parse_url(self, url):
         data = urllib.urlopen(url)
         soup = BeautifulSoup(data)
-        data = str(soup)
-        data = self._comments.sub('', data)
+        data = unicode(soup)
+        data = self._comments.sub(u'', data)
         data = self._tags.sub(r'<\1>', data)
-        data = self._linebreaks.sub('\n', data)
-        data = self._tagdata.sub('><', data)
-        data = self._taglinks.sub('>\n<', data)
+        data = self._linebreaks.sub(u'\n', data)
+        data = self._tagdata.sub(u'><', data)
+        data = self._taglinks.sub(u'>\n<', data)
         return data
 
 
@@ -35,10 +35,10 @@ def main():
 
     for url in args:
         data = parser.parse_url(url)
-        print str(data)
+        print unicode(data)
 
 
     return 0
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     sys.exit(main())

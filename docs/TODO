@@ -1,4 +1,3 @@
-
 *** general
 
 - improve anti-abuse settings.. need to keep track of global module
@@ -20,6 +19,11 @@
 - better testing framework, perhaps even proper unit testing.  Just testing
   that the various modules work is not enough anymore.  Too much stuff can
   break with small changes.
+- history should do something fancier than dump the repr of the list
+  traffic.py has issues when you enter grabage.. expected, but probably don't
+  want unbound local error.
+- optparse help shows random useless files for protocols.. fix that shiz
+- lyrics module search should skip over artists pages if a song is later
 
 *** style
 
@@ -38,9 +42,6 @@
 
 *** 2to3
 
-- wiki.py is returning unicode instead of raw data.  For consistency, in
-  2.x, we need ALL modules to return raw bytes.  This will of course change
-  in 3.0. er, or do i mean they should all return unicode? fuck me
 - SQLObject is still using deprecated code.  Do we really need
   an object model for ONE small application, or would using raw
   SQL be acceptable just to remove a third-party dependency?  It would
@@ -49,15 +50,6 @@
 - twitter will need to use stdlib json instead of third-party
   simplejson.  Google may provide an update for this, but keep in mind that
   we've patched twitter.py in multiple ways already.
-- need to refactor bytes vs. str usage, which is currently str vs.
-  unicode.  In 2.x, we deal with raw bytes, convert to unicode based
-  on what we think (or detect) the encoding to be, then encode to raw bytes
-  based on the config file's encoding.  In 3.x we will need to perform
-  the raw bytes->unicode conversion at the plugin source, deal with unicode
-  internally, and encode to raw bytes ONLY before writing to sockets.  In
-  theory this should work out better, but it will require serious refactoring.
-- useragent will need to be totally rewritten to take advantage of urllib
-  reorganization.
 
 *** optimizations
 

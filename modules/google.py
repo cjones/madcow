@@ -24,14 +24,14 @@ from include.utils import Module
 import re
 import logging as log
 
-__version__ = '0.3'
-__author__ = 'cj_ <cjones@gruntle.org>'
+__version__ = u'0.3'
+__author__ = u'cj_ <cjones@gruntle.org>'
 
 class Main(Module):
 
-    pattern = re.compile('^\s*google\s+(.*?)\s*$')
+    pattern = re.compile(u'^\s*google\s+(.*?)\s*$')
     require_addressing = True
-    help = "google <query> - i'm feeling lucky"
+    help = u"google <query> - i'm feeling lucky"
 
     def __init__(self, *args, **kwargs):
         self.google = Google()
@@ -39,13 +39,13 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         try:
             query = args[0]
-            return '%s: %s = %s' % (nick, query, self.google.lucky(query))
+            return u'%s: %s = %s' % (nick, query, self.google.lucky(query))
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: Not so lucky today..' % nick
+            return u'%s: Not so lucky today..' % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

@@ -187,6 +187,13 @@ host=localhost
 port=706
 reconnect=yes
 reconnectWait=3
+;
+; if your server has flood protection, you can add a delay between each
+; line sent to the server. value is in milliseconds (1000 = 1 second)
+; if you use the SILCNetwork, it generally has flood protection, hence
+; the default being non-zero
+;
+delay=350
 
 ; smtp settings for summon module.  the outgoing smtp server will be
 ; used to send out a text message.  if you wish to be able to reply from

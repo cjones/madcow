@@ -23,33 +23,31 @@ from BeautifulSoup import BeautifulSoup
 import re
 from urlparse import urljoin
 
-__version__ = '0.1'
-__author__ = 'cj_ <cjones@gruntle.org>'
-__all__ = ['Wiki']
+__version__ = u'0.1'
+__author__ = u'cj_ <cjones@gruntle.org>'
+__all__ = [u'Wiki']
 
 class Wiki(object):
+
     """Return summary from WikiMedia projects"""
 
     # site-specific details, default is english wikipedia
-    _base_url = 'http://en.wikipedia.org/'
-    _random_path = '/wiki/Special:Random'
-    _search_path = '/wiki/Special:Search'
-    _advert = ' - Wikipedia, the free encyclopedia'
-    _error = 'Search results'
+    _base_url = u'http://en.wikipedia.org/'
+    _random_path = u'/wiki/Special:Random'
+    _search_path = u'/wiki/Special:Search'
+    _advert = u' - Wikipedia, the free encyclopedia'
+    _error = u'Search results'
 
     # size of response
     _summary_size = 400
     _sample_size = 32 * 1024
 
     # precompiled regex
-    _dash = '\xe2\x80\x94' # wikipedia people love their unicode :(
-    _utf8 = re.compile(r'[\x80-\xff]')
     _citations = re.compile(r'\[.*?\]', re.DOTALL)
     _audio = re.compile(r'audiolink', re.I)
     _parens = re.compile(r'\(.*?\)', re.DOTALL)
     _whitespace = re.compile(r'[ \t\r\n]+')
     _sentence = re.compile(r'(.*?\.)\s+', re.DOTALL)
-    _nbsp_entity = re.compile(r'&#160;')
     _fix_punc = re.compile(r'\s+([,;:.])')
 
     def __init__(self, base_url=_base_url, random_path=_random_path,
@@ -71,93 +69,88 @@ class Wiki(object):
         # there isn't a consistent style guide, so we just try to do the
         # most common format (ordered list of links). if this fails, return
         # a friendly failure for now
-        if soup.find('div', attrs={'id': 'disambig'}):
+        if soup.find(u'div', attrs={u'id': u'disambig'}):
             try:
-                summary = '%s (Disambiguation) - ' % title
-                for link in soup.find('ul').findAll('a'):
-                    title = str(link['title']).strip()
+                summary = u'%s (Disambiguation) - ' % title
+                for link in soup.find(u'ul').findAll(u'a'):
+                    title = unicode(link[u'title']).strip()
                     if len(summary) + len(title) + 2 > self.summary_size:
                         break
-                    if not summary.endswith(' '):
-                        summary += ', '
+                    if not summary.endswith(u' '):
+                        summary += u', '
                     summary += title
             except:
-                summary = 'Fancy, unsupported disambiguation page!'
+                summary = u'Fancy, unsupported disambiguation page!'
             return summary
 
         # massage into plain text by concatenating paragraphs
         content = []
-        for para in soup.findAll('p'):
-            content.append(str(para))
-        content = ' '.join(content)
+        for para in soup.findAll(u'p'):
+            content.append(unicode(para))
+        content = u' '.join(content)
 
         # clean up rendered text
         content = stripHTML(content)                 # strip markup
-        content = Wiki._citations.sub('', content)   # remove citations
-        content = Wiki._parens.sub('', content)      # remove parentheticals
-        content = Wiki._whitespace.sub(' ', content) # compress whitespace
+        content = Wiki._citations.sub(u'', content)   # remove citations
+        content = Wiki._parens.sub(u'', content)      # remove parentheticals
+        content = Wiki._whitespace.sub(u' ', content) # compress whitespace
         content = Wiki._fix_punc.sub(r'\1', content) # fix punctuation
         content = content.strip()                    # strip whitespace
 
         # search error
         if title == self.error:
-            return 'No results found for "%s"' % query
+            return u'No results found for "%s"' % query
 
         # generate summary by adding as many sentences as possible before limit
-        summary = '%s -' % title
+        summary = u'%s -' % title
         for sentence in Wiki._sentence.findall(content):
             if len(summary) + 1 + len(sentence) > self.summary_size:
                 break
-            summary += ' %s' % sentence
+            summary += u' %s' % sentence
         return summary
 
     def get_soup(self, query):
         if isinstance(query, (list, tuple)):
-            query = ' '.join(query)
+            query = u' '.join(query)
 
         # load page
-        if query == 'random':
+        if query == u'random':
             opts = {}
             url = urljoin(self.base_url, self.random_path)
         else:
-            opts = {'search': query, 'go': 'Go'}
+            opts = {u'search': query, u'go': u'Go'}
             url = urljoin(self.base_url, self.search_path)
         page = geturl(url, referer=self.base_url, opts=opts,
-                size=self.sample_size)
-
-        # remove high ascii since this is going to IRC
-        page = Wiki._nbsp_entity.sub(' ', page)
-        page = page.replace(Wiki._dash, ' -- ')
-        page = Wiki._utf8.sub('', page)
+                      size=self.sample_size)
 
         # create BeautifulSoup document tree
         soup = BeautifulSoup(page)
 
         # extract title minus WP advert
-        title = soup.title.string.replace(self.advert, '')
+        title = soup.title.string.replace(self.advert, u'')
 
         # remove all tabular data/sidebars
-        for table in soup.findAll('table'):
+        for table in soup.findAll(u'table'):
             table.extract()
 
         # remove disambiguation links
-        for dablink in soup.findAll('div', attrs={'class': 'dablink'}):
+        for dablink in soup.findAll(u'div', attrs={u'class': u'dablink'}):
             dablink.extract()
 
         # remove latitude/longitude metadata for places
-        for coord in soup.findAll('span', attrs={'id': 'coordinates'}):
+        for coord in soup.findAll(u'span', attrs={u'id': u'coordinates'}):
             coord.extract()
 
         # strip non-english content wrappers
-        for span in soup.findAll('span', attrs={'lang': True}):
+        for span in soup.findAll(u'span', attrs={u'lang': True}):
             span.extract()
 
         # remove IPA pronounciation guidelines
-        for span in soup.findAll('span', attrs={'class': 'IPA'}):
+        for span in soup.findAll(u'span', attrs={u'class': u'IPA'}):
             span.extract()
-        for link in soup.findAll('a', text='IPA'):
+        for link in soup.findAll(u'a', text=u'IPA'):
             link.extract()
-        for span in soup.findAll('span', attrs={'class': Wiki._audio}):
+        for span in soup.findAll(u'span', attrs={u'class': Wiki._audio}):
             span.extract()
 
         return soup, title

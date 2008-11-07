@@ -24,25 +24,24 @@ import logging as log
 from include.shell import Shell
 
 class ConsoleProtocol(Madcow):
+
     _new_nick = re.compile(r'^\s*nick\s+(\S+)\s*$', re.I)
-    _cli_usage = [
-        'quit - quit madcow',
-        'history - show history',
-        'nick <nick> - change your nick',
-        'clear - clear screen'
-    ]
-    _prompt = '\x1b[1;31m>>>\x1b[0m '
-    _clear = '\x1b[H\x1b[J'
+    _prompt = u'\x1b[1;31m>>>\x1b[0m '
+    _clear = u'\x1b[H\x1b[J'
+    _cli_usage = [u'quit - quit madcow',
+                  u'history - show history',
+                  u'nick <nick> - change your nick',
+                  u'clear - clear screen']
 
     def __init__(self, config, prefix):
-        self.colorlib = ColorLib('ansi')
+        self.colorlib = ColorLib(u'ansi')
         Madcow.__init__(self, config, prefix)
-        self.user_nick = os.environ['USER']
+        self.user_nick = os.environ[u'USER']
         self.shell = Shell(polls=[self.check_response_queue])
         self.usage_lines += self._cli_usage
 
     def run(self):
-        self.output("type 'help' for a list of commands")
+        self.output(u"type 'help' for a list of commands")
         while self.running:
             self.check_response_queue()
             try:
@@ -51,32 +50,35 @@ class ConsoleProtocol(Madcow):
                 # this happens when you get EINTR from SIGHUP handling
                 continue
 
-            if input.lower() == 'quit':
+            input = input.decode(sys.stdin.encoding, 'replace')
+
+            if input.lower() == u'quit':
                 break
 
-            if input.lower() == 'history':
-                print 'history: %s' % repr(self.shell.history)
+            if input.lower() == u'history':
+                print u'history: %s' % repr(self.shell.history)
+                continue
 
-            if input.lower() == 'clear':
+            if input.lower() == u'clear':
                 sys.stdout.write(self._clear)
                 continue
 
             if len(input) > 0:
                 req = Request(message=input)
                 req.nick = self.user_nick
-                req.channel = 'cli'
+                req.channel = u'cli'
                 req.private = True
                 req.addressed = True
 
                 self.check_addressing(req)
 
-                if req.message.startswith('^'):
+                if req.message.startswith(u'^'):
                     req.colorize = True
                     req.message = req.message[1:]
 
                 try:
                     self.user_nick = self._new_nick.search(req.message).group(1)
-                    self.output('nick changed to: %s' % self.user_nick, req)
+                    self.output(u'nick changed to: %s' % self.user_nick, req)
                     continue
                 except:
                     pass
@@ -85,7 +87,7 @@ class ConsoleProtocol(Madcow):
     def protocol_output(self, message, req=None):
         if req is not None and req.colorize is True:
             message = self.colorlib.rainbow(message)
-        print message
+        print message.encode(self.charset, 'replace')
 
 
 class ProtocolHandler(ConsoleProtocol):

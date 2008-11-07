@@ -26,9 +26,9 @@ import logging as log
 
 class Main(Module):
 
-    pattern = re.compile('^\s*calc\s+(.+)', re.I)
+    pattern = re.compile(u'^\s*calc\s+(.+)', re.I)
     require_addressing = True
-    help = 'calc <expression> - pass expression to google calculator'
+    help = u'calc <expression> - pass expression to google calculator'
 
     def __init__(self, madcow=None):
         self.google = Google()
@@ -37,13 +37,13 @@ class Main(Module):
         try:
             query = args[0]
             response = self.google.calculator(query)
-            return '%s: %s' % (nick, response)
+            return u'%s: %s' % (nick, response)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: No results (bad syntax?)' % nick
+            return u'%s: No results (bad syntax?)' % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

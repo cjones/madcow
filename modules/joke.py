@@ -27,21 +27,26 @@ import urllib
 import logging as log
 
 class Main(Module):
+
     pattern = re.compile(r'^\s*joke(?:\s+(.+?))?\s*$', re.I)
     require_addressing = True
-    help = 'joke <oneliners | news | signs | nerd | professional | quotes | lightbulb | couples | riddles | religion | gross | blonde | politics | doit | laws | defs | dirty | ethnic | zippergate> - displays a random joke'
-    baseurl = 'http://www.randomjoke.com/topic/'
-    random_url = urljoin(baseurl, 'haha.php')
+    help = (u'joke <oneliners | news | signs | nerd | professional | quotes | '
+            u'lightbulb | couples | riddles | religion | gross | blonde | poli'
+            u'tics | doit | laws | defs | dirty | ethnic | zippergate> - displ'
+            u'ays a random joke')
+    baseurl = u'http://www.randomjoke.com/topic/'
+    random_url = urljoin(baseurl, u'haha.php')
     joke = re.compile(r'next.joke.*?<P>(.*?)<CENTER>', re.DOTALL)
 
     def response(self, nick, args, kwargs):
         query = args[0]
-        if query is None or query == '':
+        if query is None or query == u'':
             url = self.random_url
         else:
-            query = ' '.join(query.split())
-            query = query.replace(' ', '_')
-            query = urllib.quote(query) + '.php'
+            query = u' '.join(query.split())
+            query = query.replace(u' ', u'_')
+            query = query.encode('utf-8', 'replace')
+            query = urllib.quote(query) + u'.php'
             url = urljoin(self.baseurl, query)
         try:
             doc = geturl(url)
@@ -49,18 +54,16 @@ class Main(Module):
             result = stripHTML(result)
 
             # cleanup output a bit.. some funny whitespace in it -cj
-            result = result.replace('\x14', ' ')
-            result = result.replace('\n', ' ')
-            result = re.sub(r'\s{2,}', ' ', result)
-            result = result.strip()
-
-            return '%s' % result
+            result = result.replace(u'\x14', u' ')
+            result = result.replace(u'\n', u' ')
+            result = re.sub(r'\s{2,}', u' ', result)
+            return result.strip()
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return "%s: I had a problem with that, sorry." % nick
+            return u"%s: I had a problem with that, sorry." % nick
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

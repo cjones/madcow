@@ -51,7 +51,7 @@ class GatewayService(object):
     def run(self):
         """While bot is alive, listen for connections"""
         if not self.bot.config.gateway.enabled:
-            log.info('GatewayService is disabled')
+            log.info(u'GatewayService is disabled')
             return
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -59,7 +59,7 @@ class GatewayService(object):
         sock.listen(5)
         while self.bot.running:
             client, addr = sock.accept()
-            log.info('connection from %s' % repr(addr))
+            log.info(u'connection from %s' % repr(addr))
             handler = GatewayServiceHandler(self, client, addr)
             handler.start()
 
@@ -74,8 +74,8 @@ class GatewayServiceHandler(Thread):
     newline = re.compile(r'\r?\n')
     headsep = re.compile(r'\r?\n\r?\n')
     required_headers = {
-        'message': ('to', 'from', 'message'),
-        'image': ('to', 'from', 'size'),
+        u'message': (u'to', u'from', u'message'),
+        u'image': (u'to', u'from', u'size'),
     }
     safenick = re.compile(r'[^0-9a-z_]', re.I)
 
@@ -84,7 +84,7 @@ class GatewayServiceHandler(Thread):
         self.client = client
         self.fd = client.fileno()
         self.addr = addr
-        self.buf = ''
+        self.buf = u''
         self.headers_done = False
         self.content_type = None
         self.hdrs = None
@@ -99,7 +99,7 @@ class GatewayServiceHandler(Thread):
             except OSError, error:
                 if error.errno != errno.EIO:
                     raise error
-                data = ''
+                data = u''
             if data:
                 return data
             raise ConnectionClosed
@@ -117,15 +117,15 @@ class GatewayServiceHandler(Thread):
                 self.data_received(data)
                 continue
             except InvalidPayload, error:
-                log.info('invalid payload from %s: %s' % (self.addr, error))
+                log.info(u'invalid payload from %s: %s' % (self.addr, error))
             except CloseConnection:
-                log.info('closing connection to %s' % repr(self.addr))
+                log.info(u'closing connection to %s' % repr(self.addr))
             except ConnectionTimeout:
-                log.info('connection timeout to %s' % repr(self.addr))
+                log.info(u'connection timeout to %s' % repr(self.addr))
             except ConnectionClosed:
-                log.info('connection closed by %s' % repr(self.addr))
+                log.info(u'connection closed by %s' % repr(self.addr))
             except Exception, error:
-                log.warn('uncaught exception from %s: %s' % (self.addr, error))
+                log.warn(u'uncaught exception from %s: %s' % (self.addr, error))
             break
         self.client.close()
 
@@ -138,36 +138,36 @@ class GatewayServiceHandler(Thread):
                 # parse headers
                 hdrs, self.buf = self.headsep.split(self.buf, 1)
                 hdrs = self.newline.split(hdrs)
-                hdrs = [hdr.split(':', 1) for hdr in hdrs]
+                hdrs = [hdr.split(u':', 1) for hdr in hdrs]
                 hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]
                 hdrs = dict(hdrs)
 
                 # sanity check headers
-                if 'type' in hdrs:
-                    content_type = hdrs['type']
+                if u'type' in hdrs:
+                    content_type = hdrs[u'type']
                 else:
-                    content_type = 'message'
+                    content_type = u'message'
                 if content_type not in self.required_headers:
                     raise InvalidPayload(
-                            'unknown content type: ' + content_type)
+                            u'unknown content type: ' + content_type)
                 for header in self.required_headers[content_type]:
                     if header not in hdrs:
                         raise InvalidPayload(
-                                'missing required field ' + header)
-                if 'size' in hdrs:
-                    hdrs['size'] = int(hdrs['size'])
+                                u'missing required field ' + header)
+                if u'size' in hdrs:
+                    hdrs[u'size'] = int(hdrs[u'size'])
 
                 # save data
                 self.content_type = content_type
                 self.hdrs = hdrs
                 self.headers_done = True
             except Exception, error:
-                raise InvalidPayload, 'invalid payload: %s' % error
+                raise InvalidPayload, u'invalid payload: %s' % error
 
-        if self.content_type == 'image':
-            if len(self.buf) < self.hdrs['size']:
+        if self.content_type == u'image':
+            if len(self.buf) < self.hdrs[u'size']:
                 return
-            image = self.buf[:self.hdrs['size']]
+            image = self.buf[:self.hdrs[u'size']]
             self.save_image(image, self.hdrs)
 
         self.process_message(self.hdrs)
@@ -176,59 +176,59 @@ class GatewayServiceHandler(Thread):
     def process_message(self, payload):
         # see if we can reverse lookup sender
         modules = self.server.bot.modules.dict()
-        dbm = modules['learn'].get_db('email')
+        dbm = modules[u'learn'].get_db(u'email')
         for user, email in dbm.items():
-            if payload['from'] == email:
-                payload['from'] = user
+            if payload[u'from'] == email:
+                payload[u'from'] = user
                 break
 
-        output = 'message from %s: %s' % (
-            payload['from'], payload['message']
+        output = u'message from %s: %s' % (
+            payload[u'from'], payload[u'message']
         )
 
         req = Request(output)
         req.colorize = False
-        req.sendto = payload['to']
+        req.sendto = payload[u'to']
         self.server.bot.output(output, req)
 
     def save_image(self, image, payload):
         if not self.isjpeg(image):
             print repr(image[:20])
-            raise InvalidPayload, 'payload is not a JPEG image'
+            raise InvalidPayload, u'payload is not a JPEG image'
         imagepath = self.server.bot.config.gateway.imagepath
         baseurl = self.server.bot.config.gateway.imageurl
         if not imagepath or not baseurl:
-            raise InvalidPayload, 'images are not configured'
+            raise InvalidPayload, u'images are not configured'
 
-        nick = self.safenick.sub('', payload['from'])[:16].lower()
+        nick = self.safenick.sub(u'', payload[u'from'])[:16].lower()
         if not len(nick):
-            raise InvalidPayload, 'invalid nick'
+            raise InvalidPayload, u'invalid nick'
 
-        date = datetime.date.today().strftime('%Y-%m-%d')
-        basename = '%s_%s' % (nick, date)
+        date = datetime.date.today().strftime(u'%Y-%m-%d')
+        basename = u'%s_%s' % (nick, date)
         idx = 0
         for basedir, subdirs, filenames in os.walk(imagepath):
             for filename in filenames:
                 try:
-                    name = filename.rsplit('.', 1)[0]
-                    seq = int(name.split(basename + '_', 1)[1])
+                    name = filename.rsplit(u'.', 1)[0]
+                    seq = int(name.split(basename + u'_', 1)[1])
                     if seq > idx:
                         idx = seq
                 except:
                     continue
         idx += 1
 
-        filename = '%s_%s.jpg' % (basename, idx)
-        fp = open(os.path.join(imagepath, filename), 'wb')
+        filename = u'%s_%s.jpg' % (basename, idx)
+        fp = open(os.path.join(imagepath, filename), u'wb')
         try:
             fp.write(image)
         finally:
             fp.close()
 
         message = urljoin(baseurl, filename)
-        if 'message' in payload and len(payload['message']):
-            message += ' (%s)' % payload['message']
-        payload['message'] = message
+        if u'message' in payload and len(payload[u'message']):
+            message += u' (%s)' % payload[u'message']
+        payload[u'message'] = message
 
     def isjpeg(self, image):
-        return image.startswith('\xff\xd8')
+        return image.startswith(u'\xff\xd8')

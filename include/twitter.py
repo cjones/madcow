@@ -4,8 +4,8 @@
 
 '''A library that provides a python interface to the Twitter API'''
 
-__author__ = 'dewitt@google.com'
-__version__ = '0.5'
+__author__ = u'dewitt@google.com'
+__version__ = u'0.5'
 
 
 import base64
@@ -84,7 +84,7 @@ class Status(object):
     self._created_at = created_at
 
   created_at = property(GetCreatedAt, SetCreatedAt,
-                        doc='The time this status message was posted.')
+                        doc=u'The time this status message was posted.')
 
   def GetCreatedAtInSeconds(self):
     '''Get the time this status message was posted, in seconds since the epoch.
@@ -92,11 +92,11 @@ class Status(object):
     Returns:
       The time this status message was posted, in seconds since the epoch.
     '''
-    return time.mktime(time.strptime(self.created_at, '%a %b %d %H:%M:%S +0000 %Y'))
+    return time.mktime(time.strptime(self.created_at, u'%a %b %d %H:%M:%S +0000 %Y'))
 
   created_at_in_seconds = property(GetCreatedAtInSeconds,
-                                   doc="The time this status message was "
-                                       "posted, in seconds since the epoch")
+                                   doc=u"The time this status message was "
+                                       u"posted, in seconds since the epoch")
 
   def GetId(self):
     '''Get the unique id of this status message.
@@ -115,7 +115,7 @@ class Status(object):
     self._id = id
 
   id = property(GetId, SetId,
-                doc='The unique id of this status message.')
+                doc=u'The unique id of this status message.')
 
   def GetText(self):
     '''Get the text of this status message.
@@ -134,7 +134,7 @@ class Status(object):
     self._text = text
 
   text = property(GetText, SetText,
-                  doc='The text of this status message')
+                  doc=u'The text of this status message')
 
   def GetRelativeCreatedAt(self):
     '''Get a human redable string representing the posting time
@@ -146,25 +146,25 @@ class Status(object):
     delta  = int(self.now) - int(self.created_at_in_seconds)
 
     if delta < (1 * fudge):
-      return 'about a second ago'
+      return u'about a second ago'
     elif delta < (60 * (1/fudge)):
-      return 'about %d seconds ago' % (delta)
+      return u'about %d seconds ago' % (delta)
     elif delta < (60 * fudge):
-      return 'about a minute ago'
+      return u'about a minute ago'
     elif delta < (60 * 60 * (1/fudge)):
-      return 'about %d minutes ago' % (delta / 60)
+      return u'about %d minutes ago' % (delta / 60)
     elif delta < (60 * 60 * fudge):
-      return 'about an hour ago'
+      return u'about an hour ago'
     elif delta < (60 * 60 * 24 * (1/fudge)):
-      return 'about %d hours ago' % (delta / (60 * 60))
+      return u'about %d hours ago' % (delta / (60 * 60))
     elif delta < (60 * 60 * 24 * fudge):
-      return 'about a day ago'
+      return u'about a day ago'
     else:
-      return 'about %d days ago' % (delta / (60 * 60 * 24))
+      return u'about %d days ago' % (delta / (60 * 60 * 24))
 
   relative_created_at = property(GetRelativeCreatedAt,
-                                 doc='Get a human readable string representing'
-                                     'the posting time')
+                                 doc=u'Get a human readable string representing'
+                                     u'the posting time')
 
   def GetUser(self):
     '''Get a twitter.User reprenting the entity posting this status message.
@@ -183,8 +183,8 @@ class Status(object):
     self._user = user
 
   user = property(GetUser, SetUser,
-                  doc='A twitter.User reprenting the entity posting this '
-                      'status message')
+                  doc=u'A twitter.User reprenting the entity posting this '
+                      u'status message')
 
   def GetNow(self):
     '''Get the wallclock time for this status message.
@@ -212,7 +212,7 @@ class Status(object):
     self._now = now
 
   now = property(GetNow, SetNow,
-                 doc='The wallclock time for this status instance.')
+                 doc=u'The wallclock time for this status instance.')
 
 
   def __ne__(self, other):
@@ -256,13 +256,13 @@ class Status(object):
     '''
     data = {}
     if self.created_at:
-      data['created_at'] = self.created_at
+      data[u'created_at'] = self.created_at
     if self.id:
-      data['id'] = self.id
+      data[u'id'] = self.id
     if self.text:
-      data['text'] = self.text
+      data[u'text'] = self.text
     if self.user:
-      data['user'] = self.user.AsDict()
+      data[u'user'] = self.user.AsDict()
     return data
 
   @staticmethod
@@ -274,13 +274,13 @@ class Status(object):
     Returns:
       A twitter.Status instance
     '''
-    if 'user' in data:
-      user = User.NewFromJsonDict(data['user'])
+    if u'user' in data:
+      user = User.NewFromJsonDict(data[u'user'])
     else:
       user = None
-    return Status(created_at=data.get('created_at', None),
-                  id=data.get('id', None),
-                  text=data.get('text', None),
+    return Status(created_at=data.get(u'created_at', None),
+                  id=data.get(u'id', None),
+                  text=data.get(u'text', None),
                   user=user)
 
 
@@ -334,7 +334,7 @@ class User(object):
     self._id = id
 
   id = property(GetId, SetId,
-                doc='The unique id of this user.')
+                doc=u'The unique id of this user.')
 
   def GetName(self):
     '''Get the real name of this user.
@@ -353,7 +353,7 @@ class User(object):
     self._name = name
 
   name = property(GetName, SetName,
-                  doc='The real name of this user.')
+                  doc=u'The real name of this user.')
 
   def GetScreenName(self):
     '''Get the short username of this user.
@@ -372,7 +372,7 @@ class User(object):
     self._screen_name = screen_name
 
   screen_name = property(GetScreenName, SetScreenName,
-                         doc='The short username of this user.')
+                         doc=u'The short username of this user.')
 
   def GetLocation(self):
     '''Get the geographic location of this user.
@@ -391,7 +391,7 @@ class User(object):
     self._location = location
 
   location = property(GetLocation, SetLocation,
-                      doc='The geographic location of this user.')
+                      doc=u'The geographic location of this user.')
 
   def GetDescription(self):
     '''Get the short text description of this user.
@@ -410,7 +410,7 @@ class User(object):
     self._description = description
 
   description = property(GetDescription, SetDescription,
-                         doc='The short text description of this user.')
+                         doc=u'The short text description of this user.')
 
   def GetUrl(self):
     '''Get the homepage url of this user.
@@ -429,7 +429,7 @@ class User(object):
     self._url = url
 
   url = property(GetUrl, SetUrl,
-                 doc='The homepage url of this user.')
+                 doc=u'The homepage url of this user.')
 
   def GetProfileImageUrl(self):
     '''Get the url of the thumbnail of this user.
@@ -448,7 +448,7 @@ class User(object):
     self._profile_image_url = profile_image_url
 
   profile_image_url= property(GetProfileImageUrl, SetProfileImageUrl,
-                              doc='The url of the thumbnail of this user.')
+                              doc=u'The url of the thumbnail of this user.')
 
   def GetStatus(self):
     '''Get the latest twitter.Status of this user.
@@ -467,7 +467,7 @@ class User(object):
     self._status = status
 
   status = property(GetStatus, SetStatus,
-                  doc='The latest twitter.Status of this user.')
+                  doc=u'The latest twitter.Status of this user.')
 
   def __ne__(self, other):
     return not self.__eq__(other)
@@ -514,21 +514,21 @@ class User(object):
     '''
     data = {}
     if self.id:
-      data['id'] = self.id
+      data[u'id'] = self.id
     if self.name:
-      data['name'] = self.name
+      data[u'name'] = self.name
     if self.screen_name:
-      data['screen_name'] = self.screen_name
+      data[u'screen_name'] = self.screen_name
     if self.location:
-      data['location'] = self.location
+      data[u'location'] = self.location
     if self.description:
-      data['description'] = self.description
+      data[u'description'] = self.description
     if self.profile_image_url:
-      data['profile_image_url'] = self.profile_image_url
+      data[u'profile_image_url'] = self.profile_image_url
     if self.url:
-      data['url'] = self.url
+      data[u'url'] = self.url
     if self.status:
-      data['status'] = self.status.AsDict()
+      data[u'status'] = self.status.AsDict()
     return data
 
   @staticmethod
@@ -540,17 +540,17 @@ class User(object):
     Returns:
       A twitter.User instance
     '''
-    if 'status' in data:
-      status = Status.NewFromJsonDict(data['status'])
+    if u'status' in data:
+      status = Status.NewFromJsonDict(data[u'status'])
     else:
       status = None
-    return User(id=data.get('id', None),
-                name=data.get('name', None),
-                screen_name=data.get('screen_name', None),
-                location=data.get('location', None),
-                description=data.get('description', None),
-                profile_image_url=data.get('profile_image_url', None),
-                url=data.get('url', None),
+    return User(id=data.get(u'id', None),
+                name=data.get(u'name', None),
+                screen_name=data.get(u'screen_name', None),
+                location=data.get(u'location', None),
+                description=data.get(u'description', None),
+                profile_image_url=data.get(u'profile_image_url', None),
+                url=data.get(u'url', None),
                 status=status)
 
 class DirectMessage(object):
@@ -617,7 +617,7 @@ class DirectMessage(object):
     self._id = id
 
   id = property(GetId, SetId,
-                doc='The unique id of this direct message.')
+                doc=u'The unique id of this direct message.')
 
   def GetCreatedAt(self):
     '''Get the time this direct message was posted.
@@ -636,7 +636,7 @@ class DirectMessage(object):
     self._created_at = created_at
 
   created_at = property(GetCreatedAt, SetCreatedAt,
-                        doc='The time this direct message was posted.')
+                        doc=u'The time this direct message was posted.')
 
   def GetCreatedAtInSeconds(self):
     '''Get the time this direct message was posted, in seconds since the epoch.
@@ -644,11 +644,11 @@ class DirectMessage(object):
     Returns:
       The time this direct message was posted, in seconds since the epoch.
     '''
-    return time.mktime(time.strptime(self.created_at, '%a %b %d %H:%M:%S +0000 %Y'))
+    return time.mktime(time.strptime(self.created_at, u'%a %b %d %H:%M:%S +0000 %Y'))
 
   created_at_in_seconds = property(GetCreatedAtInSeconds,
-                                   doc="The time this direct message was "
-                                       "posted, in seconds since the epoch")
+                                   doc=u"The time this direct message was "
+                                       u"posted, in seconds since the epoch")
 
   def GetSenderId(self):
     '''Get the unique sender id of this direct message.
@@ -667,7 +667,7 @@ class DirectMessage(object):
     self._sender_id = sender_id
 
   sender_id = property(GetSenderId, SetSenderId,
-                doc='The unique sender id of this direct message.')
+                doc=u'The unique sender id of this direct message.')
 
   def GetSenderScreenName(self):
     '''Get the unique sender screen name of this direct message.
@@ -686,7 +686,7 @@ class DirectMessage(object):
     self._sender_screen_name = sender_screen_name
 
   sender_screen_name = property(GetSenderScreenName, SetSenderScreenName,
-                doc='The unique sender screen name of this direct message.')
+                doc=u'The unique sender screen name of this direct message.')
 
   def GetRecipientId(self):
     '''Get the unique recipient id of this direct message.
@@ -705,7 +705,7 @@ class DirectMessage(object):
     self._recipient_id = recipient_id
 
   recipient_id = property(GetRecipientId, SetRecipientId,
-                doc='The unique recipient id of this direct message.')
+                doc=u'The unique recipient id of this direct message.')
 
   def GetRecipientScreenName(self):
     '''Get the unique recipient screen name of this direct message.
@@ -724,7 +724,7 @@ class DirectMessage(object):
     self._recipient_screen_name = recipient_screen_name
 
   recipient_screen_name = property(GetRecipientScreenName, SetRecipientScreenName,
-                doc='The unique recipient screen name of this direct message.')
+                doc=u'The unique recipient screen name of this direct message.')
 
   def GetText(self):
     '''Get the text of this direct message.
@@ -743,7 +743,7 @@ class DirectMessage(object):
     self._text = text
 
   text = property(GetText, SetText,
-                  doc='The text of this direct message')
+                  doc=u'The text of this direct message')
 
   def __ne__(self, other):
     return not self.__eq__(other)
@@ -789,19 +789,19 @@ class DirectMessage(object):
     '''
     data = {}
     if self.id:
-      data['id'] = self.id
+      data[u'id'] = self.id
     if self.created_at:
-      data['created_at'] = self.created_at
+      data[u'created_at'] = self.created_at
     if self.sender_id:
-      data['sender_id'] = self.sender_id
+      data[u'sender_id'] = self.sender_id
     if self.sender_screen_name:
-      data['sender_screen_name'] = self.sender_screen_name
+      data[u'sender_screen_name'] = self.sender_screen_name
     if self.recipient_id:
-      data['recipient_id'] = self.recipient_id
+      data[u'recipient_id'] = self.recipient_id
     if self.recipient_screen_name:
-      data['recipient_screen_name'] = self.recipient_screen_name
+      data[u'recipient_screen_name'] = self.recipient_screen_name
     if self.text:
-      data['text'] = self.text
+      data[u'text'] = self.text
     return data
 
   @staticmethod
@@ -813,13 +813,13 @@ class DirectMessage(object):
     Returns:
       A twitter.DirectMessage instance
     '''
-    return DirectMessage(created_at=data.get('created_at', None),
-                         recipient_id=data.get('recipient_id', None),
-                         sender_id=data.get('sender_id', None),
-                         text=data.get('text', None),
-                         sender_screen_name=data.get('sender_screen_name', None),
-                         id=data.get('id', None),
-                         recipient_screen_name=data.get('recipient_screen_name', None))
+    return DirectMessage(created_at=data.get(u'created_at', None),
+                         recipient_id=data.get(u'recipient_id', None),
+                         sender_id=data.get(u'sender_id', None),
+                         text=data.get(u'text', None),
+                         sender_screen_name=data.get(u'sender_screen_name', None),
+                         id=data.get(u'id', None),
+                         recipient_screen_name=data.get(u'recipient_screen_name', None))
 
 class Api(object):
   '''A python interface into the Twitter API
@@ -882,7 +882,7 @@ class Api(object):
 
   DEFAULT_CACHE_TIMEOUT = 60 # cache for 1 minute
 
-  _API_REALM = 'Twitter API'
+  _API_REALM = u'Twitter API'
 
   def __init__(self,
                username=None,
@@ -918,8 +918,8 @@ class Api(object):
     '''
     parameters = {}
     if since_id:
-      parameters['since_id'] = since_id
-    url = 'http://twitter.com/statuses/public_timeline.json'
+      parameters[u'since_id'] = since_id
+    url = u'http://twitter.com/statuses/public_timeline.json'
     json = self._FetchUrl(url,  parameters=parameters)
     data = simplejson.loads(json)
     return [Status.NewFromJsonDict(x) for x in data]
@@ -941,10 +941,10 @@ class Api(object):
     Returns:
       A sequence of twitter.Status instances, one for each message
     '''
-    url = 'http://twitter.com/statuses/friends_timeline/'
+    url = u'http://twitter.com/statuses/friends_timeline/'
     parameters = {}
     if since:
-      parameters['since'] = since
+      parameters[u'since'] = since
     json = self._FetchUrl(url, parameters=parameters)
     data = simplejson.loads(json)
     return [Status.NewFromJsonDict(x) for x in data]
@@ -970,18 +970,18 @@ class Api(object):
       if count:
         int(count)
     except:
-      raise TwitterError("Count must be an integer")
+      raise TwitterError(u"Count must be an integer")
     parameters = {}
     if count:
-      parameters['count'] = count
+      parameters[u'count'] = count
     if since:
-      parameters['since'] = since
+      parameters[u'since'] = since
     if user:
-      url = 'http://twitter.com/statuses/user_timeline/%s.json' % user
+      url = u'http://twitter.com/statuses/user_timeline/%s.json' % user
     elif not user and not self._username:
-      raise TwitterError("User must be specified if API is not authenticated.")
+      raise TwitterError(u"User must be specified if API is not authenticated.")
     else:
-      url = 'http://twitter.com/statuses/user_timeline.json'
+      url = u'http://twitter.com/statuses/user_timeline.json'
     json = self._FetchUrl(url, parameters=parameters)
     data = simplejson.loads(json)
     return [Status.NewFromJsonDict(x) for x in data]
@@ -1001,8 +1001,8 @@ class Api(object):
       if id:
         int(id)
     except:
-      raise TwitterError("id must be an integer")
-    url = 'http://twitter.com/statuses/show/%s.json' % id
+      raise TwitterError(u"id must be an integer")
+    url = u'http://twitter.com/statuses/show/%s.json' % id
     json = self._FetchUrl(url)
     data = simplejson.loads(json)
     return Status.NewFromJsonDict(data)
@@ -1023,8 +1023,8 @@ class Api(object):
       if id:
         int(id)
     except:
-      raise TwitterError("id must be an integer")
-    url = 'http://twitter.com/statuses/destroy/%s.json' % id
+      raise TwitterError(u"id must be an integer")
+    url = u'http://twitter.com/statuses/destroy/%s.json' % id
     json = self._FetchUrl(url, post_data={})
     data = simplejson.loads(json)
     return Status.NewFromJsonDict(data)
@@ -1041,11 +1041,11 @@ class Api(object):
       A twitter.Status instance representing the message posted
     '''
     if not self._username:
-      raise TwitterError("The twitter.Api instance must be authenticated.")
+      raise TwitterError(u"The twitter.Api instance must be authenticated.")
     if len(text) > 140:
-      raise TwitterError("Text must be less than or equal to 140 characters.")
-    url = 'http://twitter.com/statuses/update.json'
-    data = {'status': text}
+      raise TwitterError(u"Text must be less than or equal to 140 characters.")
+    url = u'http://twitter.com/statuses/update.json'
+    data = {u'status': text}
     json = self._FetchUrl(url, post_data=data)
     data = simplejson.loads(json)
     return Status.NewFromJsonDict(data)
@@ -1058,9 +1058,9 @@ class Api(object):
     Returns:
       A sequence of twitter.Status instances, one for each reply to the user.
     '''
-    url = 'http://twitter.com/statuses/replies.json'
+    url = u'http://twitter.com/statuses/replies.json'
     if not self._username:
-      raise TwitterError("The twitter.Api instance must be authenticated.")
+      raise TwitterError(u"The twitter.Api instance must be authenticated.")
     json = self._FetchUrl(url)
     data = simplejson.loads(json)
     return [Status.NewFromJsonDict(x) for x in data]
@@ -1078,11 +1078,11 @@ class Api(object):
       A sequence of twitter.User instances, one for each friend
     '''
     if not self._username:
-      raise TwitterError("twitter.Api instance must be authenticated")
+      raise TwitterError(u"twitter.Api instance must be authenticated")
     if user:
-      url = 'http://twitter.com/statuses/friends/%s.json' % user
+      url = u'http://twitter.com/statuses/friends/%s.json' % user
     else:
-      url = 'http://twitter.com/statuses/friends.json'
+      url = u'http://twitter.com/statuses/friends.json'
     json = self._FetchUrl(url)
     data = simplejson.loads(json)
     return [User.NewFromJsonDict(x) for x in data]
@@ -1096,8 +1096,8 @@ class Api(object):
       A sequence of twitter.User instances, one for each follower
     '''
     if not self._username:
-      raise TwitterError("twitter.Api instance must be authenticated")
-    url = 'http://twitter.com/statuses/followers.json'
+      raise TwitterError(u"twitter.Api instance must be authenticated")
+    url = u'http://twitter.com/statuses/followers.json'
     json = self._FetchUrl(url)
     data = simplejson.loads(json)
     return [User.NewFromJsonDict(x) for x in data]
@@ -1110,7 +1110,7 @@ class Api(object):
     Returns:
       A sequence of twitter.User instances
     '''
-    url = 'http://twitter.com/statuses/featured.json'
+    url = u'http://twitter.com/statuses/featured.json'
     json = self._FetchUrl(url)
     data = simplejson.loads(json)
     return [User.NewFromJsonDict(x) for x in data]
@@ -1126,7 +1126,7 @@ class Api(object):
     Returns:
       A twitter.User instance representing that user
     '''
-    url = 'http://twitter.com/users/show/%s.json' % user
+    url = u'http://twitter.com/users/show/%s.json' % user
     json = self._FetchUrl(url)
     data = simplejson.loads(json)
     return User.NewFromJsonDict(data)
@@ -1144,12 +1144,12 @@ class Api(object):
     Returns:
       A sequence of twitter.DirectMessage instances
     '''
-    url = 'http://twitter.com/direct_messages.json'
+    url = u'http://twitter.com/direct_messages.json'
     if not self._username:
-      raise TwitterError("The twitter.Api instance must be authenticated.")
+      raise TwitterError(u"The twitter.Api instance must be authenticated.")
     parameters = {}
     if since:
-      parameters['since'] = since
+      parameters[u'since'] = since
     json = self._FetchUrl(url, parameters=parameters)
     data = simplejson.loads(json)
     return [DirectMessage.NewFromJsonDict(x) for x in data]
@@ -1167,9 +1167,9 @@ class Api(object):
       A twitter.DirectMessage instance representing the message posted
     '''
     if not self._username:
-      raise TwitterError("The twitter.Api instance must be authenticated.")
-    url = 'http://twitter.com/direct_messages/new.json'
-    data = {'text': text, 'user': user}
+      raise TwitterError(u"The twitter.Api instance must be authenticated.")
+    url = u'http://twitter.com/direct_messages/new.json'
+    data = {u'text': text, u'user': user}
     json = self._FetchUrl(url, post_data=data)
     data = simplejson.loads(json)
     return DirectMessage.NewFromJsonDict(data)
@@ -1187,7 +1187,7 @@ class Api(object):
     Returns:
       A twitter.DirectMessage instance representing the message destroyed
     '''
-    url = 'http://twitter.com/direct_messages/destroy/%s.json' % id
+    url = u'http://twitter.com/direct_messages/destroy/%s.json' % id
     json = self._FetchUrl(url, post_data={})
     data = simplejson.loads(json)
     return DirectMessage.NewFromJsonDict(data)
@@ -1202,7 +1202,7 @@ class Api(object):
     Returns:
       A twitter.User instance representing the befriended user.
     '''
-    url = 'http://twitter.com/friendships/create/%s.json' % user
+    url = u'http://twitter.com/friendships/create/%s.json' % user
     json = self._FetchUrl(url, post_data={})
     data = simplejson.loads(json)
     return User.NewFromJsonDict(data)
@@ -1217,7 +1217,7 @@ class Api(object):
     Returns:
       A twitter.User instance representing the discontinued friend.
     '''
-    url = 'http://twitter.com/friendships/destroy/%s.json' % user
+    url = u'http://twitter.com/friendships/destroy/%s.json' % user
     json = self._FetchUrl(url, post_data={})
     data = simplejson.loads(json)
     return User.NewFromJsonDict(data)
@@ -1268,7 +1268,7 @@ class Api(object):
     Args:
       user_agent: a string that should be send to the server as the User-agent
     '''
-    self._request_headers['User-Agent'] = user_agent
+    self._request_headers[u'User-Agent'] = user_agent
 
   def SetXTwitterHeaders(self, client, url, version):
     '''Set the X-Twitter HTTP headers that will be sent to the server.
@@ -1284,9 +1284,9 @@ class Api(object):
          The client version as a string.  Will be sent to the server
          as the 'X-Twitter-Client-Version' header.
     '''
-    self._request_headers['X-Twitter-Client'] = client
-    self._request_headers['X-Twitter-Client-URL'] = url
-    self._request_headers['X-Twitter-Client-Version'] = version
+    self._request_headers[u'X-Twitter-Client'] = client
+    self._request_headers[u'X-Twitter-Client-URL'] = url
+    self._request_headers[u'X-Twitter-Client-Version'] = version
 
   def _BuildUrl(self, url, path_elements=None, extra_params=None):
     # Break url into consituent parts
@@ -1296,16 +1296,16 @@ class Api(object):
     if path_elements:
       # Filter out the path elements that have a value of None
       p = [i for i in path_elements if i]
-      if not path.endswith('/'):
-        path += '/'
-      path += '/'.join(p)
+      if not path.endswith(u'/'):
+        path += u'/'
+      path += u'/'.join(p)
 
     # Add any additional query parameters to the query string
     if extra_params and len(extra_params) > 0:
       extra_query = self._EncodeParameters(extra_params)
       # Add it to the existing query
       if query:
-        query += '&' + extra_query
+        query += u'&' + extra_query
       else:
         query = extra_query
 
@@ -1319,18 +1319,18 @@ class Api(object):
       self._request_headers = {}
 
   def _InitializeUserAgent(self):
-    user_agent = 'Python-urllib/%s (python-twitter/%s)' % \
+    user_agent = u'Python-urllib/%s (python-twitter/%s)' % \
                  (self._urllib.__version__, twitter.__version__)
     self.SetUserAgent(user_agent)
 
   def _AddAuthorizationHeader(self, username, password):
     if username and password:
-      basic_auth = base64.encodestring('%s:%s' % (username, password))[:-1]
-      self._request_headers['Authorization'] = 'Basic %s' % basic_auth
+      basic_auth = base64.encodestring(u'%s:%s' % (username, password))[:-1]
+      self._request_headers[u'Authorization'] = u'Basic %s' % basic_auth
 
   def _RemoveAuthorizationHeader(self):
-    if self._request_headers and 'Authorization' in self._request_headers:
-      del self._request_headers['Authorization']
+    if self._request_headers and u'Authorization' in self._request_headers:
+      del self._request_headers[u'Authorization']
 
   def _GetOpener(self, url, username=None, password=None):
     if username and password:
@@ -1346,9 +1346,9 @@ class Api(object):
 
   def _Encode(self, s):
     if self._input_encoding:
-      return unicode(s, self._input_encoding).encode('utf-8')
+      return unicode(s, self._input_encoding).encode(u'utf-8')
     else:
-      return unicode(s).encode('utf-8')
+      return unicode(s).encode(u'utf-8')
 
   def _EncodeParameters(self, parameters):
     '''Return a string in key=value&key=value form
@@ -1418,7 +1418,7 @@ class Api(object):
     else:
       # Unique keys are a combination of the url and the username
       if self._username:
-        key = self._username + ':' + url
+        key = self._username + u':' + url
       else:
         key = url
 
@@ -1458,13 +1458,13 @@ class _FileCache(object):
     if not os.path.exists(directory):
       os.makedirs(directory)
     if not os.path.isdir(directory):
-      raise _FileCacheError('%s exists but is not a directory' % directory)
+      raise _FileCacheError(u'%s exists but is not a directory' % directory)
     temp_fd, temp_path = tempfile.mkstemp()
-    temp_fp = os.fdopen(temp_fd, 'w')
+    temp_fp = os.fdopen(temp_fd, u'w')
     temp_fp.write(data)
     temp_fp.close()
     if not path.startswith(self._root_directory):
-      raise _FileCacheError('%s does not appear to live under %s' %
+      raise _FileCacheError(u'%s does not appear to live under %s' %
                             (path, self._root_directory))
     if os.path.exists(path):
       os.remove(path)
@@ -1473,7 +1473,7 @@ class _FileCache(object):
   def Remove(self,key):
     path = self._GetPath(key)
     if not path.startswith(self._root_directory):
-      raise _FileCacheError('%s does not appear to live under %s' %
+      raise _FileCacheError(u'%s does not appear to live under %s' %
                             (path, self._root_directory ))
     if os.path.exists(path):
       os.remove(path)
@@ -1487,15 +1487,15 @@ class _FileCache(object):
 
   def _GetUsername(self):
     '''Attempt to find the username in a cross-platform fashion.'''
-    return os.getenv('USER') or \
-        os.getenv('LOGNAME') or \
-        os.getenv('USERNAME') or \
+    return os.getenv(u'USER') or \
+        os.getenv(u'LOGNAME') or \
+        os.getenv(u'USERNAME') or \
         os.getlogin() or \
-        'nobody'
+        u'nobody'
 
   def _GetTmpCachePath(self):
     username = self._GetUsername()
-    cache_directory = 'python.cache_' + username
+    cache_directory = u'python.cache_' + username
     return os.path.join(tempfile.gettempdir(), cache_directory)
 
   def _InitializeRootDirectory(self, root_directory):
@@ -1505,7 +1505,7 @@ class _FileCache(object):
     if not os.path.exists(root_directory):
       os.mkdir(root_directory)
     if not os.path.isdir(root_directory):
-      raise _FileCacheError('%s exists but is not a directory' %
+      raise _FileCacheError(u'%s exists but is not a directory' %
                             root_directory)
     self._root_directory = root_directory
 

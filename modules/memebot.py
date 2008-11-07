@@ -19,29 +19,35 @@
 
 """Watch URLs in channel, punish people for living under a rock"""
 
+from __future__ import with_statement
 import re
 import os
 import urlparse
 import datetime
-from sqlobject import *
 import random
 from include.throttle import Throttle
 from include.utils import Module
 import logging as log
+import warnings
+
+# XXX 2.6 complains about some code deprecated in 3.0
+with warnings.catch_warnings():
+    warnings.simplefilter(u'ignore')
+    from sqlobject import *
 
 try:
     class url(SQLObject):
         url = StringCol()
         clean = StringCol()
-        author = ForeignKey('author')
-        channel = ForeignKey('channel')
+        author = ForeignKey(u'author')
+        channel = ForeignKey(u'channel')
         citations = IntCol(default=0)
         posted = DateTimeCol(default = datetime.datetime.now)
-        comments = MultipleJoin('comments')
+        comments = MultipleJoin(u'comments')
 
         def truncated_url(self):
             if (len(self.url) > 48):
-                return self.url[:48] + ' ... ' + self.url[-4:]
+                return self.url[:48] + u' ... ' + self.url[-4:]
             else:
                 return self.url
 
@@ -50,8 +56,8 @@ try:
 
     class author(SQLObject):
         name = StringCol(alternateID=True, length=50)
-        urls = MultipleJoin('url')
-        comments = MultipleJoin('comments')
+        urls = MultipleJoin(u'url')
+        comments = MultipleJoin(u'comments')
         pointsNew = IntCol(default=0)
         pointsOld = IntCol(default=0)
         pointsCredit = IntCol(default=0)
@@ -59,13 +65,13 @@ try:
 
     class channel(SQLObject):
         name = StringCol(alternateID=True, length=50)
-        urls = MultipleJoin('url')
+        urls = MultipleJoin(u'url')
 
 
     class comments(SQLObject):
         text = StringCol()
-        author = ForeignKey('author')
-        url = ForeignKey('url')
+        author = ForeignKey(u'author')
+        url = ForeignKey(u'url')
 except:
     pass
 
@@ -76,47 +82,46 @@ class Main(Module):
     priority = 10
     terminate = False
     require_addressing = False
-    help = 'score [name,range] - get memescore, empty for top10'
-    matchURL = re.compile('(http://\S+)', re.I)
-    scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
+    help = u'score [name,range] - get memescore, empty for top10'
+    matchURL = re.compile(u'(http://\S+)', re.I)
+    scoreRequest = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*('
+                              r'\S+))?)?\s*$', re.I)
     colonHeader = re.compile(r'^\s*(.*?)\s*:\s*$')
-    riffs = [
-        'OLD MEME ALERT!',
-        'omg, SO OLD!',
-        'Welcome to yesterday.',
-        'been there, done that.',
-        'you missed the mememobile.',
-        'oldest. meme. EVAR.',
-        'jesus christ you suck.',
-        'you need a new memesource, bucko.',
-        'that was funny the first time i saw it.',
-        'new to the internet?',
-        'i think that came installed with the internet',
-    ]
     get_frag = re.compile(r'^(.*)#([^;/?:@=&]*)$')
+    riffs = [u'OLD MEME ALERT!',
+             u'omg, SO OLD!',
+             u'Welcome to yesterday.',
+             u'been there, done that.',
+             u'you missed the mememobile.',
+             u'oldest. meme. EVAR.',
+             u'jesus christ you suck.',
+             u'you need a new memesource, bucko.',
+             u'that was funny the first time i saw it.',
+             u'new to the internet?',
+             u'i think that came installed with the internet']
 
     def __init__(self, madcow):
         self.throttle = Throttle()
         config = madcow.config.memebot
         engine = config.db_engine
-        uri = engine + '://'
-        if engine == 'sqlite':
+        uri = engine + u'://'
+        if engine == u'sqlite':
             uri += os.path.join(madcow.prefix,
-                    'data/db-%s-memes' % madcow.namespace)
-        elif engine == 'mysql':
+                                u'data/db-%s-memes' % madcow.namespace)
+        elif engine == u'mysql':
             user = config.db_user
             if len(config.db_pass):
-                user += ':' + config.db_pass
+                user += u':' + config.db_pass
             host = config.db_host
             if not len(host):
-                host = 'localhost'
+                host = u'localhost'
             if len(config.db_port):
-                host += ':' + config.db_port
-            uri += '%s@%s/%s' % (user, host, config.db_name)
+                host += u':' + config.db_port
+            uri += u'%s@%s/%s' % (user, host, config.db_name)
         try:
             sqlhub.processConnection = connectionForURI(uri)
         except Exception, error:
-            log.warn('invalid uri: %s (%s)' % (uri, error))
+            log.warn(u'invalid uri: %s (%s)' % (uri, error))
             self.enabled = False
             return
 
@@ -135,45 +140,44 @@ class Main(Module):
     def cleanURL(self, url):
         # stolen from urlparse.urlsplit(), which doesn't handle
         # splitting frags correctly
-        netloc = query = fragment = ''
-        i = url.find(':')
+        netloc = query = fragment = u''
+        i = url.find(u':')
         scheme = url[:i].lower()
         url = url[i+1:]
-        if url[:2] == '//':
+        if url[:2] == u'//':
             delim = len(url)
-            for c in '/?#':
+            for c in u'/?#':
                 wdelim = url.find(c, 2)
                 if wdelim >= 0:
                     delim = min(delim, wdelim)
             netloc, url = url[2:delim], url[delim:]
-        if '#' in url:
+        if u'#' in url:
             try:
                 url, fragment = self.get_frag.search(url).groups()
             except:
                 pass
-        if '?' in url:
-            url, query = url.split('?', 1)
+        if u'?' in url:
+            url, query = url.split(u'?', 1)
 
         ### now for memebots normalizing..
         # make hostname lowercase and remove www
         netloc = netloc.lower()
-        if netloc.startswith('www.') and len(netloc) > 4:
+        if netloc.startswith(u'www.') and len(netloc) > 4:
             netloc = netloc[4:]
         # all urls have trailing slash
-        if url == '':
-            url = '/'
+        if url == u'':
+            url = u'/'
         # remove empty query settings, these are usually form artifacts
         # and put them in order
         try:
-            query = '&'.join(sorted(
-                    '='.join(i)
-                    for i in [p.split('=', 1) for p in query.split('&')]
+            query = u'&'.join(sorted(
+                    u'='.join(i)
+                    for i in [p.split(u'=', 1) for p in query.split(u'&')]
                     if len(i) == 2 and i[1]))
         except:
-            query = ''
-
+            query = u''
         # ignore fragments
-        fragment = ''
+        fragment = u''
 
         return urlparse.urlunsplit([scheme, netloc, url, query, fragment])
 
@@ -187,8 +191,8 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         nick = nick.lower()
-        chan = kwargs['channel'].lower()
-        addressed = kwargs['addressed']
+        chan = kwargs[u'channel'].lower()
+        addressed = kwargs[u'addressed']
         message = args[0]
 
         if addressed:
@@ -226,9 +230,9 @@ class Main(Module):
                 out = []
                 for i, data in enumerate(scores):
                     name, score = data
-                    out.append('#%s: %s (%s)' % (i + x, name, score))
-                return ', '.join(out)
-                
+                    out.append(u'#%s: %s (%s)' % (i + x, name, score))
+                return u', '.join(out)
+
             except:
                 pass
 
@@ -236,10 +240,10 @@ class Main(Module):
         if match is None:
             return
 
-        event = self.throttle.registerEvent(name='memebot', user=nick)
+        event = self.throttle.registerEvent(name=u'memebot', user=nick)
         if event.isThrottled():
             if event.warn():
-                return '%s: Stop abusing me plz.' % nick
+                return u'%s: Stop abusing me plz.' % nick
             else:
                 return
 
@@ -274,30 +278,27 @@ class Main(Module):
 
             # chew them out unless its my own
             if old.author.name.lower() != nick.lower():
-                response = 'first posted by %s on %s' % (old.author.name,
-                        old.posted)
+                response = u'first posted by %s on %s' % (old.author.name,
+                                                         old.posted)
                 riff = random.choice(self.riffs)
                 old.author.pointsCredit = old.author.pointsCredit + 1
                 me.pointsOld = me.pointsOld + 1
                 old.citations = old.citations + 1
-                return '%s %s' % (riff, response)
-
+                return u'%s %s' % (riff, response)
 
         except SQLObjectNotFound:
             try:
                 c = channel.byName(chan)
             except SQLObjectNotFound:
                 c = channel(name=chan)
-
             urlid = url(url=orig, clean=clean, author=me, channel=c)
-
             if len(comment1) > 0:
                 comments(url=urlid, text=comment1, author=me)
             if len(comment2) > 0:
                 comments(url=urlid, text=comment2, author=me)
-
             me.pointsNew = me.pointsNew + 1
 
         except Exception, error:
-            log.warn('error in %s: %s' % (self.__module__, error))
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
+
