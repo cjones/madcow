@@ -24,28 +24,28 @@ import logging as log
 import re
 import time
 
-__version__ = '0.1'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
+__version__ = u'0.1'
+__author__ = u'Chris Jones <cjones@gruntle.org>'
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*obama\s*$', re.I)
     oday = 1232470800  # jan 20, 2009 @ 9pm
-    units = [('second', 60),
-             ('minute', 60),
-             ('hour', 24),
-             ('day', 7),
-             ('week', 4),
-             ('month', 0)]
+    units = [(u'second', 60),
+             (u'minute', 60),
+             (u'hour', 24),
+             (u'day', 7),
+             (u'week', 4),
+             (u'month', 0)]
 
     def response(self, nick, args, kwargs):
         try:
-            return '%s: President Obama in: %s' % (
+            return u'%s: President Obama in: %s' % (
                     nick, self.human_readable(self.oday - time.time()))
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
+            log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return '%s: %s' % (nick, error)
+            return u'%s: %s' % (nick, error)
 
     @classmethod
     def human_readable(cls, n):
@@ -60,15 +60,15 @@ class Main(Module):
                 n = 0
             if r:
                 if r > 1:
-                    name += 's'
-                units.append('%s %s' % (r, name))
+                    name += u's'
+                units.append(u'%s %s' % (r, name))
             if not n:
                 break
         if units:
             units.reverse()
-            return ' '.join(units)
+            return u' '.join(units)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     from include.utils import test_module
     test_module(Main)

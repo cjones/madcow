@@ -59,7 +59,7 @@ __all__ = [u'Madcow']
 MADCOW_URL = u'http://code.google.com/p/madcow/'
 CHARSET = u'utf-8'
 CONFIG = u'madcow.ini'
-SAMPLE_HASH = u'4ab3eeef8743c69a83524776ac770c98'
+SAMPLE_HASH = u'691f2a17ebb060f93b82e59957467695'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt=u'%x %X',
            format=u'[%(asctime)s] %(levelname)s: %(message)s')
 
@@ -798,10 +798,9 @@ def check_config(config, samplefile, prefix):
     # verify we're using an unaltered sample file to verify against
     hash = md5()
     hash.update(slurp(samplefile))
-    hash = hash.hexdigest()
-    if hash != SAMPLE_HASH:
-        print >> sys.stderr, u'WARNING: %s is out of date or has been altered!' \
-            % os.path.basename(samplefile)
+    if hash.hexdigest() != SAMPLE_HASH:
+        log.warn(u'WARNING: %s is out of date or has been altered!' %
+                 os.path.basename(samplefile))
 
     # read sample file
     sample = ConfigParser()
@@ -873,6 +872,8 @@ def check_config(config, samplefile, prefix):
 
     # raise exception if any errors are found
     if errors:
+        for error in errors:
+            log.error(error)
         raise ConfigError, u'\n'.join(errors)
 
 

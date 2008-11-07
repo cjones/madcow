@@ -118,6 +118,7 @@ karma=no               ; keep track of karma (nick++, nick--)
 livejournal=no         ; get livejournal entries (random or by nick)
 lyrics=no              ; look up song lyrics (spammy!)
 memebot=no             ; track urls and lay smackdown on old memes
+obama=no               ; countdown to change
 roll=no                ; roll ad&d dice
 slut=no                ; how slutty is the phrase? (safesearch vs. regular)
 traffic=no             ; real-time traffic data (n. california only)
