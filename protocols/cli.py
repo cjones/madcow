@@ -26,7 +26,7 @@ from include.shell import Shell
 class ConsoleProtocol(Madcow):
 
     _new_nick = re.compile(r'^\s*nick\s+(\S+)\s*$', re.I)
-    _prompt = u'\x1b[1;31m>>>\x1b[0m '
+    _prompt = '\x1b[1;31m>>>\x1b[0m '
     _clear = u'\x1b[H\x1b[J'
     _cli_usage = [u'quit - quit madcow',
                   u'history - show history',
