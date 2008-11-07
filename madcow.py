@@ -900,7 +900,8 @@ def main():
     # find available protocols
     protos = [proto.replace(u'.py', u'')
               for proto in os.listdir(os.path.join(prefix, u'protocols'))
-              if proto.endswith(u'.py')]
+              if proto.endswith(u'.py') and proto not in (u'__init__.py',
+                                                          u'template.py')]
 
     # parse commandline options
     parser = OptionParser(version=__version__)

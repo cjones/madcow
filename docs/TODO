@@ -22,7 +22,6 @@
 - history should do something fancier than dump the repr of the list
   traffic.py has issues when you enter grabage.. expected, but probably don't
   want unbound local error.
-- optparse help shows random useless files for protocols.. fix that shiz
 - lyrics module search should skip over artists pages if a song is later
 
 *** style
