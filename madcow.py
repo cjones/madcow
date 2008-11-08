@@ -22,11 +22,6 @@
 import sys
 
 # verify python version is high enough
-# XXX some syntax features introduced later will cause an exception before
-# this code is run; so in this file, avoid using with-statement and
-# try/except/finally constructs, guess.  whenever i get sick of that
-# limitation, this chunk of code can go.
-
 if sys.version_info[0] * 10 + sys.version_info[1] < 25:
     error = RuntimeError(u'madcow requires python 2.5 or higher')
     if __name__ == u'__main__':
@@ -45,7 +40,6 @@ from optparse import OptionParser
 import re
 from time import sleep, strftime, time as unix_time
 import logging as log
-from select import select
 from signal import signal, SIGHUP, SIGTERM
 import shutil
 from threading import Thread, RLock
@@ -54,7 +48,7 @@ from hashlib import md5
 import codecs
 from include.authlib import AuthLib
 from include.utils import slurp, Request
-from include import useragent as ua, gateway, chardet
+from include import useragent as ua, gateway
 
 __version__ = u'1.4.2'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -84,11 +78,11 @@ class Madcow(object):
 
     _delim = re.compile(r'\s*[,;]\s*')
     _botname = u'madcow'
-    re_cor1 = None
-    re_addrend = None
-    re_feedback = None
-    re_cor2 = None
-    re_addrpre = None
+    _cor1_re = None
+    _cor2_re = None
+    _addrend_re = None
+    _feedback_re = None
+    _addrpre_re = None
 
     ### INITIALIZATION FUNCTIONS ###
 
@@ -119,7 +113,7 @@ class Madcow(object):
                 self.charset = codecs.lookup(self.config.main.charset).name
             except LookupError:
                 log.warn(u'unknown charset %s, using default %s' % (
-                    self.config.main.charset, self.charset))
+                         self.config.main.charset, self.charset))
 
         # load modules
         self.modules = Modules(self, u'modules', self.prefix)
@@ -149,8 +143,8 @@ class Madcow(object):
             thread.start()
 
         # start worker threads
-        for i in range(0, self.config.main.workers):
-            name = u'ModuleWorker' + unicode(i + 1)
+        for i in range(self.config.main.workers):
+            name = u'ModuleWorker%d' % (i + 1)
             log.debug(u'Starting Thread: %s' % name)
             thread = Thread(target=self.request_handler, name=name)
             thread.setDaemon(True)
@@ -161,8 +155,16 @@ class Madcow(object):
     def run(self):
         """Runs madcow loop"""
         while self.running:
-            # this is where you do actual stuff
-            sleep(1)
+            self.check_response_queue()
+            line = raw_input('>>> ').decode(sys.stdin.encoding, 'replace')
+            line = line.rstrip()
+            req = Request(message=line)
+            req.nick = os.environ['USER']
+            req.channel = u'none'
+            req.addressed = True
+            req.private = True
+            self.check_addressing(req)
+            self.process_message(req)
 
     def signal_handler(self, sig, *args):
         """Handles signals"""
@@ -187,13 +189,11 @@ class Madcow(object):
     def check_response_queue(self):
         """Check if there's any message in response queue and process"""
         try:
-            response, req = self.response_queue.get_nowait()
+            self.handle_response(*self.response_queue.get_nowait())
         except Empty:
-            return
+            pass
         except Exception, error:
             log.exception(error)
-            return
-        self.handle_response(response, req)
 
     def handle_response(self, response, req=None):
         """encode output, lock threads, and call protocol_output"""
@@ -209,7 +209,7 @@ class Madcow(object):
 
     def protocol_output(self, message, req=None):
         """Override with protocol-specific output method"""
-        print message
+        print message.encode(sys.stdout.encoding, 'replace')
 
     ### MODULE PROCESSING ###
 
@@ -244,39 +244,39 @@ class Madcow(object):
         # recompile nick-based regex if it changes
         if nick != self.cached_nick:
             self.cached_nick = nick
-            self.re_cor1 = re.compile(r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nick,
-                    re.I)
-            self.re_cor2 = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
-            self.re_feedback = re.compile(r'^\s*%s[ !]*\?[ !]*$' % nick, re.I)
-            self.re_addrend = re.compile(r'^(.+),\s+%s\W*$' % nick, re.I)
-            self.re_addrpre = re.compile(r'^\s*%s[-,: ]+(.+)$' % nick, re.I)
+            self._cor1_re = re.compile(r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nick,
+                                       re.I)
+            self._cor2_re = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
+            self._feedback_re = re.compile(r'^\s*%s[ !]*\?[ !]*$' % nick, re.I)
+            self._addrend_re = re.compile(r'^(.+),\s+%s\W*$' % nick, re.I)
+            self._addrpre_re = re.compile(r'^\s*%s[-,: ]+(.+)$' % nick, re.I)
 
-        if self.re_feedback.search(req.message):
+        if self._feedback_re.search(req.message):
             req.feedback = req.addressed = True
 
         try:
-            req.message = self.re_addrend.search(req.message).group(1)
+            req.message = self._addrend_re.search(req.message).group(1)
             req.addressed = True
-        except:
+        except AttributeError:
             pass
 
         try:
-            req.message = self.re_addrpre.search(req.message).group(1)
+            req.message = self._addrpre_re.search(req.message).group(1)
             req.addressed = True
-        except:
+        except AttributeError:
             pass
 
         try:
-            req.message = self.re_cor1.search(req.message).group(1)
+            req.message = self._cor1_re.search(req.message).group(1)
             req.correction = req.addressed = True
-        except:
+        except AttributeError:
             pass
 
         if req.addressed:
             try:
-                req.message = self.re_cor2.search(req.message).group(1)
+                req.message = self._cor2_re.search(req.message).group(1)
                 req.correction = True
-            except:
+            except AttributeError:
                 pass
 
     def process_message(self, req):
@@ -348,11 +348,9 @@ class Madcow(object):
     def logpublic(self, req):
         """Logs public chatter"""
         line = u'%s <%s> %s\n' % (strftime(u'%T'), req.nick, req.message)
-        path = os.path.join(
-            self.prefix, u'logs',
-            u'%s-irc-%s-%s' % (self.namespace, req.channel, strftime(u'%F'))
-        )
-
+        path = os.path.join(self.prefix, u'logs',
+                            u'%s-irc-%s-%s' % (self.namespace, req.channel,
+                                               strftime(u'%F')))
         logfile = open(path, u'a')
         try:
             logfile.write(line.encode(self.charset, 'replace'))
@@ -445,63 +443,54 @@ class Admin(object):
 
     """Class to handle admin interface"""
 
-    _reAdminCommand = re.compile(r'^\s*admin\s+(.+?)\s*$', re.I)
-    _reRegister = re.compile(u'^\s*register\s+(\S+)\s*$', re.I)
-    _reAuth = re.compile(u'^\s*(?:log[io]n|auth)\s+(\S+)\s*$', re.I)
-    _reFist = re.compile(u'^\s*fist\s+(\S+)\s+(.+)$', re.I)
-    _reHelp = re.compile(u'^\s*help\s*$', re.I)
-    _reLogout = re.compile(u'^\s*log(?:out|off)\s*$', re.I)
-    _reDelUser = re.compile(r'\s*del(?:ete)?\s+(\S+)\s*$', re.I)
-    _reListUsers = re.compile(r'\s*list\s+users\s*$', re.I)
-    _reChFlag = re.compile(r'\s*chflag\s+(\S+)\s+(\S+)\s*$', re.I)
-    _reAddUser = re.compile(r'^\s*add\s+(\S+)\s+(\S+)(?:\s+(\S+))?\s*$', re.I)
-
-    _basic_usage = [
-        u'help - this screen',
-        u'register <pass> - register with bot',
-        u'login <pass> - login to bot',
-    ]
-
-    _loggedin_usage = [
-        u'logout - log out of bot',
-    ]
-
-    _admin_usage = [
-        u'fist <chan> <msg> - make bot say something in channel',
-        u'add <user> <flags> [pass] - add a user (no pass = no login)',
-        u'del <user> - delete a user',
-        u'list users - list users :P',
-        u'chflag <user> <[+-][aor]> - update user flags',
-    ]
+    _admin_cmd_re = re.compile(r'^\s*admin\s+(.+?)\s*$', re.I)
+    _register_re = re.compile(u'^\s*register\s+(\S+)\s*$', re.I)
+    _auth_re = re.compile(u'^\s*(?:log[io]n|auth)\s+(\S+)\s*$', re.I)
+    _fist_re = re.compile(u'^\s*fist\s+(\S+)\s+(.+)$', re.I)
+    _help_re = re.compile(u'^\s*help\s*$', re.I)
+    _logout_re = re.compile(u'^\s*log(?:out|off)\s*$', re.I)
+    _deluser_re = re.compile(r'\s*del(?:ete)?\s+(\S+)\s*$', re.I)
+    _list_users_re = re.compile(r'\s*list\s+users\s*$', re.I)
+    _chflag_re = re.compile(r'\s*chflag\s+(\S+)\s+(\S+)\s*$', re.I)
+    _adduser_re = re.compile(r'^\s*add\s+(\S+)\s+(\S+)(?:\s+(\S+))?\s*$', re.I)
+    _basic_usage = [u'help - this screen',
+                    u'register <pass> - register with bot',
+                    u'login <pass> - login to bot']
+    _loggedin_usage = [u'logout - log out of bot']
+    _admin_usage = [u'fist <chan> <msg> - make bot say something in channel',
+                    u'add <user> <flags> [pass] - add a user',
+                    u'del <user> - delete a user',
+                    u'list users - list users :P',
+                    u'chflag <user> <[+-][aor]> - update user flags']
 
     def __init__(self, bot):
         self.bot = bot
-        self.authlib = AuthLib(u'%s/data/db-%s-passwd' % (bot.prefix,
-            bot.namespace))
         self.users = {}
+        self.authlib = AuthLib(u'%s/data/db-%s-passwd' % (bot.prefix,
+                                                          bot.namespace))
 
     def parse(self, req):
         """Parse request for admin commands and execute, returns output"""
         if not self.bot.config.admin.enabled:
             return
         try:
-            command = self._reAdminCommand.search(req.message).group(1)
-        except:
+            command = self._admin_cmd_re.search(req.message).group(1)
+        except AttributeError:
             return
         nick = req.nick.lower()
 
         # register
         try:
-            passwd = self._reRegister.search(command).group(1)
+            passwd = self._register_re.search(command).group(1)
             return self.register_user(nick, passwd)
-        except:
+        except AttributeError:
             pass
 
         # log in
         try:
-            passwd = self._reAuth.search(command).group(1)
+            passwd = self._auth_re.search(command).group(1)
             return self.authuser(nick, passwd)
-        except:
+        except AttributeError:
             pass
 
         # help
@@ -511,17 +500,16 @@ class Admin(object):
             usage += self._loggedin_usage
             if self.users[nick].is_asmin():
                 usage += self._admin_usage
-        if self._reHelp.search(command):
+        if self._help_re.search(command):
             return u'\n'.join(usage)
 
         # don't pass this point unless we are logged in
-        try:
-            user = self.users[nick]
-        except:
+        if nick not in self.users:
             return
+        user = self.users[nick]
 
         # logout
-        if Admin._reLogout.search(command):
+        if Admin._logout_re.search(command):
             del self.users[nick]
             return u'You are now logged out.'
 
@@ -530,55 +518,52 @@ class Admin(object):
             return
 
         try:
-            adduser, flags, password = self._reAddUser.search(command).groups()
+            adduser, flags, password = self._adduser_re.search(command).groups()
             return self.adduser(adduser, flags, password)
-        except:
+        except AttributeError:
             pass
 
         # be the puppetmaster
         try:
-            channel, message = Admin._reFist.search(command).groups()
+            channel, message = Admin._fist_re.search(command).groups()
             req.sendto = channel
             return message
-        except:
+        except AttributeError:
             pass
 
         # delete a user
         try:
-            deluser = self._reDelUser.search(command).group(1)
+            deluser = self._deluser_re.search(command).group(1)
             self.authlib.delete_user(deluser)
             if deluser in self.users:
                 del self.users[deluser]
             return u'User deleted: %s' % deluser
-        except:
+        except AttributeError:
             pass
 
         # list users
-        try:
-            if self._reListUsers.search(command):
-                output = []
-                passwd = self.authlib.get_passwd()
-                for luser, data in passwd.items():
-                    flags = []
-                    if u'a' in data[u'flags']:
-                        flags.append(u'admin')
-                    if u'r' in data[u'flags']:
-                        flags.append(u'registered')
-                    if u'o' in data[u'flags']:
-                        flags.append(u'autoop')
-                    if luser in self.users:
-                        flags.append(u'loggedin')
-                    flags = u' '.join(flags)
-                    output.append(u'%s: %s' % (luser, flags))
-                return u'\n'.join(output)
-        except:
-            pass
+        if self._list_users_re.search(command):
+            output = []
+            passwd = self.authlib.get_passwd()
+            for luser, data in passwd.items():
+                flags = []
+                if u'a' in data[u'flags']:
+                    flags.append(u'admin')
+                if u'r' in data[u'flags']:
+                    flags.append(u'registered')
+                if u'o' in data[u'flags']:
+                    flags.append(u'autoop')
+                if luser in self.users:
+                    flags.append(u'loggedin')
+                flags = u' '.join(flags)
+                output.append(u'%s: %s' % (luser, flags))
+            return u'\n'.join(output)
 
         # update user flags
         try:
-            chuser, newflags = self._reChFlag.search(command).groups()
+            chuser, newflags = self._chflag_re.search(command).groups()
             return self.change_flags(chuser, newflags)
-        except:
+        except AttributeError:
             pass
 
     def change_flags(self, user, chflags):
@@ -716,9 +701,9 @@ class Modules(object):
             try:
                 for mod_name, obj in self.by_priority():
                     try:
-                        log.debug(u'%-13s: pri=%3s thread=%-5s stop=%s' % (
-                            mod_name, obj.priority, obj.allow_threading,
-                            obj.terminate))
+                        log.debug(u'%-13s: pri=%3s thread=%-5s stop=%s' %
+                                  (mod_name, obj.priority, obj.allow_threading,
+                                   obj.terminate))
                     except:
                         pass
             except:
@@ -726,10 +711,7 @@ class Modules(object):
 
     def by_priority(self):
         """Return list of tuples for modules, sorted by priority"""
-        modules = self.dict()
-        modules = sorted(modules.items(), lambda x, y: cmp(x[1].priority,
-            y[1].priority))
-        return modules
+        return sorted(self.dict().iteritems(), key=lambda x: x[1].priority)
 
     def dict(self):
         """Return dict of modules"""
@@ -747,6 +729,7 @@ class Config(object):
     """Config class that allows dot-notation namespace addressing"""
 
     class ConfigSection:
+
         _isint = re.compile(r'^-?[0-9]+$')
         _isfloat = re.compile(r'^\s*-?(?:\d+\.\d*|\d*\.\d+)\s*$')
         _istrue = re.compile(u'^(?:true|yes|on|1)$', re.I)
@@ -771,9 +754,8 @@ class Config(object):
             if attr in self.settings:
                 return self.settings[attr]
             else:
-                raise ConfigError, u'missing setting %s in section %s' % (
-                        attr, self.name)
-
+                raise ConfigError(u'missing setting %s in section %s' %
+                                  (attr, self.name))
 
     def __init__(self, filename):
         if not os.path.exists(filename):
@@ -794,10 +776,6 @@ class Config(object):
 
 def check_config(config, samplefile, prefix):
     """Sanity check config"""
-
-    # this bloated, over-engineered routine exists because fucked up
-    # config files are the #1 source of complaints about the bot being
-    # u"broken". maybe a more general solution can be done later. -CJ
 
     # verify we're using an unaltered sample file to verify against
     hash = md5()
