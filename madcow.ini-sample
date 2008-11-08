@@ -78,6 +78,7 @@ dbNamespace=madcow
 ; these are the standard information modules, which you'll probably
 ; want enabled as they are quite useful.
 ; ;
+alias=yes               ; allow users to make command aliases
 area=yes                ; look up area codes
 babel=yes               ; language translations
 bbcnews=yes             ; bbc news headlines
