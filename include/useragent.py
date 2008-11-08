@@ -81,6 +81,8 @@ class UserAgent(object):
     def settimeout(timeout):
         """Monkey-patch socket timeout if older urllib2"""
 
+        import httplib, socket
+
         def connect(self):
             try:
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -92,7 +94,6 @@ class UserAgent(object):
                 self.sock = None
                 raise error
 
-        import httplib
         httplib.HTTPConnection.connect = connect
 
 
