@@ -167,7 +167,7 @@ class IRCProtocol(Madcow):
         delta = unix_time() - self.last_response
         if delta < self.delay:
             sleep(self.delay - delta)
-        self.server.privmsg(sendto, line)
+        self.server.privmsg(sendto.encode(self.charset), line)
         self.last_response = unix_time()
 
     def on_privmsg(self, server, event):
