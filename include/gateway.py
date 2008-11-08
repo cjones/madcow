@@ -140,7 +140,7 @@ class GatewayServiceHandler(Thread):
             try:
                 # parse headers
                 hdrs, self.buf = self.headsep.split(self.buf, 1)
-                hdrs = hdrs.decode(self.bot.config.main.charset, 'replace')
+                hdrs = hdrs.decode(self.server.bot.config.main.charset, 'replace')
                 hdrs = self.newline.split(hdrs)
                 hdrs = [hdr.split(u':', 1) for hdr in hdrs]
                 hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]
