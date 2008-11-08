@@ -19,13 +19,15 @@
 
 """Handles authentication in Madcow"""
 
+from __future__ import with_statement
 from random import randint
 from hashlib import sha1
 from base64 import b64encode, b64decode
+import os
 
-__version__ = u'0.2'
-__author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = [u'UserNotFound', u'IllegalUserName', u'AuthLib']
+__version__ = '0.2'
+__author__ = 'cj_ <cjones@gruntle.org>'
+__all__ = ['UserNotFound', 'IllegalUserName', 'AuthLib']
 
 class UserNotFound(Exception):
 
@@ -39,75 +41,66 @@ class IllegalUserName(Exception):
 
 class AuthLib(object):
 
-    def __init__(self, path):
+    def __init__(self, path, charset):
         self.path = path
+        self.charset = charset
 
     def get_passwd(self):
-        try:
-            fo = open(self.path)
-            try:
-                data = fo.read()
-            finally:
-                fo.close()
-        except:
-            data = u''
+        if os.path.exists(self.path):
+            with open(self.path, 'rb') as file:
+                data = file.read()
+        else:
+            data = ''
         passwd = {}
         for line in data.splitlines():
             line = line.strip()
-            if not len(line):
+            if not line:
                 continue
-            username, password, flags = line.split(u':')
+            username, password, flags = map(self.decode, line.split(':'))
             passwd[username] = {u'password': password, u'flags': flags}
         return passwd
 
     def write_passwd(self, passwd):
         data = []
-        for user, user_data in passwd.items():
-            line = u':'.join([user, user_data[u'password'], user_data[u'flags']])
-            data.append(line)
-        data = u'\n'.join(data) + u'\n'
-        fo = open(self.path, u'wb')
-        try:
-            fo.write(data)
-        finally:
-            fo.close()
+        for user, user_data in passwd.iteritems():
+            line = u':'.join([user, user_data['password'], user_data['flags']])
+            data.append(self.encode(line))
+        with open(self.path, 'wb') as file:
+            file.write('\n'.join(data) + '\n')
 
     def change_flags(self, user, flags):
         passwd = self.get_passwd()
         if user not in passwd:
-            raise UserNotFound
+            raise UserNotFound(user)
         passwd[user][u'flags'] = flags
         self.write_passwd(passwd)
 
     def change_password(self, user, plain):
         passwd = self.get_passwd()
         if user not in passwd:
-            raise UserNotFound
-        passwd[user][u'password'] = self.encrypt(plain)
+            raise UserNotFound(user)
+        passwd[user][u'password'] = self.encrypt(self.encode(plain))
         self.write_passwd(passwd)
 
-    def add_user(self, user, plain, flags=u''):
+    def add_user(self, user, plain, flags=''):
         if u':' in user:
-            raise IllegalUserName, u'usernames cannot have : in them'
-        if plain == None:
-            password = u'*'
-        else:
-            password = self.encrypt(plain)
+            raise IllegalUserName(u'usernames cannot have : in them')
         passwd = self.get_passwd()
-        passwd[user] = {u'password': password, u'flags': flags}
+        passwd[user] = {u'password': self.encrypt(plain) if plain else u'*',
+                        u'flags': flags}
         self.write_passwd(passwd)
 
     def delete_user(self, user):
         passwd = self.get_passwd()
         if user not in passwd:
-            raise UserNotFound, user
+            raise UserNotFound(user)
         del passwd[user]
         self.write_passwd(passwd)
 
     def check_user(self, user, plain):
         passwd = self.get_passwd()
         if user not in passwd:
-            raise UserNotFound, user
+            raise UserNotFound(user)
         return self.check(passwd[user][u'password'], plain)
 
     def user_exists(self, user):
@@ -116,22 +109,32 @@ class AuthLib(object):
     def get_flags(self, user):
         passwd = self.get_passwd()
         if user not in passwd:
-            raise UserNotFound, user
+            raise UserNotFound(user)
         return passwd[user][u'flags']
 
     def encrypt(self, plain):
-        digest, salt = self.get_digest(plain)
-        return b64encode(salt + digest)
+        digest, salt = self.get_digest(self.encode(plain))
+        return self.decode(b64encode(salt + digest))
 
     def get_digest(self, plain, salt=None):
         if salt is None:
-            salt = u''.join([chr(randint(0, 255)) for i in range(4)])
+            salt = ''.join([chr(randint(0, 255)) for i in range(4)])
         return sha1(salt + plain).digest(), salt
 
     def check(self, encrypted, plain):
-        if encrypted == u'*':
+        if encrypted == '*':
             return False
-        salted = b64decode(encrypted)
+        salted = b64decode(self.encode(encrypted))
         salt, digest = salted[:4], salted[4:]
-        return digest == self.get_digest(plain, salt)[0]
+        return digest == self.get_digest(self.encode(plain), salt)[0]
+
+    def encode(self, data):
+        if isinstance(data, unicode):
+            data = data.encode(self.charset, 'replace')
+        return data
+
+    def decode(self, data):
+        if isinstance(data, str):
+            data = data.decode(self.charset, 'replace')
+        return data
 

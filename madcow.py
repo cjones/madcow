@@ -103,9 +103,6 @@ class Madcow(object):
         else:
             self.ignore_list = []
 
-        # create admin instance
-        self.admin = Admin(self)
-
         # set encoding
         self.charset = CHARSET
         if self.config.main.charset:
@@ -114,6 +111,9 @@ class Madcow(object):
             except LookupError:
                 log.warn(u'unknown charset %s, using default %s' % (
                          self.config.main.charset, self.charset))
+
+        # create admin instance
+        self.admin = Admin(self)
 
         # load modules
         self.modules = Modules(self, u'modules', self.prefix)
@@ -467,7 +467,8 @@ class Admin(object):
         self.bot = bot
         self.users = {}
         self.authlib = AuthLib(u'%s/data/db-%s-passwd' % (bot.prefix,
-                                                          bot.namespace))
+                                                          bot.namespace),
+                               bot.charset)
 
     def parse(self, req):
         """Parse request for admin commands and execute, returns output"""
