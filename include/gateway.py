@@ -29,18 +29,22 @@ from urlparse import urljoin
 import errno
 
 class InvalidPayload(Exception):
+
     """Raised when invalid payload is received by gateway"""
 
 
 class CloseConnection(Exception):
+
     """Raised to indicate gateway service should shut down connection"""
 
 
 class ConnectionTimeout(Exception):
+
     """Raised when connection times out on read/write"""
 
 
 class ConnectionClosed(Exception):
+
     """Raised when client closes their end"""
 
 
@@ -73,11 +77,9 @@ class GatewayServiceHandler(Thread):
     timeout = 60
     newline = re.compile(r'\r?\n')
     headsep = re.compile(r'\r?\n\r?\n')
-    required_headers = {
-        u'message': (u'to', u'from', u'message'),
-        u'image': (u'to', u'from', u'size'),
-    }
     safenick = re.compile(r'[^0-9a-z_]', re.I)
+    required_headers = {u'message': (u'to', u'from', u'message'),
+                        u'image': (u'to', u'from', u'size')}
 
     def __init__(self, server, client, addr):
         self.server = server
