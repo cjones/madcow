@@ -19,6 +19,7 @@
 
 """Some helper functions"""
 
+from __future__ import with_statement
 import re
 import sys
 from time import time as unix_time
