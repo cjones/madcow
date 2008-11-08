@@ -28,12 +28,7 @@ import random
 from include.throttle import Throttle
 from include.utils import Module
 import logging as log
-import warnings
-
-# XXX 2.6 complains about some code deprecated in 3.0
-with warnings.catch_warnings():
-    warnings.simplefilter(u'ignore')
-    from sqlobject import *
+from sqlobject import *
 
 try:
     class url(SQLObject):

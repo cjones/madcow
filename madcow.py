@@ -35,6 +35,10 @@ if sys.version_info[0] * 10 + sys.version_info[1] < 25:
     else:
         raise error
 
+# deprecation warnings are annoying
+import warnings
+warnings.simplefilter(u'ignore')
+
 import os
 from ConfigParser import ConfigParser
 from optparse import OptionParser
