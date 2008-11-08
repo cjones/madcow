@@ -35,8 +35,7 @@ class UserAgent(object):
 
     """Closely mimic a browser"""
 
-    def __init__(self, handlers=None, cookies=True, agent=AGENT, timeout=None):
-        self.timeout = timeout
+    def __init__(self, handlers=None, cookies=True, agent=AGENT):
         if handlers is None:
             handlers = []
         if cookies:
@@ -45,8 +44,7 @@ class UserAgent(object):
         if agent:
             self.opener.addheaders = [(u'User-Agent', agent)]
 
-    def open(self, url, opts=None, data=None, referer=None, size=-1,
-             timeout=-1):
+    def open(self, url, opts=None, data=None, referer=None, size=-1):
         """Open URL and return unicode content"""
         log.debug(u'fetching url: %s' % url)
         url = list(urlparse.urlparse(url))
@@ -62,14 +60,7 @@ class UserAgent(object):
         request = urllib2.Request(urlparse.urlunparse(url), data)
         if referer:
             request.add_header(u'Referer', referer)
-        if timeout == -1:
-            timeout = self.timeout
-        args = [request]
-        if VERSION < 26:
-            self.settimeout(timeout)
-        else:
-            args.append(timeout)
-        response = self.opener.open(*args)
+        response = self.opener.open(request)
         data = response.read(size)
         if isinstance(response, google.Response):
             headers = None
@@ -108,11 +99,12 @@ def getua():
 def setup(handlers=None, cookies=True, agent=AGENT, timeout=None):
     """Create global user agent instance"""
     global UA
-    UA = UserAgent(handlers, cookies, agent, timeout)
+    UserAgent.settimeout(timeout)
+    UA = UserAgent(handlers, cookies, agent)
 
 
-def geturl(url, opts=None, data=None, referer=None, size=-1, timeout=-1):
-    return getua().open(url, opts, data, referer, size, timeout)
+def geturl(url, opts=None, data=None, referer=None, size=-1):
+    return getua().open(url, opts, data, referer, size)
 
 geturl.__doc__ = UserAgent.open.__doc__
 
