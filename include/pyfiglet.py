@@ -499,24 +499,34 @@ class Figlet(object):
 
 def main():
     prefix = os.path.abspath(os.path.dirname(sys.argv[0]))
-
-    parser = OptionParser(version=__version__, usage=u'%prog [options] text..')
-    parser.add_option(u'-f', u'--font', default=u'standard',
-            help=u'font to render with (default: %default)', metavar=u'FONT')
-    parser.add_option(u'-d', u'--fontdir', default=None, help=u'location of font files', metavar=u'DIR')
-    parser.add_option(u'-z', u'--zipfile', default=prefix+u'/fonts.zip',
-            help=u'specify a zipfile to use instead of a directory of fonts')
-    parser.add_option(u'-D', u'--direction', type=u'choice', choices=(u'auto', u'left-to-right', u'right-to-left'),
-            default=u'auto', metavar=u'DIRECTION', help=u'set direction text will be formatted in (default: %default)')
-    parser.add_option(u'-j', u'--justify', type=u'choice', choices=(u'auto', u'left', u'center', u'right'), default=u'auto',
-            metavar=u'SIDE', help=u'set justification, defaults to print direction')
-    parser.add_option(u'-w', u'--width', type=u'int', default=80, metavar=u'COLS',
-            help=u'set terminal width for wrapping/justification (default: %default)' )
-    parser.add_option(u'-r', u'--reverse', action=u'store_true', default=False, help=u'shows mirror image of output text')
-    parser.add_option(u'-F', u'--flip', action=u'store_true', default=False, help=u'flips rendered output text over')
+    parser = OptionParser(version=__version__, usage='%prog [options] text..')
+    parser.add_option('-f', '--font', default='standard',
+                      help='font to render with (default: %default)',
+                      metavar='FONT')
+    parser.add_option('-d', '--fontdir', default=None,
+                      help='location of font files', metavar='DIR')
+    parser.add_option('-z', '--zipfile', default=prefix+'/fonts.zip',
+                      help='specify a zipfile to use instead of a directory o'
+                      'f fonts')
+    parser.add_option('-D', '--direction', type='choice',
+                      choices=('auto', 'left-to-right', 'right-to-left'),
+                      default='auto', metavar='DIRECTION',
+                      help='set direction text will be formatted in (default:'
+                      ' %default)')
+    parser.add_option('-j', '--justify', type='choice',
+                      choices=('auto', 'left', 'center', 'right'),
+                      default='auto', metavar='SIDE',
+                      help='set justification, defaults to print direction')
+    parser.add_option('-w', '--width', type='int', default=80, metavar='COLS',
+                      help='set terminal width for wrapping/justification (de'
+                      'fault: %default)')
+    parser.add_option('-r', '--reverse', action='store_true', default=False,
+                      help='shows mirror image of output text')
+    parser.add_option('-F', '--flip', action='store_true', default=False,
+                      help='flips rendered output text over')
     opts, args = parser.parse_args()
 
-    if len(args) == 0:
+    if not args:
         parser.print_help()
         return 1
 
