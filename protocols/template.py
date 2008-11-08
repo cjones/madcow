@@ -3,6 +3,7 @@
 from madcow import Madcow, Request
 import logging as log
 import os
+import sys
 
 class ProtocolHandler(Madcow):
     """This object is autoloaded by the bot"""
@@ -21,9 +22,10 @@ class ProtocolHandler(Madcow):
             try:
                 # in a real protocol, this should not block, otherwise
                 # incoming messages do not get processed
-                line = raw_input(u'>>> ')
+                line = raw_input(u'>>> ').decode(sys.stdin.encoding, 'replace')
 
-                # send message to bot subsystem for processing
+                # send message to bot subsystem for processing. this needs
+                # to be a unicode type
                 self.process_message(line, os.environ[u'USER'])
 
                 # check if we have any responses
@@ -42,7 +44,7 @@ class ProtocolHandler(Madcow):
 
     def protocol_output(self, message, req=None):
         """Protocol-specific output method"""
-        print message
+        print message.encode(sys.stdout.charset, 'replace')
 
     def process_message(self, message, nick):
         """Create request object from recived message and process it"""
