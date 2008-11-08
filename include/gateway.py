@@ -86,7 +86,7 @@ class GatewayServiceHandler(Thread):
         self.client = client
         self.fd = client.fileno()
         self.addr = addr
-        self.buf = u''
+        self.buf = ''
         self.headers_done = False
         self.content_type = None
         self.hdrs = None
@@ -128,6 +128,7 @@ class GatewayServiceHandler(Thread):
                 log.info(u'connection closed by %s' % repr(self.addr))
             except Exception, error:
                 log.warn(u'uncaught exception from %s: %s' % (self.addr, error))
+                log.exception(error)
             break
         self.client.close()
 
@@ -139,6 +140,7 @@ class GatewayServiceHandler(Thread):
             try:
                 # parse headers
                 hdrs, self.buf = self.headsep.split(self.buf, 1)
+                hdrs = hdrs.decode(self.bot.config.main.charset, 'replace')
                 hdrs = self.newline.split(hdrs)
                 hdrs = [hdr.split(u':', 1) for hdr in hdrs]
                 hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]
