@@ -61,6 +61,7 @@ Current limitations:
 .. [IRC specifications] http://www.irchelp.org/irchelp/rfc/
 """
 
+from __future__ import with_statement
 import bisect
 import re
 import select
