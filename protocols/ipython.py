@@ -14,17 +14,16 @@ from IPython.iplib import InteractiveShell
 class InteractiveShellMadcow(InteractiveShell):
 
     def handle_normal(self, line):
-        if line.line.startswith(u'$'):
-            data = line.line[1:].encode(u'utf-8', u'replace')
-            self.callback.process_message(data)
+        if line.line.startswith('$'):
+            self.callback.process_message(line.line[1:])
             self.callback.check_response_queue()
-            return u''
+            return ''
         return InteractiveShell.handle_normal(self, line)
 
 
 class IPShellMadcow(IPShellEmbed):
 
-    def __init__(self,argv=None,banner=u'',exit_msg=None,rc_override=None,
+    def __init__(self,argv=None,banner='',exit_msg=None,rc_override=None,
                  user_ns=None, callback=None):
         self.set_banner(banner)
         self.set_exit_msg(exit_msg)
@@ -55,7 +54,7 @@ class IPythonHandler(Madcow):
 
     def __init__(self, config, dir):
         """Protocol-specific initializations"""
-        self.colorlib = ColorLib(u'ansi')
+        self.colorlib = ColorLib('ansi')
         Madcow.__init__(self, config, dir)
 
     def stop(self):
@@ -64,25 +63,27 @@ class IPythonHandler(Madcow):
 
     def run(self):
         """Protocol-specific loop"""
-        print u'Prepend any messages you wish to pass to the both with a "$"'
-        print u'self = %s' % self
+        print 'Prepend any messages you wish to pass to the both with a "$"'
+        print 'self = %s' % self
         sys.argv = []
         shell = IPShellMadcow(callback=self)
         shell()
 
     def botname(self):
         """Should return bots real name for addressing purposes"""
-        return u'madcow'
+        return 'madcow'
 
     def protocol_output(self, message, req=None):
         """Protocol-specific output method"""
-        print message
+        if req is not None and req.colorize is True:
+            message = self.colorlib.rainbow(message)
+        print message.encode(self.charset, 'replace')
 
     def process_message(self, message):
         """Create request object from recived message and process it"""
         req = Request(message)
-        req.nick = os.environ[u'USER']
-        req.channel = u'ipython'
+        req.nick = os.environ['USER']
+        req.channel = 'ipython'
         req.addressed = True
         self.check_addressing(req)
         Madcow.process_message(self, req)
