@@ -26,12 +26,16 @@ import random
 import logging as log
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
-_base_url = u'http://en.wikiquote.org/'
-_advert = u' - Wikiquote'
 _linebreak = re.compile(r'[\r\n]+')
 _whitespace = re.compile(r'\s{2,}')
 _author = u'random'
 _max = 10
+
+class WikiQuotes(Wiki):
+
+    base_url = u'http://en.wikiquote.org/'
+    advert = u' - Wikiquote'
+
 
 class Main(Module):
 
@@ -40,7 +44,7 @@ class Main(Module):
     help = u'wikiquote - get random quote from wikiquotes'
 
     def __init__(self, madcow=None):
-        self.wiki = Wiki(base_url=_base_url, advert=_advert)
+        self.wiki = WikiQuotes()
 
     def get_random_quote(self, author=_author, max=_max):
         for i in range(0, max):
@@ -63,7 +67,7 @@ class Main(Module):
 
     def _get_random_quote(self, author=_author):
         soup, title = self.wiki.get_soup(author)
-        if title == Wiki._error:
+        if title == self.wiki.error:
             return u"Couldn't find quotes for that.."
         content = soup.find(u'div', attrs={u'id': u'bodyContent'})
         uls = content.findAll(u'ul', recursive=False)
@@ -97,5 +101,6 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
+    log.root.setLevel(log.DEBUG)
     from include.utils import test_module
     test_module(Main)

@@ -32,15 +32,15 @@ class Wiki(object):
     """Return summary from WikiMedia projects"""
 
     # site-specific details, default is english wikipedia
-    _base_url = u'http://en.wikipedia.org/'
-    _random_path = u'/wiki/Special:Random'
-    _search_path = u'/wiki/Special:Search'
-    _advert = u' - Wikipedia, the free encyclopedia'
-    _error = u'Search results'
+    base_url = u'http://en.wikipedia.org/'
+    random_path = u'/wiki/Special:Random'
+    search_path = u'/wiki/Special:Search'
+    advert = u' - Wikipedia, the free encyclopedia'
+    error = u'Search results'
 
     # size of response
-    _summary_size = 400
-    _sample_size = 32 * 1024
+    summary_size = 400
+    sample_size = 32 * 1024
 
     # precompiled regex
     _citations = re.compile(r'\[.*?\]', re.DOTALL)
@@ -50,17 +50,8 @@ class Wiki(object):
     _sentence = re.compile(r'(.*?\.)\s+', re.DOTALL)
     _fix_punc = re.compile(r'\s+([,;:.])')
 
-    def __init__(self, base_url=_base_url, random_path=_random_path,
-            search_path=_search_path, advert=_advert, error=_error,
-            summary_size=_summary_size, sample_size=_sample_size):
-
-        self.base_url = base_url
-        self.random_path = random_path
-        self.search_path = search_path
-        self.advert = advert
-        self.error = error
-        self.summary_size = summary_size
-        self.sample_size = sample_size
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
     def get_summary(self, query):
         soup, title = self.get_soup(query)

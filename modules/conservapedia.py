@@ -24,24 +24,31 @@ from include.utils import Module
 import re
 import logging as log
 
-# these differ from wikipedia:
-_baseurl = u'http://www.conservapedia.com/'
-_random_path = u'/Special:Random'
-_advert = u' - Conservapedia'
+class ConservaPedia(Wiki):
+
+    base_url = u'http://www.conservapedia.com/'
+    random_path = u'/Special:Random'
+    search_path = u'/Special:Search'
+    advert = u' - Conservapedia'
+
+
+class ChristoPedia(Wiki):
+
+    base_url = u'http://christopedia.us/'
+    advert = u' - Christopedia, the Christian encyclopedia'
+
 
 class Main(Module):
 
-    pattern = re.compile(u'^\s*(?:cp)\s+(.*?)\s*$', re.I)
-    require_addressing = True
-    help = u'cp <term> - look up summary of term on conservapedia'
+    pattern = re.compile(u'^\s*(c[ph])\s+(.+?)\s*$', re.I)
+    help = u'[cp|ch] <term> - look up offensive and inaccurate info'
 
     def __init__(self, madcow=None):
-        self.wiki = Wiki(base_url=_baseurl, random_path=_random_path,
-                         advert=_advert)
+        self.wikis = dict(cp=ConservaPedia(), ch=ChristoPedia())
 
     def response(self, nick, args, kwargs):
         try:
-            return self.wiki.get_summary(args)
+            return self.wikis[args[0].lower()].get_summary(args[1])
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
