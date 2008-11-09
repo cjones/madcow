@@ -30,13 +30,14 @@ __all__ = [u'Debug', u'Module', u'cache', u'throttle', u'stripHTML',
            u'unescape_entities', u'slurp', u'Request', u'cache_property']
 
 # pre-compile regex
-suptag_re = re.compile(u'<sup>(.*?)</sup>', re.I)
-break_re = re.compile(u'<br[^>]+>', re.I)
-tags_re = re.compile(u'<[^>]+>')
-newlines_re = re.compile(u'[\r\n]+')
-highascii_re = re.compile(u'([\x80-\xff])')
+pre_re = re.compile(r'(<pre.*?>(.*?)</pre>)', re.I | re.DOTALL)
+break_re = re.compile(r'<br.*?>', re.I | re.DOTALL)
+tag_re = re.compile(r'<.*?>', re.DOTALL)
+newlines_re = re.compile(r'[\r\n]+')
 entity_re = re.compile(r'(&([^;]+);)')
 charentity_re = re.compile(r'^&#(x)?(\d+);$', re.I)
+
+striplines = lambda x: map(lambda item: item.strip(), newlines_re.split(x))
 
 # entity map
 entities = {u'quot': 34, u'amp': 38, u'apos': 39, u'lt': 60, u'gt': 62,
@@ -218,12 +219,20 @@ class throttle(object):
 
 
 def stripHTML(data):
-    if data:
-        data = suptag_re.sub(r'^\1', data)
-        data = tags_re.sub(u'', data)
-        data = break_re.sub(u'\n', data)
-        data = newlines_re.sub(u'\n', data)
-        data = unescape_entities(data)
+    """Removes HTML cruft"""
+    parts = pre_re.split(data)
+    formatted = []
+    while parts:
+        part = parts.pop(0)
+        if pre_re.match(part):
+            part = break_re.sub('\n', parts.pop(0))
+        else:
+            part = ('\n'.join(striplines(break_re.sub(
+                    '\n', ' '.join(striplines(part))))))
+        part = tag_re.sub('', part)
+        part = unescape_entities(part)
+        formatted.append(part)
+    data = '\n'.join(formatted)
     return data
 
 

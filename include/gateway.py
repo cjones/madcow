@@ -17,6 +17,7 @@
 
 """Handles gateway connections"""
 
+from __future__ import with_statement
 from threading import Thread
 import os
 from select import select
@@ -73,13 +74,12 @@ class GatewayServiceHandler(Thread):
     """This class handles the listener service for message injection"""
 
     maxsize = 1 * 1024 * 1024 # 1 meg
+    maxfiles = 9999
     bufsize = 8 * 1024
     timeout = 60
     newline = re.compile(r'\r?\n')
     headsep = re.compile(r'\r?\n\r?\n')
-    safenick = re.compile(r'[^0-9a-z_]', re.I)
-    required_headers = {u'message': (u'to', u'from', u'message'),
-                        u'image': (u'to', u'from', u'size')}
+    safeword = re.compile(r'[^0-9a-z_.]', re.I)
 
     def __init__(self, server, client, addr):
         self.server = server
@@ -134,105 +134,94 @@ class GatewayServiceHandler(Thread):
 
     def data_received(self, data):
         self.buf += data
+        if len(self.buf) > self.maxsize:
+            raise InvalidPayload('payload exceeded max size')
         if not self.headers_done:
             if not self.headsep.search(self.buf):
                 return
             try:
                 # parse headers
                 hdrs, self.buf = self.headsep.split(self.buf, 1)
-                hdrs = hdrs.decode(self.server.bot.config.main.charset, 'replace')
+                hdrs = hdrs.decode(self.server.bot.config.main.charset,
+                                   'replace')
                 hdrs = self.newline.split(hdrs)
                 hdrs = [hdr.split(u':', 1) for hdr in hdrs]
                 hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]
                 hdrs = dict(hdrs)
 
-                # sanity check headers
-                if u'type' in hdrs:
-                    content_type = hdrs[u'type']
-                else:
-                    content_type = u'message'
-                if content_type not in self.required_headers:
-                    raise InvalidPayload(
-                            u'unknown content type: ' + content_type)
-                for header in self.required_headers[content_type]:
-                    if header not in hdrs:
-                        raise InvalidPayload(
-                                u'missing required field ' + header)
                 if u'size' in hdrs:
                     hdrs[u'size'] = int(hdrs[u'size'])
 
                 # save data
-                self.content_type = content_type
                 self.hdrs = hdrs
                 self.headers_done = True
             except Exception, error:
-                raise InvalidPayload, u'invalid payload: %s' % error
+                raise InvalidPayload(u'invalid payload: %s' % error)
 
-        if self.content_type == u'image':
+        if u'size' in self.hdrs:
             if len(self.buf) < self.hdrs[u'size']:
                 return
-            image = self.buf[:self.hdrs[u'size']]
-            self.save_image(image, self.hdrs)
+            self.hdrs[u'payload'] = self.buf[:self.hdrs[u'size']]
 
-        self.process_message(self.hdrs)
+        self.process_message()
         raise CloseConnection
 
-    def process_message(self, payload):
+    def process_message(self):
         # see if we can reverse lookup sender
         modules = self.server.bot.modules.dict()
         dbm = modules[u'learn'].get_db(u'email')
         for user, email in dbm.items():
-            if payload[u'from'] == email:
-                payload[u'from'] = user
+            if self.hdrs[u'from'] == email:
+                self.hdrs[u'from'] = user
                 break
 
-        output = u'message from %s: %s' % (
-            payload[u'from'], payload[u'message']
-        )
+        if u'payload' in self.hdrs:
+            self.save_payload()
+
+        output = u'message from %s: %s' % (self.hdrs[u'from'],
+                                           self.hdrs[u'message'])
 
         req = Request(output)
         req.colorize = False
-        req.sendto = payload[u'to']
+        req.sendto = self.hdrs[u'to']
         self.server.bot.output(output, req)
 
-    def save_image(self, image, payload):
-        if not self.isjpeg(image):
-            print repr(image[:20])
-            raise InvalidPayload, u'payload is not a JPEG image'
+    def save_payload(self):
         imagepath = self.server.bot.config.gateway.imagepath
         baseurl = self.server.bot.config.gateway.imageurl
         if not imagepath or not baseurl:
-            raise InvalidPayload, u'images are not configured'
+            raise InvalidPayload(u'images are not configured')
 
-        nick = self.safenick.sub(u'', payload[u'from'])[:16].lower()
-        if not len(nick):
-            raise InvalidPayload, u'invalid nick'
 
-        date = datetime.date.today().strftime(u'%Y-%m-%d')
-        basename = u'%s_%s' % (nick, date)
-        idx = 0
-        for basedir, subdirs, filenames in os.walk(imagepath):
-            for filename in filenames:
-                try:
-                    name = filename.rsplit(u'.', 1)[0]
-                    seq = int(name.split(basename + u'_', 1)[1])
-                    if seq > idx:
-                        idx = seq
-                except:
-                    continue
-        idx += 1
+        filename = []
+        if u'from' in self.hdrs:
+            filename.append(self.hdrs[u'from'])
+        filename.append(datetime.date.today().strftime(u'%Y-%m-%d'))
+        if u'filename' in self.hdrs:
+            filename.append(self.hdrs[u'filename'])
 
-        filename = u'%s_%s.jpg' % (basename, idx)
-        fp = open(os.path.join(imagepath, filename), u'wb')
-        try:
-            fp.write(image)
-        finally:
-            fp.close()
+        filename = map(lambda x: self.safeword.sub(u'', x)[:16], filename)
+        filename = filter(None, filename)
+        filename = u'_'.join(filename)
+        basename, ext = os.path.splitext(filename)
 
-        message = urljoin(baseurl, filename)
-        if u'message' in payload and len(payload[u'message']):
-            message += u' (%s)' % payload[u'message']
-        payload[u'message'] = message
+        files = os.listdir(imagepath)
+        filename = None
+        for i in range(self.maxfiles):
+            filename = basename
+            if i:
+                filename += '_%d' % i
+            filename += ext
+            if not filename in files:
+                break
 
-    def isjpeg(self, image):
-        return image.startswith(u'\xff\xd8')
+        if not filename:
+            raise InvalidPayload('no room for more files')
+
+        with open(os.path.join(imagepath, filename), 'wb') as file:
+            file.write(self.hdrs['payload'])
+
+        if u'message' in self.hdrs and self.hdrs[u'message']:
+            self.hdrs[u'message'] = u'%s (%s)' % (urljoin(baseurl, filename),
+                                                  self.hdrs[u'message'])
+

@@ -34,8 +34,8 @@ class Main(Module):
     help = u'artfart - displays some offensive ascii art'
     baseurl = u'http://www.asciiartfarts.com/'
     random_url = urljoin(baseurl, u'random.cgi')
-    artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?<pre'
-                         r'>(.*?)</pre>', re.DOTALL)
+    artfart = re.compile(r'<h1>#<a href="\S+.html">\d+</a>: (.*?)</h1>.*?(<pre>.*?</pre'
+                         r'>)', re.DOTALL)
 
     def response(self, nick, args, kwargs):
         query = args[0]

@@ -92,12 +92,10 @@ class Main(Module):
             doc = geturl(url, opts=opts)
             entries = source.entries.findall(doc)
             if query:
-                entries = [entry for entry in entries if query in entry]
-            if len(entries) > 1:
-                entry = random.choice(entries)
-            else:
-                entry = entries[0]
-            return stripHTML(entry)
+                entries = filter(None, entries)
+            entry = random.choice(entries)
+            entry = stripHTML(entry).strip()
+            return entry
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
