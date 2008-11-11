@@ -178,20 +178,20 @@ class GatewayServiceHandler(Thread):
         if u'payload' in self.hdrs:
             self.save_payload()
 
-        output = u'message from %s: %s' % (self.hdrs[u'from'],
-                                           self.hdrs[u'message'])
-
-        req = Request(output)
-        req.colorize = False
-        req.sendto = self.hdrs[u'to']
-        self.server.bot.output(output, req)
+        if u'message' in self.hdrs:
+            output = u'message from %s: %s' % (self.hdrs[u'from'],
+                                               self.hdrs[u'message'])
+            req = Request(output)
+            req.colorize = False
+            req.sendto = self.hdrs[u'to']
+            self.server.bot.output(output, req)
 
     def save_payload(self):
+        pad = len(str(self.maxfiles))
         imagepath = self.server.bot.config.gateway.imagepath
         baseurl = self.server.bot.config.gateway.imageurl
         if not imagepath or not baseurl:
             raise InvalidPayload(u'images are not configured')
-
 
         filename = []
         if u'from' in self.hdrs:
@@ -200,17 +200,19 @@ class GatewayServiceHandler(Thread):
         if u'filename' in self.hdrs:
             filename.append(self.hdrs[u'filename'])
 
-        filename = map(lambda x: self.safeword.sub(u'', x)[:16], filename)
+        filename = map(lambda x: self.safeword.sub(u'', x), filename)
         filename = filter(None, filename)
         filename = u'_'.join(filename)
         basename, ext = os.path.splitext(filename)
+        basename = basename[:255 - (len(ext) + 1 + pad)]
 
         files = os.listdir(imagepath)
         filename = None
         for i in range(self.maxfiles):
             filename = basename
             if i:
-                filename += '_%d' % i
+                idx = str(i)
+                filename += '_' + '0' * (pad - len(idx)) + idx
             filename += ext
             if not filename in files:
                 break
@@ -221,7 +223,7 @@ class GatewayServiceHandler(Thread):
         with open(os.path.join(imagepath, filename), 'wb') as file:
             file.write(self.hdrs['payload'])
 
+        message = urljoin(baseurl, filename)
         if u'message' in self.hdrs and self.hdrs[u'message']:
-            self.hdrs[u'message'] = u'%s (%s)' % (urljoin(baseurl, filename),
-                                                  self.hdrs[u'message'])
-
+            message += u' (%s)' % self.hdrs[u'message']
+        self.hdrs[u'message'] = message

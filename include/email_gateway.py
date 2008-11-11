@@ -54,21 +54,7 @@ __all__ = []
 USAGE = '%prog < [email]'
 newline_re = re.compile(r'[\r\n]+')
 encoded_re = re.compile(r'(=\?.*?\?.*?\?.*?\?=)')
-image_types = {'image/x-cmu-raster': '.ras',
-               'image/x-ms-bmp': '.bmp',
-               'image/x-portable-graymap': '.pgm',
-               'image/x-portable-bitmap': '.pbm',
-               'image/jpeg': '.jpg',
-               'image/gif': '.gif',
-               'image/x-xwindowdump': '.xwd',
-               'image/png': '.png',
-               'image/x-rgb': '.rgb',
-               'image/x-portable-pixmap': '.ppm',
-               'image/x-xpixmap': '.xpm',
-               'image/ief': '.ief',
-               'image/x-portable-anymap': '.pnm',
-               'image/x-xbitmap': '.xbm',
-               'image/tiff': '.tiff'}
+jpeg_ext_re = re.compile(r'^\.jp(e?g|e)$', re.I)
 
 def lookup_charset(charset):
     """See if we support this encoding, or return default one"""
@@ -117,13 +103,20 @@ def main():
             continue
         type = part.get_content_type()
         maintype, subtype = type.split('/')
-        if type in image_types:
-            filename = part.get_filename()
+
+        # is a jpeg file
+        if payload.startswith('\xff\xd8'):
+            filename = decode_header(part.get_filename())
+            filename = filename.encode(output_encoding, 'replace')
             if not filename:
-                filename = 'unknown'
-            if os.path.splitext(filename)[1].lower() != image_types[type]:
-                filename += image_types[type]
+                filename = 'unknown.jpg'
+            basename, ext = os.path.splitext(filename)
+            if not jpeg_ext_re.match(ext):
+                ext = '.jpg'
+            filename = basename + ext
             images.append((filename, payload))
+
+        # possible message
         elif maintype == 'text':
             charset = lookup_charset(part.get_content_charset())
             payload = payload.decode(charset, 'replace')
