@@ -70,7 +70,7 @@ class Yahoo(object):
             key, val = row.findAll(u'td')
             key = unicode(key.contents[0])
 
-            if key in (u'Last Trade:', u'Index Value:'):
+            if key in (u'Last Trade:', u'Index Value:', u'Net Asset Value:'):
                 current_price = locale.atof(stripHTML(unicode(val)))
             elif key == u'Prev Close:':
                 last_price = locale.atof(stripHTML(unicode(val)))
