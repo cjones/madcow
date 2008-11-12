@@ -73,7 +73,7 @@ class MegaHAL(object):
         log.debug('initializing brain with: ' + brain)
         megahal.init(brain)
         self.brain = brain
-        return u'set brain to ' + brain
+        return u'set brain to: ' + id
 
     def process(self, line):
         if not self.brain:
@@ -97,7 +97,7 @@ class Main(Module):
         self.megahal = MegaHAL(
                 basedir=os.path.join(madcow.prefix, 'data/megahal'),
                 charset=madcow.charset)
-        self.megahal.setid(madcow.botname())
+        self.megahal.setid('madcow')
 
     def response(self, nick, args, kwargs):
         try:
