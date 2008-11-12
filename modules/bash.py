@@ -62,7 +62,7 @@ class Main(Module):
     pattern = re.compile(u'^\s*(bash|qdb|limerick)(?:\s+(\S+))?', re.I)
     require_addressing = True
     help = u'<bash|qdb|limerick> [#|query] - get stupid IRC quotes'
-    sources = {u'bash': QDB(),
+    sources = {u'bash': Bash(),
                u'qdb': QDB(),
                u'limerick': Limerick()}
     _error = u'Having some issues, make some stupid quotes yourself'
