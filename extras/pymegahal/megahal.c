@@ -651,7 +651,13 @@ void show_dictionary(DICTIONARY *dictionary)
     register unsigned int i;
     register unsigned int j;
     FILE *file;
-    file=fopen("megahal.dic", "w");
+
+    static char *filename=NULL;
+    filename=(char *)malloc(sizeof(char)*(strlen(directory)+strlen(SEP)+12));
+    if(filename==NULL) return;
+    sprintf(filename, "%s%smegahal.dic", directory, SEP);
+
+    file=fopen(filename, "w");
     if(file==NULL) {
         return;
     }
