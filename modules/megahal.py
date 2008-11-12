@@ -24,6 +24,7 @@ import logging as log
 import re
 from include import megahal
 import os
+import time
 
 __version__ = u'0.1'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -49,11 +50,16 @@ class MegaHAL(object):
     """MegaHAL Interface"""
 
     badchars_re = re.compile(r'[^a-z0-9_.]', re.I)
+    update_freq = 1 * 60 * 60  # 1 hour
+    update_max = 50
 
     def __init__(self, basedir, charset):
         self.basedir = basedir
         self.charset = charset
         self.brain = None
+        self.last_updated = None
+        self.last_changed = None
+        self.updates = 0
 
     def setid(self, id):
         id = id.encode(self.charset, 'replace')
@@ -78,12 +84,31 @@ class MegaHAL(object):
     def process(self, line):
         if not self.brain:
             raise Uninitialized('meghal is not initialized')
-        try:
-            line = line.encode(self.charset, 'replace')
-            return megahal.process(line).decode(self.charset, 'replace')
-        finally:
-            megahal.save()
-            megahal.init(self.brain)
+        line = line.encode(self.charset, 'replace')
+        response = megahal.process(line).decode(self.charset, 'replace')
+        self.last_changed = time.time()
+        self.updates += 1
+        self.update_sentinel()
+        return response
+
+    def update_sentinel(self):
+        if not self.last_updated:
+            self.last_updated = time.time()
+        update = False
+        if self.last_changed - self.last_updated > self.update_freq:
+            update = True
+            log.debug('updating megahal because enough time has passed')
+        if self.updates > self.update_max:
+            update = True
+            log.debug('updating because enough updates have happened')
+        if update:
+            self.update()
+
+    def update(self):
+        megahal.save()
+        megahal.init(self.brain)
+        self.last_updated = time.time()
+        self.updates = 0
 
 
 class Main(Module):
