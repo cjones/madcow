@@ -121,6 +121,16 @@ ADVANCED USAGE
     wish, or just symlink the provided response file.  See
     README.grufti for more detail on the syntax and advanced features.
 
+MEGAHAL
+
+    MegaHAL is a markov chain bot.  If you enable the module for this,
+    you will need to compile the C extension.  To do this:
+
+    $ cd <madcow>/include/pymegahal
+    $ make
+    $ mv build/lib*/megahal/lib*/megahal.so <madcow>/include/
+    $ make clean
+
 
 WRITING EXTENSIONS
 
