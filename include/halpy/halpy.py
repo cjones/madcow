@@ -25,6 +25,8 @@ class Dictionary(list):
 
     """Array extended with some helper functions"""
 
+    __slots__ = []
+
     def add_word(self, word):
         if word not in self:
             self.append(word)
@@ -38,7 +40,9 @@ class Dictionary(list):
 
 class Tree(object):
 
-    """Tree of word indices"""
+    """Tree of word symbols"""
+
+    __slots__ = ['symbol', 'usage', 'count', 'tree']
 
     def __init__(self, symbol=0):
         self.symbol = symbol
@@ -47,55 +51,54 @@ class Tree(object):
         self.tree = []
 
     def add_symbol(self, symbol):
-        node = self.find_symbol_add(symbol)
+        node = self.find_symbol(symbol, add=True)
         node.count += 1
         self.usage += 1
         return node
 
-    def find_symbol_add(self, symbol):
-        i, found_symbol = self.search_node(symbol)
-        if found_symbol:
-            found = self.tree[i]
-        else:
-            found = Tree(symbol)
-            self.add_node(found, i)
-        return found
+    def find_symbol(self, symbol, add=False):
+        i, found = 0, False
+        if self.tree:
+            min = 0
+            max = len(self.tree) - 1
+            while True:
+                middle = (min + max) / 2
+                compar = symbol - self.tree[middle].symbol
+                if compar == 0:
+                    i, found = middle, True
+                    break
+                elif compar > 0:
+                    if max == middle:
+                        i, found = middle + 1, False
+                        break
+                    min = middle + 1
+                else:
+                    if min == middle:
+                        i, found = middle, False
+                        break
+                    max = middle - 1
+        if found:
+            node = self.tree[i]
+        elif add:
+            node = Tree(symbol)
+            self.tree.insert(i, node)
+        return node
 
-    def find_symbol(self, symbol):
-        i, found_symbol = self.search_node(symbol)
-        if found_symbol:
-            return self.tree[i]
+    # PICKLE INSTRUCTIONS
 
-    def add_node(self, node, position):
-        self.tree.insert(position, node)
+    def __getstate__(self):
+        return self.symbol, self.tree, self.usage, self.count
 
-    def search_node(self, symbol):
-        if not self.tree:
-            return 0, False
-        min = 0
-        max = len(self.tree) - 1
-        while True:
-            middle = int((min + max) / 2)
-            compar = symbol - self.tree[middle].symbol
-            if compar == 0:
-                return middle, True
-            elif compar > 0:
-                if max == middle:
-                    return middle + 1, False
-                min = middle + 1
-            else:
-                if min == middle:
-                    return middle, False
-                max = middle - 1
+    def __setstate__(self, state):
+        self.symbol, self.tree, self.usage, self.count = state
 
-    def show(self):
-        for level, symbol in self.dump():
-            print ' ' * level, symbol
 
 
 class Model(object):
 
     """HAL Data model"""
+
+    __slots__ = ['order', 'forward', 'backward', 'dictionary', 'context']
 
     def __init__(self, order):
         self.order = order
@@ -114,11 +117,20 @@ class Model(object):
             if self.context[i - 1] is not None:
                 self.context[i] = self.context[i - 1].find_symbol(symbol)
 
+    # PICKLE INSTRUCTIONS
+
+    def __getstate__(self):
+        return self.order, self.forward, self.backward, self.dictionary
+
+    def __setstate__(self, state):
+        self.order, self.forward, self.backward, self.dictionary = state
+
 
 class HAL(object):
 
     """Heuristically programmed ALgorithmic Computer"""
 
+    __slots__ = ['directory', 'timeout', 'model', 'ban', 'aux', 'swp']
     comment_re = re.compile(r'#.*$')
 
     def __init__(self, directory=DIRECTORY, timeout=TIMEOUT, order=ORDER):
@@ -155,7 +167,6 @@ class HAL(object):
         self.learn(self.make_words(input))
 
     def save(self):
-        self.model.initialize_context()
         with open(self.brain_file, 'wb') as file:
             pickle.dump(self.model, file)
 
@@ -468,6 +479,7 @@ def main():
     except (EOFError, KeyboardInterrupt):
         print
     finally:
+        t = time.time()
         hal.save()
     return 0
 
