@@ -67,11 +67,12 @@ def lookup_charset(charset):
 def decode_header(line):
     """Decode MIME header"""
     parts = []
-    for part in encoded_re.split(line):
-        decoded = []
-        for word, charset in email.header.decode_header(part):
-            decoded.append(word.decode(lookup_charset(charset), 'replace'))
-        parts.append(u' '.join(decoded))
+    if line:
+        for part in encoded_re.split(line):
+            decoded = []
+            for word, charset in email.header.decode_header(part):
+                decoded.append(word.decode(lookup_charset(charset), 'replace'))
+            parts.append(u' '.join(decoded))
     return u''.join(parts)
 
 
