@@ -93,7 +93,6 @@ class Tree(object):
         self.symbol, self.tree, self.usage, self.count = state
 
 
-
 class Model(object):
 
     """HAL Data model"""
