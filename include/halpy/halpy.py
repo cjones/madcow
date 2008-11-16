@@ -411,7 +411,8 @@ class HAL(object):
             return False
         if position == len(string):
             return True
-        if ((string[position] == "'") and
+        if ((len(string) - position > 1) and
+            (string[position] == "'") and
             (string[position - 1].isalpha()) and
             (string[position + 1].isalpha())):
             return False
