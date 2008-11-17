@@ -2,6 +2,8 @@
 
 """Heuristically programmed ALgorithmic Computer"""
 
+
+
 from __future__ import with_statement
 import sys
 import os
@@ -13,6 +15,21 @@ from optparse import OptionParser
 import warnings
 warnings.simplefilter('ignore')
 from sqlobject import *
+
+"""
+problems:
+
+    output is mangled.. is tree wrong or reply generation?
+        - compare tree to one made by reference bot
+        - if that's ok, need to step through reply generation
+    need support for aux/ban/swp
+    SLAMS database too much.. need to cache stuff omg
+    look for handling of <FIN> and <ERROR>, which used to be ==0 or ==1
+
+"""
+
+print >> sys.stderr, "THIS ISN'T DONE YET!"
+sys.exit(1)
 
 __version__ = '0.1'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
