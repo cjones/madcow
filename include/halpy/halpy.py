@@ -92,6 +92,13 @@ class Tree(object):
     def __setstate__(self, state):
         self.symbol, self.tree, self.usage, self.count = state
 
+    @classmethod
+    def dump(cls, node, dict, level=0):
+        print '    ' * level + repr(dict[node.symbol].upper())
+        for child in node.tree:
+            cls.dump(child, dict, level + 1)
+
+
 
 class Model(object):
 
@@ -474,6 +481,8 @@ def main():
                 break
             if input == '#save':
                 hal.save()
+            elif input == '#dump':
+                Tree.dump(hal.model.forward, hal.model.dictionary)
             else:
                 print hal.process(input)
     except (EOFError, KeyboardInterrupt):

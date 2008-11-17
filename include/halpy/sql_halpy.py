@@ -358,18 +358,16 @@ class HAL(object):
         self.initialize_context(self.forward)
         for word in words:
             self.update_model(Words.add_word(word))
-        self.update_model(1)
+        self.update_model(2)
         self.initialize_context(self.backward)
         for word in reversed(words):
-            symbol = Words.find_word(word)
-            self.update_model(symbol)
-        self.update_model(1)
+            self.update_model(Words.find_word(word))
+        self.update_model(2)
 
-    def update_model(self, symbol):
+    def update_model(self, word):
         for i in xrange(self.order + 1, 0, -1):
             if self.context[i - 1]:
-                node = self.context[i - 1].add_word(symbol)
-                self.context[i] = node
+                self.context[i] = self.context[i - 1].add_word(word)
 
     # UTILITY FUNCTIONS
 
@@ -436,6 +434,10 @@ class HAL(object):
             return True
         return False
 
+def dump(node, level=0):
+    print '    ' * level + repr(node.word.word.upper())
+    for child in node.tree:
+        dump(child, level + 1)
 
 def main():
     """Parse args and create a simple chat bot"""
@@ -453,7 +455,11 @@ def main():
     if args:
         parser.error('invalid args')
 
+    opts.reset = True
     hal = HAL(**opts.__dict__)
+    #hal.teach('this is a test.')
+    #dump(hal.forward)
+    #return 0
 
     try:
         while True:
