@@ -52,6 +52,7 @@ typedef struct {
     DICTIONARY *dictionary;
 } MODEL;
 
+void dump_tree(TREE *node);
 static int order=5;
 static DICTIONARY *words=NULL;
 static MODEL *model=NULL;
@@ -115,6 +116,7 @@ static void update_model(MODEL *, int);
 static int wordcmp(STRING, STRING);
 static bool word_exists(DICTIONARY *, STRING);
 static int rnd(int);
+static char *debug=NULL;
 
 void megahal_setdirectory (char *dir)
 {
@@ -133,6 +135,9 @@ char *megahal_do_reply(char *input, int log)
     upper(input);
     make_words(input, words);
     learn(model, words);
+    dump_tree(model->forward);
+
+    exit(0);
     output = generate_reply(model, words);
     capitalize(output);
     return output;
@@ -643,19 +648,27 @@ void show_dictionary(DICTIONARY *dictionary)
 {
     register unsigned int i;
     register unsigned int j;
-    FILE *file;
-    file=fopen("megahal.dic", "w");
-    if(file==NULL) {
-        return;
-    }
-
     for(i=0; i<dictionary->size; ++i) {
+        fprintf(stdout, "'");
         for(j=0; j<dictionary->entry[i].length; ++j)
-            fprintf(file, "%c", dictionary->entry[i].word[j]);
-        fprintf(file, "\n");
+            fprintf(stdout, "%c", dictionary->entry[i].word[j]);
+        fprintf(stdout, "' ");
     }
+    fprintf(stdout, "\n");
+}
 
-    fclose(file);
+static char *show_word(int);
+char *show_word(int symbol)
+{
+    register unsigned int i;
+    if (debug == NULL) debug = (char *)malloc(sizeof(char) * 1);
+    debug = (char *)realloc(debug,
+            (sizeof(char) * model->dictionary->entry[symbol].length) + 1);
+    for (i = 0; i < model->dictionary->entry[symbol].length; i++) {
+        debug[i] = model->dictionary->entry[symbol].word[i];
+    }
+    debug[model->dictionary->entry[symbol].length] = 0;
+    return debug;
 }
 
 void save_model(char *modelname, MODEL *model)
@@ -680,6 +693,27 @@ void save_model(char *modelname, MODEL *model)
     save_tree(file, model->backward);
     save_dictionary(file, model->dictionary);
     fclose(file);
+}
+
+void dump_tree(TREE *node)
+{
+    static int level=0;
+    static char *pad=NULL;
+    register unsigned int i;
+
+    if (pad == NULL) pad=(char *)malloc(sizeof(char)*1);
+    pad=(char *)realloc(pad, (sizeof(char)*(level*4))+1);
+    for(i=0;i<(level*4);i++){
+        pad[i] = 32;
+    }
+    pad[(level*4)] = 0;
+
+    printf("%s'%s'\n", pad, show_word(node->symbol));
+    for(i=0; i<node->branch; ++i) {
+        ++level;
+        dump_tree(node->tree[i]);
+        --level;
+    }
 }
 
 void save_tree(FILE *file, TREE *node)
@@ -850,7 +884,7 @@ char *generate_reply(MODEL *model, DICTIONARY *words)
 
     output=output_none;
     if(dummy == NULL) dummy = new_dictionary();
-    replywords = reply(model, dummy);
+    replywords = reply(model, keywords); // XXX
     if(dissimilar(words, replywords) == TRUE) output = make_output(replywords);
     max_surprise=(float)-1.0;
     count=0;
@@ -974,8 +1008,17 @@ DICTIONARY *reply(MODEL *model, DICTIONARY *keys)
         update_context(model, symbol);
     }
 
+    // debugging starts here XXX
+    printf("keys: ");
+    show_dictionary(keys);
+
+    printf("before: ");
+    show_dictionary(replies);
+
     while(TRUE) {
         symbol=babble(model, keys, replies);
+        printf("babble=%s used_key=%s\n", show_word(symbol),
+                (used_key == TRUE) ? "True" : "False");
         if((symbol==0)||(symbol==1)) break;
         if(replies->entry==NULL)
             replies->entry=(STRING *)malloc((replies->size+1)*sizeof(STRING));
@@ -995,6 +1038,10 @@ DICTIONARY *reply(MODEL *model, DICTIONARY *keys)
         replies->size+=1;
         update_context(model, symbol);
     }
+
+    printf("after: ");
+    show_dictionary(replies);
+    exit(0);
 
     return(replies);
 }
