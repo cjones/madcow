@@ -16,20 +16,8 @@ import warnings
 warnings.simplefilter('ignore')
 from sqlobject import *
 
-"""
-problems:
-
-    output is mangled.. is tree wrong or reply generation?
-        - compare tree to one made by reference bot
-        - if that's ok, need to step through reply generation
-    need support for aux/ban/swp
-    SLAMS database too much.. need to cache stuff omg
-    look for handling of <FIN> and <ERROR>, which used to be ==0 or ==1
-
-"""
-
-print >> sys.stderr, "THIS ISN'T DONE YET!"
-sys.exit(1)
+#print >> sys.stderr, "THIS ISN'T DONE YET!"
+#sys.exit(1)
 
 __version__ = '0.1'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -192,7 +180,6 @@ class HAL(object):
         while time.time() - basetime < self.timeout:
             replywords = self.reply(keywords)
             surprise = self.evaluate_reply(keywords, replywords)
-            print surprise
             if surprise > max_surprise:
                 max_surprise = surprise
                 output = ''.join(word.word for word in replywords)
@@ -267,12 +254,14 @@ class HAL(object):
                 word = Words.find_word(replies[i])
                 self.update_context(word)
 
+        # XXX this loop is fucking it up
         while True:
             word, used_key = self.babble(keys, replies, used_key)
             if word.word in ('<ERROR>', '<FIN>'):
                 break
             replies.insert(0, word)
             self.update_context(word)
+
         return replies
 
     def babble(self, keys, words, used_key):
@@ -281,18 +270,25 @@ class HAL(object):
         for i in xrange(0, self.order + 1):
             if self.context[i]:
                 node = self.context[i]
-        if not node or not node.tree:
+
+        if not node:
             return word, used_key
-        branch = random.choice(node.tree)
+        tree = node.tree
+        if not tree:
+            return word, used_key
+
+        i = random.randrange(len(tree))
         count = random.randrange(node.used)
+
         while count >= 0:
-            word = branch.word
-            if word.word in keys and word.word not in words:
-                # XXX and (used_key or word.word not in aux
+            word = tree[i].word
+            if ((word.word in keys) and
+                ((used_key) or (False)) and
+                (word not in words)):
                 used_key = True
                 break
-            count -= branch.count
-            if i >= len(node.tree) - 1:
+            count -= tree[i].count
+            if i >= len(tree) - 1:
                 i = 0
             else:
                 i += 1
@@ -308,47 +304,16 @@ class HAL(object):
             keys = keys[i:] + keys[:i]
             for test_word in keys:
                 found = Words.find_word(test_word)
-                if found:  # XXX and not in aux
+                if found:
                     return found
         return word
 
     def make_keywords(self, words):
-        return words
-        # XXX predicated on swap, aux and ban
-        # keys = []
-        # for word in words:
-        #     c = 0
-        #     for search, replace in self.swp:
-        #         if search == word:
-        #             self.add_key(keys, replace)
-        #             c += 1
-        #     if c == 0:
-        #         self.add_key(keys, word)
-
-        # if keys:
-        #     for word in words:
-        #         c = 0
-        #         for search, replace in self.swp:
-        #             if search == word:
-        #                 self.add_aux(keys, replace)
-        #                 c += 1
-        #         if c == 0:
-        #             self.add_aux(keys, word)
-
-        # return keys
-
-    # def add_key(self, keys, word):
-    #     if (Words.find_word(word) and
-    #         word[0].isalnum() and
-    #         not self.ban.find_word(word) and
-    #         not self.aux.find_word(word)):
-    #         keys.add_word(word)
-
-    # def add_aux(self, keys, word):
-    #     if (Words.find_word(word) and
-    #         word[0].isalnum() and
-    #         not self.aux.find_word(word)):
-    #         keys.add_word(word)
+        keys = []
+        for word in words:
+            if Words.find_word(word) and word[0].isalnum():
+                keys.append(word)
+        return keys
 
     # LEARNING FUNCTIONS
 
@@ -457,9 +422,6 @@ def main():
 
     opts.reset = True
     hal = HAL(**opts.__dict__)
-    #hal.teach('this is a test.')
-    #dump(hal.forward)
-    #return 0
 
     try:
         while True:
