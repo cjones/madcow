@@ -257,8 +257,30 @@ def slurp(path):
         return file.read()
 
 
+def find_madcow():
+    """Find where we are run from and config file location"""
+    prefix = sys.argv[0] if __file__.startswith(sys.argv[0]) else __file__
+    prefix = os.path.dirname(prefix)
+    prefix = os.path.abspath(prefix)
+    parts = prefix.split(os.sep)
+    while parts:
+        prefix = os.sep.join(parts)
+        config = os.path.join(prefix, 'madcow.ini')
+        if os.path.exists(config):
+            break
+        parts.pop()
+    return prefix, config
+
+
 def test_module(mod):
-    main = mod()
+    prefix, configfile = find_madcow()
+    sys.path.insert(0, prefix)
+    from madcow import Madcow, Config
+    import logging as log
+    log.basicConfig(level=log.ERROR)
+    config = Config(configfile)
+    madcow = Madcow(config, prefix)
+    main = mod(madcow)
     try:
         args = main.pattern.search(u' '.join(sys.argv[1:])).groups()
     except:
