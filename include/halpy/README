@@ -1,0 +1,89 @@
+OVERVIEW:
+---------
+
+    HAL is an eliza-like bot that utilizes a 4th-order Markov algorithm
+    to learn from input it receives and generate random responses.
+
+    This is a python port of the MegaHAL project, modified to use an
+    HDF5 backend so that it exists on disc instead of in-memory.  This
+    allows for arbitrarily large data sets to train it with.  It
+    accomplishes this by using PyTables and NumPy, which you will need
+    to install to use hal.py.
+
+    For more information on how the bot works, see the original project
+    at http://megahal.alioth.debian.org/.
+
+
+REQUIREMENTS:
+-------------
+
+    PyTables - http://www.pytables.org/
+
+    This is the core dependency you need.  However, it depends on many
+    other software packages, so you should try to install this using
+    your system package manager software.  If PyTables is not there, you
+    can download it from the above URL and install NumPy and HDF5, which
+    are its main dependencies.
+
+    Optionally, if you install psyco (http://psyco.sourceforge.net/),
+    HAL will automatically load this and optimize the algorithmic
+    portion of the code.  Only works for i386 architecture.
+
+
+INSTALLATION:
+-------------
+
+    $ python setup.py build
+    $ sudo python setup.py install
+
+    This will install HAL as a library and a command-line tool which
+    allows you to interact with the bot.
+
+
+GETTING STARTED:
+----------------
+
+    Simple usage as a library:
+
+        >>> from hal import HAL
+        hal = HAL()
+        hal.train('/path/to/training/file')
+        hal.process('learn from me', learn=True, reply=False)
+        print hal.process('get a reply', learn=False, reply=True)
+        hal.interact()
+
+    Simple usage from the command-line:
+
+        $ hal.py /path/to/training/file
+        >>> Hello there.
+        Hello there, it is indeed a great pleasure to meet you.
+
+    This will allow you to speak to the bot interactively and it will
+    learn from everything you say.  You should provide something to
+    train from on first run, otherwise its replies won't be very
+    interesting.  Provided is "meghal.trn" which will give it some
+    amusing eliza-like responses.  Other good candidates are IRC chat
+    logs.  You should strip out timestamps and other cruft such as
+    <nick> labels before training.
+
+
+GETTING HELP:
+-------------
+
+    You can email me at cjones@gruntle.org for help/bug reports/feature
+    requests.  If you are curious about the underlyingn algorithms, it
+    is explained in better detail for the original project.  You can
+    find the white paper here: http://megahal.alioth.debian.org/How.html
+
+
+CREDITS:
+--------
+
+    All credit for the underlying algorithm goes to the original author
+    of MegaHAL, Jason Hutchens.  hal.py is a port to Python/SQL backend
+    to address some flexibility issues.  In particular I wanted a way to
+    have multiple personalities instantiated that could talk to each
+    other, and the C implementation made this impossible.  Also, since
+    the Markov models were stored in memory, you could only train it
+    with so much before it broke due to memory constraints.
+
