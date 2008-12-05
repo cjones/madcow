@@ -20,7 +20,7 @@
 """Keep track of what people last said"""
 
 import re
-import anydbm
+import dbm
 import time
 import os
 from include.utils import Module
@@ -42,7 +42,7 @@ class Main(Module):
                 u'data/db-%s-seen' % madcow.namespace)
 
     def dbm(self):
-        return anydbm.open(self.dbfile, u'c', 0640)
+        return dbm.open(self.dbfile, u'c', 0640)
 
     def get(self, user):
         db = self.dbm()

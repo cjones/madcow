@@ -20,7 +20,7 @@
 """Module to handle learning"""
 
 import re
-import anydbm
+import dbm
 from include.utils import Module
 import logging as log
 
@@ -43,7 +43,7 @@ class Main(Module):
 
     def dbm(self, db):
         dbfile = self.dbfile(db)
-        return anydbm.open(dbfile, u'c', 0640)
+        return dbm.open(dbfile, u'c', 0640)
 
     def get_db(self, db):
         dbm = self.dbm(db)
@@ -56,7 +56,7 @@ class Main(Module):
         dbm = self.dbm(db)
         try:
             key = key.lower().encode(self.charset, 'replace')
-            if key in dbm:
+            if dbm.has_key(key):
                 return dbm[key].decode(self.charset, 'replace')
         finally:
             dbm.close()

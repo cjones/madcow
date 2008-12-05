@@ -24,7 +24,7 @@ import logging as log
 import re
 from re import I
 import os
-import anydbm
+import dbm
 import random
 from include import encoding
 
@@ -188,7 +188,7 @@ class Factoids(object):
     def get_dbm(self, dbname):
         dbfile = u'db-%s-%s' % (self.parent.madcow.namespace, dbname.lower())
         dbfile = os.path.join(self.parent.madcow.prefix, u'data', dbfile)
-        return anydbm.open(dbfile, u'c', 0640)
+        return dbm.open(dbfile, u'c', 0640)
 
     def get(self, dbname, key):
         dbm = self.get_dbm(dbname)
