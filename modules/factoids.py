@@ -214,7 +214,7 @@ class Factoids(object):
         dbm = self.get_dbm(dbname)
         try:
             key = key.lower().encode(self.charset, 'replace')
-            if key in dbm:
+            if dbm.has_key(key):
                 del dbm[key]
                 return True
             return False
