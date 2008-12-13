@@ -5,6 +5,11 @@
 #
 # Please look at grufti-responses.txt-sample for one without spammy inside jokes
 #
+#
+
+%match l4d
+ZOMBIES
+%end
 
 %match botsnack
 :)
