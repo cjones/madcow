@@ -40,8 +40,10 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         try:
-            return u'%s: President Obama in: %s' % (
-                    nick, self.human_readable(self.oday - time.time()))
+            e = self.oday - time.time()
+            ms = int((e - int(e)) * 1000)
+            return u'%s: President Obama in: %s %d milliseconds' % (
+                    nick, self.human_readable(e), ms)
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
