@@ -22,11 +22,11 @@
 from include.utils import Module
 import logging as log
 import re
-from include import megahal
 import os
 import time
+import sys
 
-__version__ = u'0.1'
+__version__ = u'0.2'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
 __all__ = []
 
@@ -43,6 +43,11 @@ class InvalidID(MegaHALError):
 class Uninitialized(MegaHALError):
 
     """Raised if MegaHAL is not initialized"""
+
+
+class BuildError(MegaHALError):
+
+    """Raised when we try to build MegaHAL and it blows up"""
 
 
 class MegaHAL(object):
@@ -84,6 +89,9 @@ class MegaHAL(object):
     def process(self, line):
         if not self.brain:
             raise Uninitialized('meghal is not initialized')
+        if line == '#save':
+            self.update()
+            return 'I saved the brain'
         line = line.encode(self.charset, 'replace')
         response = megahal.process(line).decode(self.charset, 'replace')
         self.last_changed = time.time()
@@ -119,6 +127,28 @@ class Main(Module):
     help += u'\nbrain <name> - switch to megahal brain'
 
     def __init__(self, madcow):
+
+        # if megahal.so doesn't exist, let's try to build it
+        global megahal
+        try:
+            from include import megahal
+        except ImportError:
+            log.warn("couldn't find megahal.so, i will try to build it")
+
+            from subprocess import Popen, PIPE, STDOUT
+            child = Popen(['./build.py'], stdout=PIPE, stderr=STDOUT,
+                          cwd=os.path.join(madcow.prefix, 'include/pymegahal'))
+            for line in child.stdout:
+                log.warn(line.strip())
+            child.wait()
+
+            # let's try that again, shall we?
+            try:
+                from include import megahal
+            except ImportError:
+                raise BuildError('could not build MegaHAL automatically')
+
+        # create the bot with a default personality
         self.megahal = MegaHAL(
                 basedir=os.path.join(madcow.prefix, 'data/megahal'),
                 charset=madcow.charset)
