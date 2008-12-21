@@ -1,13 +1,22 @@
 #!/usr/bin/env python
 
 from distutils.core import setup, Extension
+import shutil
 
-longdesc = """MegaHAL is a conversation simulator that can learn as
-you talk to it. This module contains Python bindings for the library."""
+def install():
+    setup(name='megahal',
+          version='9.0.3',
+          author='David N. Welton',
+          author_email='david@dedasys.com',
+          url='http://www.megahal.net',
+          license='GPL',
+          description='markov bot',
+          script_args = ['build', '--build-lib', 'build'],
+          ext_modules=[Extension('megahal', ['python.c', 'megahal.c'])])
+    shutil.copy('build/megahal.so', '../megahal.so')
+    shutil.rmtree('build')
+    print
+    print 'MegaHAL installed!'
 
-setup(name="megahal", version="9.0.3",
-      author="David N. Welton", author_email="david@dedasys.com",
-      url="http://www.megahal.net", license="GPL",
-      description="Python bindings for MegaHAL",
-      long_description=longdesc,
-      ext_modules=[Extension("megahal", ["python.c", "megahal.c"])])
+if __name__ == '__main__':
+    install()
