@@ -1,0 +1,29 @@
+#
+#	The word on the left is changed to the word on the
+#	right when used as a keyword
+#
+DISLIKE	LIKE
+HATE		LOVE
+I			YOU
+I'D		YOU'D
+I'LL		YOU'LL
+I'M		YOU'RE
+I'VE		YOU'VE
+LIKE		DISLIKE
+LOVE		HATE
+ME			YOU
+MINE		YOURS
+MY			YOUR
+MYSELF	YOURSELF
+NO			YES
+WHY		BECAUSE
+YES		NO
+YOU		I
+YOU		ME
+YOU'D		I'D
+YOU'LL	I'LL
+YOU'RE	I'M
+YOU'VE	I'VE
+YOUR		MY
+YOURS		MINE
+YOURSELF	MYSELF
