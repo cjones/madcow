@@ -127,9 +127,10 @@ MEGAHAL
     you will need to compile the C extension.  To do this:
 
     $ cd <madcow>/include/pymegahal
-    $ make
-    $ mv build/lib*/megahal/lib*/megahal.so <madcow>/include/
-    $ make clean
+    $ ./build.py
+
+    This will automatically build megahal.so and install it into your
+    include directory, assuming it compiles cleanly on your platform.
 
 
 WRITING EXTENSIONS
