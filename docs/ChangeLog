@@ -1,3 +1,45 @@
+1.5.0: Sun Dec 21 17:48:33 PST 2008
+    * New module -- steam, allows tracking a community so that you can see
+      what game each member is playing
+    * New module -- megahal, an eliza-like markov bot
+    * New module -- alias, allow users to custom create aliases to
+      madcow commands
+    * New module -- obama, shows countdown to inaugaration day
+    * New protocol -- IPython, allows you to interface with madcow from an
+      embedded IPython shell
+    * Rewrite woot module for cleaner output
+    * Explicitly use dbm.so instead of anydbm due to a severe memory
+      leak on certain platforms while using certain backend DB
+      libraries.
+    * Fixed group hugs confession module to work with (temporarily?)
+      busted homepage
+    * Add christ-o-pedia to conservapedia.  This is an even more
+      ridiculous and offensive right-wing wiki than conservapedia, which
+      I didn't think was possible.
+    * Rewrite bbc module for cleaner output
+    * LiveJournal module now just returns any page it gets instead of
+      complaining about pages that have UTF-8 in it.
+    * StockQuote completely rewritten for cleaner output and to show
+      afterhours changes.
+    * Native support for psyco
+    * Support for IRC server passwords
+    * Restore 2.5 compatibility
+    * Update SILC to use recent versions of toolkit
+    * Give useful error meessages for SILC configuration failure
+    * Explain to users with broken configs what's actually wrong
+    * Support for SILC output throttling
+    * Some migration to prepare for 3.0
+    * Use unicode everywhere
+    * Major code cleanup
+    * Clean up junk inside include directory
+    * Complete rewrite of useragent module
+    * Modules that require an initialized bot (to access configs, etc)
+      can now be run from the command-line properly
+    * Email gateway uses friendlier filenames for media uploads
+    * Email gateway script updated to handle different encodings
+      properly
+    * Updated to use Universal Feed Parser
+
 1.4.2: Sat Oct 18 23:17:40 PDT 2008
     * fix bug in irc protocol with socket library method names
     * rewrite babel module to use google translator (more languages)
