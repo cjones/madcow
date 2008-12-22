@@ -1,3 +1,6 @@
+1.5.1: Sun Dec 21 19:34:42 PST 2008
+    * Bugfix release -- make pymegahal's build script executable
+
 1.5.0: Sun Dec 21 17:48:33 PST 2008
     * New module -- steam, allows tracking a community so that you can see
       what game each member is playing
