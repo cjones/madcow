@@ -69,7 +69,7 @@ class Main(Module):
                     try:
                         game = self.game_re.search(page).group(1)
                     except AttributeError:
-                        continue
+                        game = 'Non-Steam Game'
                     ingame.append('%s: %s' % (data['name'], game))
                 elif data['status'] == 'Online':
                     online.append('%s: Online' % data['name'])
