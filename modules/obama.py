@@ -41,6 +41,8 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         try:
             e = self.oday - time.time()
+            if e <= 0:
+                return u'WE HAVE REACHED O-DAY!'
             ms = int((e - int(e)) * 1000)
             return u'%s: President Obama in: %s %d milliseconds' % (
                     nick, self.human_readable(e), ms)
