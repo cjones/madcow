@@ -905,6 +905,13 @@ class Api(object):
     self._input_encoding = input_encoding
     self.SetCredentials(username, password)
 
+  def GetRateLimitStatus(self):
+    '''Returns status of rate limiting'''
+    url = u'http://twitter.com/account/rate_limit_status.json'
+    json = self._FetchUrl(url, parameters={})
+    data = simplejson.loads(json)
+    return data
+
   def GetPublicTimeline(self, since_id=None):
     '''Fetch the sequnce of public twitter.Status message for all users.
 

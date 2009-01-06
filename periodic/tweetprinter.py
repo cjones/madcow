@@ -52,6 +52,17 @@ class Main(object):
 
     def response(self, *args):
         """This is called by madcow, should return a string or None"""
+        # first check our rate limit status..
+        try:
+            status = self.api.GetRateLimitStatus()
+            log.debug('rate limit status: %s' % status)
+            # this is kind of a magic number
+            if status['remaining_hits'] < 10:
+                return
+        except Exception, error:
+            log.warn(error)
+            return
+
         try:
             log.debug(u'getting tweets...')
             tweets = self.api.GetFriendsTimeline(since=self.__get_update_unicode())
