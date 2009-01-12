@@ -18,16 +18,21 @@
 """AIM Protocol"""
 
 from include.oscar import BOSConnection, CAP_CHAT, OscarAuthenticator
+from include.colorlib import ColorLib
+from include.utils import stripHTML
 from madcow import Madcow, Request
-import re
+from time import sleep
 import logging as log
 import time
-from include.utils import stripHTML
-from time import sleep
+import re
 
 class AIMProtocol(Madcow):
 
     newline = re.compile(r'[\r\n]+')
+
+    def __init__(self, config, prefix):
+        self.colorlib = ColorLib(u'mirc')
+        Madcow.__init__(self, config, prefix)
 
     def run(self):
         log.info(u'[AIM] Logging into aol.com')
@@ -47,15 +52,19 @@ class AIMProtocol(Madcow):
         self.handle_response(response, req)
 
     def protocol_output(self, message, req=None):
+        print 'RESPONSE: %s' % repr(message)
         message = self.newline.sub(u'<br>', message)
+        message = message.encode(self.config.main.charset, 'replace')
         req.aim.sendMessage(req.nick, message)
 
 
 class ProtocolHandler(AIMProtocol):
+
     pass
 
 
 class OSCARConnection(BOSConnection):
+
     capabilities = [CAP_CHAT]
 
     def initDone(self):
@@ -70,7 +79,10 @@ class OSCARConnection(BOSConnection):
         log.info(u'[AIM] Client ready')
 
     def receiveMessage(self, user, multiparts, flags):
-        req = Request(message=stripHTML(multiparts[0][0]))
+        message = multiparts[0][0]
+        message = message.decode(self.bot.config.main.charset, 'replace')
+        message = stripHTML(message)
+        req = Request(message=message)
         req.nick = user.name
         req.channel = u'AIM'
         req.private = True
@@ -82,4 +94,6 @@ class OSCARConnection(BOSConnection):
 
 
 class OSCARAuth(OscarAuthenticator):
+
     BOSClass = OSCARConnection
+
