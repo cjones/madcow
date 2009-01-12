@@ -30,7 +30,7 @@ class IRCProtocol(Madcow):
     """Implements IRC protocol for madcow"""
 
     events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg',
-              u'namreply']
+              u'namreply', u'pong']
 
     def __init__(self, config, prefix):
         self.colorlib = ColorLib(u'mirc')
@@ -44,11 +44,8 @@ class IRCProtocol(Madcow):
         self.server = self.irc.server()
         for event in self.events:
             log.info(u'[IRC] * Registering event: %s' % event)
-            self.server.add_global_handler(
-                event,
-                getattr(self, u'on_' + event),
-                0,
-            )
+            self.server.add_global_handler(event,
+                                           getattr(self, u'on_' + event), 0)
         if self.config.irc.channels is not None:
             self.channels = self._delim.split(self.config.irc.channels)
         else:
@@ -60,12 +57,21 @@ class IRCProtocol(Madcow):
         self.delay = self.config.irc.delay / float(1000)
         self.last_response = 0.0
 
+        # keepalive
+        self.keepalive = self.config.irc.keepalive
+        if self.keepalive:
+            self.last_keepalive = self.last_pong = unix_time()
+            self.keepalive_freq = self.config.irc.keepalive_freq
+            self.keepalive_timeout = self.config.irc.keepalive_timeout
+
     def connect(self):
         log.info(u'[IRC] * Connecting to %s:%s' % (
             self.config.irc.host, self.config.irc.port))
         self.server.connect(self.config.irc.host, self.config.irc.port,
                             self.config.irc.nick, ssl=self.config.irc.ssl,
                             password=self.config.irc.password)
+        if self.keepalive:
+            self.last_keepalive = self.last_pong = unix_time()
 
     def stop(self):
         Madcow.stop(self)
@@ -80,12 +86,43 @@ class IRCProtocol(Madcow):
         while self.running:
             try:
                 self.check_response_queue()
-                self.irc.process_once(0.2)
+                self.irc.process_once(0.5)
+
+                if self.keepalive:
+                    now = unix_time()
+
+                    # a new keepalive should be sent
+                    if now - self.last_keepalive > self.keepalive_freq:
+                        self.server.ping(now)
+                        self.last_keepalive = now
+                        log.debug('PING %s' % now)
+
+                    # server seems unresponsive
+                    if now - self.last_pong > self.keepalive_timeout:
+                        log.warn('server appears to have gone away')
+                        self.server.disconnect('server unresponsive')
+
             except KeyboardInterrupt:
                 self.running = False
             except Exception, error:
                 log.error(u'Error in IRC loop')
                 log.exception(error)
+
+    def on_pong(self, server, event):
+        # this should never happen, but don't take any chances
+        if not self.keepalive:
+            return
+
+        pong = event.arguments()[0]
+        try:
+            pong = float(pong)
+        except Exception, error:
+            log.error('unexpected PONG reply: %s' % pong)
+            log.exception(error)
+            return
+        now = unix_time()
+        log.debug('PONG: latency = %s' % (now - pong))
+        self.last_pong = now
 
     def botname(self):
         return self.server.get_nickname()

@@ -174,6 +174,17 @@ wrapSize=400
 ; line sent to the server. value is in milliseconds (1000 = 1 second)
 ;
 delay=0
+;
+; madcow will send keepalive pings to verify the server is responsive.
+; by default it will send one every 30 seconds.  if 2 minutes go by without
+; a response, the server is assumed dead.  note that you must have
+; "reconnect" set to "yes" above if you expect it to reconnect on this
+; occassion.  beware of setting these too aggressively, and never set
+; the timeout lower than the frequency.
+;
+keepalive=yes
+keepalive_freq=30
+keepalive_timeout=120
 
 ; settings for AIM plugin. you need to register a screenname 
 ; with AOL beforehand and plug it in here.  see aim.com
