@@ -50,7 +50,7 @@ from include.authlib import AuthLib
 from include.utils import slurp, Request
 from include import useragent as ua, gateway
 
-__version__ = u'1.5.1'
+__version__ = u'1.5.2'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
 __all__ = [u'Madcow']
 

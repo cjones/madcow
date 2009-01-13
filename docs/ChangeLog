@@ -1,3 +1,14 @@
+1.5.2: Mon Jan 12 16:10:07 PST 2009
+    * update useragent to appear more like a browser
+    * twitter gateway dynamically checks rate limit status to allow for
+      more frequent checks. it will now back off if it gets close to its
+      throttle limit
+    * fix broken AIM protocol
+    * add keep-alive feature to IRC for flakier networks
+    * fix broken modules hugs and terror
+    * steam module now correctly reports people playing non-steam games
+    * fix obama status checker so it won't explode on inaug day
+
 1.5.1: Sun Dec 21 19:34:42 PST 2008
     * Bugfix release -- make pymegahal's build script executable
 
