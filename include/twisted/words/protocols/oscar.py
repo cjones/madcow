@@ -814,10 +814,10 @@ class BOSConnection(SNACBased):
             charSet = 0
             if 'unicode' in part[1:]:
                 charSet = 2
-                part[0] = part[0].encode('utf-8')
+                part[0] = part[0].encode('utf-16-be', 'replace')
             elif 'iso-8859-1' in part[1:]:
                 charSet = 3
-                part[0] = part[0].encode('iso-8859-1')
+                part[0] = part[0].encode('iso-8859-1', 'replace')
             elif 'none' in part[1:]:
                 charSet = 0xffff
             if 'macintosh' in part[1:]:
@@ -1097,10 +1097,17 @@ class ChatService(OSCARService):
         user,rest=self.bos.parseUser(snac[3][14:],1)
         tlvs = readTLVs(rest[8:])
         message=tlvs[1]
+        if 'unicode' in tlvs[2]:
+            message = message.decode('utf-16-be', 'replace')
+        else:
+            message = message.decode('us-ascii', 'replace')
         self.bos.chatReceiveMessage(self,user,message)
 
     def sendMessage(self,message):
-        tlvs=TLV(0x02,"us-ascii")+TLV(0x03,"en")+TLV(0x01,message)
+        # XXX bleh.. just make it utf16 always or something.. jesus christ
+        message = message.encode('utf-16-be', 'replace')
+        tlvs=TLV(0x02,"unicode-2-0")+TLV(0x03,"en")+TLV(0x01,message)
+        #tlvs=TLV(0x02,"us-ascii")+TLV(0x03,"en")+TLV(0x01,message)
         self.sendSNAC(0x0e,0x05,
                       "\x46\x30\x38\x30\x44\x00\x63\x00\x00\x03\x00\x01\x00\x00\x00\x06\x00\x00\x00\x05"+
                       struct.pack("!H",len(tlvs))+
@@ -1178,7 +1185,10 @@ class OscarAuthenticator(OscarConnection):
             self.disconnect()
         elif tlvs.has_key(8):
             errorcode=tlvs[8]
-            errorurl=tlvs[4]
+            try:
+                errorurl=tlvs[4]
+            except KeyError:
+                raise Exception('You are throttled for repeated logins')
             if errorcode=='\000\030':
                 error="You are attempting to sign on again too soon.  Please try again later."
             elif errorcode=='\000\005':

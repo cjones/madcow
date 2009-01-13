@@ -52,9 +52,7 @@ class AIMProtocol(Madcow):
         return self.config.aim.username
 
     def protocol_output(self, message, req=None):
-        message = self.newline.sub(u'<br>', message)
-        message = message.encode(self.config.main.charset, 'replace')
-        args = [message]
+        args = [self.newline.sub(u'<br>', message)]
         if req.chat:
             func = req.chat.sendMessage
         else:
@@ -94,7 +92,14 @@ class OSCARConnection(oscar.BOSConnection):
         self.joinChat(exchange, fullName, instance)
 
     def receiveMessage(self, user, multiparts, flags):
-        self.on_message(user, multiparts[0][0], True, True)
+        output = []
+        for part in multiparts:
+            message = part[0]
+            if 'unicode' in part[1:]:
+                message = message.decode('utf-16-be')  # :(
+            output.append(message)
+        message = u' '.join(output)
+        self.on_message(user, message, True, True)
 
     def chatReceiveMessage(self, chat, user, message):
         self.on_message(user, message, False, False, chat)
@@ -102,7 +107,6 @@ class OSCARConnection(oscar.BOSConnection):
     def on_message(self, user, message, private, addressed, chat=None):
         if user.name == self.bot.botname():
             return
-        message = message.decode(self.bot.config.main.charset, 'replace')
         message = stripHTML(message)
         req = Request(message=message)
         req.nick = user.name
