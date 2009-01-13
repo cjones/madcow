@@ -89,7 +89,9 @@ class OSCARConnection(oscar.BOSConnection):
     def receiveChatInvite(self, user, message, exchange, fullName, instance,
                           shortName, inviteTime):
         log.info(u'[AIM] Invited to chat %s by %s' % (shortName, user.name))
-        self.joinChat(exchange, fullName, instance)
+        if self.bot.config.aim.autojoin:
+            log.info(u'[AIM] Accepting chat invite')
+            self.joinChat(exchange, fullName, instance)
 
     def receiveMessage(self, user, multiparts, flags):
         output = []

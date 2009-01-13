@@ -191,7 +191,9 @@ keepalive_timeout=120
 [aim]
 username=
 password=
-profile=
+profile=madcow infobot
+; whether to auto-join chatrooms when invited
+autojoin=yes
 
 ; settings for SILC plugin. channels are a comma-delimited list
 [silcplugin]
