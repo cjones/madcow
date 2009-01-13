@@ -18,7 +18,7 @@ else:
     import FCNTL
 
 # twisted imports
-from twisted.internet.main import CONNECTION_LOST, CONNECTION_DONE
+from include.twisted.internet.main import CONNECTION_LOST, CONNECTION_DONE
 
 
 def setNonBlocking(fd):

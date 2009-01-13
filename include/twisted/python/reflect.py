@@ -30,7 +30,7 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from twisted.python.util import unsignedID
+from include.twisted.python.util import unsignedID
 
 
 
@@ -814,8 +814,8 @@ def fullyQualifiedName(obj):
 
 
 # At the end for dependency reason
-from twisted.python.deprecate import deprecated
-from twisted.python.versions import Version
+from include.twisted.python.deprecate import deprecated
+from include.twisted.python.versions import Version
 macro = deprecated(Version("Twisted", 8, 2, 0))(macro)
 
 

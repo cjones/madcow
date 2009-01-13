@@ -12,7 +12,7 @@ functionality so that I don't have to special-case it in all programs.
 
 import warnings
 
-from twisted.python import hook
+from include.twisted.python import hook
 
 class DummyLock(object):
     """

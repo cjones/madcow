@@ -16,9 +16,9 @@ import random
 import types
 import re
 
-from twisted.internet import reactor, defer, protocol
-from twisted.python import log
-from twisted.python.hashlib import md5
+from include.twisted.internet import reactor, defer, protocol
+from include.twisted.python import log
+from include.twisted.python.hashlib import md5
 
 def logPacketData(data):
     lines = len(data)/16

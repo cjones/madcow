@@ -17,7 +17,7 @@ $Id: adapter.py 75894 2007-05-22 18:39:49Z jim $
 """
 
 import weakref
-from zope.interface import providedBy, Interface, ro
+from include.zope.interface import providedBy, Interface, ro
 
 _marker = object
 class BaseAdapterRegistry(object):

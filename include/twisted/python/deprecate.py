@@ -31,9 +31,9 @@ __all__ = [
 
 from warnings import warn
 
-from twisted.python.versions import getVersionString
-from twisted.python.reflect import fullyQualifiedName
-from twisted.python.util import mergeFunctionMetadata
+from include.twisted.python.versions import getVersionString
+from include.twisted.python.reflect import fullyQualifiedName
+from include.twisted.python.util import mergeFunctionMetadata
 
 
 def getWarningMethod():

@@ -14,8 +14,8 @@ import traceback
 import warnings
 
 # Twisted imports
-from twisted.python import log, failure, lockfile
-from twisted.python.util import unsignedID, mergeFunctionMetadata
+from include.twisted.python import log, failure, lockfile
+from include.twisted.python.util import unsignedID, mergeFunctionMetadata
 
 class AlreadyCalledError(Exception):
     pass
@@ -371,7 +371,7 @@ class Deferred:
             return
         assert not self.timeoutCall, "Don't call setTimeout twice on the same Deferred."
 
-        from twisted.internet import reactor
+        from include.twisted.internet import reactor
         self.timeoutCall = reactor.callLater(
             seconds,
             lambda: self.called or timeoutFunc(self, *args, **kw))
@@ -1049,7 +1049,7 @@ class DeferredFilesystemLock(lockfile.FilesystemLock):
         lockfile.FilesystemLock.__init__(self, name)
 
         if scheduler is None:
-            from twisted.internet import reactor
+            from include.twisted.internet import reactor
             scheduler = reactor
 
         self._scheduler = scheduler

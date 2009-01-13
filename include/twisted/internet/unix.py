@@ -15,15 +15,15 @@ Maintainer: Itamar Shtull-Trauring
 import os, stat, socket
 from errno import EINTR, EMSGSIZE, EAGAIN, EWOULDBLOCK, ECONNREFUSED
 
-from zope.interface import implements, implementsOnly, implementedBy
+from include.zope.interface import implements, implementsOnly, implementedBy
 
 if not hasattr(socket, 'AF_UNIX'):
     raise ImportError("UNIX sockets not supported on this platform")
 
 # Twisted imports
-from twisted.internet import base, tcp, udp, error, interfaces, protocol, address
-from twisted.internet.error import CannotListenError
-from twisted.python import lockfile, log, reflect, failure
+from include.twisted.internet import base, tcp, udp, error, interfaces, protocol, address
+from include.twisted.internet.error import CannotListenError
+from include.twisted.python import lockfile, log, reflect, failure
 
 
 class Server(tcp.Server):

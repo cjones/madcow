@@ -19,7 +19,7 @@ except ImportError:
     import StringIO
 
 # Twisted Imports
-from twisted.python import log
+from include.twisted.python import log
 
 try:
     from new import instancemethod
@@ -153,7 +153,7 @@ def requireUpgrade(obj):
         obj.versionUpgrade()
         return obj
 
-from twisted.python import reflect
+from include.twisted.python import reflect
 
 def _aybabtu(c):
     l = []

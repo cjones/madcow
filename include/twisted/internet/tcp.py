@@ -22,14 +22,14 @@ try:
     import fcntl
 except ImportError:
     fcntl = None
-from zope.interface import implements, classImplements
+from include.zope.interface import implements, classImplements
 
 try:
     from OpenSSL import SSL
 except ImportError:
     SSL = None
 
-from twisted.python.runtime import platformType
+from include.twisted.python.runtime import platformType
 
 
 if platformType == 'win32':
@@ -52,7 +52,7 @@ if platformType == 'win32':
     EAGAIN = EWOULDBLOCK
     from errno import WSAECONNRESET as ECONNABORTED
 
-    from twisted.python.win32 import formatError as strerror
+    from include.twisted.python.win32 import formatError as strerror
 else:
     from errno import EPERM
     from errno import EINVAL
@@ -75,11 +75,11 @@ else:
 from errno import errorcode
 
 # Twisted Imports
-from twisted.internet import defer, base, address
-from twisted.python import log, failure, reflect
-from twisted.python.util import unsignedID
-from twisted.internet.error import CannotListenError
-from twisted.internet import abstract, main, interfaces, error
+from include.twisted.internet import defer, base, address
+from include.twisted.python import log, failure, reflect
+from include.twisted.python.util import unsignedID
+from include.twisted.internet.error import CannotListenError
+from include.twisted.internet import abstract, main, interfaces, error
 
 
 

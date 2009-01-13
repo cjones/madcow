@@ -15,36 +15,36 @@ import socket
 import errno
 import os
 
-from zope.interface import implements, classImplements
+from include.zope.interface import implements, classImplements
 
-from twisted.internet.interfaces import IReactorUNIX, IReactorUNIXDatagram
-from twisted.internet.interfaces import IReactorTCP, IReactorUDP, IReactorSSL, IReactorArbitrary
-from twisted.internet.interfaces import IReactorProcess, IReactorMulticast
-from twisted.internet.interfaces import IHalfCloseableDescriptor
-from twisted.internet import error
-from twisted.internet import tcp, udp
+from include.twisted.internet.interfaces import IReactorUNIX, IReactorUNIXDatagram
+from include.twisted.internet.interfaces import IReactorTCP, IReactorUDP, IReactorSSL, IReactorArbitrary
+from include.twisted.internet.interfaces import IReactorProcess, IReactorMulticast
+from include.twisted.internet.interfaces import IHalfCloseableDescriptor
+from include.twisted.internet import error
+from include.twisted.internet import tcp, udp
 
-from twisted.python import log, failure, util
-from twisted.persisted import styles
-from twisted.python.runtime import platformType, platform
+from include.twisted.python import log, failure, util
+from include.twisted.persisted import styles
+from include.twisted.python.runtime import platformType, platform
 
-from twisted.internet.base import ReactorBase, _SignalReactorMixin
+from include.twisted.internet.base import ReactorBase, _SignalReactorMixin
 
 try:
-    from twisted.internet import ssl
+    from include.twisted.internet import ssl
     sslEnabled = True
 except ImportError:
     sslEnabled = False
 
 try:
-    from twisted.internet import unix
+    from include.twisted.internet import unix
     unixEnabled = True
 except ImportError:
     unixEnabled = False
 
 processEnabled = False
 if platformType == 'posix':
-    from twisted.internet import fdesc
+    from include.twisted.internet import fdesc
     import process
     processEnabled = True
 
@@ -231,7 +231,7 @@ class PosixReactorBase(_SignalReactorMixin, ReactorBase):
                 raise ValueError("Customizing childFDs is not supported on Windows.")
 
             if win32process:
-                from twisted.internet._dumbwin32proc import Process
+                from include.twisted.internet._dumbwin32proc import Process
                 return Process(self, processProtocol, executable, args, env, path)
             else:
                 raise NotImplementedError, "spawnProcess not available since pywin32 is not installed."

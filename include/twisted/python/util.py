@@ -235,7 +235,7 @@ def padTo(n, seq, default=None):
     return blank
 
 def getPluginDirs():
-    import twisted
+    from include import twisted
     systemPlugins = os.path.join(os.path.dirname(os.path.dirname(
                             os.path.abspath(twisted.__file__))), 'plugins')
     userPlugins = os.path.expanduser("~/TwistedPlugins")
@@ -368,7 +368,7 @@ def makeStatBar(width, maxPosition, doneChar = '=', undoneChar = '-', currentCha
 
 def spewer(frame, s, ignored):
     """A trace function for sys.settrace that prints every function or method call."""
-    from twisted.python import reflect
+    from include.twisted.python import reflect
     if frame.f_locals.has_key('self'):
         se = frame.f_locals['self']
         if hasattr(se, '__class__'):
@@ -716,7 +716,7 @@ class SubclassableCStringIO(object):
 
 def moduleMovedForSplit(origModuleName, newModuleName, moduleDesc,
                         projectName, projectURL, globDict):
-    from twisted.python import reflect
+    from include.twisted.python import reflect
     modoc = """
 %(moduleDesc)s
 

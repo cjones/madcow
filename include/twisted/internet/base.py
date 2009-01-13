@@ -10,7 +10,7 @@ Maintainer: Itamar Shtull-Trauring
 """
 
 import socket # needed only for sync-dns
-from zope.interface import implements, classImplements
+from include.zope.interface import implements, classImplements
 
 import sys
 import warnings
@@ -23,18 +23,18 @@ except ImportError:
     fcntl = None
 import traceback
 
-from twisted.internet.interfaces import IReactorCore, IReactorTime, IReactorThreads
-from twisted.internet.interfaces import IResolverSimple, IReactorPluggableResolver
-from twisted.internet.interfaces import IConnector, IDelayedCall
-from twisted.internet import main, error, abstract, defer, threads
-from twisted.python import log, failure, reflect
-from twisted.python.runtime import seconds as runtimeSeconds, platform, platformType
-from twisted.internet.defer import Deferred, DeferredList
-from twisted.persisted import styles
+from include.twisted.internet.interfaces import IReactorCore, IReactorTime, IReactorThreads
+from include.twisted.internet.interfaces import IResolverSimple, IReactorPluggableResolver
+from include.twisted.internet.interfaces import IConnector, IDelayedCall
+from include.twisted.internet import main, error, abstract, defer, threads
+from include.twisted.python import log, failure, reflect
+from include.twisted.python.runtime import seconds as runtimeSeconds, platform, platformType
+from include.twisted.internet.defer import Deferred, DeferredList
+from include.twisted.persisted import styles
 
 # This import is for side-effects!  Even if you don't see any code using it
 # in this module, don't delete it.
-from twisted.python import threadable
+from include.twisted.python import threadable
 
 
 class DelayedCall(styles.Ephemeral):
@@ -880,7 +880,7 @@ class ReactorBase(object):
             """
             Create the threadpool accessible with callFromThread.
             """
-            from twisted.python import threadpool
+            from include.twisted.python import threadpool
             self.threadpool = threadpool.ThreadPool(0, 10, 'twisted.internet.reactor')
             self.callWhenRunning(self.threadpool.start)
             self.threadpoolShutdownID = self.addSystemEventTrigger(
@@ -1083,7 +1083,7 @@ class _SignalReactorMixin:
         eventloop round prevents us from violating the state constraints
         of arbitrary classes.
         """
-        from twisted.internet.process import reapAllProcesses
+        from include.twisted.internet.process import reapAllProcesses
         if _threadSupport:
             self.callFromThread(reapAllProcesses)
         else:

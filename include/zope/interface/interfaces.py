@@ -18,8 +18,8 @@ $Id: interfaces.py 67803 2006-05-01 15:20:47Z jim $
 __docformat__ = 'restructuredtext'
 
 
-from zope.interface import Interface
-from zope.interface.interface import Attribute
+from include.zope.interface import Interface
+from include.zope.interface.interface import Attribute
 
 class IElement(Interface):
     """Objects that have basic documentation and tagged values.
@@ -173,7 +173,7 @@ class IInterface(ISpecification, IElement):
     Interfaces are created with the Python class statement using
     either Interface.Interface or another interface, as in::
 
-      from zope.interface import Interface
+      from include.zope.interface import Interface
 
       class IMyInterface(Interface):
         '''Interface documentation'''
@@ -205,7 +205,7 @@ class IInterface(ISpecification, IElement):
 
          For example::
 
-           from zope.interface import classImplements
+           from include.zope.interface import classImplements
 
            classImplements(some_class, some_interface)
 

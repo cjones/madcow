@@ -17,18 +17,19 @@
 
 """AIM Protocol"""
 
-from include.oscar import BOSConnection, CAP_CHAT, OscarAuthenticator
 from include.colorlib import ColorLib
 from include.utils import stripHTML
 from madcow import Madcow, Request
 from time import sleep
 import logging as log
-import time
 import re
+from include.twisted.words.protocols import oscar
+from include.twisted.internet import protocol, reactor
 
 class AIMProtocol(Madcow):
 
     newline = re.compile(r'[\r\n]+')
+    server = ('login.oscar.aol.com', 5190)
 
     def __init__(self, config, prefix):
         self.colorlib = ColorLib(u'mirc')
@@ -36,26 +37,35 @@ class AIMProtocol(Madcow):
 
     def run(self):
         log.info(u'[AIM] Logging into aol.com')
-        username = self.config.aim.username
-        password = self.config.aim.password
-        auth = OSCARAuth(username, password)
-        auth.bot = self
-        auth.start()
-        while auth.connected:
-            sleep(1)
-        log.info(u'[AIM] Connected to service')
-        while auth.proto.connected:
-            sleep(1)
+        p = protocol.ClientCreator(reactor, OSCARAuth,
+                                   self.config.aim.username,
+                                   self.config.aim.password, icq=0)
+        p.connectTCP(*self.server)
+        log.info('[AIM] Connected')
+        p.protocolClass.BOSClass.bot = self
+
+        reactor.callInThread(self.poll)
+        reactor.run()
         log.info(u'[AIM] Connection closed')
 
-    def output(self, response, req=None):
-        self.handle_response(response, req)
+    def botname(self):
+        return self.config.aim.username
 
     def protocol_output(self, message, req=None):
-        print 'RESPONSE: %s' % repr(message)
         message = self.newline.sub(u'<br>', message)
         message = message.encode(self.config.main.charset, 'replace')
-        req.aim.sendMessage(req.nick, message)
+        args = [message]
+        if req.chat:
+            func = req.chat.sendMessage
+        else:
+            func = req.aim.sendMessage
+            args.insert(0, req.nick)
+        reactor.callFromThread(func, *args)
+
+    def poll(self):
+        while self.running:
+            self.check_response_queue()
+            sleep(0.5)
 
 
 class ProtocolHandler(AIMProtocol):
@@ -63,9 +73,9 @@ class ProtocolHandler(AIMProtocol):
     pass
 
 
-class OSCARConnection(BOSConnection):
+class OSCARConnection(oscar.BOSConnection):
 
-    capabilities = [CAP_CHAT]
+    capabilities = [oscar.CAP_CHAT]
 
     def initDone(self):
         log.info(u'[AIM] Initialization finished')
@@ -78,22 +88,35 @@ class OSCARConnection(BOSConnection):
         self.clientReady()
         log.info(u'[AIM] Client ready')
 
+    def receiveChatInvite(self, user, message, exchange, fullName, instance,
+                          shortName, inviteTime):
+        log.info(u'[AIM] Invited to chat %s by %s' % (shortName, user.name))
+        self.joinChat(exchange, fullName, instance)
+
     def receiveMessage(self, user, multiparts, flags):
-        message = multiparts[0][0]
+        self.on_message(user, multiparts[0][0], True, True)
+
+    def chatReceiveMessage(self, chat, user, message):
+        self.on_message(user, message, False, False, chat)
+
+    def on_message(self, user, message, private, addressed, chat=None):
+        if user.name == self.bot.botname():
+            return
         message = message.decode(self.bot.config.main.charset, 'replace')
         message = stripHTML(message)
         req = Request(message=message)
         req.nick = user.name
         req.channel = u'AIM'
-        req.private = True
-        req.addressed = True
         req.aim = self
+        req.private = private
+        req.addressed = addressed
+        req.chat = chat
         log.info(u'[AIM] <%s> %s' % (req.nick, req.message))
         self.bot.check_addressing(req)
         self.bot.process_message(req)
 
 
-class OSCARAuth(OscarAuthenticator):
+class OSCARAuth(oscar.OscarAuthenticator):
 
     BOSClass = OSCARConnection
 

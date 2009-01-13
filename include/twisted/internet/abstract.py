@@ -9,12 +9,12 @@ Support for generic select()able objects.
 Maintainer: Itamar Shtull-Trauring
 """
 
-from zope.interface import implements
+from include.zope.interface import implements
 
 # Twisted Imports
-from twisted.python import log, reflect, failure
-from twisted.persisted import styles
-from twisted.internet import interfaces, main
+from include.twisted.python import log, reflect, failure
+from include.twisted.persisted import styles
+from include.twisted.internet import interfaces, main
 
 
 class FileDescriptor(log.Logger, styles.Ephemeral, object):
@@ -42,7 +42,7 @@ class FileDescriptor(log.Logger, styles.Ephemeral, object):
 
     def __init__(self, reactor=None):
         if not reactor:
-            from twisted.internet import reactor
+            from include.twisted.internet import reactor
         self.reactor = reactor
         self._tempDataBuffer = [] # will be added to dataBuffer in doWrite
         self._tempDataLen = 0

@@ -15,10 +15,10 @@ if not hasattr(sys, "version_info") or sys.version_info < (2,3):
 del sys
 
 # Ensure compat gets imported
-from twisted.python import compat
+from include.twisted.python import compat
 del compat
 
 # setup version
-from twisted._version import version
+from include.twisted._version import version
 __version__ = version.short()
 
