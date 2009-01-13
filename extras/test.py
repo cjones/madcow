@@ -116,11 +116,11 @@ tests = {
         u'bash': [
                 {
                     u'request': u'bash cj_',
-                    u'result': re.compile(r'cj_'),
+                    u'result': re.compile(r'cj'),
                     },
                 {
                     u'request': u'qdb cj_',
-                    u'result': re.compile(r'cj_'),
+                    u'result': re.compile(r'cj'),
                     },
                 {
                     u'request': u'limerick',

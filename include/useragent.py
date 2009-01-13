@@ -44,7 +44,8 @@ class UserAgent(object):
         if agent:
             self.opener.addheaders = [(u'User-Agent', agent)]
 
-    def open(self, url, opts=None, data=None, referer=None, size=-1):
+    def open(self, url, opts=None, data=None, referer=None, size=-1,
+             add_headers=None):
         """Open URL and return unicode content"""
         log.debug(u'fetching url: %s' % url)
         url = list(urlparse.urlparse(url))
@@ -60,6 +61,9 @@ class UserAgent(object):
         request = urllib2.Request(urlparse.urlunparse(url), data)
         if referer:
             request.add_header(u'Referer', referer)
+        if add_headers:
+            for item in add_headers.items():
+                request.add_header(*item)
         response = self.opener.open(request)
         data = response.read(size)
         if isinstance(response, google.Response):
@@ -103,8 +107,8 @@ def setup(handlers=None, cookies=True, agent=AGENT, timeout=None):
     UA = UserAgent(handlers, cookies, agent)
 
 
-def geturl(url, opts=None, data=None, referer=None, size=-1):
-    return getua().open(url, opts, data, referer, size)
+def geturl(url, opts=None, data=None, referer=None, size=-1, add_headers=None):
+    return getua().open(url, opts, data, referer, size, add_headers)
 
 geturl.__doc__ = UserAgent.open.__doc__
 

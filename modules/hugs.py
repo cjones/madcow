@@ -32,21 +32,14 @@ class Main(Module):
     pattern = re.compile(u'^\s*hugs\s*$', re.I)
     require_addressing = True
     help = u'hugs - random confession'
-    baseurl = u'http://beta.grouphug.us/'
+    baseurl = u'http://grouphug.us/'
     random = urljoin(baseurl, u'/random')
     last = re.compile(r'<a href="/frontpage\?page=(\d+)" class="pager-last ac'
                       r'tive"')
 
     def response(self, nick, args, kwargs):
         try:
-            # XXX site is all broken at the moment, so do this instead..
-            doc = geturl(self.baseurl)
-            last = int(self.last.search(doc).group(1))
-            page = random.randint(1, last)
-            url = urljoin(self.baseurl, '/frontpage?page=%d' % page)
-            doc = geturl(url)
-            #doc = geturl(self.random)
-
+            doc = geturl(self.random, add_headers={'Accept': '*/*'})
             soup = BeautifulSoup(doc)
             main = soup.find(u'div', attrs={u'id': u'main'})
             confs = main.findAll(u'div', attrs={u'class': u'content'})

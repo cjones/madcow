@@ -23,7 +23,6 @@ import re
 from include import feedparser
 from include.utils import Module, stripHTML
 from include.useragent import geturl
-from include.BeautifulSoup import BeautifulSoup
 import logging as log
 from include.colorlib import ColorLib
 
@@ -91,8 +90,9 @@ class IranWar(object):
 class IraqWar(object):
 
     _war_url = u'http://areweatwarwithiraq.com/rss.xml'
-    _bodycount_url = u'http://www.iraqbodycount.org/'
+    _bodycount_url = u'http://www.iraqbodycount.org/database/'
     _re_whitespace = re.compile(r'\s+')
+    _bodycount_re = re.compile(r"<p class='ibc-range'>(.*?)</p>", re.DOTALL)
 
     def war(self):
         try:
@@ -104,12 +104,11 @@ class IraqWar(object):
             return u'UNKNOWN'
 
     def bodycount(self):
+
         try:
             doc = geturl(self._bodycount_url)
-            soup = BeautifulSoup(doc)
-            data = soup.find(u'td', attrs={u'class': u'main-num'})
-            data = data.find(u'a')
-            data = unicode(data.contents[0])
+            data = self._bodycount_re.search(doc).group(1)
+            data = data.decode('ascii', 'replace')
             data = stripHTML(data)
             data = self._re_whitespace.sub(u' ', data)
             data = data.strip()
@@ -127,7 +126,7 @@ class Main(Module):
     help = u'terror - NEVAR FORGET'
 
     def __init__(self, madcow=None):
-        if madcow is not None:
+        if madcow is not None and hasattr(madcow, 'colorlib'):
             colorlib = madcow.colorlib
         else:
             colorlib = ColorLib(u'ansi')
