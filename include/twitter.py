@@ -18,7 +18,7 @@ import time
 import urllib
 import urllib2
 import urlparse
-import twitter
+import logging as log
 
 class TwitterError(Exception):
   '''Base class for Twitter errors'''
@@ -948,7 +948,8 @@ class Api(object):
     Returns:
       A sequence of twitter.Status instances, one for each message
     '''
-    url = u'http://twitter.com/statuses/friends_timeline/'
+    #url = u'http://twitter.com/statuses/friends_timeline/'  # XXX wtf?
+    url = u'http://twitter.com/statuses/friends_timeline.json'
     parameters = {}
     if since:
       parameters[u'since'] = since
@@ -1327,7 +1328,7 @@ class Api(object):
 
   def _InitializeUserAgent(self):
     user_agent = u'Python-urllib/%s (python-twitter/%s)' % \
-                 (self._urllib.__version__, twitter.__version__)
+                 (self._urllib.__version__, __version__)
     self.SetUserAgent(user_agent)
 
   def _AddAuthorizationHeader(self, username, password):
@@ -1413,6 +1414,8 @@ class Api(object):
     """
     # Add key/value parameters to the query string of the url
     url = self._BuildUrl(url, extra_params=parameters)
+
+    log.debug('twitter API is fetching url: %s' % repr(url))
 
     # Get a url opener that can handle basic auth
     opener = self._GetOpener(url, username=self._username, password=self._password)
