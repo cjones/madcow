@@ -48,7 +48,8 @@ pidfile=madcow.pid
 ; character set to output in.  utf-8 is recommended as it allows you to
 ; use the babelfish translation feature in unicode (greek alphabet,
 ; traditional chinese, etc).  you can also set this to ascii or latin1,
-; but certain modules will output garbage or ?'s
+; but certain modules will output garbage or ?'s  this setting is ignored
+; by the AIM protocol, since unicode is always ucs-2 (utf-16)
 ;
 charset=utf-8
 ;
