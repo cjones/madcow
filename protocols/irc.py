@@ -19,7 +19,7 @@ import textwrap
 from include import irclib
 import re
 import sys
-from madcow import Madcow, Request
+from madcow import Madcow, Request, delim_re
 from include.colorlib import ColorLib
 import random
 import logging as log
@@ -47,7 +47,7 @@ class IRCProtocol(Madcow):
             self.server.add_global_handler(event,
                                            getattr(self, u'on_' + event), 0)
         if self.config.irc.channels is not None:
-            self.channels = self._delim.split(self.config.irc.channels)
+            self.channels = delim_re.split(self.config.irc.channels)
         else:
             self.channels = []
         self.names = {}

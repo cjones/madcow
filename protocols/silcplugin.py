@@ -41,7 +41,7 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
         keys = silc.create_key_pair('silc.pub', 'silc.priv', passphrase='')
         nick = self.config.silcplugin.nick
         silc.SilcClient.__init__(self, keys, nick, nick, nick)
-        self.channels = self._delim.split(self.config.silcplugin.channels)
+        self.channels = madcow.delim_re.split(self.config.silcplugin.channels)
 
         # throttling
         self.delay = self.config.silcplugin.delay / float(1000)

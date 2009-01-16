@@ -57,10 +57,12 @@ __all__ = [u'Madcow']
 MADCOW_URL = u'http://code.google.com/p/madcow/'
 CHARSET = u'utf-8'
 CONFIG = u'madcow.ini'
-SAMPLE_HASH = u'6870213d4881e98f5b18460fbec2f223'
+SAMPLE_HASH = u'29371c03bc558694eff2aac389b7d354'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt=u'%x %X',
            format=u'[%(asctime)s] %(levelname)s: %(message)s')
 
+
+delim_re = re.compile(r'\s*[,;]\s*')
 
 class FileNotFound(Exception):
 
@@ -76,7 +78,6 @@ class Madcow(object):
 
     """Core bot handler, subclassed by protocols"""
 
-    _delim = re.compile(r'\s*[,;]\s*')
     _botname = u'madcow'
     _cor1_re = None
     _cor2_re = None
@@ -97,7 +98,7 @@ class Madcow(object):
         # parse ignore list
         if self.config.main.ignorelist is not None:
             self.ignore_list = self.config.main.ignorelist
-            self.ignore_list = self._delim.split(self.ignore_list)
+            self.ignore_list = delim_re.split(self.ignore_list)
             self.ignore_list = [nick.lower() for nick in self.ignore_list]
             log.info(u'Ignoring nicks: %s' % u', '.join(self.ignore_list))
         else:
@@ -315,22 +316,31 @@ class Madcow(object):
                 return
         if self.config.main.module == u'cli' and req.message == u'reload':
             self.reload_modules()
-        for mod_name, obj in self.modules.by_priority():
+        for mod_name, mod in self.modules.by_priority():
+            obj = mod['obj']
             log.debug(u'trying: %s' % mod_name)
-
             if obj.require_addressing and not req.addressed:
                 continue
-
             try:
                 args = obj.pattern.search(req.message).groups()
-            except:
+            except AttributeError:
                 continue
 
             req.matched = True # module can set this to false to avoid term
 
+            # config forces this to be private
+            if mod[u'private']:
+                req.private = True
+                req.sendto = req.nick
+
             # see if we can filter some of this information..
             kwargs = {u'req': req}
+
+            # XXX convenience for module writers.. this probably is not the
+            # best idea since these values are mutable, but have no effect
+            # if changed from within the module, unlike the req object.
             kwargs.update(req.__dict__)
+
             request = (obj, req.nick, args, kwargs,)
 
             if (self.config.main.module in (u'cli', u'ipython') or
@@ -390,7 +400,6 @@ class PeriodicEvents(Service):
 
     """Class to manage modules which are periodically executed"""
 
-    _re_delim = re.compile(r'\s*[,;]\s*')
     _ignore_modules = [u'__init__', u'template']
     _process_frequency = 1
     last_run = {}
@@ -399,8 +408,8 @@ class PeriodicEvents(Service):
         """While bot is alive, process periodic event queue"""
         delay = 5
         now = unix_time()
-        for mod_name, obj in self.bot.periodics.dict().items():
-            self.last_run[mod_name] = now - obj.frequency + delay
+        for mod_name, mod in self.bot.periodics.modules.iteritems():
+            self.last_run[mod_name] = now - mod[u'obj'].frequency + delay
 
         while self.bot.running:
             self.process_queue()
@@ -409,7 +418,8 @@ class PeriodicEvents(Service):
     def process_queue(self):
         """Process queue"""
         now = unix_time()
-        for mod_name, obj in self.bot.periodics.dict().items():
+        for mod_name, mod in self.bot.periodics.modules.iteritems():
+            obj = mod[u'obj']
             if (now - self.last_run[mod_name]) < obj.frequency:
                 continue
             self.last_run[mod_name] = now
@@ -642,12 +652,14 @@ class Modules(object):
         for mod_name, enabled in self.madcow.config.modules.settings.items():
             if not enabled:
                 disabled.append(mod_name)
+        private = delim_re.split(self.madcow.config.modules.private)
         log.info(u'reading modules from %s' % self.mod_dir)
         try:
-            filenames = os.walk(self.mod_dir).next()[2]
+            filenames = os.listdir(self.mod_dir)
         except Exception, error:
-            log.warn(u"Couldn't load modules from %s: %s" % (
-                    self.mod_dir, error))
+            log.warn(u"Couldn't load modules from %s: %s" % (self.mod_dir,
+                                                             error))
+            log.exception(error)
             return
         for filename in filenames:
             if not self._pyext.search(filename):
@@ -667,16 +679,13 @@ class Modules(object):
                     continue
             else:
                 try:
-                    mod = __import__(
-                        u'%s.%s' % (self.subdir, mod_name),
-                        globals(),
-                        locals(),
-                        [u'Main'],
-                    )
+                    mod = __import__(u'%s.%s' % (self.subdir, mod_name),
+                                     globals(), locals(), [u'Main'])
                 except Exception, error:
                     log.warn(u"couldn't load module %s: %s" % (mod_name, error))
                     continue
-                self.modules[mod_name] = {u'mod': mod}
+                self.modules[mod_name] = {u'mod': mod,
+                                          u'private': mod_name in private}
             try:
                 obj = getattr(mod, u'Main')(self.madcow)
             except Exception, error:
@@ -699,30 +708,19 @@ class Modules(object):
 
         # if debug level set, show execution order/details of modules
         if log.root.level <= log.DEBUG:
-            try:
-                for mod_name, obj in self.by_priority():
-                    try:
-                        log.debug(u'%-13s: pri=%3s thread=%-5s stop=%s' %
-                                  (mod_name, obj.priority, obj.allow_threading,
-                                   obj.terminate))
-                    except:
-                        pass
-            except:
-                pass
+            for mod_name, mod in self.by_priority():
+                obj = mod[u'obj']
+                try:
+                    log.debug(u'%-13s: pri=%3s thread=%-5s stop=%s' %
+                              (mod_name, obj.priority, obj.allow_threading,
+                               obj.terminate))
+                except:
+                    pass
 
     def by_priority(self):
         """Return list of tuples for modules, sorted by priority"""
-        return sorted(self.dict().iteritems(), key=lambda x: x[1].priority)
-
-    def dict(self):
-        """Return dict of modules"""
-        modules = {}
-        for mod_name, mod_data in self.modules.items():
-            modules[mod_name] = mod_data[u'obj']
-        return modules
-
-    def __iter__(self):
-        return self.dict().iteritems()
+        return sorted(self.modules.iteritems(),
+                      key=lambda item: item[1][u'obj'].priority)
 
 
 class Config(object):

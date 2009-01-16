@@ -73,11 +73,17 @@ psyco=yes
 ;
 dbNamespace=madcow
 ;
+; comma-delimited list of modules (see below) that will only reply via
+; privmsg to the user querying the bot.  this can be used for very spammy
+; modules that people use to disrupt the channel.
+;
+private=
+;
 ; what modules are enabled (yes/no)
 ;
 ; these are the standard information modules, which you'll probably
 ; want enabled as they are quite useful.
-; ;
+;
 alias=yes               ; allow users to make command aliases
 area=yes                ; look up area codes
 babel=yes               ; language translations
@@ -283,6 +289,10 @@ db_port=
 [steam]
 enabled=no
 group=
+; set to "no" if you only want to show who's actually playing a game.
+; if set to "yes" it will show all online steam users, which could be
+; spammy if you are tracking a very large group
+online=yes
 
 ; set this up to post urls to delicious
 [delicious]
