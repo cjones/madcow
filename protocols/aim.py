@@ -25,14 +25,29 @@ import logging as log
 import re
 from include.twisted.words.protocols import oscar
 from include.twisted.internet import protocol, reactor
+import random
+
+# max message sizes before the aol services gets angry.
+# note: unicode messages are utf-16 so thus use two bytes per character
+#
+# direct message:
+#
+# *** SENDING 2545 BYTE MESSAGE ***
+# *** SENDING 2607 BYTE FLAP ***
+#
+# chat room:
+#
+# *** TESTING SPAM WITH 1024 CHARS ***
+# *** SENDING 2111 BYTE FLAP ***
 
 class AIMProtocol(Madcow):
 
     newline = re.compile(r'[\r\n]+')
     server = ('login.oscar.aol.com', 5190)
+    color_fmt = '<div style="background-color:black;color:white;">%s</div>'
 
     def __init__(self, config, prefix):
-        self.colorlib = ColorLib(u'mirc')
+        self.colorlib = ColorLib(u'html')
         Madcow.__init__(self, config, prefix)
 
     def run(self):
@@ -52,18 +67,31 @@ class AIMProtocol(Madcow):
         return self.config.aim.username
 
     def protocol_output(self, message, req=None):
-        args = [self.newline.sub(u'<br>', message)]
-        if req.chat:
-            func = req.chat.sendMessage
-        else:
-            func = req.aim.sendMessage
-            args.insert(0, req.nick)
-        reactor.callFromThread(func, *args)
+        try:
+            if req.colorize:
+                # color output if requested
+                style = random.choice(self.colorlib._rainbow_map.keys())
+                message = self.colorlib.rainbow(message, style=style)
+                message = self.color_fmt % message
+            args = [self.newline.sub(u'<br>', message)]
+            if req.chat:
+                func = req.chat.sendMessage
+            else:
+                func = req.aim.sendMessage
+                args.insert(0, req.nick)
+            log.debug('OUT: %s' % repr(args))
+            reactor.callFromThread(func, *args)
+        except Exception, error:
+            pass
 
     def poll(self):
         while self.running:
             self.check_response_queue()
             sleep(0.5)
+
+    @classmethod
+    def xmlwrap(cls, message, length):
+        """Wraps a message based on max length without breaking html tags"""
 
 
 class ProtocolHandler(AIMProtocol):
@@ -111,6 +139,14 @@ class OSCARConnection(oscar.BOSConnection):
             return
         message = stripHTML(message)
         req = Request(message=message)
+
+        # lines that start with ^ will have their output rainbowed
+        if req.message.startswith(u'^'):
+            req.message = req.message[1:]
+            req.colorize = True
+        else:
+            req.colorize = False
+
         req.nick = user.name
         req.channel = u'AIM'
         req.aim = self
@@ -125,4 +161,3 @@ class OSCARConnection(oscar.BOSConnection):
 class OSCARAuth(oscar.OscarAuthenticator):
 
     BOSClass = OSCARConnection
-
