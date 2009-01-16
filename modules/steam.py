@@ -49,6 +49,7 @@ class Main(Module):
             self.enabled = False
             log.error('steam module enabled but no group set!')
             return
+        self.online = madcow.config.steam.online
         self.group_url = urljoin(self.base_group_url,
                                  madcow.config.steam.group)
 
@@ -71,9 +72,16 @@ class Main(Module):
                     except AttributeError:
                         game = 'Non-Steam Game'
                     ingame.append('%s: %s' % (data['name'], game))
-                elif data['status'] == 'Online':
+                elif data['status'] == 'Online' and self.online:
                     online.append('%s: Online' % data['name'])
-            return '\n'.join(ingame + online)
+            output = ingame + online
+            if not output:
+                if self.online:
+                    message = 'Online'
+                else:
+                    message = 'In-Game'
+                output = ['No users ' + message]
+            return '\n'.join(output)
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
