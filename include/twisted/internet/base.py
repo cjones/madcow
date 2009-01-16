@@ -16,6 +16,7 @@ import sys
 import warnings
 import operator
 from heapq import heappush, heappop, heapify
+import logging
 
 try:
     import fcntl
@@ -546,6 +547,7 @@ class ReactorBase(object):
     def sigInt(self, *args):
         """Handle a SIGINT interrupt.
         """
+        logging.info('Received SIGINT, shutting down.')
         log.msg("Received SIGINT, shutting down.")
         self.callFromThread(self.stop)
 
@@ -1132,9 +1134,14 @@ class _SignalReactorMixin:
                     # Advance simulation time in delayed event
                     # processors.
                     self.runUntilCurrent()
-                    t2 = self.timeout()
-                    t = self.running and t2
-                    self.doIteration(t)
+
+                    # XXX fuck this shit.. WHY does twisted's select()
+                    # block signals? this is NOT NORMAL
+                    self.doIteration(1)
+
+                    #t2 = self.timeout()
+                    #t = self.running and t2
+                    #self.doIteration(t)
             except:
                 log.msg("Unexpected error in main loop.")
                 log.err()
