@@ -85,7 +85,7 @@ class AIMProtocol(Madcow):
             pass
 
     def poll(self):
-        while self.running:
+        while self.running and reactor._started and not reactor._stopped:
             self.check_response_queue()
             sleep(0.5)
 
