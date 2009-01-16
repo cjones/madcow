@@ -92,7 +92,8 @@ def html(text):
     text=string.replace(text,'<','&lt;')
     text=string.replace(text,'>','&gt;')
     text=string.replace(text,"\n","<br>")
-    return '<html><body bgcolor="white"><font color="black">%s</font></body></html>'%text
+    return text
+    #return '<html><body bgcolor="white"><font color="black">%s</font></body></html>'%text
 
 class OSCARUser:
     def __init__(self, name, warn, tlvs):
