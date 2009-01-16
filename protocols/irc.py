@@ -155,8 +155,8 @@ class IRCProtocol(Madcow):
 
     def on_kick(self, server, event):
         """kicked from channel"""
-        log.warn(u'[IRC] * Kicked from %s by %s' % (event.arguments()[0],
-            event.target()))
+        log.warn(u'[IRC] * %s was kicked from %s by %s' % (
+            event.arguments()[0], event.target(), event.source()))
         if event.arguments()[0].lower() == server.get_nickname().lower():
             if self.config.irc.rejoin:
                 if self.config.irc.rejoinWait > 0:
