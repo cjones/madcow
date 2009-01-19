@@ -30,7 +30,8 @@ __author__ = u'Chris Jones <cjones@gruntle.org>'
 class Main(Module):
 
     pattern = re.compile(r'^\s*obama\s*$', re.I)
-    oday = 1232470800  # jan 20, 2009 @ 9pm
+    #oday = 1232470800  # jan 20, 2009 @ 9pm
+    oday = 1232514000
     units = [(u'second', 60),
              (u'minute', 60),
              (u'hour', 24),
