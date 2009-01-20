@@ -45,7 +45,7 @@ class Main(Module):
             if e <= 0:
                 return u'WE HAVE REACHED O-DAY!'
             ms = int((e - int(e)) * 1000)
-            return u'%s: President Obama in: %s %d milliseconds' % (
+            return u'%s: Pres. Obama in: %s %dms' % (
                     nick, self.human_readable(e), ms)
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
