@@ -58,6 +58,7 @@ class Main(object):
             log.debug('rate limit status: %s' % status)
             # this is kind of a magic number
             if status['remaining_hits'] < 10:
+                log.error('Hitting the Twitter limit, backing off!')
                 return
         except Exception, error:
             log.warn(error)

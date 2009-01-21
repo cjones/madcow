@@ -24,14 +24,13 @@ import logging as log
 import re
 import time
 
-__version__ = u'0.1'
+__version__ = u'0.2'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*obama\s*$', re.I)
     oday = 1232470800  # jan 20, 2009 @ 9am
-    #oday = 1232514000
     units = [(u'second', 60),
              (u'minute', 60),
              (u'hour', 24),
@@ -41,16 +40,21 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         try:
-            e = self.oday - time.time()
-            if e <= 0:
-                return u'WE HAVE REACHED O-DAY!'
+            e = time.time() - self.oday
             ms = int((e - int(e)) * 1000)
-            return u'%s: Pres. Obama in: %s %dms' % (
+            return u'%s: Bush has been gone: %s %dms' % (
                     nick, self.human_readable(e), ms)
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
             return u'%s: %s' % (nick, error)
+
+        #    e = self.oday - time.time()
+        #    if e <= 0:
+        #        return u'WE HAVE REACHED O-DAY!'
+        #    ms = int((e - int(e)) * 1000)
+        #    return u'%s: Pres. Obama in: %s %dms' % (
+        #            nick, self.human_readable(e), ms)
 
     @classmethod
     def human_readable(cls, n):
