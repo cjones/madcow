@@ -168,12 +168,13 @@ class GatewayServiceHandler(Thread):
 
     def process_message(self):
         # see if we can reverse lookup sender
-        modules = self.server.bot.modules.dict()
-        dbm = modules[u'learn'].get_db(u'email')
-        for user, email in dbm.items():
-            if self.hdrs[u'from'] == email:
-                self.hdrs[u'from'] = user
-                break
+        modules = self.server.bot.modules.modules
+        if 'learn' in modules:
+            dbm = modules['learn']['obj'].get_db('email')
+            for user, email in dbm.iteritems():
+                if self.hdrs['from'] == email:
+                    self.hdrs['from'] = user
+                    break
 
         if u'payload' in self.hdrs:
             self.save_payload()
