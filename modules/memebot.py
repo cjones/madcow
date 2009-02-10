@@ -128,7 +128,7 @@ class MemeBot(Module):
             return
 
         # show raw SQL being dispatched if loglevel is debug
-        if True: #log.root.level <= log.DEBUG:
+        if log.root.level <= log.DEBUG:
             URL._connection.debug = True
             Author._connection.debug = True
             Channel._connection.debug = True
