@@ -23,8 +23,8 @@ import useragent
 from urlparse import urljoin
 import re
 
-__version__ = u'0.1'
-__author__ = u'cj_ <cjones@gruntle.org>'
+__version__ = '0.2'
+__author__ = 'cj_ <cjones@gruntle.org>'
 
 class NonRedirectResponse(Exception):
 
@@ -67,11 +67,17 @@ class Google(object):
                          re.I | re.DOTALL)
     reConversionDetected = re.compile(u'More about (calculator|currency)')
     reConversionResult = re.compile(u'<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
+    extra_re = re.compile(r'<div id=res class=med>(.*?)</div>', re.DOTALL)
+    table_re = re.compile(r'<table.*?>(.*?)</table>', re.DOTALL | re.I)
+    rows_re = re.compile(r'<tr.*?>(.*?)</tr>', re.DOTALL | re.I)
+    cells_re = re.compile(r'<td.*?>(.*?)</td>', re.DOTALL | re.I)
+    br_re = re.compile(r'<br.*?>', re.DOTALL | re.I)
 
     def __init__(self):
         self.ua = useragent.UserAgent(handlers=[NoRedirects, NoErrors])
 
     def lucky(self, query):
+        """Return I'm Feeling Lucky URL for given query"""
         opts = dict(self.luckyopts.items())
         opts[u'q'] = query
         result = self.ua.open(self.search, opts=opts, referer=self.baseurl,
@@ -81,6 +87,7 @@ class Google(object):
         return result
 
     def spellcheck(self, query):
+        """Look for "did you mean?" response for given query"""
         opts = dict(self.spellcheck_opts)
         opts[u'q'] = query
         result = self.ua.open(self.search, opts=opts, referer=self.baseurl)
@@ -92,6 +99,7 @@ class Google(object):
         return result
 
     def calculator(self, query):
+        """Try to use google calculator for given query"""
         opts = dict(self.calcopts)
         opts[u'q'] = query
         doc = self.ua.open(self.search, opts=opts)
@@ -100,4 +108,19 @@ class Google(object):
         response = self.reConversionResult.search(doc).group(1)
         response = stripHTML(response)
         return response
+
+    def clock(self, query):
+        """Use google to look up time in a given location"""
+        try:
+            doc = self.ua.open(self.search, {'q': 'time in %s' % query})
+            extra = self.extra_re.search(doc).group(1)
+            table = self.table_re.search(extra).group(1)
+            row = self.rows_re.findall(table)[0]
+            cells = self.cells_re.findall(row)
+            if 'alt="Clock"' not in cells[0]:
+                raise Exception
+            line = self.br_re.split(cells[1])[0]
+            return stripHTML(line)
+        except:
+            pass
 
