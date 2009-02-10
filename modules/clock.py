@@ -32,6 +32,7 @@ class WorldClock(Module):
 
     pattern = re.compile(r'^\s*(?:clock|time)(?:\s*[:-]\s*|\s+)(.+?)\s*$', re.I)
     help = u'time <location> - ask google what time it is somewhere'
+    in_re = re.compile(r'^\s*in\s+', re.I)
 
     def __init__(self, madcow=None):
         self.madcow = madcow
@@ -40,11 +41,12 @@ class WorldClock(Module):
     def response(self, nick, args, kwargs):
         try:
             query = args[0]
+            query = self.in_re.sub('', query)
             result = self.google.clock(query)
             if result:
                 return u'%s: %s' % (nick, result)
             else:
-                return u"%s: They don't do the whole time thing in %s" % (
+                return u"%s: They don't do the whole time thing in \"%s\"" % (
                         nick, query)
         except Exception, error:
             log.warn('error in module %s' % self.__module__)
