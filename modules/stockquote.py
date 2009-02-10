@@ -19,111 +19,77 @@
 
 """Get stock quote from yahoo ticker"""
 
-import re
 from include.utils import Module, stripHTML
 from include.useragent import geturl
-from urlparse import urljoin
-from include.BeautifulSoup import BeautifulSoup
-import random
 import logging as log
 from include.colorlib import ColorLib
 import locale
+import csv
 
-__version__ = u'0.3'
-__author__ = u'cj_ <cjones@gruntle.org>'
+__version__ = u'0.4'
+__author__ = u'cj_ <cjones@gruntle.org> / toast <toast@evilscheme.org>'
 
 _namespace = u'madcow'
 _dir = u'..'
 
 class UnknownSymbol(Exception):
-
     pass
 
 
 class Yahoo(object):
-
-    _quote_url = u'http://finance.yahoo.com/q?s=SYMBOL'
+    # query parameters are s: symbol n: name p: prev. close k1: last trade (real time)
+    # a mostly-accurate listing of possible parameters is available here: http://www.gummy-stuff.org/Yahoo-data.htm
+    _quote_url = u'http://download.finance.yahoo.com/d/quotes.csv?s=SYMBOL&f=snpk1&e=.csv'
     _isfloat = re.compile(r'^\s*-?\s*[0-9.,]+\s*$')
-
+    
     def __init__(self, colorlib):
         self.colorlib = colorlib
-
+    
     def get_quote(self, symbol):
+        """Looks up the symbol from finance.yahoo.com, returns formatted result"""
         url = Yahoo._quote_url.replace(u'SYMBOL', symbol)
         page = geturl(url)
-        soup = BeautifulSoup(page)
-        company = u' '.join([unicode(item)
-                             for item in soup.find(u'h1').contents])
-        company = stripHTML(company)
-        tables = soup.findAll(u'table')
-        if not tables:
-            raise UnknownSymbol
-        table = tables[0]
-        rows = table.findAll(u'tr')
-        data = {}
-        current_price = 0.0
-        last_price = 0.0
-
-        # Yahoo emits numbers in the US format of course..
-        locale.setlocale(locale.LC_NUMERIC, "en_US.UTF-8")
-        for row in rows:
-            key = row.findAll(u'th')[0]
-            val = row.findAll(u'td')[0]
-            key = unicode(key.contents[0])
-
-            if key in (u'Last Trade:', u'Index Value:', u'Net Asset Value:'):
-                current_price = locale.atof(stripHTML(unicode(val)))
-            elif key == u'Prev Close:':
-                last_price = locale.atof(stripHTML(unicode(val)))
-
-        # calculate change
-        delta = current_price - last_price
-        delta_perc = 100 * delta / last_price
-
-        otext = u"Open: %.2f" % last_price
-        ptext = u"%.2f (%+.2f %+.2f%%)" % (current_price, delta, delta_perc)
-        if delta > 0:
-            ptext = self.colorlib.get_color(u'green', text=ptext)
-        elif delta < 0:
-            ptext = self.colorlib.get_color(u'red', text=ptext)
-        ptext = u"Current: " + ptext
-
-        data = [otext, ptext]
-
-        # grab after hours data if it's available
-        quotepara = soup.findAll(u'p')[1]
-        if u"After Hours:" in quotepara.contents[0]:
-            try:
-                after_hours = float(quotepara.findAll(u'span')[0].contents[0])
-                ah_delta = after_hours - current_price
-                ah_delta_perc = ah_delta / current_price * 100
-                ahtext = u'%.2f (%+.2f %+.2f%%)' % (
-                        after_hours, ah_delta, ah_delta_perc)
-                if ah_delta > 0:
-                    ahtext = self.colorlib.get_color(u'green', text=ahtext)
-                elif ah_delta < 0:
-                    ahtext = self.colorlib.get_color(u'red', text=ahtext)
-                ahtext = u"After Hours: " + ahtext
-                data.append(ahtext)
-            except ValueError:
-                pass
-
-        return u'%s - ' % company + u' | '.join(data)
+        
+        data = csv.reader([page]).next()
+        symbol = data[0]
+        name = data[1]
+        try:
+            last_close = locale.atof(data[2])
+        except ValueError:
+            raise UnknownSymbol()
+        trade_time, last_trade = stripHTML(data[3]).split(" - ")
+        last_trade = locale.atof(last_trade)
+        
+        if trade_time == "N/A":
+            trade_time = "market close"
+        
+        delta = last_trade - last_close
+        delta_perc = delta * 100.0 / last_close
+        
+        if delta < 0:
+            color = u'red'
+        elif delta > 0:
+            color = u'green'
+        else:
+            color = u'white'
+        
+        text = self.colorlib.get_color(color, text="%.2f (%+.2f %+.2f%%)" % (last_trade, delta, delta_perc))
+        
+        return "%s (%s) - Open: %.2f | %s: %s" % (name, symbol, last_close, trade_time, text)
 
 
 class Main(Module):
-
     pattern = re.compile(u'^\s*(?:stocks?|quote)\s+(\S+)', re.I)
     require_addressing = True
     help = u'quote <symbol> - get latest stock quote'
-
+    
     def __init__(self, madcow=None):
         if madcow is not None:
             colorlib = madcow.colorlib
         else:
             colorlib = ColorLib(u'ansi')
         self.yahoo = Yahoo(colorlib)
-
+    
     def response(self, nick, args, kwargs):
         query = args[0]
         try:
@@ -135,7 +101,7 @@ class Main(Module):
             log.exception(error)
             response = u'%s: %s' % (nick, error)
         return response
-
+    
 
 if __name__ == u'__main__':
     from include.utils import test_module
