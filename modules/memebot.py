@@ -121,7 +121,6 @@ class MemeBot(Module):
                 host += ':' + config.db_port
             uri += '%s@%s/%s' % (user, host, config.db_name)
         try:
-            log.warn('uri=%s' % uri)
             sqlhub.processConnection = connectionForURI(uri)
         except Exception, error:
             log.warn('invalid uri: %s (%s)' % (uri, error))
@@ -264,7 +263,6 @@ class MemeBot(Module):
                 channel = Channel(name=channel)
 
             url = URL(url=orig, clean=clean, author=me, channel=channel)
-            print '*** new ID: %d' % url.id
 
             if comment1:
                 comments(url=url, text=comment1, author=me)
