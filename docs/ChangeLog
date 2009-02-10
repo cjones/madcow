@@ -1,3 +1,18 @@
+1.5.3: Tue Feb 10 15:13:05 PST 2009
+    * ability to mark certain moduless as private-response only
+    * fixed broken aim protocol and added chatroom support
+    * fixed broken twitter feed parser to use explicit json url
+    * new module - lookup what time it is in other countries
+    * add pause/resume to rc.madcow script
+    * fixed confusing log messages for irc kicks
+    * option to not show steam members who are merely "online"
+    * fixed totally busted memebot module to work with newer SQLObject
+    * fixed bug in translate module that could not parse text with a : in it
+    * rewrite of stock quote module to use CSV feed API
+    * update election2008 module to show projected senate seats
+    * update obama module to show time since bush has been gone :D
+    * add error message to tweetprinter to log that we are hitting the throttle
+
 1.5.2: Mon Jan 12 16:10:07 PST 2009
     * update useragent to appear more like a browser
     * twitter gateway dynamically checks rate limit status to allow for
