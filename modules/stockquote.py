@@ -40,7 +40,6 @@ class Yahoo(object):
     # query parameters are s: symbol n: name p: prev. close k1: last trade (real time)
     # a mostly-accurate listing of possible parameters is available here: http://www.gummy-stuff.org/Yahoo-data.htm
     _quote_url = u'http://download.finance.yahoo.com/d/quotes.csv?s=SYMBOL&f=snpk1&e=.csv'
-    _isfloat = re.compile(r'^\s*-?\s*[0-9.,]+\s*$')
     
     def __init__(self, colorlib):
         self.colorlib = colorlib
