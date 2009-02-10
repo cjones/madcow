@@ -25,6 +25,7 @@ import logging as log
 from include.colorlib import ColorLib
 import locale
 import csv
+import re
 
 __version__ = u'0.4'
 __author__ = u'cj_ <cjones@gruntle.org> / toast <toast@evilscheme.org>'
