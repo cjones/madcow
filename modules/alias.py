@@ -136,7 +136,8 @@ class Main(Module):
         if command == u'add':
             if len(args) != 2:
                 raise AliasError(self.help)
-            for name, obj in self.madcow.modules.by_priority():
+            for name, mod in self.madcow.modules.by_priority():
+                obj = mod['obj']
                 if obj.pattern is Module._any:
                     continue
                 if obj.pattern.search(args[0]):

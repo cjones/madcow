@@ -195,7 +195,9 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         testmod = args[0]
         results = {}
-        for mod_name, obj in self.madcow.modules:
+        for mod_name, mod_data in self.madcow.modules.modules.iteritems():
+            obj = mod_data['obj']
+            #for mod_name, obj in self.madcow.modules:
             if testmod is not None and mod_name != testmod:
                 continue
             try:
