@@ -90,6 +90,7 @@ area=yes                ; look up area codes
 babel=yes               ; language translations
 bbcnews=yes             ; bbc news headlines
 calc=yes                ; google calculator
+clock=yes               ; world clock
 dictionary=yes          ; definition of words
 election2008=yes        ; current electoral vote predictor for 2008 US election
 google=yes              ; i'm feeling lucky query
