@@ -67,7 +67,8 @@ class Yahoo(object):
         # Yahoo emits numbers in the US format of course..
         locale.setlocale(locale.LC_NUMERIC, "en_US.UTF-8")
         for row in rows:
-            key, val = row.findAll(u'td')
+            key = row.findAll(u'th')[0]
+            val = row.findAll(u'td')[0]
             key = unicode(key.contents[0])
 
             if key in (u'Last Trade:', u'Index Value:', u'Net Asset Value:'):
