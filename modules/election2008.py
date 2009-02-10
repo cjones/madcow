@@ -46,6 +46,10 @@ class Main(Module):
             self.colorlib = ColorLib(u'ansi')
 
     def colorize(self, color, key, val):
+        if key == '_SEN!D':
+            key = 'Democrats'
+        elif key == '_SEN!R':
+            key = 'Republicans'
         key = self.colorlib.get_color(color, text=key)
         return u'%s: %s' % (key, val)
 
@@ -68,7 +72,8 @@ class Main(Module):
             output = [self.colorize(u'blue', *dem), self.colorize(u'red', *gop)]
             if tie:
                 output.append(self.colorize(u'white', *tie))
-            return u'%s: %s' % (nick, u', '.join(output))
+            return u'%s: Projected Senate Seats 2010: %s' % (
+                    nick, u', '.join(output))
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
