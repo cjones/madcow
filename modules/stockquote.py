@@ -27,15 +27,18 @@ import locale
 import csv
 import re
 
-__version__ = u'0.4'
+__version__ = u'0.5'
 __author__ = u'cj_ <cjones@gruntle.org> / toast <toast@evilscheme.org>'
 
 _namespace = u'madcow'
 _dir = u'..'
 
 class UnknownSymbol(Exception):
-    pass
-
+    """Unknown Symbol Exception"""
+    def __init__(self, symbolname):
+        super(UnknownSymbol, self).__init__()
+        self.symbolname = symbolname
+    
 
 class Yahoo(object):
     # query parameters are s: symbol n: name p: prev. close k1: last trade (real time)
@@ -45,41 +48,45 @@ class Yahoo(object):
     def __init__(self, colorlib):
         self.colorlib = colorlib
     
-    def get_quote(self, symbol):
+    def get_quote(self, symbols):
         """Looks up the symbol from finance.yahoo.com, returns formatted result"""
-        url = Yahoo._quote_url.replace(u'SYMBOL', symbol)
+        url = Yahoo._quote_url.replace(u'SYMBOL', "+".join(symbols.split()))
         page = geturl(url)
         
-        data = csv.reader([page]).next()
-        symbol = data[0]
-        name = data[1]
-        try:
-            last_close = locale.atof(data[2])
-        except ValueError:
-            raise UnknownSymbol()
-        trade_time, last_trade = stripHTML(data[3]).split(" - ")
-        last_trade = locale.atof(last_trade)
+        results = []
+        for line in page.splitlines():
+            data = csv.reader([line]).next()
+            symbol = data[0]
+            name = data[1]
+            try:
+                last_close = locale.atof(data[2])
+            except ValueError:
+                raise UnknownSymbol(symbol)
+            trade_time, last_trade = stripHTML(data[3]).split(" - ")
+            last_trade = locale.atof(last_trade)
+            
+            if trade_time == "N/A":
+                trade_time = u'market close'
+            
+            delta = last_trade - last_close
+            delta_perc = delta * 100.0 / last_close
+            
+            if delta < 0:
+                color = u'red'
+            elif delta > 0:
+                color = u'green'
+            else:
+                color = u'white'
+            
+            text = self.colorlib.get_color(color, text=u'%.2f (%+.2f %+.2f%%)' % (last_trade, delta, delta_perc))
+            
+            results.append(u'%s (%s) - Open: %.2f | %s: %s' % (name, symbol, last_close, trade_time, text))
         
-        if trade_time == "N/A":
-            trade_time = "market close"
-        
-        delta = last_trade - last_close
-        delta_perc = delta * 100.0 / last_close
-        
-        if delta < 0:
-            color = u'red'
-        elif delta > 0:
-            color = u'green'
-        else:
-            color = u'white'
-        
-        text = self.colorlib.get_color(color, text="%.2f (%+.2f %+.2f%%)" % (last_trade, delta, delta_perc))
-        
-        return "%s (%s) - Open: %.2f | %s: %s" % (name, symbol, last_close, trade_time, text)
+        return u'\n'.join(results)
 
 
 class Main(Module):
-    pattern = re.compile(u'^\s*(?:stocks?|quote)\s+(\S+)', re.I)
+    pattern = re.compile(u'^\s*(?:stocks?|quote)\s+([ a-zA-Z0-9^]+)', re.I)
     require_addressing = True
     help = u'quote <symbol> - get latest stock quote'
     
@@ -94,8 +101,8 @@ class Main(Module):
         query = args[0]
         try:
             response = unicode(self.yahoo.get_quote(query))
-        except UnknownSymbol:
-            response = u"Symbol not found, market may have crashed"
+        except UnknownSymbol, error:
+            response = u"Symbol %s not found, market may have crashed" % error.symbolname
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
