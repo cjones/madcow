@@ -41,7 +41,7 @@ class Alias(object):
     def __init__(self, key, val):
         self.key = key
         self.val = val
-        self.pattern = re.compile(r'^' + re.escape(key) + r'\b', re.I)
+        self.pattern = re.compile(ur'^\s*' + re.escape(key))
 
 
 class AliasDB(object):
