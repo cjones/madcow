@@ -40,13 +40,9 @@ class Alias(object):
 
     def __init__(self, key, val):
         self.key = key
-        self._val = val
+        self.val = val
         # \b doesn't work with unicode chars
         self.pattern = re.compile(ur'^\s*' + re.escape(key) + ur'(\s+|$)', re.I)
-
-    @property
-    def val(self):
-        return self._val + r'\1'
 
 
 class AliasDB(object):
@@ -180,7 +176,7 @@ class Main(Module):
     def checkalias(self, line, kwargs):
         """Check for alias substitution"""
         for alias in self.db:
-            new = alias.pattern.sub(alias.val, line, 1)
+            new = alias.pattern.sub(alias.val + r'\1', line, 1)
             if new != line:
                 kwargs[u'req'].message = new
                 break
