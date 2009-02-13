@@ -30,49 +30,54 @@ from include.utils import Module
 import logging as log
 from sqlobject import *
 
-class URL(SQLObject):
+# sqlobject explodes on reloads
+try:
+    class URL(SQLObject):
 
-    class sqlmeta:
+        class sqlmeta:
 
-        table = 'url'
+            table = 'url'
 
-    url = StringCol()
-    clean = StringCol()
-    author = ForeignKey('Author')
-    channel = ForeignKey('Channel')
-    citations = IntCol(default=0)
-    posted = DateTimeCol(default = datetime.datetime.now)
-    comments = MultipleJoin('Comments')
+        url = StringCol()
+        clean = StringCol()
+        author = ForeignKey('Author')
+        channel = ForeignKey('Channel')
+        citations = IntCol(default=0)
+        posted = DateTimeCol(default = datetime.datetime.now)
+        comments = MultipleJoin('Comments')
 
-    @property
-    def truncated_url(self):
-        if len(self.url) > 48:
-            return self.url[:48] + ' ... ' + self.url[-4:]
-        else:
-            return self.url
-
-
-class Author(SQLObject):
-
-    name = StringCol(alternateID=True, length=50)
-    urls = MultipleJoin('URL')
-    comments = MultipleJoin('Comments')
-    points_new = IntCol(default=0)
-    points_old = IntCol(default=0)
-    points_credit = IntCol(default=0)
+        @property
+        def truncated_url(self):
+            if len(self.url) > 48:
+                return self.url[:48] + ' ... ' + self.url[-4:]
+            else:
+                return self.url
 
 
-class Channel(SQLObject):
+    class Author(SQLObject):
 
-    name = StringCol(alternateID=True, length=50)
-    urls = MultipleJoin('URL')
+        name = StringCol(alternateID=True, length=50)
+        urls = MultipleJoin('URL')
+        comments = MultipleJoin('Comments')
+        points_new = IntCol(default=0)
+        points_old = IntCol(default=0)
+        points_credit = IntCol(default=0)
 
 
-class Comments(SQLObject):
+    class Channel(SQLObject):
 
-    text = StringCol()
-    author = ForeignKey('Author')
-    url = ForeignKey('URL')
+        name = StringCol(alternateID=True, length=50)
+        urls = MultipleJoin('URL')
+
+
+    class Comments(SQLObject):
+
+        text = StringCol()
+        author = ForeignKey('Author')
+        url = ForeignKey('URL')
+
+except:
+    pass
 
 
 class MemeBot(Module):

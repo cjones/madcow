@@ -40,9 +40,13 @@ class Alias(object):
 
     def __init__(self, key, val):
         self.key = key
-        self.val = val
+        self._val = val
         # \b doesn't work with unicode chars
-        self.pattern = re.compile(ur'^\s*' + re.escape(key) + ur'(\s+|$)')
+        self.pattern = re.compile(ur'^\s*' + re.escape(key) + ur'(\s+|$)', re.I)
+
+    @property
+    def val(self):
+        return self._val + r'\1'
 
 
 class AliasDB(object):
