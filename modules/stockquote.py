@@ -41,9 +41,9 @@ class UnknownSymbol(Exception):
     
 
 class Yahoo(object):
-    # query parameters are s: symbol n: name p: prev. close k1: last trade (real time)
+    # query parameters are s: symbol n: name p: prev. close l: last trade with time (15 minute delay)
     # a mostly-accurate listing of possible parameters is available here: http://www.gummy-stuff.org/Yahoo-data.htm
-    _quote_url = u'http://download.finance.yahoo.com/d/quotes.csv?s=SYMBOL&f=snpk1&e=.csv'
+    _quote_url = u'http://download.finance.yahoo.com/d/quotes.csv?s=SYMBOL&f=snpl&e=.csv'
     
     def __init__(self, colorlib):
         self.colorlib = colorlib
