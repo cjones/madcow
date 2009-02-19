@@ -42,7 +42,8 @@ class Alias(object):
         self.key = key
         self.val = val
         # \b doesn't work with unicode chars
-        self.pattern = re.compile(ur'^\s*' + re.escape(key) + ur'(\s+|$)', re.I)
+        self.pattern = re.compile(ur'^\s*' + re.escape(key) + ur'(:|\s+|$)',
+                                  re.I)
 
 
 class AliasDB(object):
