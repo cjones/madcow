@@ -26,8 +26,8 @@ from time import time as unix_time
 import os
 
 __author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = [u'Debug', u'Module', u'cache', u'throttle', u'stripHTML',
-           u'unescape_entities', u'slurp', u'Request', u'cache_property']
+__all__ = ['Debug', 'Module', 'cache', 'throttle', 'stripHTML', 'superscript',
+           'unescape_entities', 'slurp', 'Request', 'cache_property']
 
 # pre-compile regex
 pre_re = re.compile(r'(<pre.*?>(.*?)</pre>)', re.I | re.DOTALL)
@@ -73,6 +73,26 @@ entities = {u'quot': 34, u'amp': 38, u'apos': 39, u'lt': 60, u'gt': 62,
             u'rdquo': 8221, u'bdquo': 8222, u'dagger': 8224,
             u'Dagger': 8225, u'hellip': 8230, u'permil': 8240,
             u'lsaquo': 8249, u'rsaquo': 8250, u'euro': 8364, u'trade': 8482}
+
+
+# translation map to make superscript stuff
+SUPER_MAP = {
+        48: 8304,   # 0
+        49: 8305,   # 1
+        50: 178,    # 2
+        51: 179,    # 3
+        52: 8308,   # 4
+        53: 8309,   # 5
+        54: 8310,   # 6
+        55: 8311,   # 7
+        56: 8312,   # 8
+        57: 8313,   # 9
+        43: 8314,   # 10
+        45: 8315,   # -
+        61: 8316,   # =
+        40: 8317,   # (
+        41: 8318,   # )
+        110: 8319}  # n
 
 
 class Debug(object):
@@ -288,4 +308,9 @@ def test_module(mod):
         return 1
     print main.response(nick=os.environ[u'USER'], args=args, kwargs={})
     return 0
+
+def superscript(text):
+    if isinstance(text, str):
+        text = text.decode('utf8', 'replace')  # XXX durrr
+    return text.translate(SUPER_MAP)
 

@@ -18,7 +18,7 @@
 """Google interface"""
 
 import urllib2
-from utils import stripHTML
+from utils import stripHTML, superscript
 import useragent
 from urlparse import urljoin
 import re
@@ -72,6 +72,7 @@ class Google(object):
     rows_re = re.compile(r'<tr.*?>(.*?)</tr>', re.DOTALL | re.I)
     cells_re = re.compile(r'<td.*?>(.*?)</td>', re.DOTALL | re.I)
     br_re = re.compile(r'<br.*?>', re.DOTALL | re.I)
+    sup_re = re.compile(r'(<sup>.*?</sup>)', re.I | re.DOTALL)
 
     def __init__(self):
         self.ua = useragent.UserAgent(handlers=[NoRedirects, NoErrors])
@@ -106,8 +107,16 @@ class Google(object):
         if not self.reConversionDetected.search(doc):
             raise Exception, u'no conversion detected'
         response = self.reConversionResult.search(doc).group(1)
-        response = stripHTML(response)
-        return response
+
+        # turn super scripts into utf8
+        parts = []
+        for part in self.sup_re.split(response):
+            if self.sup_re.match(part):
+                part = superscript(part)
+            parts.append(part)
+        response = u''.join(parts)
+
+        return stripHTML(response)
 
     def clock(self, query):
         """Use google to look up time in a given location"""
