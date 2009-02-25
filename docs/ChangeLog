@@ -1,3 +1,10 @@
+1.5.5: Wed Feb 25 00:52:47 PST 2009
+    * Add support for superscript's in calc module
+    * Fix bug with busted HTML color in AIM protocol
+    * Fix memebot breaking on reload
+    * Fix alias module not matching colon boundaries
+    * Adjust stockquote output format
+
 1.5.4: Wed Feb 11 11:54:36 PST 2009
     * Fixed alias bug #6
     * Improved stockquote module
