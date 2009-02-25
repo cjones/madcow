@@ -68,9 +68,17 @@ class AIMProtocol(Madcow):
             if not [ch for ch in message if ord(ch) > 127]:
                 message = message.encode('us-ascii')
 
-            # escape stuff so it's not all like LOL HTML
-            message = oscar.html(message)
 
+            # ooookay, let's just strip out all html tags
+            message = stripHTML(message)
+
+            #print 'trying to output: %r' % message
+            # escape stuff so it's not all like LOL HTML
+            # print 'before esc: %r' % message
+            # message = oscar.html(message)
+            # print 'after esc: %r' % message
+            # message = message.replace('"', "'")
+            # print 'after repl: %r' % message
             # color output if requested
             #if req.colorize:
             #    style = random.choice(self.colorlib._rainbow_map.keys())
