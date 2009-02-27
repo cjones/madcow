@@ -36,7 +36,7 @@ class Main(Module):
     base_url = 'http://steamcommunity.com/'
     base_group_url = urljoin(base_url, 'groups/')
     member_re = re.compile(r'rgGroupMembers\[\'\[(.*?)\]\'\]\s+=\s+new\s+Arra'
-                           r'y\("(.*?)",\s+"(.*?)"\);')
+                           r'y\("(.*?)",\s+"(.*?)"')
     link_re = re.compile(r'<a\s+class="groupMemberLink"\s+id="member_\[(.*?)'
                          r'\]"\s+href="(.*?)">')
     game_re = re.compile(r'<p\s+id="statusInGameText">(.*?)</p>')
