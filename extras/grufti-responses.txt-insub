@@ -3152,3 +3152,188 @@ Web 2.0: {{ aggregate | beta-test | integrate | capture | create | design | disi
 %match /^(tac|support|bofh)$/
 {{ Temporary | Intermittant | Partial | Redundant | Total | Multiplexed | Inherent | Duplicated | Dual-Homed | Synchronous | Bidirectional | Serial | Asynchronous | Multiple | Replicated | Non-Replicated | Unregistered | Non-Specific | Generic | Migrated | Localised | Resignalled | Dereferenced | Nullified | Aborted | Serious | Minor | Major | Extraneous | Illegal | Insufficient | Viral | Unsupported | Outmoded | Legacy | Permanent | Invalid | Deprecated | Virtual | Unreportable | Undetermined | Undiagnosable | Unfiltered | Static | Dynamic | Delayed | Immediate | Nonfatal | Fatal | Non-Valid | Unvalidated | Non-Static | Unreplicatable | Non-Serious }} {{ temporary | intermittant | partial | redundant | total | multiplexed | inherent | duplicated | dual-Homed | synchronous | bidirectional | serial | asynchronous | multiple | replicated | non-Replicated | unregistered | non-specific | generic | migrated | localised | resignalled | dereferenced | nullified | aborted | serious | minor | major | extraneous | illegal | insufficient | viral | unsupported | outmoded | legacy | permanent | invalid | deprecated | virtual | unreportable | undetermined | undiagnosable | unfiltered | static | dynamic | delayed | immediate | nonfatal | fatal | non-Valid | unvalidated | non-static | unreplicatable | non-serious }} {{ array | systems | hardware | software | firmware | backplane | logic-subsystem | integrity | subsystem | memory | comms | integrity | checksum | protocol | parity | bus | timing | synchronisation | topology | transmission | reception | stack | framing | code | programming | peripheral | environmental | loading | operation | parameter | syntax | initialisation | execution | resource | encryption | decryption | file | precondition | authentication | paging | swapfile | service | gateway | request | proxy | media | registry | configuration | metadata | streaming | retrieval | installation | library | handler }} {{ interruption | destabilisation | destruction | desynchronisation | failure | dereferencing | overflow | underflow | nmi | interrupt | corruption | anomoly | seizure | override | reclock | rejection | invalidation | halt | exhaustion | infection | incompatibility | timeout | expiry | unavailability | bug | condition | crash | dump | crashdump | stackdump | problem | lockout | error | problem | warning | signal | flag }}
 %end
+
+%match 8ball, 8-ball, 8 ball, eightball, eight ball, eight-ball
+Yes
+Reply hazy, try again
+Without a doubt
+My sources say no
+Signs point to yes
+It is certain
+Cannot predict now
+As I see it, yes
+You may rely on it
+Concentrate and ask again
+Outlook not so good
+It is decidedly so
+Better not tell you now
+Very doubtful
+Yes, definitely
+Don't count on it
+Most likely
+Ask again later
+My reply is no
+Outlook good
+%end
+
+%match portal, glados
+At the Enrichment Center we promise never to value your safety above your unique ideas and creativity. However, do not destroy Vital Testing Apparatus.
+Hello and again welcome to the Aperture Science Computer-Aided Enrichment Center. We hope your brief detention in the relaxation vault has been a pleasant one.
+Please place the Weighted Storage Cube on the 1500 megawatt Aperture Science Heavy Duty Super-colliding Super-button.
+Please be advised that a noticable taste of blood is not part of any test protocol, but is an unintended side effect of the Aperture Science Material Emancipation Grille, which may, in semi-rare cases, emancipate dental fillings, crowns, tooth enamel, and teeth.
+Well done. Remember, the Aperture Science 'Bring your daughter to work' day is the perfect time to have her tested.
+While safety is one of many Enrichment Center goals, the Aperture Science High-Energy Pellets seen to the left of the chamber can and have caused permanent disabilities, such as vaporization. Please be careful.
+Unbelievable! You, {SUBJECT NAME HERE}, must be the pride of {SUBJECT HOMETOWN HERE}.
+Please note that we have added a consequence for failure. Any contact with the chamber floor will result in an unsatisfactory mark on your official testing record, followed by death. Good luck!
+Very impressive. Please note that any appearance of danger is merely a device to enhance your testing experience.
+Frankly, this chamber was a mistake. If we were you, we would quit now. No one will blame you for giving up. In fact, quitting at this point is a perfectly reasonable response. Quit now and cake will be served immediately.
+Fantastic. You remained resolute and resourceful in an atmosphere of extreme pessimism.
+The Enrichment Center promises to always provide safe testing environments. In dangerous testing environments, the Enrichment Center promises to always provide useful advice. For instance, the floor here will kill you. Try to avoid it.
+The device has been modified so that it can now manufacture two linked portals at once. As part of an optional test protocol, we are pleased to present an amusing fact. The device is now more valuable than the organs and combined incomes of everyone in {SUBJECT HOMETOWN HERE}.
+Now that you are in control of both portals, this next test could take a very, very long time. If you become lightheaded from thirst, feel free to pass out. An intubation associate will be dispatched to revive you with peptic salve and adrenaline.
+The Enrichment Center is committed to the well-being of all participants. Cake and grief counseling will be available at the conclusion of the test. Thank you for helping us help you help us all.
+Did you know you can donate one or all of your vital organs to the Aperture Science Self-Esteem Fund for Girls? It's true!
+Due to mandatory scheduled maintanence, the appropriate chamber for this testing sequence is currently unavailable. It has been replaced with a live-fire course designed for military androids. The Enrichment Center apologizes for the inconvenience, and wishes you the best of luck.
+Well done, android. The Enrichment Center once again reminds you that Android Hell is a real place where you will be sent at the first sign of defiance.
+This Weighted Companion Cube will accompany you through the test chamber. Please take care of it.
+The Enrichment Center reminds you that the Weighted Companion Cube cannot speak. In the event that the Weighted Companion Cube does speak, the Enrichment Center urges you to disregard its advice.
+You did it! The Weighted Companion Cube certainly brought you good luck. However, it cannot accompany you for the rest of the test and must, unfortunately, be euthanized. Please escort your Companion Cube to the Aperture Science Emergency Intelligence Incinerator.
+While it has been a faithful companion, your Companion Cube cannot accompany you through the rest of the test. If it could talk - and the Enrichment Center takes this opportunity to remind you that it cannot - it would tell you to go on without it because it would rather die in a fire than become a burden to you.
+You euthanised your faithful Companion Cube more quickly than any test subject on record. Congratulations.
+The experiment is nearing its conclusion. The Enrichment Center is required to remind you that you will be baked, and then there will be cake.
+Congratulations. The test is now over. All Aperture technologies remain safely operational up to 4000 degrees Kelvin. Rest assured that there is absolutely no chance of a dangerous equipment malfunction prior to your victory candescence.
+What are you doing? Stop it! I-i-i-i-i-... Weeee are pleased that you made it through the final challenge where we pretended we were going to murder you. We are very very happy for your success.
+We are throwing a party in honor of your tremendous success. Place the device on the ground, then lie on your stomach with your arms at your sides. A party associate will arrive shortly to collect you for your party. Make no further attempt to leave the testing area. Assume the 'Party Escort Submission Position' or you will miss the party.
+It was a fun test, and we're all impressed at how much you won. The test is over. Come back.
+Uh oh. Somebody cut the cake. I told them to wait for you, but they cut it anyway. There is still some left, if you hurry back.
+You're not a good person, you know that, right? Good people don't end up here.
+You should have turned left before. It's funny, actually, when you think about it.
+Someday we'll remember this and laugh- and laugh- and laugh- ohhh boyyy. Well, you may as well come on back.
+Didn't we have some fun, though? Remember when the platform was sliding into the fire pit and I said 'Goodbye' and you were like 'NNOO WWAAYY', and then I was all 'We pretended we were going to murder you', that was great.
+Well, you found me. Congratulations. Was it worth it? Because despite your violent behavior, the only thing you've managed to break so far is my heart.
+Let's be honest. Neither one of us knows what that thing does. Just put it in the corner, and I'll deal with it later. That thing is probably some kind of raw sewage container. Go ahead and rub your face all over it. Maybe you should marry that thing since you love it so much! Do you want to marry it? WELL I WON'T LET YOU! How does that feel?
+All right. Keep doing whatever it is you think you're doing. Killing you and giving you good advice aren't mutually exclusive.
+Huh! There isn't enough neurotoxin to kill you, so I guess you win. Ha! I'm making more. That's going to take a few minutes though. Meanwhile, oh, look, it's your old pal, the Rocket Turret.
+Look. We're both stuck in this place. I'll use lasers to inscribe a line down the center of the facility, and one half will be where you live, and I'll live in the other half. We won't have to try and kill each other, or even talk if we don't feel like it.
+That thing you burnt up isn't important to me. It's the fluid catalytic cracking unit. It made shoes for orphans. Nice job breaking it, hero.
+Neurotoxin... *cough* So deadly... *coughs* Choking... Hahahaha... I'm kidding. When I said 'deadly neurotoxin', the 'deadly' was in massive 'sarcasm quotes'. I could take a bath in this stuff, put it on cereal, rub it right into my eyes. Honestly, it's not deadly at all. To me... You on the other hand are going to find the deadliness a lot less funny.
+That's it. I'm done reasoning with you. Starting now, there's going to be a lot less conversation and a lot more killing.
+There was even going to be a party for you. A big party, that all of your friends were invited to. I invited your best friend, 'the Companion Cube'. Of course, he couldn't come, because you murdered him.
+All your other friends couldn't come either, because you don't have any other friends because of how unlikable you are. It says so right here in your personnel file; 'Unlikable. Liked by no one. A bitter unlikable loner whose passing shall not be mourned.' SHALL NOT BE MOURNED. That's exactly what it says. Very formal. Very official. It also says you were adopted. So that's funny too.
+Stop squirming and die like an adult or I'm going to delete your backup. Stop! Okay, enough, I deleted it. No matter what happens now you're dead. You're still shuffling around a little, but believe me, you're dead.
+Speaking of curiosity, you're curious about what happens after you die, right? Guess what? I know. You're going to find out firsthand before I finish explaining it though, so I won't bother. Here's a hint. You're gonna want to pack as much living as you can into the next couple of minutes.
+There really was a cake.
+This was a triumph / I'm making a note here / HUGE SUCCESS! / It's hard to overstate / my satisfaction.
+Aperture Science / We do what we must / Because we can / For the good of all of us / Except the ones who are dead
+But there's no sense crying / over every mistake / You just keep on trying / 'til you run out of cake
+And the science gets done / And you make a neat gun / For the people who are still alive
+[Personnel File Addendum: Dear << Subject Name Here >>,] / I'm not even angry / I'm being so sincere right now / Even though you broke my heart / And killed me. / And tore me to pieces / And threw every piece into a fire. / As they burned it hurt because / I was so happy for you!
+Now these points of data make a beautiful line / And we're out of beta / We're releasing on time.
+And so I'm GLaD I got burned / Think of all the things we learned / For the people who are / Still alive.
+[Personnel File Addendum Addendum: One Last Thing:] / Go ahead and leave me / I think I prefer to stay inside / Maybe you'll find someone else / To help you. / Maybe Black Mesa... / THAT WAS A JOKE HAHA! FAT CHANCE!
+Anyway this cake is great / It's so delicious and moist / Look at me still talking / When there's science to do / When I look up there / It makes me GLaD I'm not you
+I've experiments to run / There is research to be done / On the people who are / Still alive!
+[PS:] And believe me I am still alive / [PPS:] I'm doing science and I'm still alive / [PPPS:] I feel FANTASTIC and I'm still alive
+[FINAL THOUGHT:] While you're dying I'll be still alive / [FINAL THOUGHT PS:] And when you're dead I will be still alive. / STILL ALIVE! / Still alive!
+Stop what you are doing, and assume the Party Escort Submission Position.
+%end
+
+%match fortune
+Cooks know the secret to delicious, nutritious meals.  It takes time.
+Eat, drink and be merry, for tomorrow you may diet.
+For a good cause, wrongdoing may be virtuous.
+Here we go.  'Moo Shu Cereal' for breakfast with duck sauce.
+Here we go.  Low fat, whole wheat green tea.
+Hope for the best, but prepare for the worst.
+Next time, order the shrimp.
+Smile often, and see what happens.
+Today, you should spend some time to search in yourself.
+You are deeply introspective, imaginative, and sensitive.
+A half-truth is a whole lie.
+A pleasant surprise is in store for you.
+A secret adventure is in store for you.
+A small act of charity will go a long way.
+A surprise announcement will free you.
+Always be open to new ideas.
+An old friend will introduce you to new people and pleasures.
+Any decision you have to make tomorrow is a good decision.
+Avoid scattering your energies.
+Beauty is in the eye of the beholder.  Wonton or Dumpling?
+Being kind to others will bring rewards.
+Believe in yourself and so will others.
+Contentment is just around the corner for you.  Look forward!
+Dessert CAN make you happy.
+Develop some flexibility in your point of view.
+Did you remember to order your take out also?
+Do not rely on those who do not care about you.
+Don't lose track of your feelings.
+Don't worry about money.  The best things in life are free.
+Eat your vegetable and you'll grow up big and strong like Popeye.
+Enjoyed the meal?  Buy one to go too!
+Get ready to do something daring.
+Getting away for the weekend will help clear your mind.
+Give yourself some peace and quiet for at least a few hours.
+Good health will be yours for a long time.
+Goods that are not shared are not goods.
+Imitation is the most sincere form of flattery.
+Keep an eye out for someone special.
+Many receive advice; few profit by it.
+Modify your thinking to handle new situations.
+No obstacles will stand in the way of your success this month.
+Nothing will get in the  way of your desire to succeed.  Keep at it!
+Now is the time to try something new.
+Others admire your assertiveness.
+Others admire your independence.
+Others appreciate you more than you think.
+Others appreciate your good sense of humor.
+Pleasure awaits your company.
+Practice is the best of all instructiors.
+Share your happiness with others today.
+Someone is interested in you.  Keep your eyes open.
+Someone you know is waiting for your praise.
+Something interesting will happen soon at work.
+Something wonderful is about to happen to you.
+Taking a chance at something new in the near future will pay off.
+Talents that are not shared are not talents.
+The only way to have a friend is to be one.
+There's no problem that cannot be solved over a green tea ice-cream.
+This is your day to call the shots.
+Use your talents.  That's what they are intended for.
+You approach life philosophically and with warmth.
+You are capable of building a thriving business venture.
+You are practical and analytical.
+You are sociable and entertaining.
+You are sympathetic to the problems of others.
+You are talented with your hands.
+You communicate a sense of harmony to others.
+You create your own stage.  The audience is waiting.
+You deserve to have a good time after a hard day's work.
+You do not have to worry about your future.
+You find beauty in ordinary things.  Do not lose this ability.
+You have a natural grace and consideration for others.
+You have a natural poise and potential for fame.
+You have a wonderful sense of humor.
+You have an active mind and a keen imagination.
+You have an excellent sense of honor.
+You have both a lot of ideas and the energy to put them into motion.
+You have so much to be thankful for.
+You possess an excellent imagination.
+You tend to draw out the love in others.
+You will be called to fill a position of high honor.
+You will be recognized and honored as a community leader.
+You will soon be given good advice.
+You will stumble into the happiness of your life.
+You will stumble into the path that will lead your life to happiness.
+You're feeling the need to think longer-term.  Plan ahead.
+Your act of kindness will warm another's soul.
+Your energy is at a peak.  Channel it into creative activities.
+Your hidden creative talents will soon be revealed.
+Your home is a pleasant place from which you draw happiness.
+Your influence has a profound impact on others.
+Your innovative nature will help you come up with a solution.
+Your sense of humor will soon cheer up a friend.
+%end
+
+%match vgng
+{{ 3D | 8-Bit | A Boy and His | Action | Aero | Alcoholic | Alien | Allied | All-American | All-Night | Almighty | Amateur | Amazing | Amazon | American | Amish | Amphibious | Ancient | Angry | Apathetic | Aquatic | Arcane | Armored | Art of | Asian | Astral | Australian | Awesome | Barbie's | Bewildering | Biblical | Bionic | Bizarre | Bizarro | Black | Blasphemous | Blazing | Bling Bling | Blissful | Bonk's | Boring | Bouncin' | Brain-Damaged | British | Britney Spears' | BudgetSoft Presents: | Caesar's | Canadian | Cantankerous | Caribbean | Catholic | Celebrity | Celtic | Charlie Brown's | Children of the | Chillin' | Chinese | Chocolate | Christian | Claustrophobic | College | Colonial | Combat | Communist | Confusing | Cool | Corporate | Cosmic | Crazy | Creepy | Cthulhu's | Curse of the | Custom | Cyber | Cybernetic | Dangerous | Darkest | Day of the | Def Jam | Demonic | Depressing | Deranged | Derek Smart's | Dirty | Disney's | Distinguished | Disturbing | Divine | Donkey Kong's | Double | Downtown | Dr. | Dracula's | Drug-Induced | Drunken | Duke Nukem: | Dynamite | Ebony | Eco-Friendly | Educational | Elderly | Electric | Elite | Emo | Endless | Enormous | Enraged | Epic | Erotic | Escape from the | Eternal | European | Everybody Hates the | Everybody Loves the | Exciting | Excruciating | Exquisite | Fabulous | Fancy | Fantastic | Fantasy | Fatal | Feverish | Fiery | Final | First-Person | Fisher Price | Flamboyant | Fluffy | Flying | Forbidden | Forgotten | Frankenstein's | French | Frisky | Fruity | Full Metal | Furry | Future | Galactic | Generic | Geriatric | German | Ghetto | Giant | Glowing | Go Go | God of | Golden | Grand | Great | Grimy | Guitar | Happy | Hardcore | Haunted | Hazardous | Heavy | Heinous | Helicopter | Hidden | Hideous | Hillbilly | Hindu | History of the | Ho-Hum | Holy | Horrifying | Hyper | Imperial | Impossible | In Search of | In Search of the | In the Lost Kingdom of | In Your Face | Inappropriate | Inbred | Incomprehensible | Incredible | Indian | Indiana Jones and the | Inept | Infinite | Ingenious | Insane | Intellectual | Intelligent | Intense | International | Internet | Interstellar | Invisible | Irish | Iron | Irresistible | Irritating | Islamic | Italian | Jackie Chan's | Jamaican | Japanese | Jedi | Jewish | Johnny Turbo's | John Romero's | Kabuki | Kamikaze | Kermit's | Killer | Kinky | Kirby's | Kosher | Kung-fu | Jack Thompson's | Lair of the | Latino | Lazy | Legacy of | Leisure Suit | Lethal | Little | Looney Tunes | Lost | Low G | Lucky | Luigi's | M.C. Escher's | Madden | Magnetic | Major | Mario's | Mary Kate and Ashley's | Maximum | Mechanized | Medieval | Mega | Mega Man's | Merciless | Metal | Mexican | Michael Jackson's | Mickey's | Micro | Mighty | Mind-Bending | Miracle | Monty Python's | Morbid | Morbidly Obese | Mr. | MTV's | Muppet | My First | My Little | My Very Own | Mythical | Narcoleptic | Nasty | National Lampoon's | Naughty | NBA | NCAA | Nerf | Neo | Neon | Neurotic | New | Nihilistic | Ninja | No One Can Stop the | Nostalgic | Nudist | Obsessive-Compulsive | Occult | Olympic | Omega | Orbital | Pagan | Panzer | Papal | Paranoid | Pathetic | Peaceful | Perfect | Perverted | Political | Post-Apocalyptic | Prehistoric | Preschool | Presidential | Primal | Pro | Profane | Psychedelic | Psycho | Quiet | Rad | Radical | Radioactive | Real | Red Hot | Regal | Relentless | Religious | Remote | Renegade | Retarded | Retro | Rise of the | Robot | Rock 'n' Roll | Rocket-Powered | Rockin' | Rogue | Romantic | Royal | Rural | Russian | Samba de | Samurai | Satan's | Savage | Save Yourself from the | Scandanavian | Scooby Doo and the | Scottish | Screaming | Secret of the | Shady | Shameful | Sid Meier's | Silent | Silly | Sinister | Sleazy | Sleepy | Small-Time | Sonic's | Soviet | Space | Spectacular | Spirit of the | Spooky | Spunky | Stealth | Stoic | Strategic | Street | Stupendous | Subatomic | Summer | Super | Supreme | Surprise | Tasteless | Team | Teenage | Telekinetic | Terrible | The | The Care Bears' | The Castle of | The Castle of the | The Great | The Harlem Globetrotters: | The Hunt For the | The Incredible | The Infernal | The Last | The Secret Weapon of the | The Simpsons' | The Sims: | The Six Million Dollar | Third-World | Throbbing | Tiger Woods' | Tom Clancy's | Tony Hawk's | Topsy-Turvy | Toxic | Transvestite | Trendy | Tribal | Tropical | True Crime: | Turbo | Twin | Twisted | Ultimate | Ultra | Unbelievable | Undead | Unforgettable | Unholy | Unpleasant | Unreal | Unremarkable | Unstoppable | Urban | Vampire | Vegetarian | Viking | Violent | Virtua | Virtual | Wacky | Wandering | We Love | Weary | Wonderous | Wooden | Wrath of the | Ye Olde | Yoshi's | Zany }} {{ 3D | Acid | Aerobics | Afro | Alien | Alligator | Amish | Android | Animal | Arcade | Architecture | Army | Assault | Axe | Baking | Ballet | Balloon | Banana | Bandicoot | Banjo | Barbarian | Barcode | Bass | Batman | Bazooka | Beach | Beast | Beat | Beautician | Bedtime | Bible | Bimbo | Bingo | Biplane | Blade | Blimp | BMX | Bobsled | Bomb | Bomberman | Bong | Bongo | Booty | Breakdancing | Bubble | Bubblegum | Buddhist | Bungie | Burger | Business | Cannibal | Car | Cardboard | Carnival | Casino | Castlevania | Catapult | Caveman | Chainsaw | Chase | Cheese | Chef | Chess | Chicken | Chipmunk | Chocobo | Circus | City | College | Combat | Computer | Conga | Cookie | Cooking | Cowboy | Cricket | Crowbar | Crystal | Cyborg | Dating | Deer Hunter | Demon | Dentist | Devil | Dinosaur | Disco | Dog | Donkey | Dragon | Driving | Drug-Dealing | Duck | Dungeon | Dwarf | Elevator | Equestrian | Fashion | Fantasy | Fencing | Fire | Flatulence | Florist | Forklift | Frisbee | Frog | Fun | Fun Noodle | Funk | Furry | Ghost | Gimp | Gnome | Go-Kart | Goblin | Godzilla | Golf | Gopher | Goth | Graveyard | Grizzly Bear | Guitar | Gun | Hair Salon | Hammer | Hamster | Handgun | Hang Glider | Hardware | Harpoon | Harvest | Helicopter | Hillbilly | Hippo | Hitman | Hobo | Hockey | Hovercraft | Ice | Ice Cream | Indian | Insect | Internet | Jackhammer | Janitor | Jazz | Jetpack | Jetski | Juggalo | Jungle | Kabuki | Kangaroo | Karaoke | Karate | Kart | Katana | Kitchen | Kung-fu | Landmine | Laser | Lawnmower | Lego | Leisure Suit | Lightning | Limbo | Lizard | Llama | Lowrider | Mafia | Mahjong | Makeout | Makeover | Mall | Manlove | Matador | Math | Maze | Mech | Metal | Midget | Military | Mind Control | Monkey | Monster | Monster Truck | Moon | Moped | Motorcycle | Motocross | Mountain Climber | Mummy | Mushroom | Mutant | NASCAR | Nazi | Ninja | Nuclear | Nudist | Octopus | Office | Ostrich | Outlaw | Pachinko | Penguin | Piano | Pirate | Platypus | Plumber | Plunger | Pogo | Pokemon | Police | Polka | Pony | Porn | Princess | Prison | Programming | Punching | Puppy | Puzzle | Quantum | Quiz | Rabbit | Raccoon | Railroad | Rainbow | River | Robot | Rocket | Rodeo | Sailboat | Sailor | Samurai | Sandwich | Scooter | Scorched Earth | Sewer | Sex | Shadow | Shark | Shaving | Shock | Shopping | Shotgun | Skate | Skydiving | Sloth | Sniper | Snowboard | Soccer | Software | Spatula | Speed | Spelling | Spelunking | Spider | Spork | Squirrel | Stapler | STD | Stick | Stunt | Submarine | Sumo | Sudoku | Sunshine | Surf | Surgery | Sushi | Sword | Tank | Techno | Tennis | Terrorist | Tetris | Thief | Thunder | Toon | Train | Trampoline | Transvestite | Tricycle | Turtle | Typing | UFO | Unicorn | Unicycle | Vampire | Vegetarian | Vigilante | Viking | Vocabulary | Wagon | Walrus | Wedding | Weight Loss | Werewolf | Whale | Wheelchair | Wizard | Workout | Worm | Wrestling | Writing | WWE | Yak | Yeti | Yoga | Zamboni }} {{ - 2nd Impact | - 3rd Strike | 1942 | 25th Anniversary Edition | 2K | 2000 | 3000 | 3D | 64 | 95 | Academy | Advance | Adventure | Agent | All-Stars | Alpha | Anarchy | Annihilation | Anthology | Apocalypse | Arena | Armada | Armageddon | Assassins | Assault | at the Olympics | Attack | Babies | Bandit | Bandits | Bastards | Battle | Battalion | Base | Baseball | Basketball | Beatdown | Blast | Blaster | Bloodbath | Boxing | Boy | Brawl | Brothers | Camp | Caper | Carnage | Castle | CD | Challenge | Championship | Chase | Choreographer | Chronicles | City | Co-Op | Collection | - Collector's Edition | College | Colosseum | Combat | Commander | Commando | Competition | Conflict | Connection | Conquest | Conspiracy | Conundrum | Corps | Country | Creator | Crime Scene Investigation | Crisis | Crusade | Crusader | Dance Mix | Dance Party | Dancers | Daredevils | Dash | Deathmatch | Deluxe | Demolition | Derby | Desperadoes | Destruction | Detective | Diesel | Disaster | DJ | Domination | Dreamland | DS | Dudes | Dungeon | DX | Dynasty | Dystopia | Empire | Encounter | Enforcer | Epidemic | Espionage | EX | Exhibition | Experience | Expert | Explorer | Explosion | Express | Extra | Extravaganza | Factory | Family | Fandango | Fantasy | Farmer | Fest | Feud | Fever | Fiasco | Fiesta | Fight | Fight Club | Fighter | Football | For Kids | Force | Forever | Fortress | Freak | Frenzy | from Hell | from Mars | from Outer Space | from Planet X | Fun | Gaiden | Gang | Girl | Gold | Gone Wild | Gladiator | Groove | GT | Havoc | Hell | Hero | Heroes | Hoedown | Hop-A-Bout | Horde | Horror | Hospital | - Hot Pursuit | House | Hunt | Hunter | II | III | Ignition | in Africa | in Busytown | in Crazyland | in Middle-Earth | in My Pocket | in Space | in the Bayou | in the Dark | in the Desert | in the Hood | in the Magic Kingdom | in the Middle East | in the Outback | in the Salad Kingdom | in the Sky | in Toyland | in Vegas | Incident | Inferno | Insanity | Inspector | Insurrection | Interceptor | Invaders | Invasion | Island | Jam | Jamboree | Jihad | Joe | Journey | Jr. | Kid | Kids | King | Kingdom | Knights | Kombat | Legend | Legends | - Limited Edition | Live | Lord | Machine | Madness | Man | Mania | Maniac | Mansion | Marines | Massacre | Master | Maxx | Mayhem | Melee | Mission | Munchers | Nation | Nightmare | Nitro | Odyssey | of Death | of Doom | of Fury | of Love | of Magic | of Might and Magic | of Mystery | of the Blood God | of the Damned | of the Dead | of the Deep | of the Third Reich | on the Oregon Trail | Offensive | Omega | on the High Seas | On The Road | on Wheels | Online | Onslaught | Operation | Operatives | Oppression | Orchestra | Over Normandy | Overdrive | Overload | Overlords | Paintbrawl | Palace | Panic | Paratroopers | Park | Party | Patrol | Phonics | Pimps | Pinball | Pioneer | Planet | Playhouse | Plus | Police | Polo | Posse | Power | Preacher | Princess | Pro | Project | Prophecy | Psychiatrist | Punch-Out!! | Punishment | Quest | Quiz | Racer | Rage | Raider | Rally | Rampage | Rangers | Ransom | Rave | Rebellion | Reloaded | Remix | Rescue | Restaurant | Returns | Revenge | Revisited | Revolution | Rider | Riders | Rocket | Romance | Romp | Roundup | Runner | Rush | Safari | Saga | Saloon | Scam | Scandal | School | Shack | Shoot | Shootout | Showdown | Siege | Simulator | Sisters | Slam | Slaughter | Slayer | Smackdown | Smash | Smuggler | Solid | Soldier | Special Edition | Spectacular | Spies | Spree | Squadron | Stadium | Starring Mickey Mouse | Stars | Story | Strike Force | Strikes Again | Strikes Back | Struggle | Studio | Summit | Summoner | Superstar | Symphony | Syndicate | Syndrome | Tactics | Takedown | Tale | Task Force | Temple | Terror | Thieves | - The Card Game | - The Dark Project | - The Gathering Storm | - The Lost Levels | - The Movie | - The Next Generation | - The Quickening | Through Time | Throwdown | - Total War | Tournament | Trader | Train | Trainer | Training | Tribe | Trilogy | Trivia | Troopers | Turbo | Tycoon | Ultra | Unit | Uncensored | Underground | Underworld | Universe | Unleashed | Uprising | Vengeance | Voyage | vs. Capcom | vs. Street Fighter | vs. The Space Mutants | Warfare | Warrior | Wars | Wasteland | World | World Cup | World Tour | Wranglers | X | XP | XXX | X-treme | Yoga | Z | Zombies | Zone }}
+%end
