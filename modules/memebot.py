@@ -245,9 +245,9 @@ class MemeBot(Module):
                 raise SQLObjectNotFound
 
             if comment1:
-                comments(url=old, text=comment1, author=me)
+                Comments(url=old, text=comment1, author=me)
             if comment2:
-                comments(url=old, text=comment2, author=me)
+                Comments(url=old, text=comment2, author=me)
 
             # chew them out unless its my own
             if old.author.name.lower() != nick:
@@ -270,9 +270,9 @@ class MemeBot(Module):
             url = URL(url=orig, clean=clean, author=me, channel=channel)
 
             if comment1:
-                comments(url=url, text=comment1, author=me)
+                Comments(url=url, text=comment1, author=me)
             if comment2:
-                comments(url=url, text=comment2, author=me)
+                Comments(url=url, text=comment2, author=me)
             me.points_new = me.points_new + 1
 
         except Exception, error:
