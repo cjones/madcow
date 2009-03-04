@@ -120,8 +120,8 @@ class Weather(object):
                 data[u'Temperature'] = u'\x1b[5m' + data[u'Temperature'] + \
                         u'\x1b[0m'
 
-        except:
-            pass
+        except Exception, error:
+            log.exception(error)
 
         output = []
         for key, val in data.items():
