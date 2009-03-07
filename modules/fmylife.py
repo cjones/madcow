@@ -41,7 +41,7 @@ class Main(Module):
                 url = self.rand_url
             doc = geturl(url)
             text = self.regex.search(doc).group(1)
-            return unescape_entities(text).decode('utf8')
+            return unescape_entities(text)
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
