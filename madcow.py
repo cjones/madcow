@@ -57,7 +57,7 @@ __all__ = [u'Madcow']
 MADCOW_URL = u'http://code.google.com/p/madcow/'
 CHARSET = u'utf-8'
 CONFIG = u'madcow.ini'
-SAMPLE_HASH = u'3e45185d0bd709dbace347971ff05f88'
+SAMPLE_HASH = u'855cf37a528495a806853b65132126a2'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt=u'%x %X',
            format=u'[%(asctime)s] %(levelname)s: %(message)s')
 
