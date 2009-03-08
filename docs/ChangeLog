@@ -1,3 +1,11 @@
+1.5.6: Sun Mar  8 03:04:59 PDT 2009
+    * Add new grufti responses from solamen - 8ball, GladOS, video game name
+      generator, fortune cookies
+    * New module -- fuck my life random quotes
+    * Fix bug with memebot where lines with comments throw an exception
+    * Fix broken steam module
+    * Weather module logs errors
+
 1.5.5: Wed Feb 25 00:52:47 PST 2009
     * Add support for superscript's in calc module
     * Fix bug with busted HTML color in AIM protocol
