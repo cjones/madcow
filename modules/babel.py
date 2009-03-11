@@ -111,7 +111,8 @@ class Main(Module):
         exec(u'data = ' + data)
         if isinstance(data, list):
             data = data[0]
-        data = encoding.convert(data)
+        data = data.decode('utf8', 'replace')
+        #data = encoding.convert(data)
         return data
 
     @cache_property(_lang_timeout)
