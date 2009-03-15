@@ -41,7 +41,7 @@ class Main(Module):
                 url = self.rand_url
             doc = geturl(url)
             text = self.regex.search(doc).group(1)
-            return stripHTML(text)
+            return stripHTML(stripHTML(text))
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)

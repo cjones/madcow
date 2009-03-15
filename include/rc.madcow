@@ -25,14 +25,14 @@ getpid() {
 
 stop_madcow() {
     pid=`getpid` || exit 1
-    kill -SIGTERM $pid
+    kill -15 $pid
     rm -f $pidfile
     echo "madcow stopped"
 }
 
 reload_madcow() {
     pid=`getpid` || exit 1
-    kill -HUP $pid
+    kill -1 $pid
     echo "madcow reloaded"
 }
 
@@ -54,13 +54,13 @@ restart_madcow() {
 
 pause_madcow() {
     pid=`getpid` || exit 1
-    kill -SIGSTOP $pid
+    kill -17 $pid
     echo "madcow paused"
 }
 
 resume_madcow() {
     pid=`getpid` || exit 1
-    kill -SIGCONT $pid
+    kill -19 $pid
     echo "madcow resumed"
 }
 
