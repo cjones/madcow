@@ -19,7 +19,7 @@
 
 """Get a random confession from fmylife.com"""
 
-from include.utils import Module, unescape_entities
+from include.utils import Module, stripHTML
 from include.useragent import geturl
 import logging as log
 import re
@@ -41,7 +41,7 @@ class Main(Module):
                 url = self.rand_url
             doc = geturl(url)
             text = self.regex.search(doc).group(1)
-            return unescape_entities(text)
+            return stripHTML(text)
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
