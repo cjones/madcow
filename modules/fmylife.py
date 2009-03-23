@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2007, 2008 Christopher Jones
+# Copyright (C) 2009 Christopher Jones & Bryan Burns
 #
 # This file is part of Madcow.
 #
@@ -29,7 +29,7 @@ class Main(Module):
     pattern = re.compile(u'^\s*fml\s*(\d+)?\s*$', re.I)
     require_addressing = True
     help = u'fml - misery from fmylife.com'
-    rand_url = 'http://api.betacie.com/view/random?key=readonly&language=en'
+    rand_url = 'http://api.betacie.com/view/random/nocomment?key=readonly&language=en'
     spec_url = 'http://api.betacie.com/view/%d/nocomment?key=readonly&language=en'
     regex = re.compile(r'<text>(.*)</text>')
     
