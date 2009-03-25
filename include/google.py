@@ -66,7 +66,7 @@ class Google(object):
     correct = re.compile(r'Did you mean.*?:.*?</font>.*?<a.*?>\s*(.*?)\s*</a>',
                          re.I | re.DOTALL)
     reConversionDetected = re.compile(u'More about (calculator|currency)')
-    reConversionResult = re.compile(u'<h2 class=r>.*?<b>(.*?)<\/b><\/h2>')
+    reConversionResult = re.compile(u'<h2 class=r.*?>.*?<b>(.*?)<\/b><\/h2>')
     extra_re = re.compile(r'<div id=res class=med>(.*?)</div>', re.DOTALL)
     table_re = re.compile(r'<table.*?>(.*?)</table>', re.DOTALL | re.I)
     rows_re = re.compile(r'<tr.*?>(.*?)</tr>', re.DOTALL | re.I)
