@@ -32,6 +32,7 @@ ANNOYING = (# boing boing
 
             # generally irritating nonsense
             'kevinrose',
+            'meTakingAShit',
             #'TheMime',  # I LIKE THE MIME
             'macworld',
             'tinybuddha',
@@ -64,15 +65,23 @@ def main():
                         help='delete annoying people')
     optparse.add_option('-l', '--list', dest='action', action='store_const',
                         const='list', help='list friends')
+    optparse.add_option('-f', '--friend', metavar='NAME', help='add friend')
     opts, args = optparse.parse_args()
-
-    if not opts.action:
-        optparse.print_help()
-        return 1
 
     log.root.setLevel(log.ERROR)
     api = tweetprinter.Main(Madcow(Config(CONFIG), PREFIX)).api
     friends = api.GetFriends()
+
+    if opts.friend:
+        print 'adding %s' % opts.friend
+        api.CreateFriendship(opts.friend)
+
+    if not opts.action:
+        if opts.friend:
+            return 0
+        optparse.print_help()
+        return 1
+
 
     if opts.action == 'list':
         for friend in friends:
