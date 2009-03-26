@@ -756,19 +756,26 @@ class Config(object):
                 raise ConfigError(u'missing setting %s in section %s' %
                                   (attr, self.name))
 
-    def __init__(self, filename):
+    def __init__(self, filename, default):
+        # XXX this is pretty flawed
+        self.sections = self.parse(filename)
+        self.defaults = self.parse(default)
+
+    @classmethod
+    def parse(cls, filename):
         if not os.path.exists(filename):
             raise FileNotFound, filename
         parser = ConfigParser()
         parser.read(filename)
-        self.sections = {}
-        for name in parser.sections():
-            self.sections[name] = self.ConfigSection(parser.items(name), name)
+        return dict((name, cls.ConfigSection(parser.items(name), name))
+                    for name in parser.sections())
 
     def __getattr__(self, attr):
         attr = attr.lower()
         if attr in self.sections:
             return self.sections[attr]
+        elif attr in self.defaults:
+            return self.defaults[attr]
         else:
             raise ConfigError, u"missing section: %s" % attr
 
@@ -871,6 +878,7 @@ def main():
     prefix = os.path.abspath(os.path.dirname(prefix))
     sys.path.insert(0, prefix)
     default_config = os.path.join(prefix, CONFIG)
+    extra_config = os.path.join(prefix, 'include/defaults.ini')
 
     # make sure proper subdirs exist
     for subdir in u'data', u'logs':
@@ -924,7 +932,7 @@ def main():
         return 1
 
     try:
-        config = Config(opts.config)
+        config = Config(opts.config, extra_config)
     except FileNotFound:
         log.error(u'config file not found, see README')
         return 1
