@@ -329,3 +329,11 @@ agent=Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)
 ; not work if you disable this.
 ;
 cookies=yes
+
+; periodically check if a new version of madcow has been released.  this does
+; not send any information, nor will it perform an actual update.   by default,
+; it will check once a day and notify when it is out of date.
+[updater]
+enabled=yes
+updatefreq=86400
+channel=#madcow
