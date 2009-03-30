@@ -56,6 +56,7 @@ USAGE = '%prog < [email]'
 newline_re = re.compile(r'[\r\n]+')
 encoded_re = re.compile(r'(=\?.*?\?.*?\?.*?\?=)')
 jpeg_ext_re = re.compile(r'^\.jp(e?g|e)$', re.I)
+spam_re = re.compile(r'\s*-+original\s+message.*?-+.+', re.I)
 
 def lookup_charset(charset):
     """See if we support this encoding, or return default one"""
@@ -136,7 +137,8 @@ def main():
     headers = ['from: %s' % sender, 'to: %s' % channel]
     body = sorted(body, key=lambda item: len(item), reverse=True)
     if body:
-        headers.append('message: %s' % body[0])
+        body = spam_re.sub('', body[0])
+        headers.append('message: %s' % body)
 
     messages = []
     if images:
