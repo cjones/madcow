@@ -42,6 +42,7 @@ def find_madcow():
     return prefix, config
 
 PREFIX, CONFIG = find_madcow()
+DEFAULTS = os.path.join(PREFIX, 'include/defaults.ini')
 sys.path.insert(0, PREFIX)
 
 from include.utils import stripHTML
@@ -83,10 +84,12 @@ def main():
     parser = OptionParser(version=__version__, usage=USAGE)
     parser.add_option('-c', '--config', metavar='<file>', default=CONFIG,
                       help='location of config (%default)')
+    parser.add_option('-d', '--defaults', metavar='<file>',
+                      default=DEFAULTS, help='location of defaults file')
     opts, args = parser.parse_args()
 
     # get gateway information from config
-    config = Config(opts.config)
+    config = Config(opts.config, opts.defaults)
     if not config.gateway.enabled:
         print >> sys.stderr, 'error: gateway is disabled'
         return 1
