@@ -45,8 +45,7 @@ class Main(Module):
             else:
                 url = self._search_url + urllib.quote(query.encode('utf-8'))
             item = feedparser.parse(url).entries[0]
-            return u' | '.join(map(stripHTML,
-                                   [item.link, item.title, item.description]))
+            return u' | '.join([item.link, item.description, item.updated])
 
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
