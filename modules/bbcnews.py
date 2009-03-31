@@ -28,7 +28,7 @@ import logging as log
 
 class Main(Module):
 
-    pattern = re.compile(u'^\s*bbcnews(?:\s+(.+))?', re.I)
+    pattern = re.compile(u'^\s*bbc(?:news)?(?:\s+(.+))?', re.I)
     require_addressing = True
     help = u'bbcnews <string> - Searches the BBC News Website'
     _error = u'Looks like the BBC aren\'t co-operating today.'
