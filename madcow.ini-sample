@@ -106,6 +106,7 @@ urban=yes               ; look up word/phrase on urban dictionary
 weather=yes             ; look up weather from wunderground
 wikipedia=yes           ; look up summary from wikipedia
 wikiquotes=yes          ; look up quotes from wikiquotes
+yelp=yes                ; get restaraunt rating/address
 ;
 ; the following modules are either silly, or potentially annoying/offensive.
 ; they are disabled by default so you can make the decision about how
@@ -338,3 +339,7 @@ cookies=yes
 enabled=yes
 updatefreq=86400
 channel=#madcow
+
+; for the yelp module, set default search location
+[yelp]
+default_location=San Francisco, CA
