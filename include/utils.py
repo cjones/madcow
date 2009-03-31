@@ -298,7 +298,8 @@ def test_module(mod):
     from madcow import Madcow, Config
     import logging as log
     log.basicConfig(level=log.ERROR)
-    config = Config(configfile)
+    defaults = os.path.join(prefix, 'include/defaults.ini')
+    config = Config(configfile, defaults)
     madcow = Madcow(config, prefix)
     main = mod(madcow)
     try:
