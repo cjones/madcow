@@ -79,9 +79,10 @@ class Main(Module):
             phone = u''.join(phone.contents).strip()
             address.append(phone)
             address = u', '.join(part for part in address if part)
-            return self.result_fmt % {'nick': nick, 'name': name, 'cat': cat,
-                                      'rating': rating, 'reviews': reviews,
-                                      'address': address, 'url': url}
+            result = self.result_fmt % {'nick': nick, 'name': name, 'cat': cat,
+                                        'rating': rating, 'reviews': reviews,
+                                        'address': address, 'url': url}
+            return stripHTML(result)
         except Exception, error:
             log.warn('error in module %s' % self.__module__)
             log.exception(error)
