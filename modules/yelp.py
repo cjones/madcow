@@ -19,70 +19,73 @@
 
 """Restaraunt reviews"""
 
+from include.BeautifulSoup import BeautifulSoup
+from include.useragent import geturl
 from include.utils import Module
+from learn import Main as Learn
+from urlparse import urljoin
 import logging as log
 import re
-from include.useragent import geturl
-from include.utils import stripHTML
-from include.BeautifulSoup import BeautifulSoup
-from urlparse import urljoin
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
 __all__ = []
 
 DEFAULT_LOCATION = 'San Francisco, CA'
+BASEURL = 'http://www.yelp.com/'
+SEARCHURL = urljoin(BASEURL, '/search')
+RESULT_FMT = u'%(nick)s: %(name)s (%(cat)s) - %(rating)s/5 (%(reviews)s) - %(address)s [%(url)s]'
 
 class Main(Module):
 
-    base_url = 'http://www.yelp.com/'
-    search_url = urljoin(base_url, '/search')
     pattern = re.compile(r'^\s*yelp\s+(.+?)(?:\s+@(.+))?\s*$', re.I)
     help = 'yelp <name> [@location] - restaraunt reviews'
-    result_attrs = {'class': re.compile(r'businessresult')}
-    name_attrs = {'class': 'highlighted'}
-    cat_attrs = {'class': 'itemcategories'}
-    rating_attrs = {'class': 'rating'}
-    review_attrs = {'class': 'reviews'}
-    phone_attrs = {'class': 'phone'}
-    result_fmt = (u'%(nick)s: %(name)s (%(cat)s) - %(rating)s/5 (%(reviews)s)'
-                  u' - %(address)s [%(url)s]')
 
     def __init__(self, madcow=None):
         try:
             self.default_location = madcow.config.yelp.default_location
         except:
             self.default_location = DEFAULT_LOCATION
+        try:
+            self.learn = Learn(madcow=madcow)
+        except:
+            self.learn = None
 
     def response(self, nick, args, kwargs):
         try:
+            # sanity check args and pick default search location
             desc, loc = args
+            if desc.startswith('@') and not loc:
+                raise Exception('invalid search')
             if not loc:
-                loc = self.default_location
+                if self.learn:
+                    loc = self.learn.lookup(u'location', nick)
+                if not loc:
+                    loc = self.default_location
+
+            # perform search
             opts = opts={'find_desc': desc, 'ns': 1, 'find_loc': loc, 'rpp': 1}
-            page = geturl(self.search_url, opts=opts)
-            soup = BeautifulSoup(page)
-            result = soup.find('div', attrs=self.result_attrs)
-            name = result.find('span', attrs=self.name_attrs)
-            name = u''.join(name.contents).strip()
-            cat = result.find('div', attrs=self.cat_attrs).find('a')
-            cat = u''.join(cat.contents).strip()
-            rating = result.find('div', attrs=self.rating_attrs).find('img')
-            rating = rating['alt'].strip().replace(' star rating', '')
-            reviews = result.find('a', attrs=self.review_attrs)
-            url = urljoin(self.base_url, reviews['href'])
-            reviews = u''.join(reviews.contents).strip()
-            address = result.find('address')
-            address = [part.strip() for part in address.contents
-                       if isinstance(part, unicode)]
-            phone = result.find('div', attrs=self.phone_attrs)
-            phone = u''.join(phone.contents).strip()
-            address.append(phone)
+            page = geturl(SEARCHURL, opts)
+
+            # extract meaningful data from first result
+            soup = BeautifulSoup(page, convertEntities='html')
+            result = soup.body.find('div', 'businessresult clearfix')
+            name = result.find('a', id='bizTitleLink0').findAll(text=True)[1:]
+            name = u''.join(name).strip()
+            cat = result.find('div', 'itemcategories').a.renderContents()
+            rating = result.find('div', 'rating').img['alt']
+            rating = rating.replace(' star rating', '')
+            reviews = result.find('a', 'reviews')
+            url = urljoin(BASEURL, reviews['href'])
+            reviews = reviews.renderContents()
+            address = [i.strip() for i in result.address.findAll(text=True)]
             address = u', '.join(part for part in address if part)
-            result = self.result_fmt % {'nick': nick, 'name': name, 'cat': cat,
-                                        'rating': rating, 'reviews': reviews,
-                                        'address': address, 'url': url}
-            return stripHTML(result)
+
+            # return rendered page
+            return RESULT_FMT % {'nick': nick, 'name': name, 'cat': cat,
+                                 'rating': rating, 'reviews': reviews,
+                                 'address': address, 'url': url}
+
         except Exception, error:
             log.warn('error in module %s' % self.__module__)
             log.exception(error)
