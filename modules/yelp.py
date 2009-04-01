@@ -35,6 +35,7 @@ DEFAULT_LOCATION = 'San Francisco, CA'
 BASEURL = 'http://www.yelp.com/'
 SEARCHURL = urljoin(BASEURL, '/search')
 RESULT_FMT = u'%(nick)s: %(name)s (%(cat)s) - %(rating)s/5 (%(reviews)s) - %(address)s [%(url)s]'
+clean_re = re.compile(r'^\s*\d+\.\s*(.+?)\s*$')
 
 class Main(Module):
 
@@ -70,8 +71,8 @@ class Main(Module):
             # extract meaningful data from first result
             soup = BeautifulSoup(page, convertEntities='html')
             result = soup.body.find('div', 'businessresult clearfix')
-            name = result.find('a', id='bizTitleLink0').findAll(text=True)[1:]
-            name = u''.join(name).strip()
+            name = result.find('a', id='bizTitleLink0').findAll(text=True)
+            name = clean_re.search(u''.join(name)).group(1)
             cat = result.find('div', 'itemcategories').a.renderContents()
             rating = result.find('div', 'rating').img['alt']
             rating = rating.replace(' star rating', '')
