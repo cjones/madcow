@@ -66,7 +66,8 @@ class Main(object):
 
         try:
             log.debug(u'getting tweets...')
-            tweets = self.api.GetFriendsTimeline(since=self.__get_update_unicode())
+            since = since=self.__get_update_unicode()
+            tweets = self.api.GetFriendsTimeline(since=since)
         except Exception, error:
             try:
                 if error.code == 304:
@@ -89,9 +90,8 @@ class Main(object):
             lines.append(u">> tweet from %s: %s <<" % (
                     t.user.screen_name, stripHTML(t.text)))
 
-        self.__updatelast()
-
         if lines:
+            self.__updatelast()
             return u"\n".join(lines)
         else:
             return None
