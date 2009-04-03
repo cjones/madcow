@@ -20,6 +20,7 @@ def find_madcow():
     return prefix, config
 
 PREFIX, CONFIG = find_madcow()
+DEFAULTS = os.path.join(PREFIX, 'include/defaults.ini')
 sys.path.insert(0, PREFIX)
 
 from madcow import Config, Madcow
@@ -69,7 +70,7 @@ def main():
     opts, args = optparse.parse_args()
 
     log.root.setLevel(log.ERROR)
-    api = tweetprinter.Main(Madcow(Config(CONFIG), PREFIX)).api
+    api = tweetprinter.Main(Madcow(Config(CONFIG, DEFAULTS), PREFIX)).api
     friends = api.GetFriends()
 
     if opts.friend:
