@@ -11,6 +11,9 @@ class ConfigSection(object):
         for key, val in self.__dict__.iteritems():
             yield key, val
 
+    def __getattribute__(self, key):
+        return super(ConfigSection, self).__getattribute__(key.lower())
+
 
 class Config(object):
 
@@ -52,3 +55,6 @@ class Config(object):
                     val = False
                 data.setdefault(section.lower(), {})[key] = val
         return data
+
+    def __getattribute__(self, key):
+        return super(Config, self).__getattribute__(key.lower())
