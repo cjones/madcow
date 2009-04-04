@@ -1,3 +1,11 @@
+1.5.8: Sat Apr  4 01:09:59 PDT 2009
+    * new module - lookup restaraunt rating/location from yelp.com
+    * new module - lookup cnn headline
+    * fix broken twitter gateway
+    * bbc module responds to "bbc" instead of "bbcnews"
+    * rework config code to use defaults file for missing options
+    * general code cleanup
+
 1.5.7: Wed Mar 25 18:49:34 PDT 2009
     * Add defaults.ini for backup for incomplete config files
     * Fix broken google calculator module
