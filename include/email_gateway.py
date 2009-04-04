@@ -26,33 +26,21 @@ import codecs
 import os
 import re
 import socket
+from utils import find_madcow
 
-def find_madcow():
-    """Find where we are run from and config file location"""
-    prefix = sys.argv[0] if __file__.startswith(sys.argv[0]) else __file__
-    prefix = os.path.dirname(prefix)
-    prefix = os.path.abspath(prefix)
-    parts = prefix.split(os.sep)
-    while parts:
-        prefix = os.sep.join(parts)
-        config = os.path.join(prefix, 'madcow.ini')
-        if os.path.exists(config):
-            break
-        parts.pop()
-    return prefix, config
+prefix, configfile = find_madcow()
+sys.path.insert(0, prefix)
 
-PREFIX, CONFIG = find_madcow()
-DEFAULTS = os.path.join(PREFIX, 'include/defaults.ini')
-sys.path.insert(0, PREFIX)
-
+from madcow import DEFAULTS
 from include.utils import stripHTML
-from madcow import Config
+from include.config import Config
 
 __version__ = '0.5'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
 __all__ = []
 
 USAGE = '%prog < [email]'
+defaults = os.path.join(prefix, DEFAULTS)
 newline_re = re.compile(r'[\r\n]+')
 encoded_re = re.compile(r'(=\?.*?\?.*?\?.*?\?=)')
 jpeg_ext_re = re.compile(r'^\.jp(e?g|e)$', re.I)
@@ -83,10 +71,10 @@ def main():
 
     # read argv
     parser = OptionParser(version=__version__, usage=USAGE)
-    parser.add_option('-c', '--config', metavar='<file>', default=CONFIG,
+    parser.add_option('-c', '--config', metavar='<file>', default=configfile,
                       help='location of config (%default)')
     parser.add_option('-d', '--defaults', metavar='<file>',
-                      default=DEFAULTS, help='location of defaults file')
+                      default=defaults, help='location of defaults file')
     opts, args = parser.parse_args()
 
     # get gateway information from config

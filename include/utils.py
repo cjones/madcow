@@ -256,6 +256,7 @@ def stripHTML(data):
     return data
 
 
+# XXX lulz there is a builtin for this shit.. i can nuke this crap
 def unescape_entities(text):
     for entity, name in entity_re.findall(text):
         if name in entities:
@@ -273,32 +274,39 @@ def unescape_entities(text):
 
 
 def slurp(path):
-    with open(path, u'rb') as file:
-        return file.read()
+    with open(path, 'rb') as fp:
+        return fp.read()
 
 
 def find_madcow():
     """Find where we are run from and config file location"""
-    prefix = sys.argv[0] if __file__.startswith(sys.argv[0]) else __file__
-    prefix = os.path.dirname(prefix)
-    prefix = os.path.abspath(prefix)
-    parts = prefix.split(os.sep)
+    if __file__.startswith(sys.argv[0]):
+        prefix = sys.argv[0]
+    else:
+        prefix = __file__
+    parts = os.path.abspath(os.path.dirname(prefix)).split(os.sep)
+    found = False
+    prefix = None
     while parts:
         prefix = os.sep.join(parts)
         config = os.path.join(prefix, 'madcow.ini')
         if os.path.exists(config):
+            found = True
             break
         parts.pop()
+    if not found:
+        raise Exception('No config file found')
     return prefix, config
 
 
 def test_module(mod):
     prefix, configfile = find_madcow()
     sys.path.insert(0, prefix)
-    from madcow import Madcow, Config
+    from madcow import Madcow, DEFAULTS
+    from include.config import Config
     import logging as log
     log.basicConfig(level=log.ERROR)
-    defaults = os.path.join(prefix, 'include/defaults.ini')
+    defaults = os.path.join(prefix, DEFAULTS)
     config = Config(configfile, defaults)
     madcow = Madcow(config, prefix)
     main = mod(madcow)

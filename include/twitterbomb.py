@@ -4,27 +4,16 @@ from optparse import OptionParser
 import sys
 import os
 import logging as log
+from utils import find_madcow
 
-def find_madcow():
-    """Find where we are run from and config file location"""
-    prefix = sys.argv[0] if __file__.startswith(sys.argv[0]) else __file__
-    prefix = os.path.dirname(prefix)
-    prefix = os.path.abspath(prefix)
-    parts = prefix.split(os.sep)
-    while parts:
-        prefix = os.sep.join(parts)
-        config = os.path.join(prefix, 'madcow.ini')
-        if os.path.exists(config):
-            break
-        parts.pop()
-    return prefix, config
+prefix, config = find_madcow()
+sys.path.insert(0, prefix)
 
-PREFIX, CONFIG = find_madcow()
-DEFAULTS = os.path.join(PREFIX, 'include/defaults.ini')
-sys.path.insert(0, PREFIX)
-
-from madcow import Config, Madcow
+from madcow import DEFAULTS, Madcow
+from include.config import Config
 from periodic import tweetprinter
+
+defaults = os.path.join(prefix, DEFAULTS)
 
 ANNOYING = (# boing boing
             'xenijardin',
@@ -70,7 +59,7 @@ def main():
     opts, args = optparse.parse_args()
 
     log.root.setLevel(log.ERROR)
-    api = tweetprinter.Main(Madcow(Config(CONFIG, DEFAULTS), PREFIX)).api
+    api = tweetprinter.Main(Madcow(Config(config, defaults), prefix)).api
     friends = api.GetFriends()
 
     if opts.friend:

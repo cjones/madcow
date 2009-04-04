@@ -24,7 +24,7 @@ import sys
 # verify python version is high enough
 if sys.version_info[0] * 10 + sys.version_info[1] < 25:
     error = RuntimeError(u'madcow requires python 2.5 or higher')
-    if __name__ == u'__main__':
+    if __name__ == '__main__':
         print >> sys.stderr, error
         sys.exit(1)
     else:
@@ -32,23 +32,23 @@ if sys.version_info[0] * 10 + sys.version_info[1] < 25:
 
 # deprecation warnings are annoying
 import warnings
-warnings.simplefilter(u'ignore')
+warnings.simplefilter('ignore')
 
-import os
-from ConfigParser import ConfigParser
-from optparse import OptionParser
-import re
 from time import sleep, strftime, time as unix_time
-import logging as log
+from include import useragent as ua, gateway
 from signal import signal, SIGHUP, SIGTERM
-import shutil
+from include.utils import slurp, Request
+from include.authlib import AuthLib
 from threading import Thread, RLock
+from include.config import Config
+from optparse import OptionParser
 from Queue import Queue, Empty
 from hashlib import md5
+import logging as log
+import shutil
 import codecs
-from include.authlib import AuthLib
-from include.utils import slurp, Request
-from include import useragent as ua, gateway
+import os
+import re
 
 __version__ = u'1.5.7'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -56,23 +56,13 @@ __all__ = [u'Madcow']
 
 MADCOW_URL = u'http://code.google.com/p/madcow/'
 CHARSET = u'utf-8'
-CONFIG = u'madcow.ini'
+CONFIG = 'madcow.ini'
+SAMPLE = 'madcow.ini-sample'
+DEFAULTS = 'include/defaults.ini'
 SAMPLE_HASH = u'528d1693555ff4ce9d2132e4e333c2b5'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt=u'%x %X',
            format=u'[%(asctime)s] %(levelname)s: %(message)s')
-
-
 delim_re = re.compile(r'\s*[,;]\s*')
-
-class FileNotFound(Exception):
-
-    """Raised when a file is not found"""
-
-
-class ConfigError(Exception):
-
-    """Raised when a required config option is missing"""
-
 
 class Madcow(object):
 
@@ -388,7 +378,7 @@ class Service(Thread):
 
     def __init__(self, bot):
         self.bot = bot
-        Thread.__init__(self, name=self.__class__.__name__)
+        super(Service, self).__init__(name=type(self).__name__)
 
 
 class GatewayService(gateway.GatewayService, Service):
@@ -649,7 +639,7 @@ class Modules(object):
     def load_modules(self):
         """Load/reload modules"""
         disabled = list(self._ignore_mods)
-        for mod_name, enabled in self.madcow.config.modules.settings.items():
+        for mod_name, enabled in self.madcow.config.modules:
             if not enabled:
                 disabled.append(mod_name)
         private = delim_re.split(self.madcow.config.modules.private)
@@ -723,148 +713,6 @@ class Modules(object):
                       key=lambda item: item[1][u'obj'].priority)
 
 
-class Config(object):
-
-    """Config class that allows dot-notation namespace addressing"""
-
-    class ConfigSection:
-
-        _isint = re.compile(r'^-?[0-9]+$')
-        _isfloat = re.compile(r'^\s*-?(?:\d+\.\d*|\d*\.\d+)\s*$')
-        _istrue = re.compile(u'^(?:true|yes|on|1)$', re.I)
-        _isfalse = re.compile(u'^(?:false|no|off|0)$', re.I)
-
-        def __init__(self, settings, name):
-            self.name = name
-            self.settings = {}
-            for key, val in settings:
-                if self._isint.search(val):
-                    val = int(val)
-                elif self._isfloat.search(val):
-                    val = float(val)
-                elif self._istrue.search(val):
-                    val = True
-                elif self._isfalse.search(val):
-                    val = False
-                self.settings[key.lower()] = val
-
-        def __getattr__(self, attr):
-            attr = attr.lower()
-            if attr in self.settings:
-                return self.settings[attr]
-            else:
-                raise ConfigError(u'missing setting %s in section %s' %
-                                  (attr, self.name))
-
-    def __init__(self, filename, default):
-        # XXX this is pretty flawed
-        self.sections = self.parse(filename)
-        self.defaults = self.parse(default)
-
-    @classmethod
-    def parse(cls, filename):
-        if not os.path.exists(filename):
-            raise FileNotFound, filename
-        parser = ConfigParser()
-        parser.read(filename)
-        return dict((name, cls.ConfigSection(parser.items(name), name))
-                    for name in parser.sections())
-
-    def __getattr__(self, attr):
-        attr = attr.lower()
-        if attr in self.sections:
-            return self.sections[attr]
-        elif attr in self.defaults:
-            return self.defaults[attr]
-        else:
-            raise ConfigError, u"missing section: %s" % attr
-
-
-def check_config(config, samplefile, prefix):
-    """Sanity check config"""
-
-    # verify we're using an unaltered sample file to verify against
-    hash = md5()
-    hash.update(slurp(samplefile))
-    if hash.hexdigest() != SAMPLE_HASH:
-        log.warn(u'WARNING: %s is out of date or has been altered!' %
-                 os.path.basename(samplefile))
-
-    # read sample file
-    sample = ConfigParser()
-    sample.read(samplefile)
-
-    # problems stored here
-    errors = []
-    missing_sections = []
-    missing_options = {}
-
-    # look for valid protocols
-    protocols = []
-    for proto in os.walk(os.path.join(prefix, u'protocols')).next()[2]:
-        try:
-            name = re.search(r'^([^_]{2}\S+)\.py$', proto).group(1)
-            if name == u'template':
-                continue
-            protocols.append(name)
-        except AttributeError:
-            continue
-
-    # determine our protocol
-    try:
-        protocol = config.main.module
-        if protocol not in protocols:
-            errors.append(u'Invalid protocol %s, should be one of: %s' % (
-                protocol, protocols))
-    except ConfigError:
-        errors.append(u'No protocol defined')
-        protocol = None
-
-    for section in sample.sections():
-        # skip protocol sections that we aren't using
-        if section in protocols and section != protocol:
-            continue
-
-        # see if the section even exists
-        try:
-            config_section = getattr(config, section)
-        except ConfigError:
-            missing_sections.append(section)
-            continue
-
-        # if section has an enabled flag and it's set to off,
-        # then don't bother checking the other options
-        if sample.has_option(section, u'enabled'):
-            try:
-                if not config_section.enabled:
-                    continue
-            except ConfigError:
-                missing_options[section] = [u'enabled']
-                continue
-
-        # verify options exist
-        for option in sample.options(section):
-            try:
-                getattr(config_section, option)
-            except ConfigError:
-                missing_options.setdefault(section, [])
-                missing_options[section].append(option)
-
-    # construct list of errors
-    if missing_sections:
-        missing_sections = [u'[%s]' % i for i in missing_sections]
-        errors.append(u'Missing sections: ' + u','.join(missing_sections))
-    for section, options in missing_options.items():
-        errors.append(u'Section [%s] missing options: %s' % (section,
-            u', '.join(options)))
-
-    # raise exception if any errors are found
-    if errors:
-        for error in errors:
-            log.error(error)
-        raise ConfigError, u'\n'.join(errors)
-
-
 def main():
     """Entry point to set up bot and run it"""
 
@@ -877,11 +725,14 @@ def main():
         prefix = __file__
     prefix = os.path.abspath(os.path.dirname(prefix))
     sys.path.insert(0, prefix)
-    default_config = os.path.join(prefix, CONFIG)
-    extra_config = os.path.join(prefix, 'include/defaults.ini')
+
+    # location of config files
+    config = os.path.join(prefix, CONFIG)
+    defaults = os.path.join(prefix, DEFAULTS)
+    sample = os.path.join(prefix, SAMPLE)
 
     # make sure proper subdirs exist
-    for subdir in u'data', u'logs':
+    for subdir in 'data', 'logs':
         path = os.path.join(prefix, subdir)
         if not os.path.exists(path):
             os.mkdir(path)
@@ -893,68 +744,54 @@ def main():
                                                           u'template.py')]
 
     # parse commandline options
-    parser = OptionParser(version=__version__)
-    parser.add_option(
-            '-c', '--config', metavar='<file>', default=default_config,
+    optparse = OptionParser(version=__version__)
+    optparse.add_option(
+            '-c', '--config', metavar='<file>', default=config,
             help='use config file (default: %default)')
-    parser.add_option(
+    optparse.add_option(
             '-d', '--detach', default=False, action='store_true',
             help='run process in the background')
-    parser.add_option(
+    optparse.add_option(
             '-p', '--protocol', metavar='<%s>' % '|'.join(protos),
             type='choice', choices=protos,
             help='force the use of this output protocol')
-    parser.add_option(
+    optparse.add_option(
             '-D', '--debug', dest='loglevel', action='store_const',
             const=log.DEBUG, help='show debug messages')
-    parser.add_option(
+    optparse.add_option(
             '-v', '--verbose', dest='loglevel', action='store_const',
             const=log.INFO, help='show info messages')
-    parser.add_option(
+    optparse.add_option(
             '-q', '--quiet', dest='loglevel', action='store_const',
             const=log.WARN, help='show only error messages')
-    parser.add_option(
+    optparse.add_option(
             '-P', '--pidfile', metavar='<file>',
             help='override pidfile (default: %default)')
-    opts, args = parser.parse_args()
+    opts, args = optparse.parse_args()
 
     if args:
-        parser.error(u'invalid arguments')
+        optparse.error(u'invalid arguments')
 
     # read config file
-    sample_config = default_config + u'-sample'
     if not os.path.exists(opts.config):
-        if opts.config == default_config:
-            shutil.copyfile(sample_config, opts.config)
-            log.error(u'created config %s - edit and rerun' % CONFIG)
-        else:
-            log.error(u'config not found: %s' % opts.config)
+        shutil.copyfile(sample, opts.config)
+        log.error('created config %s - edit and rerun' % opts.config)
         return 1
 
     try:
-        config = Config(opts.config, extra_config)
-    except FileNotFound:
-        log.error(u'config file not found, see README')
-        return 1
+        config = Config(opts.config, defaults)
     except Exception, error:
         log.error(u'error parsing config: %s' % error)
         return 1
 
-    try:
-        check_config(config, sample_config, prefix)
-    except ConfigError, error:
-        log.error(u'%s is missing required settings, check %s' % (
-                os.path.basename(opts.config),
-                os.path.basename(sample_config)))
-        return 1
-
     # init log facility
-    try:
-        loglevel = getattr(log, config.main.loglevel)
-    except:
-        loglevel = LOGLEVEL
     if opts.loglevel is not None:
         loglevel = opts.loglevel
+    else:
+        try:
+            loglevel = getattr(log, config.main.loglevel)
+        except AttributeError:
+            loglevel = LOG['level']
     log.root.setLevel(loglevel)
 
     # if specified, log to file as well
@@ -983,10 +820,10 @@ def main():
             log.warn(u'not detaching for commandline client')
         else:
             if os.fork():
-                sys.exit(0)
+                os._exit(0)
             os.setsid()
             if os.fork():
-                sys.exit(0)
+                os._exit(0)
             for stream in sys.stdout, sys.stderr:
                 stream.flush()
             devnull = file(u'/dev/null', u'a+', 0)
@@ -1075,7 +912,6 @@ def main():
 
     log.info(u'madcow is shutting down')
     return 0
-
 
 if __name__ == u'__main__':
     sys.exit(main())
