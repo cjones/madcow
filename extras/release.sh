@@ -1,5 +1,4 @@
 # update __version__ in main bot
-# update latest.txt
 # diff trunk from previous release and update ChangeLog
 # make a release tag:
 

@@ -50,7 +50,7 @@ import codecs
 import os
 import re
 
-__version__ = u'1.5.7'
+__version__ = u'1.5.8'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
 __all__ = [u'Madcow']
 
@@ -59,7 +59,6 @@ CHARSET = u'utf-8'
 CONFIG = 'madcow.ini'
 SAMPLE = 'madcow.ini-sample'
 DEFAULTS = 'include/defaults.ini'
-SAMPLE_HASH = u'528d1693555ff4ce9d2132e4e333c2b5'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt=u'%x %X',
            format=u'[%(asctime)s] %(levelname)s: %(message)s')
 delim_re = re.compile(r'\s*[,;]\s*')
