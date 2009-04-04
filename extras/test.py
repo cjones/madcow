@@ -99,7 +99,7 @@ tests = {'learn': {'request': 'set karma cj_ 31337',
                       '.|')},
          'clock': {'request': 'time in budapest',
                    'result': re.compile(
-                       r'test:\s+\d+:\d+[ap]m\s+\w+\s+\(CET\)\s+-\s+Time in B'
+                       r'test:\s+\d+:\d+[ap]m\s+\w+\s+\(CEST\)\s+-\s+Time in B'
                        r'udapest, Hungary')},
          'obama': {'request': 'obama',
                    'result': re.compile(r'Bush has been gone.*?\d')},
