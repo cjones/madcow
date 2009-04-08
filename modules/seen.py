@@ -20,11 +20,15 @@
 """Keep track of what people last said"""
 
 import re
-import dbm
 import time
 import os
 from include.utils import Module
 import logging as log
+
+try:
+    import dbm
+except ImportError:
+    import anydbm as dbm
 
 class Main(Module):
 

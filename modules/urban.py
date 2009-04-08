@@ -20,7 +20,7 @@
 """Look up a definition in the Urban Dictionary"""
 
 import re
-import SOAPpy
+from include import SOAPpy
 from include.utils import Module, stripHTML
 import logging as log
 

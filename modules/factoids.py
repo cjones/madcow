@@ -24,9 +24,13 @@ import logging as log
 import re
 from re import I
 import os
-import dbm
 import random
 from include import encoding
+
+try:
+    import dbm
+except ImportError:
+    import anydbm as dbm
 
 __version__ = u'0.1'
 __author__ = u'cj_ <cjones@gruntle.org>'

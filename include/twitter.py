@@ -11,7 +11,7 @@ __version__ = u'0.5'
 import base64
 from hashlib import md5
 import os
-import simplejson
+from include import simplejson
 import sys
 import tempfile
 import time

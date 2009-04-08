@@ -20,9 +20,13 @@
 """Module to handle learning"""
 
 import re
-import dbm
 from include.utils import Module
 import logging as log
+
+try:
+    import dbm
+except ImportError:
+    import anydbm as dbm
 
 class Main(Module):
 

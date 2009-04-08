@@ -36,7 +36,6 @@ warnings.simplefilter('ignore')
 
 from time import sleep, strftime, time as unix_time
 from include import useragent as ua, gateway
-from signal import signal, SIGHUP, SIGTERM
 from include.utils import slurp, Request
 from include.authlib import AuthLib
 from threading import Thread, RLock
@@ -49,6 +48,12 @@ import shutil
 import codecs
 import os
 import re
+
+# win32
+try:
+    from signal import signal, SIGHUP, SIGTERM
+except ImportError:
+    signal = SIGHUP = SIGTERM = None
 
 __version__ = u'1.5.8'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -113,8 +118,9 @@ class Madcow(object):
         self.usage_lines.append(u'version - get bot version')
 
         # signal handlers
-        signal(SIGHUP, self.signal_handler)
-        signal(SIGTERM, self.signal_handler)
+        if signal:
+            signal(SIGHUP, self.signal_handler)
+            signal(SIGTERM, self.signal_handler)
 
         # initialize threads
         self.request_queue = Queue()
@@ -795,9 +801,13 @@ def main():
 
     # if specified, log to file as well
     if config.main.logfile:
-        handler = log.FileHandler(config.main.logfile)
+        logfile = config.main.logfile
+        if not logfile.startswith('/'):
+            logfile = os.path.join(prefix, logfile)
+        handler = log.FileHandler(logfile)
         handler.setFormatter(log.Formatter(LOG[u'format'], LOG[u'datefmt']))
         log.root.addHandler(handler)
+        log.info('logging messages to %s' % logfile)
 
     # load specified protocol
     if opts.protocol:
