@@ -200,7 +200,7 @@ class MovieRatings(object):
 
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
 
-    sources = (IMDB(),) #RottenTomatoes(), MetaCritic(),)
+    sources = (IMDB(), RottenTomatoes(), MetaCritic())
     baseurl = u'http://videoeta.com/'
     topurl = urljoin(baseurl, u'/theaters.html')
     movieurl = urljoin(baseurl, u'/movie/')

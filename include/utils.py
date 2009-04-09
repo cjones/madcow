@@ -20,6 +20,7 @@
 """Some helper functions"""
 
 from __future__ import with_statement
+import logging as log
 import re
 import sys
 from time import time as unix_time
@@ -304,7 +305,6 @@ def test_module(mod):
     sys.path.insert(0, prefix)
     from madcow import Madcow, DEFAULTS
     from include.config import Config
-    import logging as log
     log.basicConfig(level=log.ERROR)
     defaults = os.path.join(prefix, DEFAULTS)
     config = Config(configfile, defaults)
