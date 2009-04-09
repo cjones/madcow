@@ -81,7 +81,7 @@ class IPythonHandler(Madcow):
 
     def process_message(self, message):
         """Create request object from recived message and process it"""
-        req = Request(message)
+        req = Request(message=message)
         req.nick = os.environ['USER']
         req.channel = 'ipython'
         req.addressed = True

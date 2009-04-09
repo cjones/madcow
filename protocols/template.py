@@ -54,7 +54,7 @@ class ProtocolHandler(Madcow):
         # with the response message in protocol_output(), which means you
         # can set arbitrary attributes and access them later, for example
         # a channel to send to for multi-channel protocols, etc.
-        req = Request(message)
+        req = Request(message=message)
 
         # required for most modules
         req.nick = nick

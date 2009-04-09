@@ -19,10 +19,11 @@
 
 """Implement Grufti trigger/response spam"""
 
+from __future__ import with_statement
 import re
 import os
 import random
-from include.utils import Module, slurp
+from include.utils import Module
 import logging as log
 import shutil
 from include import encoding
@@ -50,7 +51,8 @@ class Main(Module):
                 sample = os.path.join(madcow.prefix, self._sample)
                 shutil.copyfile(sample, filename)
                 log.warn(u'created %s' % self._filename)
-            doc = slurp(filename)
+            with open(filename, 'rb') as fp:
+                doc = fp.read()
             for block in self.reMatchBlocks.findall(doc):
                 responses = block.splitlines()
                 matchString = responses.pop(0)

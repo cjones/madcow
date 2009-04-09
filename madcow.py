@@ -36,7 +36,7 @@ warnings.simplefilter('ignore')
 
 from time import sleep, strftime, time as unix_time
 from include import useragent as ua, gateway
-from include.utils import slurp, Request
+from include.utils import Request
 from include.authlib import AuthLib
 from threading import Thread, RLock
 from include.config import Config
@@ -418,7 +418,7 @@ class PeriodicEvents(Service):
             if (now - self.last_run[mod_name]) < obj.frequency:
                 continue
             self.last_run[mod_name] = now
-            req = Request(None)
+            req = Request()
             req.sendto = obj.output
             request = (obj, None, None, {u'req': req})
             self.bot.request_queue.put(request)
