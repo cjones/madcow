@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Module stub"""
+"""Rate movies"""
 
 from include.utils import Module
 import logging as log
@@ -26,11 +26,6 @@ from include.useragent import geturl
 from urlparse import urljoin
 from include.utils import stripHTML
 
-__version__ = u'0.2'
-__author__ = u'cj_ <cjones@gmail.com>'
-__all__ = [u'IMDB', u'RottenTomatoes', u'MovieRatings']
-
-# global
 reopts = re.I | re.DOTALL
 whitespace = re.compile(r'\s+')
 html_title = re.compile(r'<title>(.*?)</title>', re.I)
@@ -87,7 +82,7 @@ class IMDB(object):
             return response
 
         except:
-            return
+            raise
 
 
 class RottenTomatoes(object):
@@ -205,10 +200,7 @@ class MovieRatings(object):
 
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
 
-    sources = (IMDB(),
-               RottenTomatoes(),
-               MetaCritic(),
-               )
+    sources = (IMDB(),) #RottenTomatoes(), MetaCritic(),)
     baseurl = u'http://videoeta.com/'
     topurl = urljoin(baseurl, u'/theaters.html')
     movieurl = urljoin(baseurl, u'/movie/')
@@ -264,6 +256,7 @@ def normalize(name):
     name = name.strip()
     name = whitespace.sub(u' ', name)
     return name
+
 
 if __name__ == u'__main__':
     from include.utils import test_module
