@@ -182,7 +182,7 @@ class GatewayServiceHandler(Thread):
         if u'message' in self.hdrs:
             output = u'message from %s: %s' % (self.hdrs[u'from'],
                                                self.hdrs[u'message'])
-            req = Request(output)
+            req = Request(message=output)
             req.colorize = False
             req.sendto = self.hdrs[u'to']
             self.server.bot.output(output, req)
