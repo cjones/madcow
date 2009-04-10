@@ -28,7 +28,8 @@ import urllib
 
 class Main(Module):
 
-    pattern = re.compile(u'^\s*define\s+(\S+)(?:\s+(\d+))?$')
+    #pattern = re.compile(u'^\s*define\s+(\S+)(?:\s+(\d+))?$')
+    pattern = re.compile(r'^\s*define\s+(.+?)(?:\s+(\d+))?\s*$', re.I)
     require_addressing = True
     help = u'define <word/phrase> [#] - get a definition from merriam-webster'
     re_defs = re.compile(r'<div class="defs">(.*?)</div>', re.DOTALL)
