@@ -69,13 +69,11 @@ class Main(object):
             since = since=self.__get_update_unicode()
             tweets = self.api.GetFriendsTimeline(since=since)
         except Exception, error:
-            try:
-                if error.code == 304:
-                    log.debug(u'no new tweets')
-                    return
-            except:
-                pass
-            log.warn(u'error in module %s' % self.__module__)
+            # not-modified response means there's nothing new, natch
+            if hasattr(error, 'code') and error.code == 304:
+                log.debug(u'no new tweets')
+                return
+            # otherwise who knows wtf happened
             log.exception(error)
             return
 

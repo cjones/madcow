@@ -33,6 +33,10 @@ SUPER_MAP = {48: 8304, 49: 8305, 50: 178, 51: 179, 52: 8308, 53: 8309,
              54: 8310, 55: 8311, 56: 8312, 57: 8313, 43: 8314, 45: 8315,
              61: 8316, 40: 8317, 41: 8318, 110: 8319}
 
+# apos is non-standard but used frequently
+name2codepoint = dict(name2codepoint)
+name2codepoint['apos'] = ord("'")
+
 class HTMLStripper(HTMLParser):
 
     def __init__(self, data):

@@ -52,7 +52,7 @@ def lookup(charset):
     """Lookup codec"""
     try:
         return codecs.lookup(charset).name
-    except LookupError:
+    except (LookupError, TypeError, AttributeError):
         pass
 
 
