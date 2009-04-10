@@ -57,9 +57,11 @@ class HTMLStripper(HTMLParser):
 
     def handle_entityref(self, name):
         try:
-            self._stripped.append(unichr(name2codepoint[name]))
+            char = unichr(name2codepoint[name])
         except Exception, error:
             log.warn('unknown entity: %s' % error)
+            char = u'&%s;' % name
+        self._stripped.append(char)
 
     def handle_data(self, data):
         self._stripped.append(data)

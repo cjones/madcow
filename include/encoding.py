@@ -71,13 +71,14 @@ def metacharset(data):
 
 def parseattrs(data):
     """Parse key=val attributes"""
+    #log.warn('PARSEATTRS: %r' % data)
     attrs = {}
     for key, rest, val in attr_re.findall(data):
         if not rest:
             val = None
         elif val[:1] == '\'' == val[-1:] or val[:1] == '"' == val[-1:]:
             val = val[1:-1]
-            val = stripHTML(val)
+            #val = stripHTML(val)  # XXX i can't figure out why i did this
         attrs[key.lower()] = val
     return attrs
 
