@@ -21,14 +21,17 @@ ANNOYING = (# boing boing
             'BoingBoing',
 
             # generally irritating nonsense
-            'kevinrose',
-            'meTakingAShit',
-            #'TheMime',  # I LIKE THE MIME
-            'macworld',
-            'tinybuddha',
-            'sfearthquakes',
-            'PiMPY3WASH',
-            'cracked',
+            'kevinrose',        # some annoying internet star (digg founder)
+            'meTakingAShit',    # descriptive shitter
+            'TheMime',          # ...
+            'macworld',         # lots of apple spam
+            'tinybuddha',       # inane, shallow sayings
+            'sfearthquakes',    # every 3.x quake in the geyser ever
+            'PiMPY3WASH',       # some guys washing machine, seriously
+            'cracked',          # cracked.com... kinda spammy and inane
+            'DinDaaDaa',        # a markov bot
+            'GusAndPenny',      # some guys catflap hooked up to twitter
+            'FluffyTheCat',     # Meow...
 
             # star wars rp'ers
             'JeanLuc_Picard',
