@@ -83,6 +83,7 @@ class Weather(object):
         # total misunderstanding of how unicode works on the part of the
         # authors, so we need to jump through some hoops to make it work
         conditions = conditions.encode(u'raw-unicode-escape')
+        print 'A', repr(conditions)
         conditions = stripHTML(conditions)
         conditions = encoding.convert(conditions)
         fields = self._bar.split(conditions)
@@ -176,6 +177,7 @@ badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
 def normalize(name):
     """Normalize city name for easy comparison"""
+    print 'B', repr(name)
     name = stripHTML(name)
     name = year.sub(u'', name)
     name = badchars.sub(u' ', name)
