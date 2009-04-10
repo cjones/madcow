@@ -82,7 +82,7 @@ class IMDB(object):
             return response
 
         except:
-            raise
+            pass
 
 
 class RottenTomatoes(object):
@@ -134,8 +134,8 @@ class RottenTomatoes(object):
             response += u': %s%%' % rating
             return response
 
-        except Exception, error:
-            log.exception(error)
+        except:
+            pass
 
 
 class MetaCritic(object):
