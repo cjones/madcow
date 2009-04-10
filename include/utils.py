@@ -21,6 +21,7 @@
 
 from __future__ import with_statement
 from htmlentitydefs import name2codepoint
+from include.colorlib import ColorLib
 from time import time as unix_time
 from HTMLParser import HTMLParser
 import logging as log
@@ -161,6 +162,7 @@ def test_module(mod):
     defaults = os.path.join(prefix, DEFAULTS)
     config = Config(configfile, defaults)
     madcow = Madcow(config, prefix)
+    madcow.colorlib = ColorLib('ansi')
     main = mod(madcow)
     try:
         args = main.pattern.search(u' '.join(sys.argv[1:])).groups()
