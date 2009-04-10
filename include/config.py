@@ -27,13 +27,13 @@ class Config(object):
         settings = self.parse(settings)
         for name, options in defaults.iteritems():
             if name not in settings:
-                log.warn('missing: %s, using defaults' % name)
+                log.info('missing: %s, using defaults' % name)
                 settings[name] = options
                 continue
             for key, val in options.iteritems():
                 if key not in settings[name]:
                     settings[name][key] = val
-                    log.warn('missing: %s.%s, using default (%r)' % (
+                    log.info('missing: %s.%s, using default (%r)' % (
                         name, key, val))
         for name, options in settings.iteritems():
             setattr(self, name, ConfigSection(options))
