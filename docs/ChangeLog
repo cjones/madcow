@@ -1,3 +1,17 @@
+1.5.9: Thu Apr  9 21:27:03 PDT 2009
+    * some changes to work on win32/cygwin architecture
+    * some long-needed cleanup/refactoring
+    * include soappy and simplejson to reduce third-party deps
+    * more RFC-compliant html stripping using stdlib
+    * fix broken email gateway
+    * fix running modules from the commandline to test
+    * fix encoding detection to not crash if chardet fails (mostly delicious)
+    * add more annoying stuff to twitter management tool
+    * proper rewrite of config handler to use real default values
+    * fix modules that use DBM backend to failback on anydbm
+    * supress spurious tweetprinter warnings
+    * all modules default to on if they aren't referenced in madcow.ini
+
 1.5.8: Sat Apr  4 01:09:59 PDT 2009
     * new module - lookup restaraunt rating/location from yelp.com
     * new module - lookup cnn headline

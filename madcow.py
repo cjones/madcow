@@ -55,7 +55,7 @@ try:
 except ImportError:
     signal = SIGHUP = SIGTERM = None
 
-__version__ = u'1.5.8'
+__version__ = u'1.5.9'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
 __all__ = [u'Madcow']
 
