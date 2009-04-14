@@ -119,6 +119,7 @@ care=no                ; generate a high-precision care-o-meter
 chp=no                 ; california real-time traffic reports
 conservapedia=no       ; look up inaccurate "conservative information"
 delicious=no           ; post all urls to delicious (see config below)
+ed=no                  ; encyclopedia dramatica
 factoids=no            ; makes madcow remember stuff from chatter
 figlet=no              ; generate ascii fonts
 fmylife=no             ; fmylife complaint, random or by ID
