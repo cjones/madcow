@@ -21,7 +21,6 @@
 
 from __future__ import with_statement
 from htmlentitydefs import name2codepoint
-from include.colorlib import ColorLib
 from time import time as unix_time
 from HTMLParser import HTMLParser
 import logging as log
@@ -164,6 +163,7 @@ def test_module(mod):
     sys.path.insert(0, prefix)
     from madcow import Madcow, DEFAULTS
     from include.config import Config
+    from include.colorlib import ColorLib
     log.basicConfig(level=log.ERROR)
     defaults = os.path.join(prefix, DEFAULTS)
     config = Config(configfile, defaults)
