@@ -21,6 +21,7 @@ ANNOYING = (# boing boing
             'BoingBoing',
 
             # generally irritating nonsense
+            'AKGovSarahPalin',  # yeah.. sarah palin.
             'kevinrose',        # some annoying internet star (digg founder)
             'meTakingAShit',    # descriptive shitter
             'TheMime',          # ...

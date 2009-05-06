@@ -42,7 +42,6 @@ from threading import Thread, RLock
 from include.config import Config
 from optparse import OptionParser
 from Queue import Queue, Empty
-from hashlib import md5
 import logging as log
 import shutil
 import codecs
