@@ -33,7 +33,7 @@ __all__ = ['TrekFailure']
 class TrekFailure(Module):
 
     pattern = re.compile(r'^\s*(?:star\s*)?trek\s*$', re.I)
-    help = u'generate technobabble'
+    help = u'trek - generate technobabble'
     url = 'http://hyotynen.kapsi.fi/trekfailure/'
     fail_re = re.compile(r'^[ \n]*- (.*?) -[ \n]*$')
     spaces_re = re.compile(r'\s{2,}')
