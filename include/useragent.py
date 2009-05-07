@@ -78,7 +78,7 @@ class UserAgent(object):
         else:
             headers = response.headers
 
-        if headers.get('content-encoding') == 'gzip':
+        if headers and headers.get('content-encoding') == 'gzip':
             data = GzipFile(fileobj=StringIO(data)).read()
 
         return encoding.convert(data, headers)
