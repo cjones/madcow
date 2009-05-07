@@ -26,6 +26,12 @@ import urllib
 import logging as log
 import encoding
 import google
+from gzip import GzipFile
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 AGENT = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 VERSION = sys.version_info[0] * 10 + sys.version_info[1]
@@ -66,10 +72,15 @@ class UserAgent(object):
                 request.add_header(*item)
         response = self.opener.open(request)
         data = response.read(size)
+
         if isinstance(response, google.Response):
             headers = None
         else:
             headers = response.headers
+
+        if headers.get('content-encoding') == 'gzip':
+            data = GzipFile(fileobj=StringIO(data)).read()
+
         return encoding.convert(data, headers)
 
     @staticmethod
