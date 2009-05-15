@@ -5,7 +5,7 @@ from NS        import NS
 from Utilities import *
 
 import string
-import fpconst
+from include import fpconst
 import xml.sax
 from wstools.XMLname import fromXMLname
 

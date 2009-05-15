@@ -158,7 +158,9 @@ def find_madcow():
     return prefix, config
 
 
-def test_module(mod):
+def test_module(mod, argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
     prefix, configfile = find_madcow()
     sys.path.insert(0, prefix)
     from madcow import Madcow, DEFAULTS
@@ -171,7 +173,7 @@ def test_module(mod):
     madcow.colorlib = ColorLib('ansi')
     main = mod(madcow)
     try:
-        args = main.pattern.search(u' '.join(sys.argv[1:])).groups()
+        args = main.pattern.search(u' '.join(argv)).groups()
     except:
         print 'no match, double-check regex'
         return 1
