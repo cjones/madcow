@@ -39,7 +39,7 @@ class Main(Module):
                            r'y\("(.*?)",\s+"(.*?)"')
     link_re = re.compile(r'<a\s+class="groupMemberLink"\s+id="member_\[(.*?)'
                          r'\]"\s+href="(.*?)">')
-    game_re = re.compile(r'<p\s+id="statusInGameText">(.*?)</p>')
+    game_re = re.compile(r'<p\s+id="statusInGameText">(.*?)</p>', re.DOTALL)
 
     def __init__(self, madcow):
         if not madcow.config.steam.enabled:
@@ -68,7 +68,7 @@ class Main(Module):
                 if data['status'] == 'In-Game':
                     page = geturl(data['link'])
                     try:
-                        game = self.game_re.search(page).group(1)
+                        game = self.game_re.search(page).group(1).strip()
                     except AttributeError:
                         game = 'Non-Steam Game'
                     ingame.append('%s: %s' % (data['name'], game))
