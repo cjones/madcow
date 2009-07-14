@@ -30,7 +30,7 @@ __version__ = u'0.3'
 __author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
-FORMAT = u'Terror: %s, DoomsDay: %s, IranWar: %s, IraqWar: %s, BodyCount: %s, WHO Pandemic: %s'
+FORMAT = u'Terror: %s, DoomsDay: %s, IraqWar: %s, BodyCount: %s, WHO Pandemic: %s'
 
 class WHO(object):
 
@@ -100,20 +100,6 @@ class DoomsDay(object):
             return u'UNKNOWN'
 
 
-class IranWar(object):
-
-    _url = u'http://www.areweatwarwithiran.com/rss.xml'
-
-    def war(self):
-        try:
-            rss = feedparser.parse(self._url)
-            return rss.entries[0].title
-        except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
-            return u'UNKNOWN'
-
-
 class IraqWar(object):
 
     _war_url = u'http://areweatwarwithiraq.com/rss.xml'
@@ -159,14 +145,13 @@ class Main(Module):
             colorlib = ColorLib(u'ansi')
         self.terror = Terror(colorlib)
         self.doom = DoomsDay()
-        self.iran = IranWar()
         self.iraq = IraqWar()
         self.who = WHO(colorlib)
 
     def response(self, nick, args, kwargs):
         try:
             return FORMAT % (self.terror.level(), self.doom.time(),
-                             self.iran.war(), self.iraq.war(),
+                             self.iraq.war(),
                              self.iraq.bodycount(), self.who.phase())
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
