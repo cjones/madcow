@@ -30,34 +30,7 @@ __version__ = u'0.3'
 __author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
-FORMAT = u'Terror: %s, DoomsDay: %s, IraqWar: %s, BodyCount: %s, WHO Pandemic: %s'
-
-class WHO(object):
-
-    """WHO pandemic phase"""
-
-    phase_re = re.compile(r'The current WHO phase of pandemic alert is (\d+)', re.I)
-    url = 'http://www.who.int/csr/disease/avian_influenza/phase/en/index.html'
-    colors = {'1': 'bright green',
-              '2': 'bright cyan',
-              '3': 'bright blue',
-              '4': 'bright yellow',
-              '5': 'orange',
-              '6': 'red'}
-
-    def __init__(self, colorlib):
-        self.colorlib = colorlib
-
-    def phase(self):
-        try:
-            doc = geturl(self.url)
-            phase = self.phase_re.search(doc).group(1)
-            color = self.colors[phase]
-            return self.colorlib.get_color(color, text=phase)
-        except Exception, error:
-            log.warn(error)
-            return 'UNKNOWN'
-
+FORMAT = u'Terror: %s, DoomsDay: %s, IraqWar: %s, BodyCount: %s'
 
 class Terror(object):
 
@@ -146,13 +119,11 @@ class Main(Module):
         self.terror = Terror(colorlib)
         self.doom = DoomsDay()
         self.iraq = IraqWar()
-        self.who = WHO(colorlib)
 
     def response(self, nick, args, kwargs):
         try:
             return FORMAT % (self.terror.level(), self.doom.time(),
-                             self.iraq.war(),
-                             self.iraq.bodycount(), self.who.phase())
+                             self.iraq.war(), self.iraq.bodycount())
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
