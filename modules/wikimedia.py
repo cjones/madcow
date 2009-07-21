@@ -2,7 +2,7 @@
 
 """Handles WikiMedia queries"""
 
-from BeautifulSoup import BeautifulSoup
+from include.BeautifulSoup import BeautifulSoup
 from include.useragent import geturl
 from include.utils import stripHTML
 from include.utils import Module
