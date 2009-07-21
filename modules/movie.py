@@ -19,12 +19,12 @@
 
 """Rate movies"""
 
-from include.utils import Module
+from urlparse import urljoin
 import logging as log
 import re
 from include.useragent import geturl
-from urlparse import urljoin
-from include.utils import stripHTML
+from include.BeautifulSoup import BeautifulSoup
+from include.utils import stripHTML, Module
 
 reopts = re.I | re.DOTALL
 whitespace = re.compile(r'\s+')
@@ -200,21 +200,35 @@ class MovieRatings(object):
 
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
 
-    # XXX metacritic search is ass-slow
+    # XXX metacritic is hella broken, and slow when it works, so just lose it
     #sources = (IMDB(), RottenTomatoes(), MetaCritic())
     sources = (IMDB(), RottenTomatoes())
-    baseurl = u'http://videoeta.com/'
-    topurl = urljoin(baseurl, u'/theaters.html')
-    movieurl = urljoin(baseurl, u'/movie/')
-    movies = re.compile(r'/movie/(.*?).>(.*?)<', re.DOTALL)
+    baseurl = u'http://www.imdb.com/'
+    topurl = urljoin(baseurl, '/chart/')
+    #movieurl = urljoin(baseurl, u'/movie/')
+    #movies = re.compile(r'/movie/(.*?).>(.*?)<', re.DOTALL)
 
     def topmovies(self):
-        doc = geturl(self.topurl)
-        results = self.movies.findall(doc)[:10]
-        results = [u'%2s: %s - %s%s' % (i+1, r[1], self.movieurl, r[0])
-                   for i, r in enumerate(results)]
-        results.insert(0, u'>>> Top Movies At Box Office <<<')
-        return u'\n'.join(results)
+        soup = BeautifulSoup(geturl(self.topurl))
+        table = soup.body.find('div', id='boxoffice').find('table')
+        data = []
+        for row in table.findAll('tr')[1:]:
+            items = row.findAll('td')
+            data.append(
+                    {'title': stripHTML(items[2].find('a').renderContents()),
+                     'weekend': items[3].renderContents().strip(),
+                     'gross': items[4].renderContents().strip()})
+        tsize = max(len(item['title']) for item in data)
+        wsize = max(len(item['weekend']) for item in data)
+        gsize = max(len(item['gross']) for item in data)
+        output = []
+        for i, item in enumerate(data):
+            output.append('%s %s - %s / %s' % (
+                    str(i + 1).ljust(2),
+                    item['title'].ljust(tsize),
+                    item['weekend'].ljust(wsize),
+                    item['gross'].ljust(gsize)))
+        return '\n'.join(output)
 
     def rate(self, movie):
         """Get movie ratings from imdb and rotten tomatoes"""
