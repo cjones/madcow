@@ -138,75 +138,13 @@ class RottenTomatoes(object):
             pass
 
 
-class MetaCritic(object):
-
-    baseurl = u'http://www.metacritic.com/'
-    search = urljoin(baseurl, u'/search/process')
-    movie_opts = {u'sort': u'relevance',
-                  u'termType': u'all',
-                  u'ts': None,
-                  u'ty': u'1',
-                  u'x': u'24',
-                  u'y': u'10',
-                  }
-    result = re.compile(r'<strong>(?:Film|Video):</strong>\s+<a href="([^"]+)'
-                        r'"><b>(.*?)</b>', reopts)
-    critic_rating = re.compile(r'ALT="Metascore: ([0-9.]+)"')
-    user_rating = re.compile(r'<span class="subhead">([0-9.]+)</span>')
-
-    def rate(self, movie):
-        try:
-            opts = dict(self.movie_opts)
-            opts[u'ts'] = movie
-            page = geturl(self.search, opts=opts)
-            movie = normalize(movie)
-            movies = self.result.findall(page)
-            movies = [(path, normalize(title)) for path, title in movies]
-            url = None
-            for path, title in movies:
-                if title == movie:
-                    url = urljoin(self.baseurl, path)
-                    break
-            if not url:
-                url = urljoin(self.baseurl, movies[0][0])
-            page = geturl(url, referer=self.search)
-            try:
-                critic_rating = self.critic_rating.search(page).group(1)
-                critic_rating = u'Critics: ' + critic_rating + u'/100'
-            except:
-                critic_rating = None
-            try:
-                user_rating = self.user_rating.search(page).group(1)
-                user_rating = u'Users: ' + user_rating + u'/10'
-            except:
-                user_rating = None
-
-            title = html_title.search(page).group(1)
-            title = title.replace(u': Reviews', u'')
-
-            response = u'Meta'
-            if normalize(title) != movie:
-                response += u' [%s]' % stripHTML(title)
-            ratings = [i for i in (critic_rating, user_rating) if i is not None]
-            ratings = u', '.join(ratings)
-            if ratings:
-                response += u' - %s' % ratings
-            return response
-        except:
-            pass
-
-
 class MovieRatings(object):
 
     """Class that gets movie ratings from IMDB and Rotten Tomatoes"""
 
-    # XXX metacritic is hella broken, and slow when it works, so just lose it
-    #sources = (IMDB(), RottenTomatoes(), MetaCritic())
     sources = (IMDB(), RottenTomatoes())
-    baseurl = u'http://www.imdb.com/'
+    baseurl = 'http://www.imdb.com/'
     topurl = urljoin(baseurl, '/chart/')
-    #movieurl = urljoin(baseurl, u'/movie/')
-    #movies = re.compile(r'/movie/(.*?).>(.*?)<', re.DOTALL)
 
     def topmovies(self):
         soup = BeautifulSoup(geturl(self.topurl))
@@ -224,7 +162,7 @@ class MovieRatings(object):
         output = []
         for i, item in enumerate(data):
             output.append('%s %s - %s / %s' % (
-                    str(i + 1).ljust(2),
+                    str(i + 1).rjust(2),
                     item['title'].ljust(tsize),
                     item['weekend'].ljust(wsize),
                     item['gross'].ljust(gsize)))
