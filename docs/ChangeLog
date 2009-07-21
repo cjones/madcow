@@ -1,3 +1,18 @@
+1.6.0: Tue Jul 21 01:01:11 PDT 2009
+    * add star trek technobabble module
+    * add 'texts from last night' module
+    * fixed definition regex
+    * fixed steam regex
+    * remove broken/slowass metacritic hook from movie.py and revamp topmovies
+    * useragent handles gzip pages
+    * add fpconst to base release to reduce dependencies
+    * remove iranwar from terror.py, as the site is now defunct
+    * add some default training files for megahal
+    * add script to convert megahal brains from 2-byte to 4-byte indices
+    * fixed test_module() function
+    * cleanup - remove bogus imports
+    * rework wikimedia modules to use a unified module
+
 1.5.9: Thu Apr  9 21:27:03 PDT 2009
     * some changes to work on win32/cygwin architecture
     * some long-needed cleanup/refactoring
