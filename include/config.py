@@ -1,6 +1,11 @@
+from __future__ import with_statement
 from ConfigParser import ConfigParser
 import logging as log
+import sys
+import os
 import re
+
+ENCODING = sys.getfilesystemencoding()
 
 class ConfigSection(object):
 
@@ -23,19 +28,21 @@ class Config(object):
     isfalse_re = re.compile(u'^(?:false|no|off)$', re.I)
 
     def __init__(self, settings, defaults):
-        defaults = self.parse(defaults)
-        settings = self.parse(settings)
-        for name, options in defaults.iteritems():
-            if name not in settings:
+        self._settings_file = settings
+        self._defaults_file = defaults
+        self._defaults = self.parse(defaults)
+        self._settings = self.parse(settings)
+        for name, options in self._defaults.iteritems():
+            if name not in self._settings:
                 log.info('missing: %s, using defaults' % name)
-                settings[name] = options
+                self._settings[name] = options
                 continue
             for key, val in options.iteritems():
-                if key not in settings[name]:
-                    settings[name][key] = val
+                if key not in self._settings[name]:
+                    self._settings[name][key] = val
                     log.info('missing: %s.%s, using default (%r)' % (
                         name, key, val))
-        for name, options in settings.iteritems():
+        for name, options in self._settings.iteritems():
             setattr(self, name, ConfigSection(options))
 
     @classmethod
@@ -56,5 +63,31 @@ class Config(object):
                 data.setdefault(section.lower(), {})[key] = val
         return data
 
+    def save(self, filename=None):
+        if filename is None:
+            filename = self._settings_file
+        config = ConfigParser()
+        for section, options in self._settings.iteritems():
+            for key, val in options.iteritems():
+                if (section in self._defaults and
+                    key in self._defaults[section] and
+                    val != self._defaults[section][key]):
+                    if isinstance(val, bool):
+                        val = 'yes' if val else 'no'
+                    if not isinstance(val, basestring):
+                        val = str(val)
+                    if isinstance(val, unicode):
+                        val = val.encode(ENCODING)
+                    if not config.has_section(section):
+                        config.add_section(section)
+                    config.set(section, key, val)
+
+        if os.path.exists(filename):
+            os.rename(filename, filename + '.bak')
+        with open(filename, 'wb') as fp:
+            config.write(fp)
+        log.info('wrote settings to ' + filename)
+
     def __getattribute__(self, key):
         return super(Config, self).__getattribute__(key.lower())
+
