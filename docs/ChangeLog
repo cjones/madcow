@@ -1,3 +1,8 @@
+1.6.1: Fri Jul 31 18:12:12 PDT 2009
+    * Fix chatroom support for AIM protocol
+    * Add save() method to config object
+    * Explicitly disable deprecated wikipedia/conservapedia modules
+
 1.6.0: Tue Jul 21 01:01:11 PDT 2009
     * add star trek technobabble module
     * add 'texts from last night' module

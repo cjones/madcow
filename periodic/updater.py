@@ -24,7 +24,7 @@ from madcow import __version__ as current_version
 
 class Main(object):
 
-    url = 'http://gruntle.org/app/madcow/latest/'
+    url = 'http://dis.gruntle.org/app/madcow/latest/'
     agent = 'Madcow Updater v' + current_version
     msg_fmt = 'Madcow v%(new_version)s is available, you have v%(current_version)s.  Visit http://madcow.googlecode.com/ to update.\x07'
 
