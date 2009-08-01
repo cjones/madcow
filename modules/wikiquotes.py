@@ -24,8 +24,7 @@ import logging as log
 import random
 import re
 
-from BeautifulSoup import BeautifulSoup
-
+from include.BeautifulSoup import BeautifulSoup
 from include.utils import stripHTML, Module
 from include.useragent import geturl
 
