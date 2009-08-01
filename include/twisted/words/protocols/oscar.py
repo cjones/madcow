@@ -1096,7 +1096,28 @@ class ChatService(OSCARService):
     def oscar_0E_06(self,snac):
         data = snac[3]
         user,rest=self.bos.parseUser(snac[3][14:],1)
-        tlvs = readTLVs(rest[8:])
+
+        #print 'data = %r' % data
+        #print 'user = %r' % user
+        #print 'rest = %r' % rest
+        #i = 0
+        #while True:
+        #    packet = rest[i:]
+        #    if not packet:
+        #        break
+        #    try:
+        #        tlvs = readTLVs(packet)
+        #        message = repr(tlvs)
+        #    except Exception, error:
+        #        message = error
+        #    print i, message
+        #    i += 1
+        #return
+
+        # so for some reason the TLV packet now starts at 14 instead of 8..
+        # whatever i guess.
+        tlvs = readTLVs(rest[14:])
+
         message=tlvs[1]
         if 'unicode' in tlvs[2]:
             message = message.decode('utf-16-be', 'replace')
