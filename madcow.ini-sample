@@ -62,6 +62,11 @@ owner=nick
 ; don't want it to do this or it is causing trouble, set this to no
 ;
 psyco=yes
+;
+; if your bot name is long, which makes it annoying to type, you
+; can specify aliases it will also respond to here, seperated by a , or ;
+;
+aliases=
 
 [modules]
 ;

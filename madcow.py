@@ -97,6 +97,12 @@ class Madcow(object):
         else:
             self.ignore_list = []
 
+        # bot aliases
+        if self.config.main.aliases:
+            self.aliases = delim_re.split(self.config.main.aliases)
+        else:
+            self.aliases = []
+
         # set encoding
         self.charset = CHARSET
         if self.config.main.charset:
@@ -234,7 +240,8 @@ class Madcow(object):
 
     def check_addressing(self, req):
         """Is bot being addressed?"""
-        nick = re.escape(self.botname())
+        nick = [self.botname()] + self.aliases
+        nick = '(?:%s)' % '|'.join(re.escape(n) for n in nick)
 
         # recompile nick-based regex if it changes
         if nick != self.cached_nick:
