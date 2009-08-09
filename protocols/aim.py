@@ -86,6 +86,11 @@ class AIMProtocol(Madcow):
 
             # AIM reacts indignantly to overlong messages, so we need to
             # wrap.  try not to break up html tags injected by colorlib.
+            if not hasattr(req, 'chat'):
+                req.chat = None
+            if not hasattr(req, 'aim'):
+                req.aim = self.oscar_connection
+
             if req.chat:
                 width = 2048
                 func = req.chat.sendMessage
@@ -109,6 +114,8 @@ class AIMProtocol(Madcow):
 
                 args = [line]
                 if not req.chat:
+                    if not req.nick:
+                        req.nick = req.sendto
                     args.insert(0, req.nick)
                 reactor.callFromThread(func, *args)
 
@@ -160,6 +167,7 @@ class OSCARConnection(oscar.BOSConnection):
 
     def initDone(self):
         """After auth, we need to set a few things up"""
+        self.bot.oscar_connection = self
         log.info(u'[AIM] Initialization finished')
         self.requestSelfInfo()
         self.requestSSI()
