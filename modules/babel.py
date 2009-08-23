@@ -46,7 +46,8 @@ class Main(Module):
     url = 'http://ajax.googleapis.com/ajax/services/language/translate'
 
     # synced with google.language Sun Aug 23 10:50:03 PDT 2009
-    langs = {'albanian': 'sq',
+    langs = {'auto': '',
+             'albanian': 'sq',
              'arabic': 'ar',
              'bulgarian': 'bg',
              'catalan': 'ca',
