@@ -125,8 +125,7 @@ class Main(Module):
                     if arg == 'auto':
                         raise BabelError('can only auto-detect source')
                     if current_lang != arg:
-                        job = self.langs[current_lang], self.langs[arg]
-                        translations.append(job)
+                        translations.append((current_lang, arg))
                 current_lang = arg
             elif arg == 'to':
                 if not current_lang:
@@ -135,18 +134,21 @@ class Main(Module):
                 raise BabelError('unknown language: ' + arg)
 
         if not translations:
-            translations = [('auto', self._default_lang)]
+            translations = [('auto', self.default_lang)]
         for from_lang, to_lang in translations:
             text = self.translate(text, from_lang, to_lang)
         return text
 
     def translate(self, text, src, dst):
         """Perform the translation"""
-        opts = {'langpair': '%s|%s' % (src, dst), 'v': '1.0', 'q': text}
+        opts = {'langpair': '%s|%s' % (self.langs[src], self.langs[dst]),
+                'v': '1.0', 'q': text}
         res = simplejson.loads(geturl(self.url, opts))
         return res['responseData']['translatedText']
 
 
 if __name__ == u'__main__':
     from include.utils import test_module
+    import sys
+    sys.argv.append('translate: jasdjfsdf')
     test_module(Main)
