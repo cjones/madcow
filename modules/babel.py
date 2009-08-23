@@ -23,12 +23,10 @@ from include.utils import Module
 import logging as log
 import re
 from include.useragent import geturl
-from include.utils import stripHTML, cache_property
-import urlparse
-from include import encoding
+from include import simplejson
 
-__version__ = u'0.1'
-__author__ = u'Chris Jones <cjones@gruntle.org>'
+__version__ = '2.0'
+__author__ = 'Chris Jones <cjones@gruntle.org>'
 __all__ = []
 
 class BabelError(Exception):
@@ -40,96 +38,112 @@ class Main(Module):
 
     """Translation service using Google Translate"""
 
-    pattern = r'^\s*(trans(?:late)?(.+?)|list\s+lang(s|uages))\s*$'
+    pattern = r'^\s*(tr(?:ans(?:late)?)?(.+?)|list\s+lang(s|uages))\s*$'
     pattern = re.compile(pattern, re.I)
-    help = u'translate <lang> to <lang> [to <lang> ...]: text'
-    help += u'\nlist languages - show all translate languages'
-    _baseurl = u'http://translate.google.com/'
-    _translate = urlparse.urljoin(_baseurl, u'/translate_a/t')
-    _langs_re = re.compile(r'<select name=sl.*?>(.*?)</select>')
-    _lang_re = re.compile(r'<option.*?value="(.*?)".*?>(.*?)</option>')
-    _lang_timeout = 1 * 60 * 60
-    _default_lang = u'english'
+    help = 'translate <lang> to <lang> [to <lang> ...]: text'
+    help += '\nlist languages - show all translate languages'
+    default_lang = 'english'
+    url = 'http://ajax.googleapis.com/ajax/services/language/translate'
+
+    # synced with google.language Sun Aug 23 10:50:03 PDT 2009
+    langs = {'albanian': 'sq',
+             'arabic': 'ar',
+             'bulgarian': 'bg',
+             'catalan': 'ca',
+             'chinese': 'zh-CN',
+             'chinese-traditional': 'zh-TW',
+             'croatian': 'hr',
+             'czech': 'cs',
+             'danish': 'da',
+             'dutch': 'nl',
+             'english': 'en',
+             'estonian': 'et',
+             'filipino': 'tl',
+             'finnish': 'fi',
+             'french': 'fr',
+             'galician': 'gl',
+             'german': 'de',
+             'greek': 'el',
+             'hebrew': 'iw',
+             'hindi': 'hi',
+             'hungarian': 'hu',
+             'indonesian': 'id',
+             'italian': 'it',
+             'japanese': 'ja',
+             'korean': 'ko',
+             'latvian': 'lv',
+             'lithuanian': 'lt',
+             'maltese': 'mt',
+             'norwegian': 'no',
+             'persian': 'fa',
+             'polish': 'pl',
+             'portuguese': 'pt',
+             'romanian': 'ro',
+             'russian': 'ru',
+             'serbian': 'sr',
+             'slovak': 'sk',
+             'slovenian': 'sl',
+             'spanish': 'es',
+             'swedish': 'sv',
+             'thai': 'th',
+             'turkish': 'tr',
+             'ukrainian': 'uk',
+             'vietnamese': 'vi'}
 
     def response(self, nick, args, kwargs):
         """Return a response to the bot to display"""
-        if args[0].startswith(u'trans'):
+        if args[0].startswith('tr'):
             try:
                 message = self.parse(args[1])
             except BabelError, error:
                 log.error(error)
                 message = error
             except Exception, error:
-                log.warn(u'error in %s' % self.__module__)
+                log.warn('error in %s' % self.__module__)
                 log.exception(error)
                 message = error
         else:
-            message = u', '.join(self.langs)
+            message = ', '.join(self.langs)
         return u'%s: %s' % (nick, message)
 
     def parse(self, cmd):
         """Parse command structure and transform text"""
-        if u':' not in cmd:
-            raise BabelError(u'missing text to translate')
-        cmd, text = [arg.strip() for arg in cmd.split(u':', 1)]
+        if ':' not in cmd:
+            raise BabelError('missing text to translate')
+        cmd, text = [arg.strip() for arg in cmd.split(':', 1)]
         cmd = cmd.lower().split()
 
         translations = []
         current_lang = None
         while cmd:
             arg = cmd.pop(0)
-            if arg == u'from':
+            if arg == 'from':
                 continue
             elif arg in self.langs:
                 if current_lang:
-                    if arg == u'auto':
-                        raise BabelError(u'can only auto-detect source')
+                    if arg == 'auto':
+                        raise BabelError('can only auto-detect source')
                     if current_lang != arg:
-                        translations.append((current_lang, arg))
+                        job = self.langs[current_lang], self.langs[arg]
+                        translations.append(job)
                 current_lang = arg
-            elif arg == u'to':
+            elif arg == 'to':
                 if not current_lang:
-                    current_lang = u'auto'
+                    current_lang = 'auto'
             else:
-                raise BabelError(u'unknown language: ' + arg)
+                raise BabelError('unknown language: ' + arg)
 
         if not translations:
-            translations = [(u'auto', self._default_lang)]
+            translations = [('auto', self._default_lang)]
         for from_lang, to_lang in translations:
             text = self.translate(text, from_lang, to_lang)
         return text
 
-    def translate(self, text, from_lang, to_lang):
+    def translate(self, text, src, dst):
         """Perform the translation"""
-        opts = dict(client=u't',
-                    text=text,
-                    sl=self.langs[from_lang],
-                    tl=self.langs[to_lang])
-
-        # ajax response
-        data = geturl(self._translate, opts=opts)
-        exec(u'data = ' + data)
-        if isinstance(data, list):
-            data = data[0]
-        data = data.decode('utf8', 'replace')
-        #data = encoding.convert(data)
-        return data
-
-    @cache_property(_lang_timeout)
-    def langs(self):
-        """Get available languages"""
-        data = geturl(self._baseurl)
-        try:
-            data = self._langs_re.search(data).group(1)
-        except AttributeError:
-            raise BabelError(u"couldn't find langs")
-        langs = {}
-        for lang in self._lang_re.findall(data):
-            code, name = map(unicode.lower, lang)
-            if name == u'detect language':
-                name = u'auto'
-            langs[name] = code
-        return langs
+        opts = {'langpair': '%s|%s' % (src, dst), 'v': '1.0', 'q': text}
+        res = simplejson.loads(geturl(self.url, opts))
+        return res['responseData']['translatedText']
 
 
 if __name__ == u'__main__':
