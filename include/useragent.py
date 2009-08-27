@@ -27,11 +27,14 @@ import logging as log
 import encoding
 import google
 from gzip import GzipFile
+import re
 
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
+
+from include.BeautifulSoup import BeautifulSoup
 
 AGENT = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 VERSION = sys.version_info[0] * 10 + sys.version_info[1]
@@ -121,5 +124,16 @@ def setup(handlers=None, cookies=True, agent=AGENT, timeout=None):
 def geturl(url, opts=None, data=None, referer=None, size=-1, add_headers=None):
     return getua().open(url, opts, data, referer, size, add_headers)
 
-geturl.__doc__ = UserAgent.open.__doc__
 
+script_re = re.compile(r'<script.*?>.*?</script>', re.I | re.DOTALL)
+
+def getsoup(*args, **kwargs):
+    """geturl wrapper to return soup minus scripts/styles"""
+    page = geturl(*args, **kwargs)
+    page = script_re.sub('', page)
+    soup = BeautifulSoup(page)
+    for style in soup('style'):
+        style.extract()
+    return soup
+
+geturl.__doc__ = UserAgent.open.__doc__
