@@ -28,6 +28,16 @@ import random
 from include.throttle import Throttle
 from include.utils import Module
 import logging as log
+
+# XXX hack to work around busted pysqlite/sqlobject integration
+try:
+    from pysqlite2 import _sqlite
+    if _sqlite.sqlite_version.count('.') == 3:
+        i = _sqlite.sqlite_version.rindex('.')
+        _sqlite.sqlite_version = _sqlite.sqlite_version[:i]
+except ImportError:
+    pass
+
 from sqlobject import *
 
 # sqlobject explodes on reloads
