@@ -51,7 +51,7 @@ class Main(Module):
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            response = u'Something bad happened'
+            response = u'So obscure, not even urban dictionary knows it'
         return u'%s: %s' % (nick, response)
 
     def lookup(self, query, idx=None):
