@@ -19,37 +19,38 @@
 
 """Spellcheck using google"""
 
-from include.utils import Module
+from urlparse import urljoin
 import logging as log
 import re
-from include.google import Google
 
-__version__ = u'0.1'
-__author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = []
+from include.utils import Module, stripHTML
+from include.useragent import getsoup
+
+__version__ = '2.0'
+__author__ = 'cj_ <cjones@gruntle.org>'
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*spell(?:\s*check)?\s+(.+?)\s*$', re.I)
     help = u'spellcheck <word> - use google to spellcheck'
 
-    def __init__(self, madcow=None):
-        self.google = Google()
+    google_url = 'http://www.google.com/'
+    google_search = urljoin(google_url, '/search')
 
     def response(self, nick, args, kwargs):
         try:
-            query = args[0]
-            corrected = self.google.spellcheck(query)
-            if query.lower() == corrected.lower():
-                result = u'spelled correctly'
+            opts = {'hl': 'en', 'aq': 'f', 'safe': 'off', 'q': args[0]}
+            soup = getsoup(self.google_search, opts, referer=self.google_url)
+            a = soup.body.find('a', 'spell')
+            if a:
+                res = stripHTML(a.renderContents().decode('utf-8', 'ignore'))
             else:
-                result = corrected
-            return u'%s: %s' % (nick, result)
+                res = u'spelled correctly'
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
+            log.warn('error in module %s' % self.__module__)
             log.exception(error)
-            return u'%s: %s' % (nick, self.error)
-
+            res = u'I had trouble with that'
+        return u'%s: %s' % (nick, res)
 
 if __name__ == u'__main__':
     from include.utils import test_module
