@@ -19,62 +19,66 @@
 
 """Get song lyrics from lyricwiki"""
 
-from include.utils import Module
+from urlparse import urljoin
 import logging as log
 import re
-from include.useragent import geturl
-from include.utils import stripHTML
-from include.BeautifulSoup import BeautifulSoup
-from urlparse import urljoin
+
+from include.utils import Module, stripHTML
+from include.useragent import getsoup
 from include.google import Google, NonRedirectResponse
 
-__version__ = u'0.2'
-__author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = []
+__version__ = '2.0'
+__author__ = 'cj_ <cjones@gruntle.org>'
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*sing\s+(.+?)\s*$', re.I)
-    help = u'sing <song/artist>'
-    error = u'no results'
+    help = 'sing <song/artist>'
+
     baseurl = u'http://lyricwiki.org/'
     searchurl = urljoin(baseurl, u'/Special:Search')
-    advert = u' - lyrics from LyricWiki'
-    google = Google()
+    advert = ' - Lyrics from LyricWiki'
+
     _br = r'\s*<br\s*/?\s*>\s*'
     _line_break = re.compile(_br, re.I)
     _verse_break = re.compile(_br * 2, re.I)
 
+    def __init__(self, *args, **kwargs):
+        self.google = Google()
+        super(Main, self).__init__()
+
     def normalize(self, lyrics):
         verses = self._verse_break.split(lyrics)
-        verses = [self._line_break.sub(u' / ', verse) for verse in verses]
+        verses = [self._line_break.sub(' / ', verse) for verse in verses]
         verses = [stripHTML(verse) for verse in verses]
-        return u'\n'.join(verses).strip()
+        return '\n'.join(verses).strip()
 
     def response(self, nick, args, kwargs):
         try:
             try:
                 url = self.google.lucky(args[0] + u' site:lyricwiki.org')
             except NonRedirectResponse:
-                opts = {u'search': args[0], u'ns0': 1}
-                page = geturl(self.searchurl, referer=self.baseurl, opts=opts)
-                soup = BeautifulSoup(page)
-                url = unicode(soup.findAll(u'li')[0].find(u'a')[u'href'])
-                url = urljoin(self.baseurl, url)
-            page = geturl(url, referer=self.baseurl)
-            soup = BeautifulSoup(page)
-            title = soup.find(u'title').string.replace(self.advert, u'')
-            lyrics = unicode(soup.find(u'div', attrs={u'class': u'lyricbox'}))
+                opts = {'search': args[0], 'ns0': 1}
+                soup = getsoup(self.searchurl, referer=self.baseurl, opts=opts)
+                url = urljoin(self.baseurl, soup.li.a['href'])
+            soup = getsoup(url, referer=self.baseurl)
+            title = self.render(soup.title).replace(self.advert, '')
+            lyrics = self.render(soup.find('div', 'lyricbox'))
             lyrics = self.normalize(lyrics)
-            if not lyrics or lyrics == u'None':
-                raise Exception, u'no results'
+            if not lyrics or lyrics == 'None':
+                raise ValueError('no results')
             return u'%s:\n%s' % (title, lyrics)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
+            log.warn('error in module %s' % self.__module__)
             log.exception(error)
-            return u'%s: %s' % (nick, error)
+            return u'%s: %s' % (nick, "Couldn't find them, they must suck")
+
+    def render(self, node):
+        return node.renderContents().decode('utf-8', 'ignore')
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     from include.utils import test_module
+    import sys
+    sys.argv.append('sing around the world daft punk')
     test_module(Main)
