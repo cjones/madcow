@@ -62,9 +62,6 @@ class Google(object):
     search = urljoin(baseurl, u'/search')
     luckyopts = {u'hl': u'en', u'btnI': u'I', u'aq': u'f', u'safe': u'off'}
     calcopts = {u'hl': u'en', u'safe': u'off', u'c2coff': 1, u'btnG': u'Search'}
-    spellcheck_opts = {u'hl': u'en', u'aq': u'f', u'safe': u'off'}
-    correct = re.compile(r'Did you mean.*?:.*?</font>.*?<a.*?>\s*(.*?)\s*</a>',
-                         re.I | re.DOTALL)
     reConversionDetected = re.compile(u'More about (calculator|currency)')
     reConversionResult = re.compile(u'<h2 class=r.*?>.*?<b>(.*?)<\/b><\/h2>')
     extra_re = re.compile(r'<div id=res class=med>(.*?)</div>', re.DOTALL)
@@ -85,18 +82,6 @@ class Google(object):
                               size=1024)
         if not result.startswith(u'http'):
             raise NonRedirectResponse
-        return result
-
-    def spellcheck(self, query):
-        """Look for "did you mean?" response for given query"""
-        opts = dict(self.spellcheck_opts)
-        opts[u'q'] = query
-        result = self.ua.open(self.search, opts=opts, referer=self.baseurl)
-        try:
-            result = self.correct.search(result).group(1)
-            result = stripHTML(result)
-        except AttributeError:
-            result = query
         return result
 
     def calculator(self, query):
