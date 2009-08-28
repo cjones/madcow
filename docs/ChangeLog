@@ -1,3 +1,20 @@
+1.6.2: Fri Aug 28 02:29:40 PDT 2009
+    * Add alias feature to make easier addressing of bot
+    * New module NOAA as an alternative weather source (US only)
+    * Rewrite urban dictionary module to not use busted, out-of-date SOAP
+      API.  Also, called without arguments, returns a random definition.
+    * Bible module can do different versions
+    * Fix broken spellcheck module
+    * Fix broken dictionary module
+    * Fix AIM chatroom bug where some characters caused a crash
+    * Fix compatibility issue with newer SQLObject + pysqlite2 (memebot only)
+    * Strip advertisement spam in lyrics output
+    * Rewrite movie IMDB/RottenTomatoes module to have more accurate results
+    * Make google translate code use AJAX API and add new languages
+    * Add getsoup shortcut for geturl
+    * Bugfix module test framework when redirecting UTF8 output
+    * template.py defaults brought up to date
+
 1.6.1: Fri Jul 31 18:12:12 PDT 2009
     * Fix chatroom support for AIM protocol
     * Add save() method to config object
