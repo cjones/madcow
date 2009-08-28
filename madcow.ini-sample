@@ -102,6 +102,7 @@ election2008=yes        ; current electoral vote predictor for 2008 US election
 google=yes              ; i'm feeling lucky query
 learn=yes               ; used for various modules to cache per-user data
 movie=yes               ; rate movie on imdb & rotten tomatoes
+noaa=yes                ; alternative to wunderground (us-only, more accurate)
 nslookup=yes            ; look up ip of hostnames
 seen=yes                ; keep track of last thing everyone in channel said
 spellcheck=yes          ; spellcheck a word/phrase using google
