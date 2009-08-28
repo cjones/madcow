@@ -177,7 +177,7 @@ def test_module(mod, argv=None):
     except:
         print 'no match, double-check regex'
         return 1
-    print main.response(nick=os.environ[u'USER'], args=args, kwargs={})
+    print main.response(nick=os.environ[u'USER'], args=args, kwargs={}).encode('utf-8')
     return 0
 
 
