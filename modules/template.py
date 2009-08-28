@@ -19,14 +19,14 @@
 
 """Module stub"""
 
-from include.utils import Module
 import logging as log
 import re
-#from include.useragent import geturl   # mimic browser
-#from include.utils import stripHTML    # strip HTML/unescape entities
 
-__version__ = u'0.1'
-__author__ = u'Chris Jones <cjones@gruntle.org>'
+from include.utils import Module, stripHTML
+from include.useragent import getsoup
+
+__version__ = '1.0'
+__author__ = 'Chris Jones <cjones@gruntle.org>'
 __all__ = []
 
 class Main(Module):
@@ -34,7 +34,7 @@ class Main(Module):
     pattern = None
 
     # example regexes
-    #pattern = re.compile(r'^\s*trigger\s*$', re.I)               # no params
+    #pattern = re.compile(r'^\s*trigger\s*$', re.I)              # no params
     #pattern = re.compile(r'^\s*trigger\s+(\S+)\s*', re.I)       # with params
     #pattern = re.compile(r'^\s*trigger(?:\s+(.+?))?\s*$', re.I) # opt params
     #pattern = Module._any      # this will match anything (read NOTE below!)
@@ -62,22 +62,23 @@ class Main(Module):
     # which match anything (i.e. are ALWAYS called no matter what a user types)
     # such as: delicious, factoids, grufti, karma, memebot, seen
 
-    def __init__(self, madcow=None):
-        # this gives user access to the internal bot
-        self.madcow = madcow
+    def __init__(self, *args, **kwargs):
+        # init-specific stuff here, or delete this function
+        super(Main, self).__init__(*args, **kwargs)
 
     def response(self, nick, args, kwargs):
         # this function should return a unicode response or None
         # - args is a list that matches the matched parts of the pattern
         # - kwargs give you access to the details of the request from the bot
         try:
-            return u'module not implemented'
+            response = u'module not implemented'
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
-            return u'%s: %s' % (nick, error)
+            response = u'Something bad happened'
+        return u'%s: %s' % (nick, response)
 
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     from include.utils import test_module
     test_module(Main)
