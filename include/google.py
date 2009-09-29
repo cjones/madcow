@@ -17,13 +17,16 @@
 
 """Google interface"""
 
-import urllib2
-from utils import stripHTML, superscript
-import useragent
 from urlparse import urljoin
+import logging as log
+import urllib2
 import re
 
-__version__ = '0.2'
+from include.BeautifulSoup import BeautifulSoup
+from utils import stripHTML, superscript
+import useragent
+
+__version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
 
 class NonRedirectResponse(Exception):
@@ -64,12 +67,8 @@ class Google(object):
     calcopts = {u'hl': u'en', u'safe': u'off', u'c2coff': 1, u'btnG': u'Search'}
     reConversionDetected = re.compile(u'More about (calculator|currency)')
     reConversionResult = re.compile(u'<h2 class=r.*?>.*?<b>(.*?)<\/b><\/h2>')
-    extra_re = re.compile(r'<div id=res class=med>(.*?)</div>', re.DOTALL)
-    table_re = re.compile(r'<table.*?>(.*?)</table>', re.DOTALL | re.I)
-    rows_re = re.compile(r'<tr.*?>(.*?)</tr>', re.DOTALL | re.I)
-    cells_re = re.compile(r'<td.*?>(.*?)</td>', re.DOTALL | re.I)
-    br_re = re.compile(r'<br.*?>', re.DOTALL | re.I)
     sup_re = re.compile(r'(<sup>.*?</sup>)', re.I | re.DOTALL)
+    clock_re = re.compile(r'/chart\?.*?chc=localtime')
 
     def __init__(self):
         self.ua = useragent.UserAgent(handlers=[NoRedirects, NoErrors])
@@ -107,14 +106,12 @@ class Google(object):
         """Use google to look up time in a given location"""
         try:
             doc = self.ua.open(self.search, {'q': 'time in %s' % query})
-            extra = self.extra_re.search(doc).group(1)
-            table = self.table_re.search(extra).group(1)
-            row = self.rows_re.findall(table)[0]
-            cells = self.cells_re.findall(row)
-            if 'alt="Clock"' not in cells[0]:
-                raise Exception
-            line = self.br_re.split(cells[1])[0]
-            return stripHTML(line)
+            soup = BeautifulSoup(doc)
+            time = soup.find('img', src=self.clock_re).findNext('td')
+            try:
+                time.find('table').extract()
+            except AttributeError:
+                pass
+            return stripHTML(time.renderContents().decode('utf-8')).strip()
         except:
             pass
-
