@@ -709,14 +709,13 @@ class Modules(object):
 
         # if debug level set, show execution order/details of modules
         if log.root.level <= log.DEBUG:
-            for mod_name, mod in self.by_priority():
-                obj = mod[u'obj']
-                try:
+            try:
+                for mod_name, mod in self.by_priority():
                     log.debug(u'%-13s: pri=%3s thread=%-5s stop=%s' %
                               (mod_name, obj.priority, obj.allow_threading,
                                obj.terminate))
-                except:
-                    pass
+            except:
+                pass
 
     def by_priority(self):
         """Return list of tuples for modules, sorted by priority"""
