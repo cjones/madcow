@@ -104,6 +104,11 @@ class IRCProtocol(Madcow):
 
             except KeyboardInterrupt:
                 self.running = False
+            except ServerNotConnectedError:
+                # There's a bug where sometimes on_disconnect doesn't fire
+                if self.config.irc.reconnect and self.running:
+                    sleep(self.config.irc.reconnectWait)
+                    self.connect()
             except Exception, error:
                 log.error(u'Error in IRC loop')
                 log.exception(error)
