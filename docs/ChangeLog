@@ -1,3 +1,12 @@
+1.6.3: Tue Sep 29 03:31:42 PDT 2009
+    * Refactor alias functionality so you don't need a space after alias if it
+      ends in a punctuation mark of some sort (e.g. !define cow)
+    * Fix bug that caused bot to explode if you set DEBUG loglevel
+    * Fix broken worldclock function ('madcow: time in london')
+    * Apply patch from j0no to fix edge-case where SSL connection that gets
+      disconnected will not reconnect to IRC.
+    * Change dictionary module to use definr
+
 1.6.2: Fri Aug 28 02:29:40 PDT 2009
     * Add alias feature to make easier addressing of bot
     * New module NOAA as an alternative weather source (US only)
