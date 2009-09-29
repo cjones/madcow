@@ -34,7 +34,7 @@ ANNOYING = (# boing boing
             'GusAndPenny',      # some guys catflap hooked up to twitter
             'FluffyTheCat',     # Meow...
 
-            # star wars rp'ers
+            # star TREK rp'ers
             'JeanLuc_Picard',
             'LtWorf',
             'wesley_crusher',
