@@ -35,9 +35,10 @@ __all__ = []
 class Main(Module):
 
     pattern = re.compile(r'^\s*def(?:ine)?\s+(.+?)\s*$', re.I)
-    help = 'define <term> - get a definition from merriam-webster'
-    mw_url = 'http://www.merriam-webster.com/'
-    mw_search = urljoin(mw_url, '/dictionary/')
+    help = 'define <term> - get a definition'
+    base_url = 'http://definr.com/'
+    define_url = urljoin(base_url, '/definr/show/toe')
+    whitespace_re = re.compile(r'\s{2,}')
 
     def response(self, nick, args, kwargs):
         try:
@@ -50,10 +51,13 @@ class Main(Module):
 
     def lookup(self, term, idx=1):
         """Lookup term in dictionary"""
-        url = urljoin(self.mw_search, quote(term.lower()))
-        soup = getsoup(url, referer=self.mw_url)
-        entry = soup.find('p', 'd').renderContents()
-        return stripHTML(entry.decode('utf-8')).strip()
+        url = urljoin(self.define_url, quote(term.lower()))
+        soup = getsoup(url, referer=self.base_url)
+        for br in soup('br'):
+            br.extract()
+        val = stripHTML(soup.renderContents().decode('utf-8'))
+        val = val.replace(u'\xa0', ' ').replace('\n', ' ')
+        return self.whitespace_re.sub(' ', val).strip()
 
 
 if __name__ == '__main__':
