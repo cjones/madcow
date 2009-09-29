@@ -77,6 +77,7 @@ class Madcow(object):
     _addrend_re = None
     _feedback_re = None
     _addrpre_re = None
+    _punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
 
     ### INITIALIZATION FUNCTIONS ###
 
@@ -240,18 +241,32 @@ class Madcow(object):
 
     def check_addressing(self, req):
         """Is bot being addressed?"""
-        nick = [self.botname()] + self.aliases
-        nick = '(?:%s)' % '|'.join(re.escape(n) for n in nick)
 
-        # recompile nick-based regex if it changes
-        if nick != self.cached_nick:
-            self.cached_nick = nick
-            self._cor1_re = re.compile(r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nick,
-                                       re.I)
-            self._cor2_re = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
-            self._feedback_re = re.compile(r'^\s*%s[ !]*\?[ !]*$' % nick, re.I)
-            self._addrend_re = re.compile(r'^(.+),\s+%s\W*$' % nick, re.I)
-            self._addrpre_re = re.compile(r'^\s*%s[-,: ]+(.+)$' % nick, re.I)
+        # this is.. torturous.  it works, but it really really
+        # needs to be un-perlified at some point.
+        botname = self.botname()
+        if botname != self.cached_nick:
+            self.cached_nick = botname
+            nicks = []
+            pre_nicks = []
+            for nick in [botname] + self.aliases:
+                nick_e = re.escape(nick)
+                nicks.append(nick_e)
+                if nick_e[-1] not in self._punc:
+                    nick_e += '[-,: ]+'
+                pre_nicks.append(nick_e)
+            nicks = '(?:%s)' % '|'.join(nicks)
+            pre_nicks = '(?:%s)' % '|'.join(pre_nicks)
+            pre_pat = r'^\s*%s\s*(.+)$' % pre_nicks
+            self._addrpre_re = re.compile(pre_pat, re.I)
+            self._cor1_re = re.compile(
+                    r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nicks, re.I)
+            self._cor2_re = re.compile(
+                    r'^\s*no[ ,]+(.+)$', re.I)
+            self._feedback_re = re.compile(
+                    r'^\s*%s[ !]*\?[ !]*$' % nicks, re.I)
+            self._addrend_re = re.compile(
+                    r'^(.+),\s+%s\W*$' % nicks, re.I)
 
         if self._feedback_re.search(req.message):
             req.feedback = req.addressed = True
