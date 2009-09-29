@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Script to clean/normalize the #insub logfiles for megahal"""
+
 import sys
 import os
 import re
