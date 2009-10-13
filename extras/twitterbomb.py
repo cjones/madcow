@@ -4,7 +4,7 @@ from optparse import OptionParser
 import sys
 import os
 import logging as log
-from utils import find_madcow
+from include.utils import find_madcow
 
 prefix, config = find_madcow()
 sys.path.insert(0, prefix)
