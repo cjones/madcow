@@ -21,18 +21,19 @@
 
 import sys
 
-# verify python version is high enough
-if sys.version_info[0] * 10 + sys.version_info[1] < 25:
-    error = RuntimeError(u'madcow requires python 2.5 or higher')
+if sys.hexversion < 0x02050000:
+    error = 'madcow requires python 2.5 or higher'
     if __name__ == '__main__':
         print >> sys.stderr, error
         sys.exit(1)
     else:
-        raise error
+        raise RuntimeError(error)
+elif sys.hexversion >= 0x02060000:
+    sys.dont_write_bytecode = True
 
-# deprecation warnings are annoying
 import warnings
-warnings.simplefilter('ignore')
+
+warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 from time import sleep, strftime, time as unix_time
 from include import useragent as ua, gateway
@@ -48,7 +49,7 @@ import codecs
 import os
 import re
 
-# win32
+# be mindful of win32
 try:
     from signal import signal, SIGHUP, SIGTERM
 except ImportError:
