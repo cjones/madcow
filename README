@@ -15,9 +15,7 @@ REQUIREMENTS
     required components it will be disabled at runtime.  You can find a
     description of each plugin in madcow.ini-sample
 
-    urban.py: SOAPpy
     memebot.py: sqlobject, pysqlite or MySQLdb
-    tweetprinter.py: simplejson.py
 
 
 BASIC USAGE
