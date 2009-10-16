@@ -27,6 +27,7 @@ class Main(object):
     url = 'http://dis.gruntle.org/app/madcow/latest/'
     agent = 'Madcow Updater v' + current_version
     msg_fmt = 'Madcow v%(new_version)s is available, you have v%(current_version)s.  Visit http://madcow.googlecode.com/ to update.\x07'
+    priority = 0
 
     def __init__(self, madcow):
         self.madcow = madcow

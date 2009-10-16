@@ -21,7 +21,7 @@
 
 import re
 
-__version__ = u'0.5'
+__version__ = u'0.6'
 __author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = [u'ColorLib']
 
@@ -38,7 +38,7 @@ class UnknownRainbowStyle(Exception):
 
 
 class ColorLib(object):
-    _protocols = [u'mirc', u'ansi', u'html']
+    _protocols = [u'mirc', u'ansi', u'html', None]
     _codes = {
         u'r': u'red',
         u'o': u'orange',
@@ -131,7 +131,7 @@ class ColorLib(object):
 
     def __init__(self, protocol):
         if protocol not in self._protocols:
-            raise UnknownProtocol, protocol
+            raise UnknownProtocol(protocol)
         self.protocol = protocol
         self.rainbow_offset = {}
 
@@ -149,8 +149,13 @@ class ColorLib(object):
         return color
 
     def get_color(self, fg=None, bg=None, text=None):
+        if not self.protocol:
+            if text is None:
+                return u''
+            return text
+
         if not fg and not bg:
-            return self.get_reset()
+            return self.reset()
         if fg:
             fg = self._color_map[self.protocol][self._normalize_color(fg)]
         if bg:
@@ -196,8 +201,12 @@ class ColorLib(object):
             return u'\x0f'
         elif self.protocol == u'html':
             return u'</span>'
+        else:
+            return u''
 
     def rainbow(self, text, style=u'rainbow'):
+        if not self.protocol:
+            return text
         if style not in self._rainbow_map:
             raise UnknownRainbowStyle, style
         self.rainbow_offset.setdefault(style, 0)
@@ -217,6 +226,8 @@ class ColorLib(object):
         return output
 
     def strip_color(self, text):
+        if not self.protocol:
+            return text
         if self.protocol == u'ansi':
             text = self._ansi_color.sub(u'', text)
         elif self.protocol == u'mirc':

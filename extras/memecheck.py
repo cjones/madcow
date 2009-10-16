@@ -14,7 +14,7 @@ the bookmarklet to invoke this:
 javascript:(%20function()%20{%20var%20url%20=%20'http://gruntle.org/memecheck/check?url='%20+%20escape(window.location.href);%20var%20params%20=%20'width=588,height=156,toolbar=0,status=1,location=0,scrollbars=0,menubar=0,resizable=0';%20w%20=%20open(url,%20'w',%20params);%20setTimeout('w.focus()',%200);%20})();
 """
 
-dbinfo = dict(user=u'memebot', passwd=uu'memebot', db=uu'memebot')
+dbinfo = dict(user=u'memebot', passwd=u'memebot', db=u'memebot')
 chksql = (u'SELECT url.posted, author.name FROM url, author WHERE url.author_i'
           u'd = author.id AND url.clean = %s ORDER BY url.posted ASC;')
 

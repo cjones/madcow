@@ -18,10 +18,10 @@
 import sys
 from madcow import Madcow, Request
 import os
-from include.colorlib import ColorLib
 import re
-import logging as log
 from include.shell import Shell
+
+COLOR_SCHEME = 'ansi'
 
 class ConsoleProtocol(Madcow):
 
@@ -33,9 +33,10 @@ class ConsoleProtocol(Madcow):
                   u'nick <nick> - change your nick',
                   u'clear - clear screen']
 
-    def __init__(self, config, prefix):
-        self.colorlib = ColorLib(u'ansi')
-        Madcow.__init__(self, config, prefix)
+    def __init__(self, config, prefix, scheme=None):
+        if scheme is None:
+            scheme = COLOR_SCHEME
+        super(ConsoleProtocol, self).__init__(config, prefix, scheme)
         self.user_nick = os.environ[u'USER']
         self.shell = Shell(polls=[self.check_response_queue])
         self.usage_lines += self._cli_usage

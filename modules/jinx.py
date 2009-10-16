@@ -21,7 +21,6 @@
 #
 # Handle coke allocation
 
-import re
 import time
 from include.utils import Module
 import logging as log

@@ -27,17 +27,18 @@
 import madcow
 import silc
 import time
-import re
-from include.colorlib import ColorLib
 import logging as log
 from time import sleep, time as unix_time
 from include import encoding
 
+COLOR_SCHEME = 'mirc'
+
 class SilcPlugin(madcow.Madcow, silc.SilcClient):
 
-    def __init__(self, config, prefix):
-        self.colorlib = ColorLib(u'mirc')
-        madcow.Madcow.__init__(self, config, prefix)
+    def __init__(self, config, prefix, scheme=None):
+        if scheme is None:
+            scheme = COLOR_SCHEME
+        madcow.Madcow.__init__(self, config, prefix, scheme)
         keys = silc.create_key_pair('silc.pub', 'silc.priv', passphrase='')
         nick = self.config.silcplugin.nick
         silc.SilcClient.__init__(self, keys, nick, nick, nick)

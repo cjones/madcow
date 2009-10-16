@@ -34,7 +34,6 @@ results, and unsafe returns, say, 100, the phrase is 100% slutty.  If
 the number of results for both are equal, the phrase is 0% slutty.
 """
 
-import urllib2
 import re
 from include.utils import Module
 from include.useragent import geturl

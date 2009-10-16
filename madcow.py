@@ -36,11 +36,7 @@ import warnings
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 from time import sleep, strftime, time as unix_time
-from include import useragent as ua, gateway
-from include.utils import Request
-from include.authlib import AuthLib
 from threading import Thread, RLock
-from include.config import Config
 from optparse import OptionParser
 from Queue import Queue, Empty
 import logging as log
@@ -51,9 +47,16 @@ import re
 
 # be mindful of win32
 try:
-    from signal import signal, SIGHUP, SIGTERM
+    from signal import signal, SIGHUP, SIGTERM, SIGCHLD, SIG_IGN
+    SIGNALS = True
 except ImportError:
-    signal = SIGHUP = SIGTERM = None
+    SIGNALS = False
+
+from include import useragent as ua, gateway
+from include.colorlib import ColorLib
+from include.utils import Request
+from include.authlib import AuthLib
+from include.config import Config
 
 __version__ = u'1.6.3'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -66,6 +69,7 @@ SAMPLE = 'madcow.ini-sample'
 DEFAULTS = 'include/defaults.ini'
 LOG = dict(level=log.WARN, stream=sys.stderr, datefmt=u'%x %X',
            format=u'[%(asctime)s] %(levelname)s: %(message)s')
+
 delim_re = re.compile(r'\s*[,;]\s*')
 
 class Madcow(object):
@@ -82,8 +86,9 @@ class Madcow(object):
 
     ### INITIALIZATION FUNCTIONS ###
 
-    def __init__(self, config, prefix):
+    def __init__(self, config, prefix, scheme=None):
         """Initialize bot"""
+        self.colorlib = ColorLib(scheme)
         self.config = config
         self.prefix = prefix
         self.cached_nick = None
@@ -95,7 +100,7 @@ class Madcow(object):
             self.ignore_list = self.config.main.ignorelist
             self.ignore_list = delim_re.split(self.ignore_list)
             self.ignore_list = [nick.lower() for nick in self.ignore_list]
-            log.info(u'Ignoring nicks: %s' % u', '.join(self.ignore_list))
+            log.info(u'Ignoring nicks: %s', u', '.join(self.ignore_list))
         else:
             self.ignore_list = []
 
@@ -111,8 +116,8 @@ class Madcow(object):
             try:
                 self.charset = codecs.lookup(self.config.main.charset).name
             except LookupError:
-                log.warn(u'unknown charset %s, using default %s' % (
-                         self.config.main.charset, self.charset))
+                log.warn('unknown charset %s, using default %s',
+                         self.config.main.charset, self.charset)
 
         # create admin instance
         self.admin = Admin(self)
@@ -125,7 +130,7 @@ class Madcow(object):
         self.usage_lines.append(u'version - get bot version')
 
         # signal handlers
-        if signal:
+        if SIGNALS:
             signal(SIGHUP, self.signal_handler)
             signal(SIGTERM, self.signal_handler)
 
@@ -140,7 +145,7 @@ class Madcow(object):
 
         # start services
         for service in Service.__subclasses__():
-            log.info(u'starting service: %s' % service.__name__)
+            log.info('starting service: %s', service.__name__)
             thread = service(self)
             thread.setDaemon(True)
             thread.start()
@@ -148,7 +153,7 @@ class Madcow(object):
         # start worker threads
         for i in range(self.config.main.workers):
             name = u'ModuleWorker%d' % (i + 1)
-            log.debug(u'Starting Thread: %s' % name)
+            log.debug('Starting Thread: %s', name)
             thread = Thread(target=self.request_handler, name=name)
             thread.setDaemon(True)
             thread.start()
@@ -205,7 +210,7 @@ class Madcow(object):
             try:
                 self.protocol_output(response, req)
             except Exception, error:
-                log.error(u'error in output: %s' % repr(response))
+                log.error('error in output: %r', response)
                 log.exception(error)
         finally:
             self.lock.release()
@@ -304,7 +309,7 @@ class Madcow(object):
         if self.config.main.logpublic and not req.private:
             self.logpublic(req)
         if req.nick.lower() in self.ignore_list:
-            log.info(u'Ignored "%s" from %s' % (req.message, req.nick))
+            log.info(u'Ignored %r from %s', req.message, req.nick)
             return
         if req.feedback:
             self.output(u'yes?', req)
@@ -335,7 +340,7 @@ class Madcow(object):
             self.reload_modules()
         for mod_name, mod in self.modules.by_priority():
             obj = mod['obj']
-            log.debug(u'trying: %s' % mod_name)
+            log.debug('trying: %s', mod_name)
             if obj.require_addressing and not req.addressed:
                 continue
             try:
@@ -352,24 +357,20 @@ class Madcow(object):
 
             # see if we can filter some of this information..
             kwargs = {u'req': req}
-
-            # XXX convenience for module writers.. this probably is not the
-            # best idea since these values are mutable, but have no effect
-            # if changed from within the module, unlike the req object.
             kwargs.update(req.__dict__)
 
             request = (obj, req.nick, args, kwargs,)
 
             if (self.config.main.module in (u'cli', u'ipython') or
                 not obj.allow_threading):
-                log.debug(u'running non-threaded code for module %s' % mod_name)
+                log.debug('running non-threaded code for module %s', mod_name)
                 self.process_module_item(request)
             else:
-                log.debug(u'launching thread for module: %s' % mod_name)
+                log.debug('launching thread for module: %s', mod_name)
                 self.request_queue.put(request)
 
             if obj.terminate and req.matched:
-                log.debug(u'terminating because %s matched' % mod_name)
+                log.debug('terminating because %s matched', mod_name)
                 break
 
     def logpublic(self, req):
@@ -419,7 +420,10 @@ class PeriodicEvents(Service):
 
     _ignore_modules = [u'__init__', u'template']
     _process_frequency = 1
-    last_run = {}
+
+    def __init__(self, *args, **kwargs):
+        self.last_run = {}
+        super(PeriodicEvents, self).__init__(*args, **kwargs)
 
     def run(self):
         """While bot is alive, process periodic event queue"""
@@ -670,12 +674,11 @@ class Modules(object):
             if not enabled:
                 disabled.append(mod_name)
         private = delim_re.split(self.madcow.config.modules.private)
-        log.info(u'reading modules from %s' % self.mod_dir)
+        log.info('reading modules from %s', self.mod_dir)
         try:
             filenames = os.listdir(self.mod_dir)
         except Exception, error:
-            log.warn(u"Couldn't load modules from %s: %s" % (self.mod_dir,
-                                                             error))
+            log.warn("Couldn't load modules from %s: %s", self.mod_dir, error)
             log.exception(error)
             return
         for filename in filenames:
@@ -683,15 +686,15 @@ class Modules(object):
                 continue
             mod_name = self._pyext.sub(u'', filename)
             if mod_name in disabled:
-                log.debug(u'skipping %s: disabled' % mod_name)
+                log.debug('skipping %s: disabled', mod_name)
                 continue
             if mod_name in self.modules:
                 mod = self.modules[mod_name][u'mod']
                 try:
                     reload(mod)
-                    log.debug(u'reloaded module %s' % mod_name)
+                    log.debug('reloaded module %s', mod_name)
                 except Exception, error:
-                    log.warn(u"couldn't reload %s: %s" % (mod_name, error))
+                    log.warn("couldn't reload %s: %s", mod_name, error)
                     del self.modules[mod_name]
                     continue
             else:
@@ -699,44 +702,64 @@ class Modules(object):
                     mod = __import__(u'%s.%s' % (self.subdir, mod_name),
                                      globals(), locals(), [u'Main'])
                 except Exception, error:
-                    log.warn(u"couldn't load module %s: %s" % (mod_name, error))
+                    log.warn("couldn't load module %s: %s", mod_name, error)
                     continue
                 self.modules[mod_name] = {u'mod': mod,
                                           u'private': mod_name in private}
             try:
-                obj = getattr(mod, u'Main')(self.madcow)
+                obj = mod.Main(self.madcow)
             except Exception, error:
-                log.warn(u"failure loading %s: %s" % (mod_name, error))
+                log.warn("failure loading %s: %s", mod_name, error)
                 del self.modules[mod_name]
                 continue
             if not obj.enabled:
-                log.debug(u"skipped loading %s: disabled" % mod_name)
+                log.debug("skipped loading %s: disabled", mod_name)
                 del self.modules[mod_name]
                 continue
             try:
-                if obj.help:
-                    self.help.append(obj.help)
-                else:
-                    raise Exception
-            except:
-                log.debug(u'no help for module: %s' % mod_name)
+                if not obj.help:
+                    raise AttributeError
+                self.help.append(obj.help)
+            except AttributeError:
+                log.debug('no help for module: %s', mod_name)
             self.modules[mod_name][u'obj'] = obj
-            log.debug(u'loaded module: %s' % mod_name)
+            log.debug('loaded module: %s', mod_name)
 
         # if debug level set, show execution order/details of modules
         if log.root.level <= log.DEBUG:
             try:
                 for mod_name, mod in self.by_priority():
-                    log.debug(u'%-13s: pri=%3s thread=%-5s stop=%s' %
-                              (mod_name, obj.priority, obj.allow_threading,
-                               obj.terminate))
-            except:
+                    log.debug('%-13s: pri=%3s thread=%-5s stop=%s',
+                              mod_name, obj.priority,
+                              obj.allow_threading,
+                              obj.terminate)
+            except AttributeError:
                 pass
 
     def by_priority(self):
         """Return list of tuples for modules, sorted by priority"""
         return sorted(self.modules.iteritems(),
                       key=lambda item: item[1][u'obj'].priority)
+
+
+def daemonize():
+    import resource
+    if os.fork():
+        os._exit(0)
+    os.setsid()
+    if os.fork():
+        os._exit(0)
+    for fd in xrange(resource.getrlimit(resource.RLIMIT_NOFILE)[0]):
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+    fd = os.open(os.devnull, os.O_RDWR)
+    os.dup(fd)
+    os.dup(fd)
+    os.umask(027)
+    os.chdir('/')
+    signal(SIGCHLD, SIG_IGN)
 
 
 def main():
@@ -801,13 +824,13 @@ def main():
     # read config file
     if not os.path.exists(opts.config):
         shutil.copyfile(sample, opts.config)
-        log.error('created config %s - edit and rerun' % opts.config)
+        log.error('created config %s - edit and rerun', opts.config)
         return 1
 
     try:
         config = Config(opts.config, defaults)
     except Exception, error:
-        log.error(u'error parsing config: %s' % error)
+        log.error('error parsing config: %s', error)
         return 1
 
     # init log facility
@@ -815,8 +838,8 @@ def main():
         loglevel = opts.loglevel
     else:
         try:
-            loglevel = getattr(log, config.main.loglevel)
-        except AttributeError:
+            loglevel = log._levelNames[config.main.loglevel.upper()]
+        except KeyError:
             loglevel = LOG['level']
     log.root.setLevel(loglevel)
 
@@ -828,7 +851,7 @@ def main():
         handler = log.FileHandler(logfile)
         handler.setFormatter(log.Formatter(LOG[u'format'], LOG[u'datefmt']))
         log.root.addHandler(handler)
-        log.info('logging messages to %s' % logfile)
+        log.info('logging messages to %s', logfile)
 
     # load specified protocol
     if opts.protocol:
@@ -849,17 +872,7 @@ def main():
         elif protocol == u'cli':
             log.warn(u'not detaching for commandline client')
         else:
-            if os.fork():
-                os._exit(0)
-            os.setsid()
-            if os.fork():
-                os._exit(0)
-            for stream in sys.stdout, sys.stderr:
-                stream.flush()
-            devnull = file(u'/dev/null', u'a+', 0)
-            for fd in range(3):
-                os.dup2(devnull.fileno(), fd)
-            log.info(u'madcow is launched as a daemon')
+            daemonize()
 
     # determine pidfile to use (commandline overrides config)
     if opts.pidfile:
@@ -871,7 +884,7 @@ def main():
     # so that the pidfile can be removed when we're done
     if pidfile:
         if os.path.exists(pidfile):
-            log.warn(u'removing stale pidfile: %s' % pidfile)
+            log.warn('removing stale pidfile: %s', pidfile)
             os.remove(pidfile)
         try:
             pidfp = open(pidfile, u'wb')
@@ -880,15 +893,14 @@ def main():
             finally:
                 pidfp.close()
         except Exception, error:
-            log.warn(u'failed to write %s: %s' % (pidfile, error))
+            log.warn('failed to write %s: %s', pidfile, error)
             log.exception(error)
 
     # import protocol handler
     handler = None
     try:
         module = __import__(u'protocols', globals(), locals(), [protocol])
-        module = getattr(module, protocol)
-        handler = getattr(module, u'ProtocolHandler')
+        handler = getattr(module, protocol).ProtocolHandler
     except ImportError, error:
         # give useful error messages for some known failures (*cough* piece
         # of shit SILC *cough*)
@@ -901,7 +913,7 @@ def main():
                 log.error(u'pysilc cannot find silc-toolkit, try setting '
                           u'LD_LIBRARY_PATH to the location of ' + so)
             except AttributeError:
-                log.error(u'error loading protocol %s: %s' % (protocol, error))
+                log.error('error loading protocol %s: %s', protocol, error)
     except AttributeError:
         log.error(u'no handler found for protocol: ' + protocol)
     except Exception, error:
@@ -937,7 +949,7 @@ def main():
         try:
             os.remove(pidfile)
         except Exception, error:
-            log.warn(u'failed to remove pidfile %s' % pidfile)
+            log.warn('failed to remove pidfile %s', pidfile)
             log.exception(error)
 
     log.info(u'madcow is shutting down')

@@ -12,7 +12,6 @@ import base64
 from hashlib import md5
 import os
 from include import simplejson
-import sys
 import tempfile
 import time
 import urllib

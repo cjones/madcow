@@ -21,7 +21,7 @@
 
 import re
 from include import feedparser
-from include.utils import Module, stripHTML
+from include.utils import Module
 import urllib
 from urlparse import urljoin
 import logging as log

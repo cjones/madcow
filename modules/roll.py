@@ -24,8 +24,6 @@ import random
 import math
 from include.utils import Module
 from include.colorlib import ColorLib
-import os
-import logging as log
 
 class Main(Module):
 
@@ -93,7 +91,6 @@ class Main(Module):
 
         return u'%s rolls %s, needs %s, %s %s' % (nick, saving_throw,
                 save_versus, nick, result)
-
 
 if __name__ == u'__main__':
     from include.utils import test_module

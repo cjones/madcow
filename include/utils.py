@@ -165,12 +165,10 @@ def test_module(mod, argv=None):
     sys.path.insert(0, prefix)
     from madcow import Madcow, DEFAULTS
     from include.config import Config
-    from include.colorlib import ColorLib
     log.basicConfig(level=log.ERROR)
     defaults = os.path.join(prefix, DEFAULTS)
     config = Config(configfile, defaults)
-    madcow = Madcow(config, prefix)
-    madcow.colorlib = ColorLib('ansi')
+    madcow = Madcow(config, prefix, 'ansi')
     main = mod(madcow)
     try:
         args = main.pattern.search(u' '.join(argv)).groups()

@@ -25,7 +25,6 @@ from urlparse import urljoin
 from include.utils import Module, stripHTML
 import re
 import logging as log
-import urllib
 
 class Delicious(object):
 

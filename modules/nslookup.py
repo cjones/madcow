@@ -22,7 +22,6 @@
 import re
 import socket
 from include.utils import Module
-import logging as log
 
 class Main(Module):
 

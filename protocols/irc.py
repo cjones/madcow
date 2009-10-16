@@ -17,13 +17,12 @@
 
 import textwrap
 from include import irclib
-import re
-import sys
 from madcow import Madcow, Request, delim_re
-from include.colorlib import ColorLib
 import random
 import logging as log
 from time import sleep, time as unix_time
+
+COLOR_SCHEME = 'mirc'
 
 class IRCProtocol(Madcow):
 
@@ -32,9 +31,10 @@ class IRCProtocol(Madcow):
     events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg',
               u'namreply', u'pong']
 
-    def __init__(self, config, prefix):
-        self.colorlib = ColorLib(u'mirc')
-        Madcow.__init__(self, config, prefix)
+    def __init__(self, config, prefix, scheme=None):
+        if scheme is None:
+            scheme = COLOR_SCHEME
+        super(IRCProtocol, self).__init__(config, prefix, scheme)
 
         if log.root.level <= log.DEBUG:
             irclib.DEBUG = 1
@@ -104,7 +104,7 @@ class IRCProtocol(Madcow):
 
             except KeyboardInterrupt:
                 self.running = False
-            except ServerNotConnectedError:
+            except irclib.ServerNotConnectedError:
                 # There's a bug where sometimes on_disconnect doesn't fire
                 if self.config.irc.reconnect and self.running:
                     sleep(self.config.irc.reconnectWait)

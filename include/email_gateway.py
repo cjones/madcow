@@ -21,7 +21,6 @@ from __future__ import with_statement
 import sys
 from optparse import OptionParser
 import email
-import email.header
 import codecs
 import os
 import re

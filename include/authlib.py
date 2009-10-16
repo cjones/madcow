@@ -116,9 +116,10 @@ class AuthLib(object):
         digest, salt = self.get_digest(self.encode(plain))
         return self.decode(b64encode(salt + digest))
 
-    def get_digest(self, plain, salt=None):
+    @staticmethod
+    def get_digest(plain, salt=None):
         if salt is None:
-            salt = ''.join([chr(randint(0, 255)) for i in range(4)])
+            salt = ''.join([chr(randint(0, 255)) for i in xrange(4)])
         return sha1(salt + plain).digest(), salt
 
     def check(self, encrypted, plain):

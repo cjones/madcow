@@ -19,13 +19,13 @@
 
 from include.twisted.internet import protocol, reactor
 from include.twisted.words.protocols import oscar
-from include.colorlib import ColorLib
 from include.utils import stripHTML
 from madcow import Madcow, Request
 from time import sleep
 import logging as log
-import random
 import re
+
+COLOR_SCHEME = 'html'
 
 class AIMProtocol(Madcow):
 
@@ -37,9 +37,10 @@ class AIMProtocol(Madcow):
     tag_re = re.compile(r'(<(\S+?).*?>.*?</\2>)', re.DOTALL)
     whitespace_re = re.compile(r'(\s+)')
 
-    def __init__(self, config, prefix):
-        self.colorlib = ColorLib(u'html')
-        Madcow.__init__(self, config, prefix)
+    def __init__(self, config, prefix, scheme=None):
+        if scheme is None:
+            scheme = COLOR_SCHEME
+        super(AIMProtocol, self).__init__(config, prefix, scheme)
 
     def run(self):
         """Log in to AOL's servers and enter main event loop"""

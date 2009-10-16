@@ -18,7 +18,6 @@
 """Google interface"""
 
 from urlparse import urljoin
-import logging as log
 import urllib2
 import re
 

@@ -23,7 +23,6 @@ from include.utils import Module
 import logging as log
 import re
 from include.useragent import geturl
-from include.utils import stripHTML
 from urlparse import urljoin
 from include.colorlib import ColorLib
 

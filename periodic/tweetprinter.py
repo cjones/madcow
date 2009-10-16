@@ -29,6 +29,8 @@ import logging as log
 
 class Main(object):
 
+    priority = 0
+
     _agent = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 
     def __init__(self, madcow):

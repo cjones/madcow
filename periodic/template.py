@@ -23,6 +23,8 @@
 
 class Main(object):
 
+    priority = 0
+
     def __init__(self, madcow):
         self.madcow = madcow
 

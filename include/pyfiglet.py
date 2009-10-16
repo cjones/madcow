@@ -93,13 +93,13 @@ class FigletFont(object):
 
             header = data.pop(0)
             if self.reMagicNumber.search(header) is None:
-                raise FontError, u'%s is not a valid figlet font' % fontPath
+                raise FontError('not a valid figlet font')
 
             header = self.reMagicNumber.sub(u'', header)
             header = header.split()
 
             if len(header) < 6:
-                raise FontError, u'malformed header for %s' % fontPath
+                raise FontError('malformed header')
 
             hardBlank = header[0]
             height, baseLine, maxLength, oldLayout, commentLines = map(int, header[1:6])

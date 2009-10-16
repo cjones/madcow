@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import re
-from utils import stripHTML
 import codecs
 import chardet
 import logging as log
@@ -78,7 +77,6 @@ def parseattrs(data):
             val = None
         elif val[:1] == '\'' == val[-1:] or val[:1] == '"' == val[-1:]:
             val = val[1:-1]
-            #val = stripHTML(val)  # XXX i can't figure out why i did this
         attrs[key.lower()] = val
     return attrs
 

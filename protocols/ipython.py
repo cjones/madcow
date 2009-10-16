@@ -1,15 +1,15 @@
 """Embedded IPython hooks"""
 
 from madcow import Madcow, Request
-import logging as log
 import os
-from include.colorlib import ColorLib
 import sys
 from IPython.Shell import IPShellEmbed, kill_embedded
 from IPython.ipmaker import make_IPython
 from IPython import ipapi
 from IPython import ultraTB
 from IPython.iplib import InteractiveShell
+
+COLOR_SCHEME = 'ansi'
 
 class InteractiveShellMadcow(InteractiveShell):
 
@@ -52,10 +52,11 @@ class IPythonHandler(Madcow):
 
     """This object is autoloaded by the bot"""
 
-    def __init__(self, config, dir):
+    def __init__(self, config, dir, scheme=None):
         """Protocol-specific initializations"""
-        self.colorlib = ColorLib('ansi')
-        Madcow.__init__(self, config, dir)
+        if scheme is None:
+            scheme = COLOR_SCHEME
+        super(IPythonHandler, self).__init__(config, dir, scheme)
 
     def stop(self):
         """Protocol-specific shutdown procedure"""

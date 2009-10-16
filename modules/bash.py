@@ -24,7 +24,6 @@ import random
 from include.utils import Module, stripHTML
 from include.useragent import geturl
 import logging as log
-from include import encoding
 
 class Bash(object):
 

@@ -5,16 +5,20 @@ import logging as log
 import os
 import sys
 
+COLOR_SCHEME = None
+
 class ProtocolHandler(Madcow):
     """This object is autoloaded by the bot"""
 
-    def __init__(self, config, dir):
+    def __init__(self, config, dir, scheme=None):
         """Protocol-specific initializations"""
-        Madcow.__init__(self, config, dir)
+        if scheme is None:
+            scheme = COLOR_SCHEME
+        super(ProtocolHandler, self).__init__(config, dir, scheme)
 
     def stop(self):
         """Protocol-specific shutdown procedure"""
-        Madcow.stop(self)
+        super(ProtocolHandler, self).stop()
 
     def run(self):
         """Protocol-specific loop"""
@@ -31,12 +35,11 @@ class ProtocolHandler(Madcow):
                 # check if we have any responses
                 self.check_response_queue()
 
-            except KeyboardInterrupt:
-                self.running = False
-            except EOFError:
+            except (KeyboardInterrupt, EOFError):
                 self.running = False
             except Exception, error:
                 log.exception(error)
+                self.running = False
 
     def botname(self):
         """Should return bots real name for addressing purposes"""
@@ -71,5 +74,4 @@ class ProtocolHandler(Madcow):
         self.check_addressing(req)
 
         # pass to substem for final processing
-        Madcow.process_message(self, req)
-
+        super(ProtocolHandler, self).process_message(req)

@@ -24,7 +24,6 @@ import logging as log
 import re
 import os
 import time
-import sys
 
 __version__ = u'0.2'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -139,7 +138,10 @@ class Main(Module):
             child = Popen(['./build.py'], stdout=PIPE, stderr=STDOUT,
                           cwd=os.path.join(madcow.prefix, 'include/pymegahal'))
             for line in child.stdout:
-                log.warn(line.strip())
+                try:
+                    log.warn(line.strip())
+                except:
+                    pass
             child.wait()
 
             # let's try that again, shall we?
