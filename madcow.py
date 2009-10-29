@@ -758,7 +758,7 @@ def daemonize():
     os.dup(fd)
     os.dup(fd)
     os.umask(027)
-    os.chdir('/')
+    #os.chdir('/')
     signal(SIGCHLD, SIG_IGN)
 
 

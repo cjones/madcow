@@ -24,6 +24,7 @@ import logging as log
 import re
 from include.useragent import geturl
 from include import simplejson
+from include.utils import stripHTML
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -144,7 +145,7 @@ class Main(Module):
         opts = {'langpair': '%s|%s' % (self.langs[src], self.langs[dst]),
                 'v': '1.0', 'q': text}
         res = simplejson.loads(geturl(self.url, opts))
-        return res['responseData']['translatedText']
+        return stripHTML(res['responseData']['translatedText'])
 
 
 if __name__ == u'__main__':
