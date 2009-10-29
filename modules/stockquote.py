@@ -21,6 +21,7 @@
 
 from include.utils import Module, stripHTML
 from include.useragent import geturl
+from urllib import quote
 import logging as log
 from include.colorlib import ColorLib
 import locale
@@ -50,7 +51,8 @@ class Yahoo(object):
     
     def get_quote(self, symbols):
         """Looks up the symbol from finance.yahoo.com, returns formatted result"""
-        url = Yahoo._quote_url.replace(u'SYMBOL', "+".join(symbols.split()))
+        symbols = [quote(symbol) for symbol in symbols.split()]
+        url = Yahoo._quote_url.replace(u'SYMBOL', "+".join(symbols))
         page = geturl(url)
         
         results = []
@@ -58,12 +60,12 @@ class Yahoo(object):
             data = csv.reader([line]).next()
             symbol = data[0]
             name = data[1]
+            trade_time, last_trade = stripHTML(data[3]).split(" - ")
+            last_trade = locale.atof(last_trade)
             try:
                 last_close = locale.atof(data[2])
             except ValueError:
-                raise UnknownSymbol(symbol)
-            trade_time, last_trade = stripHTML(data[3]).split(" - ")
-            last_trade = locale.atof(last_trade)
+                last_close = last_trade
             
             if trade_time == "N/A":
                 trade_time = u'market close'
@@ -86,7 +88,7 @@ class Yahoo(object):
 
 
 class Main(Module):
-    pattern = re.compile(u'^\s*(?:stocks?|quote)\s+([ a-zA-Z0-9^]+)', re.I)
+    pattern = re.compile(u'^\s*(?:stocks?|quote)\s+([ .=a-zA-Z0-9^]+)', re.I)
     require_addressing = True
     help = u'quote <symbol> - get latest stock quote'
     
