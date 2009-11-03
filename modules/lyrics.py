@@ -35,9 +35,8 @@ class Main(Module):
     pattern = re.compile(r'^\s*sing\s+(.+?)\s*$', re.I)
     help = 'sing <song/artist>'
 
-    baseurl = u'http://lyricwiki.org/'
+    baseurl = u'http://lyrics.wikia.com/'
     searchurl = urljoin(baseurl, u'/Special:Search')
-    advert = ' - Lyrics from LyricWiki'
 
     _br = r'\s*<br\s*/?\s*>\s*'
     _line_break = re.compile(_br, re.I)
@@ -56,14 +55,19 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         try:
             try:
-                url = self.google.lucky(args[0] + u' site:lyricwiki.org')
+                url = self.google.lucky(u'site:lyrics.wikia.com ' + args[0])
             except NonRedirectResponse:
                 opts = {'search': args[0], 'ns0': 1}
                 soup = getsoup(self.searchurl, referer=self.baseurl, opts=opts)
                 url = urljoin(self.baseurl, soup.li.a['href'])
             soup = getsoup(url, referer=self.baseurl)
-            title = self.render(soup.title).replace(self.advert, '')
-            lyrics = self.render(soup.find('div', 'lyricbox'))
+            title = self.render(soup.title).split(' - LyricWiki')[0]
+            title = title.replace(':', ' - ')
+            title = title.replace('_', ' ')
+            lyrics = soup.find('div', 'lyricbox')
+            for spam in lyrics('div', 'rtMatcher'):
+                spam.extract()
+            lyrics = self.render(lyrics)
             lyrics = self.normalize(lyrics)
             if not lyrics or lyrics == 'None':
                 raise ValueError('no results')
