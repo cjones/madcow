@@ -15,7 +15,7 @@ from periodic import tweetprinter
 
 defaults = os.path.join(prefix, DEFAULTS)
 
-ANNOYING = (# boing boing
+ANNOYING = (# boing boing  D:
             'xenijardin',
             'doctorow',
             'BoingBoing',
@@ -33,6 +33,11 @@ ANNOYING = (# boing boing
             'DinDaaDaa',        # a markov bot
             'GusAndPenny',      # some guys catflap hooked up to twitter
             'FluffyTheCat',     # Meow...
+            'Schwarzenegger',   # governator
+            'Helen_Keller',     # grraaaaaarrrrhhh
+            'sockington',       # jason scotts cat :(
+            'big_ben_clock',    # BONG BONG BONG
+            'big_ben_cock',     # DONG DONG DONG
 
             # star TREK rp'ers
             'JeanLuc_Picard',
