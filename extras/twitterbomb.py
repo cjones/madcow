@@ -38,6 +38,7 @@ ANNOYING = (# boing boing  D:
             'sockington',       # jason scotts cat :(
             'big_ben_clock',    # BONG BONG BONG
             'big_ben_cock',     # DONG DONG DONG
+            'newmoticons',      # random unicode shit
 
             # star TREK rp'ers
             'JeanLuc_Picard',
