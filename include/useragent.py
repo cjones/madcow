@@ -129,11 +129,8 @@ script_re = re.compile(r'<script.*?>.*?</script>', re.I | re.DOTALL)
 
 def getsoup(*args, **kwargs):
     """geturl wrapper to return soup minus scripts/styles"""
-    page = geturl(*args, **kwargs)
-    page = script_re.sub('', page)
-    soup = BeautifulSoup(page)
-    for style in soup('style'):
-        style.extract()
-    return soup
+    #page = script_re.sub('', page)  # XXX hack for newer version of BS
+    #for style in soup('style'): style.extract()
+    return BeautifulSoup(geturl(*args, **kwargs))
 
 geturl.__doc__ = UserAgent.open.__doc__

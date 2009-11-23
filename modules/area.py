@@ -21,27 +21,32 @@
 
 import re
 from include.utils import Module
-from include.useragent import geturl
-from urlparse import urljoin
+from include.useragent import getsoup
 import logging as log
+
+def render(node):
+    return node.renderContents().decode('utf-8', 'ignore').strip()
+
+
+def proper(name):
+    return ' '.join(word.capitalize() for word in name.split())
+
 
 class Main(Module):
 
     pattern = re.compile(u'^\s*area(?:\s+code)?\s+(\d+)\s*', re.I)
     require_addressing = True
     help = u'area <areacode> - what city does it belong to'
-    baseurl = u'http://www.melissadata.com/'
-    searchurl = urljoin(baseurl, u'/lookups/phonelocation.asp')
-    city = re.compile(r'<tr><td><A[^>]+>(.*?)</a></td><td>(.*?)</td><td align'
-                      r'=center>\d+</td></tr>')
+    url = 'http://www.melissadata.com/lookups/ZipCityPhone.asp'
 
     def response(self, nick, args, kwargs):
         try:
-            geturl(self.baseurl)
-            doc = geturl(self.searchurl, opts={u'number': args[0]})
-            city, state = self.city.search(doc).groups()
-            city = u' '.join([x.lower().capitalize() for x in city.split()])
-            return u'%s: %s = %s, %s' % (nick, args[0], city, state)
+            soup = getsoup(self.url, {'InData': args[0]})
+            city = soup.body.find('table', bgcolor='#ffffcc').a
+            return u'%s: %s: %s, %s' % (
+                    nick, args[0], proper(render(city).capitalize()),
+                    proper(render(city.parent.findNext('td'))))
+            return u''
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
@@ -49,5 +54,7 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
+    import sys
+    sys.argv.append('area 707')
     from include.utils import test_module
     test_module(Main)
