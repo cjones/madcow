@@ -32,16 +32,18 @@ class ConnectionHandler(Thread):
 
     def run(self):
         self.running = True
+        print 'worker launched'
         try:
             while self.server.running:
                 job = self.server.queue.get()
                 if job is None:
                     break
                 sock, addr = job
+                print 'connection from %r' % (addr,)
                 try:
                     self.handle(sock)
                 except ConnectionClosed:
-                    pass
+                    print 'connection to %r closed' % (addr,)
                 except Exception, error:
                     print >> sys.stderr, error
         finally:
@@ -50,6 +52,7 @@ class ConnectionHandler(Thread):
     def handle(self, local):
         remote = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         remote.connect(self.server.remote_addr)
+        print 'remote connection to %r' % (self.server.remote_addr,)
         try:
             while True:
                 rfds = select([local, remote], [], [], self.server.timeout)[0]
@@ -65,8 +68,10 @@ class ConnectionHandler(Thread):
                     if not data:
                         raise ConnectionClosed
                     if sock is remote:
+                        print 'sending to local: %r' % (data,)
                         local.send(data)
                     elif sock is local:
+                        print 'sending to remote: %r' % (data,)
                         remote.send(data)
         finally:
             for sock in local, remote:
@@ -105,6 +110,7 @@ class ProxyServer(object):
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(self.local_addr)
         self.sock.listen(self.queue_size)
+        print 'server is listening on %r' % (self.local_addr,)
         self.handlers = [ConnectionHandler(self) for i in xrange(self.workers)]
         self.run()
 
