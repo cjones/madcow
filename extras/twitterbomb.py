@@ -39,6 +39,7 @@ ANNOYING = (# boing boing  D:
             'big_ben_clock',    # BONG BONG BONG
             'big_ben_cock',     # DONG DONG DONG
             'newmoticons',      # random unicode shit
+            'TW1TT3Rart',       # more random unicode shit
 
             # star TREK rp'ers
             'JeanLuc_Picard',
