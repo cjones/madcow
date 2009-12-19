@@ -20,7 +20,8 @@
 """Get a random confession from fmylife.com"""
 
 from include.utils import Module, stripHTML
-from include.useragent import geturl
+from include.useragent import getsoup
+from urlparse import urljoin
 import logging as log
 import re
 
@@ -29,19 +30,18 @@ class Main(Module):
     pattern = re.compile(u'^\s*fml\s*(\d+)?\s*$', re.I)
     require_addressing = True
     help = u'fml - misery from fmylife.com'
-    rand_url = 'http://api.betacie.com/view/random/nocomment?key=readonly&language=en'
-    spec_url = 'http://api.betacie.com/view/%d/nocomment?key=readonly&language=en'
-    regex = re.compile(r'<text>(.*)</text>')
-    
+    base_url = 'http://www.fmylife.com/'
+    rand_url = urljoin(base_url, 'random')
+    spec_url = urljoin(base_url, '%d')
+
     def response(self, nick, args, kwargs):
         try:
-            if args[0]:
-                url = self.spec_url % int(args[0])
-            else:
-                url = self.rand_url
-            doc = geturl(url)
-            text = self.regex.search(doc).group(1)
-            return stripHTML(stripHTML(text))
+            soup = getsoup(self.spec_url % int(args[0]) if args[0] else self.rand_url)
+            soup.find('div', id='submit').extract()
+            post = soup.body.find('div', 'post')
+            return u'%s: (%d) %s' % (nick, int(post.find('a', 'fmllink')['href'].split('/')[-1]),
+                                     stripHTML(' '.join(link.renderContents()
+                                                        for link in post('a', 'fmllink')).decode('utf-8', 'ignore')))
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)
