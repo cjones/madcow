@@ -36,7 +36,8 @@ class Main(Module):
              (u'hour', 24),
              (u'day', 7),
              (u'week', 4),
-             (u'month', 0)]
+             (u'month', 12),
+             (u'year', 0)]
 
     def response(self, nick, args, kwargs):
         try:

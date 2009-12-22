@@ -21,7 +21,7 @@ ANNOYING = (# boing boing  D:
             'BoingBoing',
 
             # generally irritating nonsense
-            'AKGovSarahPalin',  # yeah.. sarah palin.
+            #'AKGovSarahPalin',  # yeah.. sarah palin... deleted?
             'kevinrose',        # some annoying internet star (digg founder)
             'meTakingAShit',    # descriptive shitter
             'TheMime',          # ...
@@ -40,6 +40,7 @@ ANNOYING = (# boing boing  D:
             'big_ben_cock',     # DONG DONG DONG
             'newmoticons',      # random unicode shit
             'TW1TT3Rart',       # more random unicode shit
+            'loadedsanta',      # lame
 
             # star TREK rp'ers
             'JeanLuc_Picard',
