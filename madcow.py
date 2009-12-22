@@ -68,7 +68,7 @@ CONFIG = 'madcow.ini'
 SAMPLE = 'madcow.ini-sample'
 DEFAULTS = 'include/defaults.ini'
 
-log.basicConfig(level=log.INFO, stream=sys.stderr, datefmt='%c',
+log.basicConfig(level=log.WARN, stream=sys.stderr, datefmt='%c',
                 format='[%(asctime)s] %(levelname)s: %(message)s')
 
 delim_re = re.compile(r'\s*[,;]\s*')
