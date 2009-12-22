@@ -67,8 +67,9 @@ CHARSET = u'utf-8'
 CONFIG = 'madcow.ini'
 SAMPLE = 'madcow.ini-sample'
 DEFAULTS = 'include/defaults.ini'
-LOG = dict(level=log.WARN, stream=sys.stderr, datefmt=u'%x %X',
-           format=u'[%(asctime)s] %(levelname)s: %(message)s')
+
+log.basicConfig(level=log.INFO, stream=sys.stderr, datefmt='%c',
+                format='[%(asctime)s] %(levelname)s: %(message)s')
 
 delim_re = re.compile(r'\s*[,;]\s*')
 
@@ -765,8 +766,6 @@ def daemonize():
 def main():
     """Entry point to set up bot and run it"""
 
-    log.basicConfig(**LOG)
-
     # where we are being run from
     if __file__.startswith(sys.argv[0]):
         prefix = sys.argv[0]
@@ -834,24 +833,15 @@ def main():
         return 1
 
     # init log facility
-    if opts.loglevel is not None:
-        loglevel = opts.loglevel
-    else:
+    if opts.loglevel is None:
         try:
             loglevel = log._levelNames[config.main.loglevel.upper()]
         except KeyError:
-            loglevel = LOG['level']
-    log.root.setLevel(loglevel)
-
-    # if specified, log to file as well
-    if config.main.logfile:
-        logfile = config.main.logfile
-        if not logfile.startswith('/'):
-            logfile = os.path.join(prefix, logfile)
-        handler = log.FileHandler(logfile)
-        handler.setFormatter(log.Formatter(LOG[u'format'], LOG[u'datefmt']))
-        log.root.addHandler(handler)
-        log.info('logging messages to %s', logfile)
+            loglevel = None
+    else:
+        loglevel = opts.loglevel
+    if loglevel is not None:
+        log.root.setLevel(loglevel)
 
     # load specified protocol
     if opts.protocol:
@@ -873,6 +863,16 @@ def main():
             log.warn(u'not detaching for commandline client')
         else:
             daemonize()
+
+    # if specified, log to file as well
+    if config.main.logfile:
+        logfile = config.main.logfile
+        if not logfile.startswith('/'):
+            logfile = os.path.join(prefix, logfile)
+        handler = log.FileHandler(logfile)
+        handler.setFormatter(log.root.handlers[0].formatter)
+        log.root.addHandler(handler)
+        log.info('logging messages to %s', logfile)
 
     # determine pidfile to use (commandline overrides config)
     if opts.pidfile:
@@ -955,5 +955,5 @@ def main():
     log.info(u'madcow is shutting down')
     return 0
 
-if __name__ == u'__main__':
+if __name__ == '__main__':
     sys.exit(main())
