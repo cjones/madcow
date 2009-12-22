@@ -1,3 +1,13 @@
+1.6.4: Tue Dec 22 12:54:13 PST 2009
+    * Fixed modules: lyrics, area code, fmylife,
+    * Stockquote module can now do currencies
+    * Don't write bytecode if python in 2.6+
+    * Cleanup some unused module imports
+    * Fix problem where logfile would be closed by deaemonize
+    * Removed some unused modules from include directory
+    * Added tool for parsing megahal's brain via python (mhlib.py)
+    * Rolled back bundled BeautifulSoup library
+
 1.6.3: Tue Sep 29 03:31:42 PDT 2009
     * Refactor alias functionality so you don't need a space after alias if it
       ends in a punctuation mark of some sort (e.g. !define cow)
