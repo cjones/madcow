@@ -350,3 +350,9 @@ channel=#madcow
 ; for the yelp module, set default search location
 [yelp]
 default_location=San Francisco, CA
+
+; for world of warcraft activity feed
+[armory]
+enabled=no
+updatefreq=300
+channel=#madcow
