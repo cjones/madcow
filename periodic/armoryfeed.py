@@ -20,8 +20,6 @@
 from urllib import urlencode
 from include import feedparser
 from include.utils import stripHTML
-from time import mktime, time, timezone
-import re
 
 ARMORY_URL = 'http://www.wowarmory.com/character-feed.atom?%s'
 
@@ -33,34 +31,22 @@ class Main(object):
         self.enabled = madcow.config.armory.enabled
         self.frequency = madcow.config.armory.updatefreq
         self.output = madcow.config.armory.channel
-        self.feed = ArmoryFeed()
-
-    def response(self, *args):
-        """This is called by madcow, should return a string or None"""
-        return '\n'.join(self.feed.get_new_messages())
-
-
-class ArmoryFeed(object):
-
-    """Checks armory"""
-
-    def __init__(self):
-        # XXX move this into .. something else
+        self.cache = set()
+        self.first_run = True
         self.characters = {('Illidan', 'Zerianna'): {},
                            ('Illidan', 'Tohst'): {},
                            ('Illidan', 'Cudicus'): {},
                            ('Illidan', 'Wept'): {},
                            ('Illidan', 'Dent'): {}}
-        self.last_check = time()
+
+    def response(self, *args):
+        return '\n'.join(self.get_new_messages())
 
     def get_new_messages(self):
-        now = time()
         for realm, character in self.characters:
-            for published, message in self.get_character_feed(realm, character):
-                if published > self.last_check:
-                    yield '%s: %s' % (character, message)
-        self.last_check = now
-
-    def get_character_feed(self, realm, character):
-        for entry in feedparser.parse(ARMORY_URL % urlencode({'r': realm, 'cn': character})).entries:
-            yield mktime(entry.published_parsed) - timezone, stripHTML(entry.subtitle)
+            for entry in feedparser.parse(ARMORY_URL % urlencode({'r': realm, 'cn': character})).entries:
+                if entry.id not in self.cache:
+                    self.cache.add(entry.id)
+                    if not self.first_run:
+                        yield '%s: %s' % (character, stripHTML(entry.subtitle))
+        self.first_run = False
