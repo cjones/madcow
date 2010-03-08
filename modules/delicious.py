@@ -79,6 +79,8 @@ class Main(Module):
             for url in self.url.findall(args[0]):
                 self.delicious.post(url, tags=[nick])
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            # XXX meh.. people post jokey urls a lot, no point spamming logs
+            #log.warn(u'error in module %s' % self.__module__)
+            #log.exception(error)
+            pass
 
