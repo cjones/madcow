@@ -25,7 +25,6 @@ import os
 import urlparse
 import datetime
 import random
-from include.throttle import Throttle
 from include.utils import Module
 import logging as log
 
@@ -118,7 +117,6 @@ class MemeBot(Module):
 
     def __init__(self, madcow):
         self.encoding = madcow.config.main.charset
-        self.throttle = Throttle()
         config = madcow.config.memebot
         engine = config.db_engine
         uri = engine + '://'
@@ -224,13 +222,6 @@ class MemeBot(Module):
             orig = self.match_url_re.search(message).group(1)
         except AttributeError:
             return
-
-        event = self.throttle.registerEvent(name='memebot', user=nick)
-        if event.isThrottled():
-            if event.warn():
-                return '%s: Stop abusing me plz.' % nick
-            else:
-                return
 
         clean = self.clean_url(orig)
 
