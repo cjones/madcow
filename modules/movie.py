@@ -133,8 +133,6 @@ class Main(Module):
             else:
                 raise ValueError('no exact matches')
             soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
-            with open('/home/cjones/gruntle.org/media/tmp/foo.html', 'wb') as fp:
-                fp.write(soup.prettify())
         return stripHTML(soup.title.renderContents()), soup.body.find('div', 'starbar-meta').b.renderContents()
 
     def gettop(self):
