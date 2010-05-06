@@ -84,7 +84,10 @@ class Main(Module):
                     rating = '[%s] %s' % (title, rating)
                 out.append('%s: %s' % (source, rating))
             except:
+                log.exception('no match')
                 pass
+        if not out:
+            out.append('No match')
         return ', '.join(out)
 
     def rate_rt(self, name):
@@ -120,7 +123,9 @@ class Main(Module):
             for p in main('p', style=None):
                 for row in p.table('tr'):
                     link = row('td')[2].a
-                    if self.normalize(link.renderContents()) == name:
+                    normalized = self.normalize(link.renderContents())
+                    log.debug('Comparing: %r == %r', normalized, name)
+                    if normalized == name:
                         url = urljoin(self.imdb_url, link['href'])
                         break
                 if url:
@@ -128,11 +133,9 @@ class Main(Module):
             else:
                 raise ValueError('no exact matches')
             soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
-        try:
-            rating = soup.body.find('div', 'meta').b.renderContents()
-        except AttributeError:
-            rating = 'Unrated'
-        return stripHTML(soup.title.renderContents()), rating
+            with open('/home/cjones/gruntle.org/media/tmp/foo.html', 'wb') as fp:
+                fp.write(soup.prettify())
+        return stripHTML(soup.title.renderContents()), soup.body.find('div', 'starbar-meta').b.renderContents()
 
     def gettop(self):
         """Get box office ratings"""
