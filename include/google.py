@@ -67,7 +67,7 @@ class Google(object):
     reConversionDetected = re.compile(u'More about (calculator|currency)')
     reConversionResult = re.compile(u'<h2 class=r.*?>.*?<b>(.*?)<\/b><\/h2>')
     sup_re = re.compile(r'(<sup>.*?</sup>)', re.I | re.DOTALL)
-    clock_re = re.compile(r'/chart\?.*?chc=localtime')
+    clock_re = re.compile(r'/images/icons/onebox/clock')
 
     def __init__(self):
         self.ua = useragent.UserAgent(handlers=[NoRedirects, NoErrors])
