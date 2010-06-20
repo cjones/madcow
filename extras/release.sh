@@ -2,7 +2,7 @@
 # diff trunk from previous release and update ChangeLog
 # make a release tag:
 
-release="madcow-1.6.4"
+release="madcow-1.6.5"
 
 svn copy https://madcow.googlecode.com/svn/trunk https://madcow.googlecode.com/svn/tags/$release || exit
 

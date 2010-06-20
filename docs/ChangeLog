@@ -1,3 +1,10 @@
+1.6.5: Sun Jun 20 02:25:46 PDT 2010
+    * Fix google time module
+    * Fix broken movie rating module
+    * Remove broken throttle module
+    * Silence spurious delicious warnings
+    * Armory feed module for wow
+
 1.6.4: Tue Dec 22 12:54:13 PST 2009
     * Fixed modules: lyrics, area code, fmylife,
     * Stockquote module can now do currencies
