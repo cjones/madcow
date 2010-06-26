@@ -30,7 +30,7 @@ __version__ = u'0.3'
 __author__ = u'cj_ <cjones@gruntle.org>'
 __all__ = []
 
-FORMAT = u'Terror: %s, DoomsDay: %s, IraqWar: %s, BodyCount: %s'
+FORMAT = u'Terror: %s, DoomsDay: %s, BodyCount: %s'
 
 class Terror(object):
 
@@ -75,19 +75,9 @@ class DoomsDay(object):
 
 class IraqWar(object):
 
-    _war_url = u'http://areweatwarwithiraq.com/rss.xml'
     _bodycount_url = u'http://www.iraqbodycount.org/database/'
     _re_whitespace = re.compile(r'\s+')
     _bodycount_re = re.compile(r"<p class='ibc-range'>(.*?)</p>", re.DOTALL)
-
-    def war(self):
-        try:
-            rss = feedparser.parse(self._war_url)
-            return rss.entries[0].title
-        except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
-            return u'UNKNOWN'
 
     def bodycount(self):
 
@@ -122,8 +112,7 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         try:
-            return FORMAT % (self.terror.level(), self.doom.time(),
-                             self.iraq.war(), self.iraq.bodycount())
+            return FORMAT % (self.terror.level(), self.doom.time(), self.iraq.bodycount())
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)

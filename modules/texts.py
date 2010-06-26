@@ -6,14 +6,16 @@ import logging as log
 import random
 import re
 from include.BeautifulSoup import BeautifulSoup
-from include.useragent import geturl
+from include.useragent import getsoup
 from include.utils import stripHTML
 from include.utils import Module
+import re
 
 __version__ = '0.1'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
 
 url = 'http://www.textsfromlastnight.com/random/'
+spam_re = re.compile(r'\s*http://tfl.nu/.*$')
 
 class Main(Module):
 
@@ -30,19 +32,12 @@ class Main(Module):
 
 
 def get_text():
-    page = geturl(url)
-    soup = BeautifulSoup(page)
-    texts = soup.body.findAll('div', 'post_content')
-    text = random.choice(texts)
-    text = text.renderContents()
-    text = stripHTML(text)
-    text = text.splitlines()
-    text = [line.strip() for line in text]
-    text = [line for line in text if line]
-    text = u'\n'.join(text)
-    return text
+    text = random.choice(getsoup(url).body.find('ul', id='texts-list')('div', 'text')).textarea
+    return spam_re.sub(u'', text.renderContents().decode('utf-8'))
 
 
 if __name__ == u'__main__':
     from include.utils import test_module
+    import sys
+    sys.argv.append('txt')
     test_module(Main)

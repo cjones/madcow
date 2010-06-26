@@ -37,12 +37,12 @@ class Bash(object):
 
 class QDB(object):
 
-    random = u'http://qdb.us/random'
-    bynum = u'http://qdb.us/num'
-    search = u'http://qdb.us/'
+    random = 'http://qdb.us/random'
+    bynum = 'http://qdb.us/num'
+    search = 'http://qdb.us/'
     query = 'search'
     opts = dict(limit=100, approved=1)
-    entries = re.compile(u'<td[^>]+><p>(.*?)</p>', re.DOTALL)
+    entries = re.compile(r'<span class=qt[^>]*>(.*?)</span>', re.DOTALL)
 
 
 class Limerick(object):
@@ -93,8 +93,7 @@ class Main(Module):
             if query:
                 entries = filter(None, entries)
             entry = random.choice(entries)
-            entry = stripHTML(entry).strip()
-            return entry
+            return '\n'.join(filter(None, stripHTML(entry).strip().splitlines()))
         except Exception, error:
             log.warn(u'error in module %s' % self.__module__)
             log.exception(error)

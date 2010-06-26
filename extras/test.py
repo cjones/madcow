@@ -32,7 +32,7 @@ tests = {'learn': {'request': 'set karma cj_ 31337',
          'woot': {'request': 'woot',
                   'result': re.compile(r'http://www.woot.com/')},
          'area': {'request': 'area 707',
-                  'result': 'test: 707 = Santa Rosa, California'},
+             'result': 'test: 707: Santa Rosa, California'},
          'webtender': {'request': 'drinks fuzzy navel',
                        'result': re.compile(
                            r'test: Fuzzy Navel - 1/3 Peach schnapps')},
@@ -50,14 +50,13 @@ tests = {'learn': {'request': 'set karma cj_ 31337',
                        'result': 'test: I forgot foo'}],
          'calc': {'request': 'calc 1+1', 'result': 'test: 1 + 1 = 2'},
          'war': {'request': 'terror',
-                 'result': re.compile(
-                     'Terror: \x1b\[1;33m.*?\x1b\[0m, DoomsDay: It is \d+ Minu'
-                     'tes to Midnight, IranWar: .*?, IraqWar: .*?, BodyCount')},
+                 'result': re.compile(u'Terror: \x1b\[[0-9;]*m\w+\x1b\[0m, DoomsDay: It is \d+ Minutes? to Midnight, BodyCount: [0-9, \u2013]*$'),
+                 },
          'urban': {'request': 'urban penis',
                    'result': re.compile(
-                       r'test: \[1/20\] The tool used to wean')},
+                       r'test: \[1/\d+\] Penis: The tool used to wean')},
          'dictionary': {'request': 'define penis',
-                        'result': re.compile(r'a male erectile organ')},
+                        'result': re.compile(r'the male organ of copulation')},
          'conservapedia': {'request': 'cp penis',
                            'result': re.compile(
                                r'Human reproduction - Human reproduction')},
@@ -69,8 +68,7 @@ tests = {'learn': {'request': 'set karma cj_ 31337',
          'nslookup': {'request': 'nslookup localhost',
                       'result': 'test: 127.0.0.1'},
          'bible': {'request': 'bible john 3:16',
-                   'result': re.compile(
-                       '"For God so loved the world that he gave')},
+                   'result': re.compile('For God so loved the world, that he gave')},
          'yourmom': {'request': 'yourmom', 'result': any},
          'roll': {'request': 'roll 2d20',
                   'result': re.compile(r'test rolls \d+, needs \d+, test')},
@@ -81,11 +79,9 @@ tests = {'learn': {'request': 'set karma cj_ 31337',
          'karma': {'request': 'karma cj_',
                    'result': re.compile(r"test: cj_'s karma is \d+")},
          'babel': {'request': 'translate from english to spanish: your mom',
-                   'result': 'test: tu madre'},
+                 'result': u'test: tu mam\xe1'},
          'movie': {'request': 'rate bone collector',
-                   'result': (
-                       'test: IMDB: 6.3/10, Freshness: 28%, Meta - Critics: 4'
-                       '5/100, Users: 5.0/10')},
+                   'result': 'test: IMDB: 6.3/10, RT: 27%'},
          'stockquote': {'request': 'quote goog',
                         'result': re.compile(r'Google Inc\.')},
          'artfart': {'request': 'artfart',
@@ -107,8 +103,8 @@ tests = {'learn': {'request': 'set karma cj_ 31337',
                           'result': re.compile(
                               r'^test: Projected Senate Seats 2010:.*?Democra'
                               r'ts.*?: \d+, .*?Republicans.*?: \d+')},
-         'spellcheck': {'request': 'spell untied',
-                        'result': 'test: united'},
+         'spellcheck': {'request': 'spell gerbage',
+                        'result': 'test: garbage'},
          'figlet': {'request': 'figlet hi', 'result': any},
          'fmylife': {'request': 'fml', 'result': any},
          'joke': {'request': 'joke', 'result': any},
@@ -121,6 +117,12 @@ tests = {'learn': {'request': 'set karma cj_ 31337',
          'delicious': None,
          'jinx': None,
          'steam': None,
+         'cnn': {'request': 'cnn', 'result': re.compile(r'http://rss\.cnn\.com')},
+         'noaa': {'request': 'noaa 94005', 'result': re.compile(r'Visibility')},
+         'texts': {'request': 'txt', 'result': re.compile(r'\(\d+')},
+         'trek': {'request': 'trek', 'result': re.compile(r'test: \x1b\[[0-9;]+mFAIL\x1b\[0m: .+ \x1b\[[0-9;]+mFIX\x1b\[0m: .+$')},
+
+         'yelp': {'request': 'yelp madhouse @94005', 'result': re.compile(r'test: Madhouse Coffee')},
 }
 
 retype = type(re.compile(u''))
@@ -138,6 +140,7 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         testmod = args[0]
         results = {}
+        failed_list = []
         for mod_name, mod_data in self.madcow.modules.modules.iteritems():
             obj = mod_data['obj']
             #for mod_name, obj in self.madcow.modules:
@@ -190,8 +193,9 @@ class Main(Module):
                 sys.stderr.write(u'ok\r\n')
             else:
                 sys.stderr.write(u'fail [%s]\r\n' % repr(response))
+                failed_list.append(mod_name)
             results[mod_name] = passed
         tested = len(results)
         passed = len([m for m, r in results.items() if r])
-        return u'results: %s / %s passed' % (passed, tested)
+        return u'results: %s / %s passed\nfailed: %s' % (passed, tested, ', '.join(failed_list))
 
