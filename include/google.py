@@ -68,6 +68,8 @@ class Google(object):
     reConversionResult = re.compile(u'<h2 class=r.*?>.*?<b>(.*?)<\/b><\/h2>')
     sup_re = re.compile(r'(<sup>.*?</sup>)', re.I | re.DOTALL)
     clock_re = re.compile(r'/images/icons/onebox/clock')
+    sun_re = re.compile(r'/images/icons/onebox/weather_sun')
+    whitespace_re = re.compile(r'\s{2,}')
 
     def __init__(self):
         self.ua = useragent.UserAgent(handlers=[NoRedirects, NoErrors])
@@ -101,6 +103,15 @@ class Google(object):
 
         return stripHTML(response)
 
+    def sunrise_sunset(self, query, location):
+        """Ask google for the sunrise or sunset from location"""
+        soup = BeautifulSoup(self.ua.open(self.search, {'q': '%s in %s' % (query, location)}))
+        image = soup.find('img', src=self.sun_re)
+        row1 = image.findNext('td')
+        row2 = row1.findNext('td')
+        result = stripHTML(u'%s (%s)' % (self.decode(row1), self.decode(row2)))
+        return self.whitespace_re.sub(u' ', result.strip())
+
     def clock(self, query):
         """Use google to look up time in a given location"""
         try:
@@ -114,3 +125,7 @@ class Google(object):
             return stripHTML(time.renderContents().decode('utf-8')).strip()
         except:
             pass
+
+    @staticmethod
+    def decode(node):
+        return node.renderContents().decode('utf-8', 'ignore')

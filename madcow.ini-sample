@@ -108,6 +108,7 @@ seen=yes                ; keep track of last thing everyone in channel said
 spellcheck=yes          ; spellcheck a word/phrase using google
 stockquote=yes          ; get yahoo stock quotes
 summon=yes              ; summon users (send email/sms)
+sunrise=yes             ; get sunrise/sunset from google for your area
 urban=yes               ; look up word/phrase on urban dictionary
 weather=yes             ; look up weather from wunderground
 wikimedia=yes           ; look up summaries from various wikis
