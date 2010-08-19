@@ -27,6 +27,8 @@ import datetime
 import random
 from include.utils import Module
 import logging as log
+from cgi import parse_qsl
+from urllib import urlencode
 
 # XXX hack to work around busted pysqlite/sqlobject integration
 try:
@@ -177,24 +179,29 @@ class MemeBot(Module):
         ### now for memebots normalizing..
         # make hostname lowercase and remove www
         netloc = netloc.lower()
+        netloc = urlparse.unquote(netloc).replace('+', ' ')
         if netloc.startswith('www.') and len(netloc) > 4:
             netloc = netloc[4:]
+        if netloc.endswith('.') and len(netloc) > 1:
+            netloc = netloc[:-1]
         # all urls have trailing slash
         if url == '':
             url = '/'
+        url = urlparse.unquote(url).replace('+', ' ')
         # remove empty query settings, these are usually form artifacts
         # and put them in order
         try:
-            query = '&'.join(
-                    sorted('='.join(i)
-                           for i in [p.split('=', 1) for p in query.split('&')]
-                           if len(i) == 2 and i[1]))
-        except:
+            query = urlencode([
+                item for item in sorted(parse_qsl(query)) if item[1]])
+        except Exception, e:
             query = ''
         # ignore fragments
         fragment = ''
 
-        return urlparse.urlunsplit([scheme, netloc, url, query, fragment])
+        args = [scheme, netloc, url, query, fragment]
+        url = urlparse.urlunsplit(args)
+        #print 'became: %r' % url
+        return url
 
     def get_score_for_author(self, author):
         return ((author.points_new    *  1) +
