@@ -376,10 +376,11 @@ class Madcow(object):
 
     def logpublic(self, req):
         """Logs public chatter"""
-        line = u'%s <%s> %s\n' % (strftime(u'%T'), req.nick, req.message)
-        path = os.path.join(self.prefix, u'logs',
-                            u'%s-irc-%s-%s' % (self.namespace, req.channel,
-                                               strftime(u'%F')))
+        message = req.message
+        if req.action:
+            message = u'ACTION: %s' % message
+        line = u'%s <%s> %s\n' % (strftime(u'%T'), req.nick, message)
+        path = os.path.join(self.prefix, u'logs', u'%s-irc-%s-%s' % (self.namespace, req.channel, strftime(u'%F')))
         logfile = open(path, u'a')
         try:
             logfile.write(line.encode(self.charset, 'replace'))

@@ -29,7 +29,7 @@ class IRCProtocol(Madcow):
     """Implements IRC protocol for madcow"""
 
     events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg',
-              u'namreply', u'pong']
+              u'namreply', u'pong', u'action']
 
     def __init__(self, config, prefix, scheme=None):
         if scheme is None:
@@ -45,8 +45,7 @@ class IRCProtocol(Madcow):
         self.server = self.irc.server()
         for event in self.events:
             log.info(u'[IRC] * Registering event: %s' % event)
-            self.server.add_global_handler(event,
-                                           getattr(self, u'on_' + event), 0)
+            self.server.add_global_handler(event, getattr(self, u'on_' + event), 0)
         if self.config.irc.channels is not None:
             self.channels = delim_re.split(self.config.irc.channels)
         else:
@@ -129,6 +128,9 @@ class IRCProtocol(Madcow):
         now = unix_time()
         log.debug('PONG: latency = %s' % (now - pong))
         self.last_pong = now
+
+    def on_action(self, server, event):
+        self.on_message(server, event, False, True)
 
     def botname(self):
         return self.server.get_nickname()
@@ -221,12 +223,13 @@ class IRCProtocol(Madcow):
         """public message received"""
         self.on_message(server, event, private=False)
 
-    def on_message(self, server, event, private):
+    def on_message(self, server, event, private, action=False):
         """process incoming messages"""
         req = Request(message=event.arguments()[0])
         req.nick = irclib.nm_to_n(event.source())
         req.channel = event.target()
         req.private = private
+        req.action = action
 
         if private:
             req.sendto = req.nick
@@ -272,6 +275,5 @@ class IRCProtocol(Madcow):
         self.last_names_update = unix_time()
 
 
-class ProtocolHandler(IRCProtocol):
-    pass
+ProtocolHandler = IRCProtocol
 

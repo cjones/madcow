@@ -108,7 +108,8 @@ class Request(object):
                 'correction': False,
                 'colorize': False,
                 'channel': None,
-                'addressed': False}
+                'addressed': False,
+                'action': False}
 
     def __init__(self, **kwargs):
         self.__dict__.update(self.defaults, **kwargs)
