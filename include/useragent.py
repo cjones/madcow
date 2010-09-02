@@ -67,7 +67,9 @@ class UserAgent(object):
             if url[4]:
                 query.append(url[4])
             url[4] = u'&'.join(query)
-        request = urllib2.Request(urlparse.urlunparse(url), data)
+        realurl = urlparse.urlunparse(url)
+        #print 'url = %r' % realurl
+        request = urllib2.Request(realurl, data)
         if referer:
             request.add_header(u'Referer', referer)
         if add_headers:
