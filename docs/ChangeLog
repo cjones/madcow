@@ -1,3 +1,22 @@
+1.6.6: Thu Sep  2 00:03:34 PDT 2010
+    * log IRC /me actions and accept commands from there
+    * add sunrise/sunset module
+    * remove broken bay area traffic module
+    * update twitter feed to use oAuth
+    * turn off IRCs obscenely verbose debugging when DEBUG level is set
+    * fix bug where some AIM output would not transmit, such as help
+    * update unit tests
+    * fix some workarounds to trick memebot
+    * remove defunt "iraq war yes/no" site from terror.py
+    * no more spam in encyclopedia dramatica wiki interface
+    * update google translates list of languages
+    * show which language was actually used in google translate
+    * fix broken bash/qdb modules
+    * fix broken slutcheck module
+    * fix broken "texts from last night" module
+    * update list of bibles in bible.py module
+    * fix rogue whitespace/newlines in movie rating module
+
 1.6.5: Sun Jun 20 02:25:46 PDT 2010
     * Fix google time module
     * Fix broken movie rating module
