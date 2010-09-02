@@ -81,6 +81,10 @@ class WikiMedia(object):
     def _getsummary(self, url, opts=None):
         soup, title = self._getpage(url, opts)
 
+        spam = soup.find('div', attrs={'id': 'siteNotice'})
+        if spam is not None:
+            spam.extract()
+
         # massage into plain text by concatenating paragraphs
         content = ' '.join(p.renderContents().decode('utf-8')
                            for p in soup.findAll('p'))
