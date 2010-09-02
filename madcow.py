@@ -774,6 +774,7 @@ def main():
         prefix = __file__
     prefix = os.path.abspath(os.path.dirname(prefix))
     sys.path.insert(0, prefix)
+    sys.path.insert(0, os.path.join(prefix, 'include'))
 
     # location of config files
     config = os.path.join(prefix, CONFIG)
