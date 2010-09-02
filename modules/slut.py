@@ -40,9 +40,9 @@ from include.useragent import geturl
 import logging as log
 from urlparse import urljoin
 
-match_re = re.compile(r'Results .* of about <b>([\d,]+)</b> for')
-filter_re = re.compile(
-        r'The word <b>"(\w+)"</b> has been filtered from the search')
+#match_re = re.compile(r'Results .* of about <b>([\d,]+)</b> for')
+match_re = re.compile(r'About ([\d,]+) results')
+filter_re = re.compile(r'The word <b>"(\w+)"</b> has been filtered from the search')
 baseURL = u'http://www.google.com/'
 searchURL = urljoin(baseURL, u'/search')
 
@@ -65,33 +65,27 @@ def slutrating(phrase):
 
     phrase = cleanurl(phrase)
 
-    for i in range(5):  # Try up to 5 times to get a good result
+    try:
+        data = geturl(searchURL, opts={u'q': phrase, u'safe': u'off'})
+        unsafe = int(match_re.search(data).group(1).replace(u',', u''))
+    except AttributeError:
+        unsafe = 0
+
+    try:
+        data = geturl(searchURL, opts={u'q': phrase, u'safe': u'active'})
         try:
-            data = geturl(searchURL, opts={u'q': phrase, u'safe': u'off'})
-            unsafe = int(match_re.search(data).group(1).replace(u',', u''))
+            filtered = filter_re.search(data).group(1)
+            raise WordFiltered(filtered)
         except AttributeError:
-            unsafe = 0
+            pass
+        safe = int(match_re.search(data).group(1).replace(u',', u''))
+    except AttributeError:
+        safe = 0
 
-        try:
-            data = geturl(searchURL, opts={u'q': phrase, u'safe': u'active'})
-            try:
-                filtered = filter_re.search(data).group(1)
-                raise WordFiltered(filtered)
-            except AttributeError:
-                pass
-            safe = int(match_re.search(data).group(1).replace(u',', u''))
-        except AttributeError:
-            safe = 0
-
-        if not unsafe:
-            if safe > 0:
-                continue # shouldn't really be possible to have safe w/o unsafe
-            else:
-                return 0
-
-        value = float(unsafe - safe) / float(unsafe)
-        if value > 0:
-            return value
+    value = float(unsafe - safe) / float(unsafe)
+    if value < 0:
+        value = 0
+    return value
 
 
 class Main(Module):
@@ -107,6 +101,7 @@ class Main(Module):
             rating = slutrating(query)
             return u"%s is %.2f%% slutty." % (query, rating * 100)
         except TypeError, error:
+            log.exception('what')
             return u"%s: Sorry, google isn't being cooperative.." % nick
         except WordFiltered, error:
             return u"%s: Hmm, google is filtering the word '%s'.." % (

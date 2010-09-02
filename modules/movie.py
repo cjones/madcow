@@ -82,6 +82,7 @@ class Main(Module):
                 title, rating = func(name)
                 if self.normalize(title) != normalized:
                     rating = '[%s] %s' % (title, rating)
+                rating = rating.strip()
                 out.append('%s: %s' % (source, rating))
             except:
                 log.exception('no match')
