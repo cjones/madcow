@@ -23,9 +23,13 @@ from include.utils import stripHTML
 from madcow import Madcow, Request
 from time import sleep
 import logging as log
+import textwrap
 import re
 
-COLOR_SCHEME = 'html'
+#COLOR_SCHEME = 'html'
+COLOR_SCHEME = None
+
+newline_re = re.compile(r'[\r\n]+')
 
 class AIMProtocol(Madcow):
 
@@ -61,7 +65,7 @@ class AIMProtocol(Madcow):
         return self.config.aim.username
 
     def protocol_output(self, message, req=None):
-        """This is how we send shit to AOL"""
+        """This is how we send shit to AOL.. what a mess"""
         try:
             # so, utf16 doubles the size of the FLAP packets, which
             # really limits our max message size.  if none of the ordinals
@@ -69,21 +73,12 @@ class AIMProtocol(Madcow):
             if not [ch for ch in message if ord(ch) > 127]:
                 message = message.encode('us-ascii')
 
-
-            # ooookay, let's just strip out all html tags
-            message = stripHTML(message)
-
-            #print 'trying to output: %r' % message
-            # escape stuff so it's not all like LOL HTML
-            # print 'before esc: %r' % message
-            # message = oscar.html(message)
-            # print 'after esc: %r' % message
-            # message = message.replace('"', "'")
-            # print 'after repl: %r' % message
-            # color output if requested
-            #if req.colorize:
-            #    style = random.choice(self.colorlib._rainbow_map.keys())
-            #    message = self.colorlib.rainbow(message, style=style)
+            # i don't know what's going on here anymore.. let's try something
+            # completely different!
+            message = message.replace('&', '&amp;')
+            message = message.replace('<', '&lt;')
+            message = message.replace('>', '&gt;')
+            message = newline_re.sub('<br>', message)
 
             # AIM reacts indignantly to overlong messages, so we need to
             # wrap.  try not to break up html tags injected by colorlib.
@@ -103,16 +98,7 @@ class AIMProtocol(Madcow):
             if isinstance(message, unicode):
                 width = int(width / 2) - 1
 
-            # make room for the div tag that sets a black background
-            #if req.colorize:
-            #    width -= 43
-
-            # XXX this regex does really really bad things with lots of color
             for line in self.xmlwrap(message, width):
-
-                #if req.colorize:
-                #    line = self.black_fmt % line
-
                 args = [line]
                 if not req.chat:
                     if not req.nick:
