@@ -141,7 +141,6 @@ obama=no               ; countdown since change.. such as it has been
 roll=no                ; roll ad&d dice
 slut=no                ; how slutty is the phrase? (safesearch vs. regular)
 texts=no               ; random texts from last night
-traffic=no             ; real-time traffic data (n. california only)
 trek=no                ; generate star trek technobabble
 war=no                 ; current war status
 wardb=no               ; look up warhammer online items and show stats
