@@ -194,7 +194,11 @@ class Main(Module):
         opts = {'langpair': '%s|%s' % (self.langs[src], self.langs[dst]),
                 'v': '1.0', 'q': text}
         res = simplejson.loads(geturl(self.url, opts))
-        lang = self.lookup.get(res['responseData']['detectedSourceLanguage'], 'unknown').capitalize()
+        try:
+            lang = self.lookup.get(res['responseData']['detectedSourceLanguage'], 'unknown')
+        except KeyError:
+            lang = dst
+        lang = lang.capitalize()
         return stripHTML('[%s] %s' % (lang, res['responseData']['translatedText']))
 
 
