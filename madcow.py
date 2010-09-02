@@ -58,7 +58,7 @@ from include.utils import Request
 from include.authlib import AuthLib
 from include.config import Config
 
-__version__ = u'1.6.6'
+__version__ = u'1.6.7'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
 __all__ = [u'Madcow']
 

@@ -1,3 +1,6 @@
+1.6.7: Thu Sep  2 16:20:17 PDT 2010
+    * emergency fix for tweetprinter and google translate
+
 1.6.6: Thu Sep  2 00:03:34 PDT 2010
     * log IRC /me actions and accept commands from there
     * add sunrise/sunset module
