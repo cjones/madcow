@@ -278,12 +278,19 @@ imageURL=
 ; channel and follow all the people whose updates you would like to see
 ; relayed to the channel.
 ;
+; to enable this you must create an application at dev.twitter.com
+; and run the include/get_access_token.py script by editing it and filling
+; out the consumer_key and consumer_token, then following instructions for
+; PIN authentication. when it's done it will give you the token_key and token_secret
+;
 [twitter]
-enabled=no
-channel=#madcow
-updatefreq=240
-username=twitterbotaccount
-password=twitterbotpassword
+username = consumer_key
+password = consumer_secret
+token_key = token_key
+token_secret = token_secret
+updatefreq = 45
+enabled = no
+channel = #madcow
 
 ; database config (mysql and sqlite supported)
 ; NOTE: if you use the web frontend, i recommend mysql, as sqlite has

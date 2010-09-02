@@ -36,10 +36,11 @@ class IRCProtocol(Madcow):
             scheme = COLOR_SCHEME
         super(IRCProtocol, self).__init__(config, prefix, scheme)
 
-        if log.root.level <= log.DEBUG:
-            irclib.DEBUG = 1
-        else:
-            irclib.DEBUG = 0
+        # this is crazy noisy
+        # if log.root.level <= log.DEBUG:
+        #     irclib.DEBUG = 1
+        # else:
+        #     irclib.DEBUG = 0
         self.irc = irclib.IRC()
         self.server = self.irc.server()
         for event in self.events:

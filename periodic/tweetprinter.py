@@ -31,26 +31,21 @@ class Main(object):
 
     priority = 0
 
-    _agent = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
-
     def __init__(self, madcow):
         self.madcow = madcow
         self.enabled = madcow.config.twitter.enabled
         self.frequency = madcow.config.twitter.updatefreq
         self.output = madcow.config.twitter.channel
-        self.api = twitter.Api()
+        self.api = twitter.Api(username=self.madcow.config.twitter.username,
+                               password=self.madcow.config.twitter.password,
+                               access_token_key=self.madcow.config.twitter.token_key,
+                               access_token_secret=self.madcow.config.twitter.token_secret)
         self.api.SetCache(None)  # this fills up /tmp :(
-        self.api.SetUserAgent(self._agent)
-        self.api.SetCredentials(self.madcow.config.twitter.username,
-                                self.madcow.config.twitter.password)
-        self.__updatelast()
+        self.updatelast()
 
-    def __updatelast(self):
+    def updatelast(self):
         """Updates timestamp of last update."""
-        self.lastupdate = time.gmtime()
-
-    def __get_update_unicode(self):
-        return time.strftime(u"%a, %d %b %Y %X GMT", self.lastupdate)
+        self.lastupdate = time.time()
 
     def response(self, *args):
         """This is called by madcow, should return a string or None"""
@@ -68,8 +63,7 @@ class Main(object):
 
         try:
             log.debug(u'getting tweets...')
-            since = since=self.__get_update_unicode()
-            tweets = self.api.GetFriendsTimeline(since=since)
+            tweets = self.api.GetFriendsTimeline()
         except Exception, error:
             # not-modified response means there's nothing new, natch
             if hasattr(error, 'code') and error.code == 304:
@@ -84,14 +78,21 @@ class Main(object):
 
         for t in reversed(tweets):
             # twitter fails sometimes, so we do our own filter..
-            if time.localtime(t.GetCreatedAtInSeconds()) < self.lastupdate:
+            time_of_tweet = t.GetCreatedAtInSeconds()
+            log.debug('message: %r (%d [%s] < %d [%s])',
+                    t.text,
+                    time_of_tweet,
+                    time.ctime(time_of_tweet),
+                    self.lastupdate,
+                    time.ctime(self.lastupdate),
+                    )
+            if time_of_tweet < self.lastupdate:
                 log.debug(u'ignoring old tweet')
                 continue
-            lines.append(u">> tweet from %s: %s <<" % (
-                    t.user.screen_name, stripHTML(t.text)))
+            lines.append(u">> tweet from %s: %s <<" % (t.user.screen_name, stripHTML(t.text)))
 
         if lines:
-            self.__updatelast()
+            self.updatelast()
             return u"\n".join(lines)
         else:
             return None

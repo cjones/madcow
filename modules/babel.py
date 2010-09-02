@@ -76,6 +76,7 @@ class Main(Module):
              'latvian': 'lv',
              'lithuanian': 'lt',
              'maltese': 'mt',
+             'malay': 'ms',
              'norwegian': 'no',
              'persian': 'fa',
              'polish': 'pl',
