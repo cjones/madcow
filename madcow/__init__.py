@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (C) 2007, 2008 Christopher Jones
 #
 # This file is part of Madcow.
@@ -17,61 +15,43 @@
 # You should have received a copy of the GNU General Public License
 # along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Madcow infobot"""
+"""Core Madcow infobot"""
 
-import sys
-
-if sys.hexversion < 0x02050000:
-    error = 'madcow requires python 2.5 or higher'
-    if __name__ == '__main__':
-        print >> sys.stderr, error
-        sys.exit(1)
-    else:
-        raise RuntimeError(error)
-elif sys.hexversion >= 0x02060000:
-    sys.dont_write_bytecode = True
-
+import threading
 import warnings
-
-warnings.filterwarnings('ignore', category=DeprecationWarning)
-
-from time import sleep, strftime, time as unix_time
-from threading import Thread, RLock
-from optparse import OptionParser
-from Queue import Queue, Empty
-import logging as log
 import shutil
 import codecs
+import Queue as queue
+import time
+import sys
 import os
 import re
 
 # be mindful of win32
 try:
-    from signal import signal, SIGHUP, SIGTERM, SIGCHLD, SIG_IGN
-    SIGNALS = True
+    import signal
 except ImportError:
-    SIGNALS = False
+    signal = None
 
-from include import useragent as ua, gateway
-from include.colorlib import ColorLib
-from include.utils import Request
-from include.authlib import AuthLib
-from include.config import Config
+# add our include path for third party libs
+PREFIX = os.path.realpath(os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(PREFIX, 'include'))
 
-__version__ = u'1.6.7'
-__author__ = u'Chris Jones <cjones@gruntle.org>'
-__all__ = [u'Madcow']
+from madcow.util import gateway
+from madcow.settings import Config
 
-MADCOW_URL = u'http://code.google.com/p/madcow/'
-CHARSET = u'utf-8'
-CONFIG = 'madcow.ini'
-SAMPLE = 'madcow.ini-sample'
-DEFAULTS = 'include/defaults.ini'
+VERSION = 1, 7, 0
 
-log.basicConfig(level=log.WARN, stream=sys.stderr, datefmt='%c',
-                format='[%(asctime)s] %(levelname)s: %(message)s')
+__version__ = '.'.join(str(_) for _ in VERSION)
+__author__ = 'Chris Jones <cjones@gruntle.org>'
+__url__ = 'http://code.google.com/p/madcow/'
 
 delim_re = re.compile(r'\s*[,;]\s*')
+
+class MadcowError(Exception):
+
+    pass
+
 
 class Madcow(object):
 
@@ -155,7 +135,7 @@ class Madcow(object):
         for i in range(self.config.main.workers):
             name = u'ModuleWorker%d' % (i + 1)
             log.debug('Starting Thread: %s', name)
-            thread = Thread(target=self.request_handler, name=name)
+            thread = threading.Thread(target=self.request_handler, name=name)
             thread.setDaemon(True)
             thread.start()
 
@@ -402,7 +382,7 @@ class Madcow(object):
         return self._botname
 
 
-class Service(Thread):
+class Service(threading.Thread):
 
     """Service object"""
 
@@ -745,6 +725,7 @@ class Modules(object):
 
 
 def daemonize():
+    """POSIX only: run as a daemon"""
     import resource
     if os.fork():
         os._exit(0)
@@ -760,79 +741,37 @@ def daemonize():
     os.dup(fd)
     os.dup(fd)
     os.umask(027)
-    #os.chdir('/')
-    signal(SIGCHLD, SIG_IGN)
+    os.chdir('/')
+    signal.signal(signal.SIGCHLD, signal.SIG_IGN)
+
+
+def run(base, settings=None):
+    """Execute the main bot"""
+
+    # if this is a new bot, create base and stop
+    new_bot = False
+    for subdir in 'db', 'log':
+        dir = os.path.join(base, subdir)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+            new_bot = True
+    settings_file = os.path.join(base, 'settings.ini')
+    default_settings_file = os.path.join(PREFIX, 'settings', 'default.ini')
+    if not os.path.exists(settings_file):
+        shutil.copy(default_settings_file, settings_file)
+        os.chmod(settings_file, 0644)
+        new_bot = True
+    if new_bot:
+        raise MadcowError('A new bot has been created at %s, please modify config and rerun' % base)
+
+    config = Config(settings_file, default_settings_file, overrides=settings)
+    config.values['main']['logfile'] = 'newlogfile.txt'
+    config.save('/home/cjones/wtf.ini')
+    print config.main.logfile
 
 
 def main():
     """Entry point to set up bot and run it"""
-
-    # where we are being run from
-    if __file__.startswith(sys.argv[0]):
-        prefix = sys.argv[0]
-    else:
-        prefix = __file__
-    prefix = os.path.abspath(os.path.dirname(prefix))
-    sys.path.insert(0, prefix)
-    sys.path.insert(0, os.path.join(prefix, 'include'))
-
-    # location of config files
-    config = os.path.join(prefix, CONFIG)
-    defaults = os.path.join(prefix, DEFAULTS)
-    sample = os.path.join(prefix, SAMPLE)
-
-    # make sure proper subdirs exist
-    for subdir in 'data', 'logs':
-        path = os.path.join(prefix, subdir)
-        if not os.path.exists(path):
-            os.mkdir(path)
-
-    # find available protocols
-    protos = [proto.replace(u'.py', u'')
-              for proto in os.listdir(os.path.join(prefix, u'protocols'))
-              if proto.endswith(u'.py') and proto not in (u'__init__.py',
-                                                          u'template.py')]
-
-    # parse commandline options
-    optparse = OptionParser(version=__version__)
-    optparse.add_option(
-            '-c', '--config', metavar='<file>', default=config,
-            help='use config file (default: %default)')
-    optparse.add_option(
-            '-d', '--detach', default=False, action='store_true',
-            help='run process in the background')
-    optparse.add_option(
-            '-p', '--protocol', metavar='<%s>' % '|'.join(protos),
-            type='choice', choices=protos,
-            help='force the use of this output protocol')
-    optparse.add_option(
-            '-D', '--debug', dest='loglevel', action='store_const',
-            const=log.DEBUG, help='show debug messages')
-    optparse.add_option(
-            '-v', '--verbose', dest='loglevel', action='store_const',
-            const=log.INFO, help='show info messages')
-    optparse.add_option(
-            '-q', '--quiet', dest='loglevel', action='store_const',
-            const=log.WARN, help='show only error messages')
-    optparse.add_option(
-            '-P', '--pidfile', metavar='<file>',
-            help='override pidfile (default: %default)')
-    opts, args = optparse.parse_args()
-
-    if args:
-        optparse.error(u'invalid arguments')
-
-    # read config file
-    if not os.path.exists(opts.config):
-        shutil.copyfile(sample, opts.config)
-        log.error('created config %s - edit and rerun', opts.config)
-        return 1
-
-    try:
-        config = Config(opts.config, defaults)
-    except Exception, error:
-        log.error('error parsing config: %s', error)
-        return 1
 
     # init log facility
     if opts.loglevel is None:

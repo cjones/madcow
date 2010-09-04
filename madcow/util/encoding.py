@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import re
 import codecs
 import chardet
@@ -80,3 +81,14 @@ def parseattrs(data):
         attrs[key.lower()] = val
     return attrs
 
+
+def get_encoding():
+    for encoding in sys.getfilesystemencoding(), sys.getdefaultencoding(), 'ascii':
+        try:
+            return codecs.lookup(encoding).name
+        except LookupError:
+            pass
+    else:
+        raise
+
+ENCODING = get_encoding()

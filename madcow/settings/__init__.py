@@ -1,93 +1,94 @@
-from __future__ import with_statement
+"""Config management"""
+
 from ConfigParser import ConfigParser
-import logging as log
 import sys
 import os
 import re
+from madcow.util.encoding import ENCODING
 
-ENCODING = sys.getfilesystemencoding()
+isint_re = re.compile(r'^-?[0-9]+$')
+isfloat_re = re.compile(r'^\s*-?(?:\d+\.\d*|\d*\.\d+)\s*$')
+istrue_re = re.compile(u'^(?:true|yes|on)$', re.I)
+isfalse_re = re.compile(u'^(?:false|no|off)$', re.I)
 
-class ConfigSection(object):
+class Section(object):
 
-    def __init__(self, options):
-        self.__dict__.update(options)
-
-    def __iter__(self):
-        for key, val in self.__dict__.iteritems():
-            yield key, val
+    def __init__(self, values=None):
+        if values is None:
+            values = {}
+        self.values = values
 
     def __getattribute__(self, key):
-        return super(ConfigSection, self).__getattribute__(key.lower())
+        try:
+            val = super(Section, self).__getattribute__(key)
+        except AttributeError:
+            val = self.values.get(key)
+            if isinstance(val, dict):
+                val = Section(val)
+        return val
+
+    __getitem__ = __getattribute__
 
 
-class Config(object):
+class Config(Section):
 
-    isint_re = re.compile(r'^-?[0-9]+$')
-    isfloat_re = re.compile(r'^\s*-?(?:\d+\.\d*|\d*\.\d+)\s*$')
-    istrue_re = re.compile(u'^(?:true|yes|on)$', re.I)
-    isfalse_re = re.compile(u'^(?:false|no|off)$', re.I)
+    def __init__(self, settings_file, default_settings_file=None, overrides=None, encoding=None):
+        if encoding is None:
+            encoding = ENCODING
+        self.settings_file = settings_file
+        self.default_settings_file = default_settings_file
+        self.encoding = encoding
+        super(Config, self).__init__()
+        if default_settings_file:
+            self.read_config(default_settings_file)
+        self.read_config(settings_file)
 
-    def __init__(self, settings, defaults):
-        self._settings_file = settings
-        self._defaults_file = defaults
-        self._defaults = self.parse(defaults)
-        self._settings = self.parse(settings)
-        for name, options in self._defaults.iteritems():
-            if name not in self._settings:
-                log.info('missing: %s, using defaults' % name)
-                self._settings[name] = options
-                continue
-            for key, val in options.iteritems():
-                if key not in self._settings[name]:
-                    self._settings[name][key] = val
-                    log.info('missing: %s.%s, using default (%r)' % (
-                        name, key, val))
-        for name, options in self._settings.iteritems():
-            setattr(self, name, ConfigSection(options))
-
-    @classmethod
-    def parse(cls, file):
+    def read_config(self, file):
         parser = ConfigParser()
         parser.read(file)
-        data = {}
-        for section in parser.sections():
-            for key, val in parser.items(section):
-                if cls.isint_re.search(val):
-                    val = int(val)
-                elif cls.isfloat_re.search(val):
-                    val = float(val)
-                elif cls.istrue_re.search(val):
-                    val = True
-                elif cls.isfalse_re.search(val):
-                    val = False
-                data.setdefault(section.lower(), {})[key] = val
-        return data
+        for name in parser.sections():
+            for key, val in parser.items(name):
+                self.values.setdefault(name, {})[key] = self.to_python(val)
 
-    def save(self, filename=None):
+    def save(self, filename=None, ignore_unchanged=False):
         if filename is None:
-            filename = self._settings_file
-        config = ConfigParser()
-        for section, options in self._settings.iteritems():
+            filename = self.settings_file
+        parser = ConfigParser()
+        for section, options in self.values.iteritems():
             for key, val in options.iteritems():
-                if (section in self._defaults and
-                    key in self._defaults[section] and
-                    val != self._defaults[section][key]):
-                    if isinstance(val, bool):
-                        val = 'yes' if val else 'no'
-                    if not isinstance(val, basestring):
-                        val = str(val)
-                    if isinstance(val, unicode):
-                        val = val.encode(ENCODING)
-                    if not config.has_section(section):
-                        config.add_section(section)
-                    config.set(section, key, val)
+                if not parser.has_section(section):
+                    parser.add_section(section)
+                parser.set(section, key, self.to_string(val))
 
         if os.path.exists(filename):
             os.rename(filename, filename + '.bak')
         with open(filename, 'wb') as fp:
-            config.write(fp)
-        log.info('wrote settings to ' + filename)
+            parser.write(fp)
 
-    def __getattribute__(self, key):
-        return super(Config, self).__getattribute__(key.lower())
+    def to_python(self, val):
+        if isinstance(val, str):
+            val = val.decode(self.encoding)
+        if not isinstance(val, unicode):
+            raise TypeError('values from config parser should be a string')
+        if isint_re.search(val):
+            val = int(val)
+        elif isfloat_re.search(val):
+            val = float(val)
+        elif istrue_re.search(val):
+            val = True
+        elif isfalse_re.search(val):
+            val = False
+        if isinstance(val, unicode) and not val:
+            val = None
+        return val
 
+    def to_string(self, val):
+        if val is None:
+            val = u''
+        elif isinstance(val, str):
+            val = val.decode(self.encoding)
+        elif isinstance(val, bool):
+            val = u'yes' if val else u'no'
+        else:
+            val = unicode(val)
+        return val.encode(self.encoding)

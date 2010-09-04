@@ -17,17 +17,16 @@
 
 """Handles gateway connections"""
 
-from __future__ import with_statement
 from threading import Thread
 import os
 from select import select
-from utils import Request
 import re
 import socket
 import logging as log
 import datetime
 from urlparse import urljoin
 import errno
+from madcow.util import Request
 
 class InvalidPayload(Exception):
 
