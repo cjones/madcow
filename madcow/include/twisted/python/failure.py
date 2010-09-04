@@ -18,7 +18,7 @@ import inspect
 import opcode
 from cStringIO import StringIO
 
-from include.twisted.python import reflect
+from twisted.python import reflect
 
 count = 0
 traceupLength = 4

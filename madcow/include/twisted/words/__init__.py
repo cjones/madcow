@@ -6,5 +6,5 @@
 """Twisted Words: a Twisted Chat service.
 """
 
-from include.twisted.words._version import version
+from twisted.words._version import version
 __version__ = version.short()

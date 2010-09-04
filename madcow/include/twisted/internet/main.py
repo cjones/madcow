@@ -18,7 +18,7 @@ CONNECTION_LOST = error.ConnectionLost('Connection lost')
 
 def installReactor(reactor):
     # this stuff should be common to all reactors.
-    from include.twisted import internet
+    from twisted import internet
     import sys
     assert not sys.modules.has_key('include.twisted.internet.reactor'), \
            "reactor already installed"

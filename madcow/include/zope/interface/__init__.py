@@ -52,28 +52,28 @@ $Id: __init__.py 70082 2006-09-08 22:09:27Z ctheune $
 """
 __docformat__ = 'restructuredtext'
 
-from include.zope.interface.interface import Interface, _wire
+from zope.interface.interface import Interface, _wire
 
 # Need to actually get the interface elements to implement the right interfaces
 _wire()
 del _wire
 
-from include.zope.interface.interface import Attribute, invariant, taggedValue
+from zope.interface.interface import Attribute, invariant, taggedValue
 
-from include.zope.interface.declarations import providedBy, implementedBy
-from include.zope.interface.declarations import classImplements, classImplementsOnly
-from include.zope.interface.declarations import directlyProvidedBy, directlyProvides
-from include.zope.interface.declarations import alsoProvides, implementer
-from include.zope.interface.declarations import implements, implementsOnly
-from include.zope.interface.declarations import classProvides, moduleProvides
-from include.zope.interface.declarations import noLongerProvides, Declaration
-from include.zope.interface.exceptions import Invalid
+from zope.interface.declarations import providedBy, implementedBy
+from zope.interface.declarations import classImplements, classImplementsOnly
+from zope.interface.declarations import directlyProvidedBy, directlyProvides
+from zope.interface.declarations import alsoProvides, implementer
+from zope.interface.declarations import implements, implementsOnly
+from zope.interface.declarations import classProvides, moduleProvides
+from zope.interface.declarations import noLongerProvides, Declaration
+from zope.interface.exceptions import Invalid
 
 # The following are to make spec pickles cleaner
-from include.zope.interface.declarations import Provides
+from zope.interface.declarations import Provides
 
 
-from include.zope.interface.interfaces import IInterfaceDeclaration
+from zope.interface.interfaces import IInterfaceDeclaration
 
 moduleProvides(IInterfaceDeclaration)
 

@@ -11,8 +11,8 @@ Maintainer: Itamar Shtull-Trauring
 
 import Queue
 
-from include.twisted.python import failure
-from include.twisted.internet import defer
+from twisted.python import failure
+from twisted.internet import defer
 
 
 def deferToThreadPool(reactor, threadpool, f, *args, **kwargs):
@@ -63,7 +63,7 @@ def deferToThread(f, *args, **kwargs):
     or an errback with a L{twisted.python.failure.Failure} if f throws
     an exception.
     """
-    from include.twisted.internet import reactor
+    from twisted.internet import reactor
     if reactor.threadpool is None:
         reactor._initThreadPool()
     return deferToThreadPool(reactor, reactor.threadpool,
@@ -84,7 +84,7 @@ def callMultipleInThread(tupleList):
 
     tupleList should be a list of (function, argsList, kwargsDict) tuples.
     """
-    from include.twisted.internet import reactor
+    from twisted.internet import reactor
     reactor.callInThread(_runMultiple, tupleList)
 
 

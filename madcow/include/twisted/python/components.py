@@ -10,7 +10,7 @@ Component architecture for Twisted, based on Zope3 components.
 Using the Zope3 API directly is strongly recommended. Everything
 you need is in the top-level of the zope.interface package, e.g.::
 
-   from include.zope.interface import Interface, implements
+   from zope.interface import Interface, implements
 
    class IFoo(Interface):
        pass
@@ -27,15 +27,15 @@ adapter registry).
 """
 
 # twisted imports
-from include.twisted.python import reflect
-from include.twisted.persisted import styles
+from twisted.python import reflect
+from twisted.persisted import styles
 
 # system imports
 import warnings
 
 # zope3 imports
-from include.zope.interface import directlyProvides, interface, declarations
-from include.zope.interface.adapter import AdapterRegistry
+from zope.interface import directlyProvides, interface, declarations
+from zope.interface.adapter import AdapterRegistry
 
 
 

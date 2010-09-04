@@ -14,11 +14,11 @@ Maintainer: Itamar Shtull-Trauring
 """
 
 import random
-from include.zope.interface import implements
+from zope.interface import implements
 
 # Twisted Imports
-from include.twisted.python import log, failure, components
-from include.twisted.internet import interfaces, error, defer
+from twisted.python import log, failure, components
+from twisted.internet import interfaces, error, defer
 
 
 class Factory:
@@ -264,7 +264,7 @@ class ReconnectingClientFactory(ClientFactory):
 
         if self.noisy:
             log.msg("%s will retry in %d seconds" % (connector, self.delay,))
-        from include.twisted.internet import reactor
+        from twisted.internet import reactor
 
         def reconnector():
             self._callID = None

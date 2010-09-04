@@ -5,8 +5,8 @@
 """Address objects for network connections."""
 
 import warnings, os
-from include.zope.interface import implements
-from include.twisted.internet.interfaces import IAddress
+from zope.interface import implements
+from twisted.internet.interfaces import IAddress
 
 
 class IPv4Address(object):

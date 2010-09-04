@@ -14,13 +14,13 @@ import sys
 import select
 from errno import EINTR, EBADF
 
-from include.zope.interface import implements
+from zope.interface import implements
 
-from include.twisted.internet.interfaces import IReactorFDSet
-from include.twisted.internet import error
-from include.twisted.internet import posixbase
-from include.twisted.python import log
-from include.twisted.python.runtime import platformType
+from twisted.internet.interfaces import IReactorFDSet
+from twisted.internet import error
+from twisted.internet import posixbase
+from twisted.python import log
+from twisted.python.runtime import platformType
 
 
 def win32select(r, w, e, timeout=None):
@@ -198,7 +198,7 @@ def install():
     """Configure the twisted mainloop to be run using the select() reactor.
     """
     reactor = SelectReactor()
-    from include.twisted.internet.main import installReactor
+    from twisted.internet.main import installReactor
     installReactor(reactor)
 
 __all__ = ['install']

@@ -32,7 +32,7 @@ Maintainer: Itamar Shtull-Trauring
 # The correct idiom to import this module is thus:
 
 # try:
-#    from include.twisted.internet import ssl
+#    from twisted.internet import ssl
 # except ImportError:
 #    # happens the first time the interpreter tries to import it
 #    ssl = None
@@ -44,10 +44,10 @@ supported = False
 
 # System imports
 from OpenSSL import SSL
-from include.zope.interface import implements, implementsOnly, implementedBy
+from zope.interface import implements, implementsOnly, implementedBy
 
 # Twisted imports
-from include.twisted.internet import tcp, interfaces, base, address
+from twisted.internet import tcp, interfaces, base, address
 
 
 class ContextFactory:
@@ -204,10 +204,10 @@ class Connector(base.BaseConnector):
     def getDestination(self):
         return address.IPv4Address('TCP', self.host, self.port, 'SSL')
 
-from include.twisted.internet._sslverify import DistinguishedName, DN, Certificate
-from include.twisted.internet._sslverify import CertificateRequest, PrivateCertificate
-from include.twisted.internet._sslverify import KeyPair
-from include.twisted.internet._sslverify import OpenSSLCertificateOptions as CertificateOptions
+from twisted.internet._sslverify import DistinguishedName, DN, Certificate
+from twisted.internet._sslverify import CertificateRequest, PrivateCertificate
+from twisted.internet._sslverify import KeyPair
+from twisted.internet._sslverify import OpenSSLCertificateOptions as CertificateOptions
 
 __all__ = [
     "ContextFactory", "DefaultOpenSSLContextFactory", "ClientContextFactory",

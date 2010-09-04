@@ -24,12 +24,12 @@ try:
 except ImportError:
     fcntl = None
 
-from include.twisted.persisted import styles
-from include.twisted.python import log, failure
-from include.twisted.python.util import switchUID
-from include.twisted.internet import fdesc, abstract, error
-from include.twisted.internet.main import CONNECTION_LOST, CONNECTION_DONE
-from include.twisted.internet._baseprocess import BaseProcess
+from twisted.persisted import styles
+from twisted.python import log, failure
+from twisted.python.util import switchUID
+from twisted.internet import fdesc, abstract, error
+from twisted.internet.main import CONNECTION_LOST, CONNECTION_DONE
+from twisted.internet._baseprocess import BaseProcess
 
 # Some people were importing this, which is incorrect, just keeping it
 # here for backwards compatibility:

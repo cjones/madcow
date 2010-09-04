@@ -30,11 +30,11 @@ __docformat__ = 'restructuredtext'
 
 import sys
 import weakref
-from include.zope.interface.interface import InterfaceClass, Specification
+from zope.interface.interface import InterfaceClass, Specification
 from ro import mergeOrderings, ro
 import exceptions
 from types import ClassType, ModuleType
-from include.zope.interface.advice import addClassAdvisor
+from zope.interface.advice import addClassAdvisor
 
 # Registry of class-implementation specifications
 BuiltinImplementationSpecifications = {}
@@ -57,7 +57,7 @@ class Declaration(Specification):
 
         for example:
 
-          >>> from include.zope.interface import Interface
+          >>> from zope.interface import Interface
           >>> class I1(Interface): pass
           ...
           >>> class I2(I1): pass
@@ -84,7 +84,7 @@ class Declaration(Specification):
 
         for example:
 
-          >>> from include.zope.interface import Interface
+          >>> from zope.interface import Interface
           >>> class I1(Interface): pass
           ...
           >>> class I2(I1): pass
@@ -112,7 +112,7 @@ class Declaration(Specification):
 
         for example:
 
-          >>> from include.zope.interface import Interface
+          >>> from zope.interface import Interface
           >>> class I1(Interface): pass
           ...
           >>> class I2(I1): pass
@@ -145,7 +145,7 @@ class Declaration(Specification):
 
         Examples:
 
-          >>> from include.zope.interface import Interface
+          >>> from zope.interface import Interface
           >>> class I1(Interface): pass
           ...
           >>> class I2(I1): pass
@@ -188,7 +188,7 @@ class Declaration(Specification):
 
         Examples:
 
-          >>> from include.zope.interface import Interface
+          >>> from zope.interface import Interface
           >>> class I1(Interface): pass
           ...
           >>> class I2(I1): pass
@@ -265,7 +265,7 @@ def implementedByFallback(cls):
 
       for example:
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class I1(Interface): pass
         ...
         >>> class I2(I1): pass
@@ -391,7 +391,7 @@ def classImplementsOnly(cls, *interfaces):
 
       Consider the following example:
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class I1(Interface): pass
         ...
         >>> class I2(Interface): pass
@@ -429,7 +429,7 @@ def classImplements(cls, *interfaces):
 
       Consider the following example:
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class I1(Interface): pass
         ...
         >>> class I2(Interface): pass
@@ -548,7 +548,7 @@ def implements(*interfaces):
       Consider the following example::
 
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class IA1(Interface): pass
         ...
         >>> class IA2(Interface): pass
@@ -605,7 +605,7 @@ def implementsOnly(*interfaces):
 
       Consider the following example::
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class IA1(Interface): pass
         ...
         >>> class IA2(Interface): pass
@@ -664,7 +664,7 @@ class Provides(Declaration):  # Really named ProvidesClass
 
         For example:
 
-          >>> from include.zope.interface import Interface
+          >>> from zope.interface import Interface
           >>> class IFooFactory(Interface): pass
           ...
 
@@ -718,7 +718,7 @@ def Provides(*interfaces):
       >>> class C(object):
       ...    pass
 
-      >>> from include.zope.interface import Interface
+      >>> from zope.interface import Interface
       >>> class I(Interface):
       ...    pass
 
@@ -768,7 +768,7 @@ def directlyProvides(object, *interfaces):
 
       Consider the following example:
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class I1(Interface): pass
         ...
         >>> class I2(Interface): pass
@@ -872,7 +872,7 @@ def alsoProvides(object, *interfaces):
 
     Consider the following example:
 
-      >>> from include.zope.interface import Interface
+      >>> from zope.interface import Interface
       >>> class I1(Interface): pass
       ...
       >>> class I2(Interface): pass
@@ -933,7 +933,7 @@ def noLongerProvides(object, interface):
     This removes a directly provided interface from an object.
     Consider the following two interfaces:
 
-      >>> from include.zope.interface import Interface
+      >>> from zope.interface import Interface
       >>> class I1(Interface): pass
       ...
       >>> class I2(Interface): pass
@@ -1002,7 +1002,7 @@ class ClassProvides(Declaration, ClassProvidesBase):
 
     For example:
 
-      >>> from include.zope.interface import Interface
+      >>> from zope.interface import Interface
       >>> class IFooFactory(Interface):
       ...     pass
       >>> class IFoo(Interface):
@@ -1077,7 +1077,7 @@ def classProvides(*interfaces):
 
       For example:
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class IFoo(Interface): pass
         ...
         >>> class IFooFactory(Interface): pass
@@ -1092,7 +1092,7 @@ def classProvides(*interfaces):
 
       if equivalent to:
 
-        >>> from include.zope.interface import Interface
+        >>> from zope.interface import Interface
         >>> class IFoo(Interface): pass
         ...
         >>> class IFooFactory(Interface): pass
@@ -1183,7 +1183,7 @@ def ObjectSpecification(direct, cls):
 
     For example:
 
-      >>> from include.zope.interface import Interface
+      >>> from zope.interface import Interface
       >>> class I1(Interface): pass
       ...
       >>> class I2(Interface): pass
@@ -1320,7 +1320,7 @@ class ObjectSpecificationDescriptorPy(object):
 
         For example:
 
-          >>> from include.zope.interface import Interface
+          >>> from zope.interface import Interface
           >>> class IFoo(Interface): pass
           ...
           >>> class IFooFactory(Interface): pass

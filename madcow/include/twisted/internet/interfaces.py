@@ -8,7 +8,7 @@ Interface documentation.
 Maintainer: Itamar Shtull-Trauring
 """
 
-from include.zope.interface import Interface, Attribute
+from zope.interface import Interface, Attribute
 
 
 class IAddress(Interface):

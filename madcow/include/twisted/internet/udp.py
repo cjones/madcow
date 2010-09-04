@@ -18,9 +18,9 @@ import socket
 import operator
 import struct
 import warnings
-from include.zope.interface import implements
+from zope.interface import implements
 
-from include.twisted.python.runtime import platformType
+from twisted.python.runtime import platformType
 if platformType == 'win32':
     from errno import WSAEWOULDBLOCK as EWOULDBLOCK
     from errno import WSAEINTR as EINTR
@@ -32,9 +32,9 @@ else:
     from errno import EWOULDBLOCK, EINTR, EMSGSIZE, ECONNREFUSED, EAGAIN
 
 # Twisted Imports
-from include.twisted.internet import protocol, base, defer, address
-from include.twisted.persisted import styles
-from include.twisted.python import log, reflect, failure
+from twisted.internet import protocol, base, defer, address
+from twisted.persisted import styles
+from twisted.python import log, reflect, failure
 
 # Sibling Imports
 import abstract, error, interfaces
@@ -182,7 +182,7 @@ class Port(base.BasePort):
     def _loseConnection(self):
         self.stopReading()
         if self.connected: # actually means if we are *listening*
-            from include.twisted.internet import reactor
+            from twisted.internet import reactor
             reactor.callLater(0, self.connectionLost)
 
     def stopListening(self):
