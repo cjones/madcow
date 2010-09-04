@@ -1,365 +1,187 @@
-[main]
-;
-; specify protocol module to use.  by default, madcow runs as a local
-; shell-like client, which is not very useful.  if you choose
-; irc/silc/aim, you must edit the corresponding section (e.g. [irc]) to
-; set connection settings.  you may override the protocol with the -p
-; flag on the commandline.  note you may only specifiy one protocol,
-; madcow does not support multiple connections from one running process.
-;
-module=cli
-;module=irc
-;module=aim
-;module=silcplugin
-;module=ipython
-;
-; whether to daemonize when run (POSIX only).  you can force the bot to
-; detach by specifying -d on the commandline.
-;
-detach=no
-;
-; how many worker threads to spawn for module handling.  don't set this
-; too high.
-;
-workers=5
-;
-; setting this to yes will log public chatter in the logs directory
-; (IRC and SILC only).  set this to no for better privacy.
-;
-logpublic=yes
-;
-; these nicks will be completely ignored in public settings such as
-; IRC or SILC. you should put other bots that reside in the channel
-; in this list to prevent feedback loops. comma-delimited.  note that
-; any messages that contain the string NOBOT in them will also be
-; ignored by madcow.
-;
-ignoreList=
-;
-; set this to log console output to a file in madcow base directory
-;
-loglevel=WARN           ; default level, valid options are DEBUG, INFO, WARN
-logfile=logs/madcow.log ; leave blank for no file-level logging
-;
-; filename to record process PID in
-;
-pidfile=madcow.pid
-;
-; character set to output in.  utf-8 is recommended as it allows you to
-; use the babelfish translation feature in unicode (greek alphabet,
-; traditional chinese, etc).  you can also set this to ascii or latin1,
-; but certain modules will output garbage or ?'s  this setting is ignored
-; by the AIM protocol, since unicode is always ucs-2 (utf-16)
-;
-charset=utf-8
-;
-; nickname of the bot owner. when you first register with the bot, if the
-; nick matches, you will be granted admin privileges.
-;
-owner=nick
-;
-; normally madcow will try to import psyco and do a full profile.  if you
-; don't want it to do this or it is causing trouble, set this to no
-;
-psyco=no
-;
-; if your bot name is long, which makes it annoying to type, you
-; can specify aliases it will also respond to here, seperated by a , or ;
-;
-aliases=
+"""Settings for madcow"""
 
-[modules]
-;
-; if you wish to run multiple bots from the same directory you should
-; give them a unique namespace. this is used to name the db files
-; something unique. if you do not change this, then multiple bots will
-; share the same backend data store.  this may be what you want. but
-; probably not. concurrency problems have not been considered, so prolly
-; don't even try running multiple bots with the same namespace.
-;
-dbNamespace=madcow
-;
-; comma-delimited list of modules (see below) that will only reply via
-; privmsg to the user querying the bot.  this can be used for very spammy
-; modules that people use to disrupt the channel.
-;
-private=
-;
-; what modules are enabled (yes/no)
-;
-; these are the standard information modules, which you'll probably
-; want enabled as they are quite useful.
-;
-alias=yes               ; allow users to make command aliases
-area=yes                ; look up area codes
-babel=yes               ; language translations
-bbcnews=yes             ; bbc news headlines
-calc=yes                ; google calculator
-clock=yes               ; world clock
-cnn=yes                 ; show cnn headline
-dictionary=yes          ; definition of words
-election2008=yes        ; current electoral vote predictor for 2008 US election
-google=yes              ; i'm feeling lucky query
-learn=yes               ; used for various modules to cache per-user data
-movie=yes               ; rate movie on imdb & rotten tomatoes
-noaa=yes                ; alternative to wunderground (us-only, more accurate)
-nslookup=yes            ; look up ip of hostnames
-seen=yes                ; keep track of last thing everyone in channel said
-spellcheck=yes          ; spellcheck a word/phrase using google
-stockquote=yes          ; get yahoo stock quotes
-summon=yes              ; summon users (send email/sms)
-sunrise=yes             ; get sunrise/sunset from google for your area
-urban=yes               ; look up word/phrase on urban dictionary
-weather=yes             ; look up weather from wunderground
-wikimedia=yes           ; look up summaries from various wikis
-wikiquotes=yes          ; look up quotes from wikiquotes
-yelp=yes                ; get restaraunt rating/address
-;
-; the following modules are either silly, or potentially annoying/offensive.
-; they are disabled by default so you can make the decision about how
-; obnoxious your bot is able to be.
-;
-artfart=no             ; random ascii art
-bash=no                ; bash (irc/im) quotes
-bible=no               ; get a quote from the bible
-care=no                ; generate a high-precision care-o-meter
-chp=no                 ; california real-time traffic reports
-delicious=no           ; post all urls to delicious (see config below)
-factoids=no            ; makes madcow remember stuff from chatter
-figlet=no              ; generate ascii fonts
-fmylife=no             ; fmylife complaint, random or by ID
-grufti=no              ; random response triggeres, like grufti bot
-hugs=no                ; random group hug confession
-jinx=no                ; someone owes you a coke for being unoriginal
-joke=no                ; random joke
-karma=no               ; keep track of karma (nick++, nick--)
-livejournal=no         ; get livejournal entries (random or by nick)
-lyrics=no              ; look up song lyrics (spammy!)
-megahal=no             ; markov bot (requires you build C extension!)
-memebot=no             ; track urls and lay smackdown on old memes
-obama=no               ; countdown since change.. such as it has been
-roll=no                ; roll ad&d dice
-slut=no                ; how slutty is the phrase? (safesearch vs. regular)
-texts=no               ; random texts from last night
-trek=no                ; generate star trek technobabble
-war=no                 ; current war status
-wardb=no               ; look up warhammer online items and show stats
-webtender=no           ; how to make drinks!
-woot=no                ; latest woot offer
+###################
+### MAIN CONFIG ###
+###################
 
-; admin module
-[admin]
-enabled=yes
-allowRegistration=yes
-;
-; default flags for new users
-;
-; a = admin
-; r = registered
-; o = auto-op (irc only)
-;
-defaultFlags=r
+PROTOCOL = 'cli'  # irc, aim, silc, shell, cli
+BOTNAME = 'madcow'  # will use this nickname in irc/silc and for addressing
+ALIASES = ['!']  # list of other nicks the bot will also respond to
+DETACH = False  # set to True to run as a daemon (UNIX only)
+WORKERS = 5  # how many threads to process requests
+LOG_PUBLIC = True  # set to False to avoid logging public chatter
+IGNORE_NICKS = ['spammer', 'otherbot']  # list of nicknames to completely ignore
+LOGLEVEL = 'WARN'  # valid options: DEBUG, INFO, WARN, ERROR
+LOGFILE = 'log/madcow.log'  # file (relative to base) to log errors
+PIDFILE = 'madcow.pid'  # file (relative to base) for pid for current bot
+CHARSET = 'utf-8'  # encoding of your system or the protocol you are communicating over
+OWNER_NICK = 'yournick'  # in irc/silc/aim set to your name to be given auto-admin
+ALLOW_REGISTRATION = True  # allow other users to register with the bot
+DEFAULT_FLAGS = ''  # flags given to registered users o=auto-op (irc only), a=admin
 
-; connection settings for IRC plugin. should be fairly obvious
-; channels is a comma-delimited list of channels to join
-[irc]
-host=localhost
-port=6667
-ssl=no
-password=
-nick=madcow
-channels=#madcow
-reconnect=yes
-reconnectWait=3
-rejoin=yes
-rejoinWait=3
-rejoinReply=hi
-quitMessage=bye
-oper=no
-operUser=
-operPass=
-nickServUser=NickServ
-nickServPass=
-;
-; if you don't want wrapping, set this very high. the rfc has
-; a limitation and your bot WILL get dropped for sending raw
-; messages that exceed it. 400 is a good number if you are
-; against wrapping
-;
-wrapSize=400
-;
-; if your server has flood protection, you can add a delay between each
-; line sent to the server. value is in milliseconds (1000 = 1 second)
-;
-delay=0
-;
-; madcow will send keepalive pings to verify the server is responsive.
-; by default it will send one every 30 seconds.  if 2 minutes go by without
-; a response, the server is assumed dead.  note that you must have
-; "reconnect" set to "yes" above if you expect it to reconnect on this
-; occassion.  beware of setting these too aggressively, and never set
-; the timeout lower than the frequency.
-;
-keepalive=yes
-keepalive_freq=30
-keepalive_timeout=120
+###############
+### MODULES ###
+###############
 
-; settings for AIM plugin. you need to register a screenname 
-; with AOL beforehand and plug it in here.  see aim.com
-[aim]
-username=
-password=
-profile=madcow infobot
-; whether to auto-join chatrooms when invited
-autojoin=yes
+MODULES = ['alias',               # allow users to make command aliases
+           'area',                # look up area codes
+           'babel',               # language translations
+           'bbcnews',             # bbc news headlines
+           'calc',                # google calculator
+           'clock',               # world clock
+           'cnn',                 # show cnn headline
+           'dictionary',          # definition of words
+           'election2008',        # current electoral vote predictor for 2008 US election
+           'google',              # i'm feeling lucky query
+           'learn',               # used for various modules to cache per-user data
+           'movie',               # rate movie on imdb & rotten tomatoes
+           'noaa',                # alternative to wunderground (us-only, more accurate)
+           'nslookup',            # look up ip of hostnames
+           'seen',                # keep track of last thing everyone in channel said
+           'spellcheck',          # spellcheck a word/phrase using google
+           'stockquote',          # get yahoo stock quotes
+           'summon',              # summon users (send email/sms)
+           'sunrise',             # get sunrise/sunset from google for your area
+           'urban',               # look up word/phrase on urban dictionary
+           'weather',             # look up weather from wunderground
+           'wikimedia',           # look up summaries from various wikis
+           'wikiquotes',          # look up quotes from wikiquotes
+           'yelp',                # get restaraunt rating/address
+           #
+           # the following modules are either silly, or potentially annoying/offensive.
+           # they are disabled by default so you can make the decision about how
+           # obnoxious your bot is able to be.
+           #
+           #'artfart',             # random ascii art
+           #'bash',                # bash (irc/im) quotes
+           #'bible',               # get a quote from the bible
+           #'care',                # generate a high-precision care-o-meter
+           #'chp',                 # california real-time traffic reports
+           #'delicious',           # post all urls to delicious (see config below)
+           #'factoids',            # makes madcow remember stuff from chatter
+           #'figlet',              # generate ascii fonts
+           #'fmylife',             # fmylife complaint, random or by ID
+           #'grufti',              # random response triggeres, like grufti bot
+           #'hugs',                # random group hug confession
+           #'jinx',                # someone owes you a coke for being unoriginal
+           #'joke',                # random joke
+           #'karma',               # keep track of karma (nick++, nick--)
+           #'livejournal',         # get livejournal entries (random or by nick)
+           #'lyrics',              # look up song lyrics (spammy!)
+           #'megahal',             # markov bot (requires you build C extension!)
+           #'memebot',             # track urls and lay smackdown on old memes
+           #'obama',               # countdown since change.. such as it has been
+           #'roll',                # roll ad&d dice
+           #'slut',                # how slutty is the phrase? (safesearch vs. regular)
+           #'steam',               # allow queries into your steam group about who's online
+           #'texts',               # random texts from last night
+           #'trek',                # generate star trek technobabble
+           #'war',                 # current war status
+           #'wardb',               # look up warhammer online items and show stats
+           #'webtender',           # how to make drinks!
+           #'woot',                # latest woot offer
+           ]
 
-; settings for SILC plugin. channels are a comma-delimited list
-[silcplugin]
-nick=madcow
-channels=#madcow
-host=localhost
-port=706
-reconnect=yes
-reconnectWait=3
-;
-; if your server has flood protection, you can add a delay between each
-; line sent to the server. value is in milliseconds (1000 = 1 second)
-; if you use the SILCNetwork, it generally has flood protection, hence
-; the default being non-zero
-;
-delay=350
+PRIVATE_MODULES = ['lyrics']  # list of modules (from MODULES above) that only respond in private message
 
-; smtp settings for summon module.  the outgoing smtp server will be
-; used to send out a text message.  if you wish to be able to reply from
-; your phone and have the message be sent to the channel, you must set
-; the sender to a routable mailing address and configure the [gateway]
-; section below.
-;
-; see http://en.wikipedia.org/wiki/SMS_gateway#Carrier-provided_Email_or_Web_to_SMS_gateways for email addresses that act as your phone's sms gateway and
-; set your email to this in channel or privmsg like so:
-;
-; /msg bot set email <nick> <email address>
-;
-; after this, bot: summon <nick> <reason> will send a text message to
-; your phone.
-;
-[smtp]
-server=localhost
-sender=madcow@example.com
-user=
-password=
+#######################
+### PROTOCOL CONFIG ###
+#######################
 
-; service for email gateway (sms, images, etc).  to make this actually
-; do anything you will need to set up an email account that sends its
-; email to $BOTDIR/include/email_gateway.py in either an aliases file,
-; .forward, or procmail.  sms/picture messages sent from phones to this
-; email address will then be displayed in channel.  if you are unable to
-; set up incoming email in this way, you should disable this.
-; 
-[gateway]
-enabled=yes
-bind=localhost
-port=5000
-channels=all
-;
-; define these if you want to capture image attachements from incoming
-; messages. they will be saved to a local directory and the message output
-; will contain a url constructed from imageURL as the base. imageURL *must*
-; have a trailing / if it is a directory.
-;
-imagePath=
-imageURL=
+# connection settings for irc plugin
+IRC_HOST = 'localhost'
+IRC_PORT = 6667
+IRC_SSL = False
+IRC_PASSWORD = None
+IRC_CHANNELS = ['#madcow']
+IRC_RECONNECT = True
+IRC_RECONNECT_WAIT = 3
+IRC_RECONNECT_MESSAGE = None
+IRC_REJOIN = True
+IRC_REJOIN_WAIT = 3
+IRC_REJOIN_MESSAGE = None
+IRC_QUIT_MESSAGE = None
+IRC_OPER = False
+IRC_OPER_USER = None
+IRC_OPER_PASS = None
+IRC_IDENTIFY_NICKSERV = False
+IRC_NICKSERV_USER = 'NickServ'
+IRC_NICKSERV_PASS = None
+IRC_FORCE_WRAP = 400
+IRC_DELAY_LINES = 0  # miliseconds
+IRC_KEEPALIVE = True
+IRC_KEEPALIVE_FREQ = 30
+IRC_KEEPALIVE_TIMEOUT = 120
+IRC_GIVE_OPS = False
+IRC_GIVE_OPS_FREQ = 30
 
-; twitter settings.  if enabled, madcow will contact twitter every 4
-; minutes with the specified user/pass and check if that person's
-; friends have any new "tweets", displaying them to the specified
-; channel.  the best way to use this is to create an account for your
-; channel and follow all the people whose updates you would like to see
-; relayed to the channel.
-;
-; to enable this you must create an application at dev.twitter.com
-; and run the include/get_access_token.py script by editing it and filling
-; out the consumer_key and consumer_token, then following instructions for
-; PIN authentication. when it's done it will give you the token_key and token_secret
-;
-[twitter]
-username = consumer_key
-password = consumer_secret
-token_key = token_key
-token_secret = token_secret
-updatefreq = 45
-enabled = no
-channels = all
+# settings for the aim protocol
+AIM_USERNAME = 'aimusername'
+AIM_PASSWORD = 'aimpassword'
+AIM_PROFILE = 'Madcow InfoBot'
+AIM_AUTOJOIN_CHAT = True
 
-; database config (mysql and sqlite supported)
-; NOTE: if you use the web frontend, i recommend mysql, as sqlite has
-; serious concurrency issues
-[memebot]
-db_engine=sqlite
-; fill the following out if you use mysql.
-db_name=
-db_user=
-db_pass=
-db_host=
-db_port=
+# settings for the silc protocol
+SILC_CHANNELS = ['#madcow']
+SILC_HOST = 'localhost'
+SILC_PORT = 706
+SILC_RECONNECT = True
+SILC_RECONNECT_WAIT = 3
+SILC_DELAY = 350  # miliseconds
 
-; set name of steam community to track what members
-; are doing when queried.
-[steam]
-enabled=no
-group=
-; set to "no" if you only want to show who's actually playing a game.
-; if set to "yes" it will show all online steam users, which could be
-; spammy if you are tracking a very large group
-online=yes
+#######################
+### MODULE SETTINGS ###
+#######################
 
-; set this up to post urls to delicious
-[delicious]
-username=
-password=
+# for steam plugin
+STEAM_GROUP = None
+STEAM_SHOW_ONLINE = True
 
-; IRC ONLY, will give +o to users with oper flag
-[ircops]
-enabled=no
-updatefreq=30
+# for delicious plugin
+DELICIOUS_USERNAME = None
+DELICIOUS_PASSWORD = None
 
-; for requests that modules make to outside websites
-[http]
-;
-; timeout: how long modules that hit external websites will try before giving
-; up. if you set timeout too high or unset it, multiple requests to a slow
-; or unresponsive website could cause all worker threads to block and deadlock
-; the bot. if you wish to increase it, consider increasing your worker threads
-; to compensate, but beware that the potential for abuse is increased.
-;
-timeout=10
-;
-; user agent to masquerade as. this is set to a generic "real" browser agent
-; because many websites deny bot access, such as google.  if you change
-; this, many modules will stop working since they are designed to block
-; bots or serve up different information to spiders.
-;
-agent=Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)
-;
-; whether to accept and store cookies between requests. some modules will
-; not work if you disable this.
-;
-cookies=yes
+# for the yelp plugin
+YELP_DEFAULT_LOCATION = 'San Francisco, CA'
 
-; periodically check if a new version of madcow has been released.  this does
-; not send any information, nor will it perform an actual update.   by default,
-; it will check once a day and notify when it is out of date.
-[updater]
-enabled=yes
-updatefreq=86400
-channels=all
+################
+### FEATURES ###
+################
 
-; for the yelp module, set default search location
-[yelp]
-default_location=San Francisco, CA
+SMTP_SERVER = 'localhost'
+SMTP_FROM = 'madcow@example.com'
+SMTP_USER = None
+SMTP_PASS = None
 
-; for world of warcraft activity feed
-[armory]
-enabled=no
-updatefreq=300
-channels=all
+# a gateway for communicating with the bot over tcp
+GATEWAY_ENABLED = False
+GATEWAY_ADDR = 'localhost'
+GATEWAY_PORT = 5000
+GATEWAY_CHANNELS = 'ALL'  # or list of channels
+GATEWAY_SAVE_IMAGES = False
+GATEWAY_IMAGE_PATH = '/tmp/images'
+GATEWAY_IMAGE_URL = 'http://example.com/images/'
+
+# watch a twitter account and bridge tweets to channels you are in
+TWITTER_ENABLED = False
+TWITTER_CONSUMER_KEY = None
+TWITTER_CONSUMER_SECRET = None
+TWITTER_TOKEN_KEY = None
+TWITTER_TOKEN_SECRET = None
+TWITTER_UPDATE_FREQ = 45
+TWITTER_CHANNELS = 'ALL'  # or list of channels
+
+# settings for modules that use http
+HTTP_TIMEOUT = 10
+HTTP_AGENT = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
+HTTP_COOKIES = True
+
+# check for madcow updates once a day and announce new versions in channel
+UPDATER_ENABLED = True
+UPDATER_FREQ = 86400
+UPDATER_ANNOUNCE_CHANNELS = 'ALL'  # or list of channels
+
+# watch world of warcraft armory rss feed and report events to channel
+WOW_ARMORY_FEED_ENABLED = False
+WOW_ARMORY_FEED_FREQ = 300
+WOW_ARMORY_CHANNELS = 'ALL'  # or list of channels
