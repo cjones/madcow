@@ -1,0 +1,88 @@
+#!/bin/sh
+
+prefix=`pwd`/`dirname $0`
+pidfile=$prefix/madcow.pid
+protocol=irc
+python=`which python`
+python_flags="-OO"
+madcow=$prefix/madcow.py
+madcow_flags="-d -p $protocol"
+
+usage() {
+    echo "$0 [stop|start|restart|reload|pause|resume]" >&2
+    exit 1
+}
+
+getpid() {
+    if [ -f $pidfile ]; then
+        pid=`cat $pidfile`
+        echo $pid
+    else
+        echo "$pidfile not found" >&2
+        exit 1
+    fi
+}
+
+stop_madcow() {
+    pid=`getpid` || exit 1
+    kill -15 $pid
+    rm -f $pidfile
+    echo "madcow stopped"
+}
+
+reload_madcow() {
+    pid=`getpid` || exit 1
+    kill -1 $pid
+    echo "madcow reloaded"
+}
+
+start_madcow() {
+    if [ -f $pidfile ]; then
+        pid=`getpid`
+        echo "already running? (pid=$pid)" >&2
+        exit 1
+    fi
+    cd $prefix && $python $python_flags $madcow $madcow_flags
+    echo "madcow started"
+}
+
+restart_madcow() {
+    stop_madcow || exit 1
+    sleep 1
+    start_madcow
+}
+
+pause_madcow() {
+    pid=`getpid` || exit 1
+    kill -17 $pid
+    echo "madcow paused"
+}
+
+resume_madcow() {
+    pid=`getpid` || exit 1
+    kill -19 $pid
+    echo "madcow resumed"
+}
+
+case "$*" in
+    "stop")
+        stop_madcow
+        ;;
+    "start")
+        start_madcow
+        ;;
+    "restart")
+        restart_madcow
+        ;;
+    "reload")
+        reload_madcow
+        ;;
+    "pause")
+        pause_madcow
+        ;;
+    "resume")
+        resume_madcow
+        ;;
+    *)
+        usage
+esac

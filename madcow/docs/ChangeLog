@@ -1,0 +1,552 @@
+1.6.7: Thu Sep  2 16:20:17 PDT 2010
+    * emergency fix for tweetprinter and google translate
+
+1.6.6: Thu Sep  2 00:03:34 PDT 2010
+    * log IRC /me actions and accept commands from there
+    * add sunrise/sunset module
+    * remove broken bay area traffic module
+    * update twitter feed to use oAuth
+    * turn off IRCs obscenely verbose debugging when DEBUG level is set
+    * fix bug where some AIM output would not transmit, such as help
+    * update unit tests
+    * fix some workarounds to trick memebot
+    * remove defunt "iraq war yes/no" site from terror.py
+    * no more spam in encyclopedia dramatica wiki interface
+    * update google translates list of languages
+    * show which language was actually used in google translate
+    * fix broken bash/qdb modules
+    * fix broken slutcheck module
+    * fix broken "texts from last night" module
+    * update list of bibles in bible.py module
+    * fix rogue whitespace/newlines in movie rating module
+
+1.6.5: Sun Jun 20 02:25:46 PDT 2010
+    * Fix google time module
+    * Fix broken movie rating module
+    * Remove broken throttle module
+    * Silence spurious delicious warnings
+    * Armory feed module for wow
+
+1.6.4: Tue Dec 22 12:54:13 PST 2009
+    * Fixed modules: lyrics, area code, fmylife,
+    * Stockquote module can now do currencies
+    * Don't write bytecode if python in 2.6+
+    * Cleanup some unused module imports
+    * Fix problem where logfile would be closed by deaemonize
+    * Removed some unused modules from include directory
+    * Added tool for parsing megahal's brain via python (mhlib.py)
+    * Rolled back bundled BeautifulSoup library
+
+1.6.3: Tue Sep 29 03:31:42 PDT 2009
+    * Refactor alias functionality so you don't need a space after alias if it
+      ends in a punctuation mark of some sort (e.g. !define cow)
+    * Fix bug that caused bot to explode if you set DEBUG loglevel
+    * Fix broken worldclock function ('madcow: time in london')
+    * Apply patch from j0no to fix edge-case where SSL connection that gets
+      disconnected will not reconnect to IRC.
+    * Change dictionary module to use definr
+
+1.6.2: Fri Aug 28 02:29:40 PDT 2009
+    * Add alias feature to make easier addressing of bot
+    * New module NOAA as an alternative weather source (US only)
+    * Rewrite urban dictionary module to not use busted, out-of-date SOAP
+      API.  Also, called without arguments, returns a random definition.
+    * Bible module can do different versions
+    * Fix broken spellcheck module
+    * Fix broken dictionary module
+    * Fix AIM chatroom bug where some characters caused a crash
+    * Fix compatibility issue with newer SQLObject + pysqlite2 (memebot only)
+    * Strip advertisement spam in lyrics output
+    * Rewrite movie IMDB/RottenTomatoes module to have more accurate results
+    * Make google translate code use AJAX API and add new languages
+    * Add getsoup shortcut for geturl
+    * Bugfix module test framework when redirecting UTF8 output
+    * template.py defaults brought up to date
+
+1.6.1: Fri Jul 31 18:12:12 PDT 2009
+    * Fix chatroom support for AIM protocol
+    * Add save() method to config object
+    * Explicitly disable deprecated wikipedia/conservapedia modules
+
+1.6.0: Tue Jul 21 01:01:11 PDT 2009
+    * add star trek technobabble module
+    * add 'texts from last night' module
+    * fixed definition regex
+    * fixed steam regex
+    * remove broken/slowass metacritic hook from movie.py and revamp topmovies
+    * useragent handles gzip pages
+    * add fpconst to base release to reduce dependencies
+    * remove iranwar from terror.py, as the site is now defunct
+    * add some default training files for megahal
+    * add script to convert megahal brains from 2-byte to 4-byte indices
+    * fixed test_module() function
+    * cleanup - remove bogus imports
+    * rework wikimedia modules to use a unified module
+
+1.5.9: Thu Apr  9 21:27:03 PDT 2009
+    * some changes to work on win32/cygwin architecture
+    * some long-needed cleanup/refactoring
+    * include soappy and simplejson to reduce third-party deps
+    * more RFC-compliant html stripping using stdlib
+    * fix broken email gateway
+    * fix running modules from the commandline to test
+    * fix encoding detection to not crash if chardet fails (mostly delicious)
+    * add more annoying stuff to twitter management tool
+    * proper rewrite of config handler to use real default values
+    * fix modules that use DBM backend to failback on anydbm
+    * supress spurious tweetprinter warnings
+    * all modules default to on if they aren't referenced in madcow.ini
+
+1.5.8: Sat Apr  4 01:09:59 PDT 2009
+    * new module - lookup restaraunt rating/location from yelp.com
+    * new module - lookup cnn headline
+    * fix broken twitter gateway
+    * bbc module responds to "bbc" instead of "bbcnews"
+    * rework config code to use defaults file for missing options
+    * general code cleanup
+
+1.5.7: Wed Mar 25 18:49:34 PDT 2009
+    * Add defaults.ini for backup for incomplete config files
+    * Fix broken google calculator module
+    * Update RC script to use numeric signals to work on Linux
+    * Optional auto-updater to complain when Madcow is out of date
+    * Make translate module always use UTF-8 instead of faulty autodetection
+    * Make FML module not include comments, and fix double-entity encoding
+
+1.5.6: Sun Mar  8 03:04:59 PDT 2009
+    * Add new grufti responses from solamen - 8ball, GladOS, video game name
+      generator, fortune cookies
+    * New module -- fuck my life random quotes
+    * Fix bug with memebot where lines with comments throw an exception
+    * Fix broken steam module
+    * Weather module logs errors
+
+1.5.5: Wed Feb 25 00:52:47 PST 2009
+    * Add support for superscript's in calc module
+    * Fix bug with busted HTML color in AIM protocol
+    * Fix memebot breaking on reload
+    * Fix alias module not matching colon boundaries
+    * Adjust stockquote output format
+
+1.5.4: Wed Feb 11 11:54:36 PST 2009
+    * Fixed alias bug #6
+    * Improved stockquote module
+
+1.5.3: Tue Feb 10 15:13:05 PST 2009
+    * ability to mark certain moduless as private-response only
+    * fixed broken aim protocol and added chatroom support
+    * fixed broken twitter feed parser to use explicit json url
+    * new module - lookup what time it is in other countries
+    * add pause/resume to rc.madcow script
+    * fixed confusing log messages for irc kicks
+    * option to not show steam members who are merely "online"
+    * fixed totally busted memebot module to work with newer SQLObject
+    * fixed bug in translate module that could not parse text with a : in it
+    * rewrite of stock quote module to use CSV feed API
+    * update election2008 module to show projected senate seats
+    * update obama module to show time since bush has been gone :D
+    * add error message to tweetprinter to log that we are hitting the throttle
+
+1.5.2: Mon Jan 12 16:10:07 PST 2009
+    * update useragent to appear more like a browser
+    * twitter gateway dynamically checks rate limit status to allow for
+      more frequent checks. it will now back off if it gets close to its
+      throttle limit
+    * fix broken AIM protocol
+    * add keep-alive feature to IRC for flakier networks
+    * fix broken modules hugs and terror
+    * steam module now correctly reports people playing non-steam games
+    * fix obama status checker so it won't explode on inaug day
+
+1.5.1: Sun Dec 21 19:34:42 PST 2008
+    * Bugfix release -- make pymegahal's build script executable
+
+1.5.0: Sun Dec 21 17:48:33 PST 2008
+    * New module -- steam, allows tracking a community so that you can see
+      what game each member is playing
+    * New module -- megahal, an eliza-like markov bot
+    * New module -- alias, allow users to custom create aliases to
+      madcow commands
+    * New module -- obama, shows countdown to inaugaration day
+    * New protocol -- IPython, allows you to interface with madcow from an
+      embedded IPython shell
+    * Rewrite woot module for cleaner output
+    * Explicitly use dbm.so instead of anydbm due to a severe memory
+      leak on certain platforms while using certain backend DB
+      libraries.
+    * Fixed group hugs confession module to work with (temporarily?)
+      busted homepage
+    * Add christ-o-pedia to conservapedia.  This is an even more
+      ridiculous and offensive right-wing wiki than conservapedia, which
+      I didn't think was possible.
+    * Rewrite bbc module for cleaner output
+    * LiveJournal module now just returns any page it gets instead of
+      complaining about pages that have UTF-8 in it.
+    * StockQuote completely rewritten for cleaner output and to show
+      afterhours changes.
+    * Native support for psyco
+    * Support for IRC server passwords
+    * Restore 2.5 compatibility
+    * Update SILC to use recent versions of toolkit
+    * Give useful error meessages for SILC configuration failure
+    * Explain to users with broken configs what's actually wrong
+    * Support for SILC output throttling
+    * Some migration to prepare for 3.0
+    * Use unicode everywhere
+    * Major code cleanup
+    * Clean up junk inside include directory
+    * Complete rewrite of useragent module
+    * Modules that require an initialized bot (to access configs, etc)
+      can now be run from the command-line properly
+    * Email gateway uses friendlier filenames for media uploads
+    * Email gateway script updated to handle different encodings
+      properly
+    * Updated to use Universal Feed Parser
+
+1.4.2: Sat Oct 18 23:17:40 PDT 2008
+    * fix bug in irc protocol with socket library method names
+    * rewrite babel module to use google translator (more languages)
+    * 2.6 compatibility changes to silence some DeprecationWarnings
+    * improve character set detection/support and default utf-8
+    * support for hex-encoded html entities in HTML stripping
+    * improved documentation in sample config file
+    * fix bug in weather module for temps between 0-40F not showing blue
+    * local service protocol accepts UNIX linefeeds
+
+1.4.1: Mon Oct 13 18:15:50 PDT 2008
+    * add SSL support for irc
+    * add electoral-vote predictor module for 2008 election
+    * make periodics execute once on startup
+    * add CGI script extras/memecheck to see if a URL has been posted
+    * strip HTML from urban dictionary responses
+    * fix broken Rotten Tomatoes search in rate.py
+    * fix auto-ops bug where capitalized nicks would be ignored
+    * remove documentation cruft for deprecated django app
+
+1.4.0: Thu Sep 11 19:05:11 PDT 2008
+    * add warhammer online item lookup module
+    * fix url escaping bug that allowed non-rfc compliant url lookups
+    * improve debug messages of useragent module
+
+1.3.9: Thu Aug 28 23:27:39 PDT 2008
+    * Migrated project hosting to Google Code
+    * Updated license to GPLv3
+    * Updated IMDB rating module for recent changes to the website.
+    * Redirected bash.org requests to QDB, since bash is currently offline.
+
+1.3.8: Sat Jul 12 20:36:14 PDT 2008
+    * update prefix method
+    * fix CLI problem that caused large outputs to fill output stream
+    * update test suite
+    * remove stupid.py module, website gone
+    * increase twitter update frequency to avoid throttling
+    * fix bug in memebot normalization code
+    * remove XKCDB option, website gone
+    * fix movie rating normalization to remove leading article
+
+1.3.7: Thu Jul  3 20:04:07 PDT 2008
+    * gateway service now can capture images sent as attachments
+    * add spellcheck to module list in madcow.ini-sample
+    * update joke module's help line to be wrappable
+    * fix weather module when multiple data sources are found
+    * fix rotten tomatoes & metacritic results for movie.py
+    * add james' "topmovies" command to movie.py
+    * code cleanup & refactoring
+    * update test suite
+
+1.3.6: Mon Jun 30 20:40:09 PDT 2008
+    * add rate limiting to irc for servers which have flood protection
+    * add joke module (from james)
+
+1.3.5: Mon Jun 23 16:45:40 PDT 2008
+    * FIX to make madcow work in 2.4 again (oops!)
+    * make lyrics module try google site-search first (better results)
+
+1.3.4: Sun Jun 22 14:19:32 PDT 2008
+    * rewrite lyrics module - now uses lyricwiki
+    * check config file for integrity
+    * use HTTP timeout for web requests to avoid thread lockup
+    * fix startup errors being hidden
+    * replace bash with qdb, since its been down for a long time
+
+1.3.3: Fri Jun 20 17:07:40 PDT 2008
+    * help goes to privmsg
+
+1.3.2: Mon Jun 16 21:32:43 PDT 2008
+    * refactor code based on PyLINT feedback
+    * fix modules that use color to use colorlib instead of hard-coded ascii
+
+1.3.1: Sat Jun 14 19:13:29 PDT 2008
+    * code and basedir cleanup
+    * remove dependency on twisted for AIM
+    * bugfix for grufti match code that ends in punctuation
+
+1.3.0: Thu Jun 12 05:37:04 PDT 2008
+    * new module - use google as a spellchecker
+    * new module - care-o-meter
+    * yourmom renamed to figlet to do arbitrary text (from james)
+    * full rewrite of movie rating module -- now supports metacritic, more
+      precise search results, and reporting when result isn't an exact match
+    * move documentation to its own directory
+    * madcow.log defaults to log/ directory
+    * delicious doesn't spam when the service is unresponsive
+    * color codes now stripped from incoming messages
+    * add cronjob script to check madcow health (from james)
+    * create data and log dirs on startup if they don't exist
+    * pidfile default in madcow.ini
+    * make factoids a lot less spammy (no more misunderstanding questions
+      as statements when unaddressed)
+    * rewrite Lyrics module for more precise searching
+    * allow phrases for dictionary
+    * don't allow cheating in roll.py
+    * completely rework threading model to use worker threads, queues, and
+      a dispatcher. this allows for better performance and thread safety
+    * add script to generate static single-file compiled madcow
+    * abstract all google functions to their own library
+    * massive code cleanup (reordered & renamed functions, refactored some
+      messy code, etc)
+    * add a template for protocols
+
+1.2.1: Sun Jun  1 06:58:25 PDT 2008
+    * fix logging spam
+    * fix broken twitter API
+    * fix handling of grufti module on first run
+
+1.2.0: Sun Jun  1 01:27:56 PDT 2008
+    * full rewrite of factoids module to work like infobot.pl
+    * all modules now log errors/warnings to logfile when daemonized
+    * config setting added for irc shutdown message
+    * new module - bay area traffic approximation times/speed
+    * new admin function - add user
+    * bot now shuts down cleanly when receiving SIGTERM or SIGINT
+    * support for NickServ authentication
+    * no longer spew IRC chatter unless in DEBUG mode
+    * fix tweetprinter to work with API changes (http auth/user agent check)
+    * tweetprinter no longer caches objects in /tmp
+    * more module code cleanup
+    * abstract threading support to a library
+    * fix bug where madcow would crash in debug mode with periodics running
+    * added comments to most functions
+    * improved addressed-checking code (caches regex until nick changes)
+
+1.1.9: Fri May 23 22:52:02 PDT 2008
+    * clarify auto-op/admin process in README and add ownership setting to ini
+    * add module execution priority and termination
+    * update test suite
+    * add rc script to include/ for starting/stopping madcow
+    * improve URL cleaning algorithm for memebot
+    * madcow now creates a pidfile when launched
+    * FIX bug with gateway responses that caused it to crash
+    * increase --debug output to show module exec and raw SQL
+    * improve mysql options to allow default port/host
+    * document and improve the module template
+    * make friendly error when delicious is down
+
+1.1.8: Wed May 21 23:40:39 PDT 2008
+    * new module to rate movie (imdb & rottentomatoes)
+    * added delicious module (posts urls to a delicious account)
+    * updated CLI to be more shell-like (history)
+    * add commands to CLI - history, nick, clear, reload
+    * add auto-op functionality (IRC ONLY)
+    * reworked admin interface. msg bot with "admin help" for commands
+    * if 'NOBOT' appears in message, madcow will ignore it
+    * can reload madcow config with SIGHUP (not supported on all systems)
+    * always encode output to the designated encoding (utf8, latin1, ascii)
+    * update memebot to use mysql or sqlite (specificed in ini)
+    * fix babel fish translation modules
+    * lyrics module removes ringtone spam
+    * bot now creates a default config when run for the first time
+    * default config now has spammy/offensive modules disabled by default
+    * stockquote module handles no-change responses correctly
+    * fixed horrible google.py bug that caused much spam
+    * parse utf8-quoted names in email_gateway properly
+    * help messages are alphabetized
+    * do not fork when run from cli
+    * add dedicated user agent library
+    * rewrite authlib
+    * refactor much code
+    * wrote a test suite to make checking module freshness easier
+    * a fix for SIGHUP handler on systems that don't set SA_RESTART
+    * FIXED problem with modules not being disabled properly
+
+1.1.7: Tue May 20 00:06:35 PDT 2008
+    * not released
+
+1.1.6: Mon Apr 28 19:46:48 PDT 2008
+    * major overhaul to threading system/module API
+    * various bugfixes
+
+1.1.5: Fri Apr 25 22:35:58 PDT 2008
+    * rewrite email_gateway and consolidate .ini settings for it
+    * add simple tool in include/ called tagstruct, to aid in parsing webpages
+    * improve Base class idioms
+    * add base Error class for custom exceptions
+    * update UserAgent to take a sample size instead of full webpage
+    * add decorator for caching function results (@cache)
+    * add decorator for throttling user calls
+    * support for twitter (see [twitter] in madcow.ini-sample)
+    * abstracted wikimedia parsing class for use in various modules
+    * lots of code cleanup
+    * added support for modules that are executed periodically without
+      user input (see template.py in periodic/)
+    * rename logging module to log to save a few precious columns
+    * remove legacy hard-coded module ignores. if you have updated from
+      a very old version, make sure tac.py, bullshitr.py and ircadmin.py no
+      longer exist in the modules/ directory!
+    * gateway service for email is now optional (see [gateway] section in
+      madcow.ini-sample). you can also set various attributes here
+    * default log level is now INFO (configurable in .ini file), with options
+      to make it very quiet, or debug.
+    * you can now set a file to log to in madcow.ini instead of console-only
+    * threads are now all shut down properly when user ^C's
+    * overhaul to how modules are enabled/diasabled in madcow.ini
+    * war module overhauled & now shows iraq war bodycount
+    * protect learn module from setting arbitrary db keys
+    * completely rewrite lyrics module to use BeautifulSoup
+    * rewrite conservapedia and wikipedia to use wikimedia library
+    * new module - get quotes from wikiquotes
+    * add karma module (nick++/nick--)
+    * change logic in stock quote %-checking
+    * new module - roll.py lets you roll d&d dice
+
+1.1.4: Sat Mar  8 15:30:24 PST 2008
+    * remove wikiparse library
+    * add email parsing script for summon tie-in
+    * add Base and UserAgent classes
+    * add service for madcow to feed it public messages
+    * add top-level exception handler to avoid crashing bot
+    * add [smtp] and [server] sections to bot config
+    * roll terror and doomsday module into war module + new features
+    * don't use reserved keyword in factoid module!
+    * full rewrite of weather module to use BeautifulSoup parser,
+      read wundergrounds RSS feed, and color-code temperature ranges
+    * rewrite "learn" module to save generic key/values. now let's you
+      set email (for summon) and location (for weather)
+    * full rewrite of lyrics module to use BeautifulSoup parsing, updated
+      for HTML changes to lyricsfreak
+    * updated translation module for HTML changes to altavista babelfish
+    * updated hugs module for new HTML and use BeautifulSoup module
+    * updated bash module to include xkcdb and limerickdb (thanks to toast)
+    * add conservapedia module for the crazy right-wing version of reality.
+      now madcow is fair and balanced.
+    * fix broken stockquote module, total rewrite. now handles stock indexes,
+      calculates % change, and color codes up/down with red or green
+    * add stupid.py, gets a random quote from the database of stupid things
+      said on the internet
+    * fix google.py to handle some cases where it wasn't redirecting when
+      the referer url wasn't set. make sure safesearch is turned off as well.
+    * add summon module. this allows you to send a page to someone's SMS email
+      gateway, if they set their email address with 'set email <user> <email>'
+
+1.1.3: Sat Nov 10 03:35:34 PST 2007
+    * Various fixes to WikiPedia module's output
+
+1.1.2: Thu Nov  8 18:06:20 PST 2007
+    * NEW module -- WikiPedia lookups
+
+1.1.1: Mon Oct 15 20:12:17 PDT 2007
+    * add authentication system for simple admin functions
+    * change order of changelog :)
+    * bbcnews when called without an argument will show headline
+    * normalize the syntax/style of all the modules
+    * add ignore list functionality
+    * upgrade pyfiglet and pycolorlib extensions
+    * add grufti documentation
+    * FIXED broken modules define, lyrics
+    * FIXED totally broken mirc color implementation
+
+1.1.0: Fri Jul 27 14:07:06 PDT 2007
+    * a whole bunch of much-needed code cleanup and minor bugfixes.
+
+1.0.9: Thu Jul 26 00:35:28 PDT 2007
+    * small protocol change to mIRC colors to use less bytes when coloring
+    large amounts of text
+    * USA rainbow colors brighter
+    * IRC module now logs public chatter to logs/ directory
+    * NEW - lyrics module looks up random lyrics for a band and spams
+    channel
+    * hugs.py module can now take an optional confessionID to retreive
+    instead of just a random hug
+
+1.0.8: Tue Jul 24 20:59:18 PDT 2007
+    * Re-arrange bot directory -- there is now a protocols, data, and
+    include directory, to keep the root from being too cluttered
+    * Use logging module which finer levels of verbosity
+    * Fix silc bug which causes madcow to crash on private messages
+    * Grufti response file removed keyword "test" -- oops!
+
+1.0.7: Sat Jul 21 23:08:58 PDT 2007
+    * memebot url catcher now sees and records commentary that goes with a
+    posted link, such as surrounding text.
+    * memebot frontend search now matches "comments"
+    * IRC, CLI, and SILC now can colorize output. appending a string with
+    ^ will cause its output to use a random rainbow color.
+    * new -- jinx.py. sort of self-explanatory, catches people who say the
+    same thing simultaneously.
+    * grufti module can now have inline tokens which will choose a random
+    word/phrase from a list.
+    * grufti module can now use regular expression matches if the match
+    string is surrounded by // (like perl)
+    * ported the tac.py and bullshitr.py module to use grufti syntax
+    * added more complete grufti-responses.txt sample files -- the full
+    insub version, and a cleaner sample version with mostly simpsons and
+    zippy quotes.
+    * patched colorlib to not attempt coloring whitespace, which pushed
+    most ascii art to the RFC limit.
+    * rainbow offset will now properly roll over instead of growing
+    infinitely
+    * weather.py now shows wind speed/direction more reliably
+    * remove auto-color of yourmom.py and artfart.py, since it can now be
+    colorized on demand with the ^ filter.
+    * madcow core and protocol handlers further abstracted by removing all
+    protocol-depending required variables and passing around a Request
+    object which can have arbitrary attributes. These are made available
+    to the plugin modules as a dict, allowing for more advanced
+    protocol-dependent modules. This also allows pre-/post-processing
+    filters to be applied within the protocol module.
+
+1.0.6: Thu Jul 12 22:37:03 PDT 2007
+    * Fix all module regex's to only trigger from beginning of line to prevent
+      the spam caused by chaining multiple keywords
+    * Rename django settings file to a sample name so updates won't clobber it
+    * add "today" link to memebot page when you navigate to older days
+    * update AAF to show the title of the ascii art, as well as the option to
+      supply a keyword to pull art from
+    * add pyfiglet module to include directory - figlet font driver
+    * add colorlib module to include directory - ansi/mirc colorizing library
+    * add yourmom.py module :)
+    * some cosmetic changes to silc output
+
+1.0.5: Fri Jul  6 19:26:04 PDT 2007
+    * Bundle python-irclib to make installation easier
+    * Bugfix - Can now properly use IP addresses as hostnames
+    * Add a flexible throttling module
+    * Add throttling to memebot for URL postings to prevent gaming
+
+1.0.4: Thu Jul  5 19:21:38 PDT 2007
+    * NEW - django frontend for memebot (see http://memebot.gruntle.org/)
+    * Fix bug with SILC private messages
+    * Remove typo in memebot insult list
+    * Improve weather.py module's logic to work with ambiguous serach results
+    * Improve documentation
+
+1.0.3: Sun Jul  1 19:27:09 PDT 2007
+    * A bunch of necessary code cleanup to the module framework
+    * Rewrote the Config class to be more efficient
+    * Added -v flag for verbosity when executed in a console
+    * Fixed grufti from triggering on substring matches
+    * Grufti module now precompiles regexes at loadtime
+
+1.0.2: Sat Jun 30 22:32:09 PDT 2007
+    * Refactor module API to expose more data to the extensions
+    * Move seen/factoids/memebot into standard extension API
+    * Add namespace config for unique database files
+    * Added some startup verbosity
+    * Listed a description of all base modules in config
+    * Allow modules to be disabled in config file
+
+1.0.1: Sat Jun 30 17:39:08 PDT 2007
+    * Updated TODO list
+    * Get a rid of all the CVS Id tags
+    * Clean up jesus module to not have footnotes
+    * Stock module can now do mutual funds

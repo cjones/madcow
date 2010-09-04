@@ -1,0 +1,192 @@
+REQUIREMENTS
+
+    * python 2.5 or higher
+
+    Madcow can use a variety of protocol formats.  Depending on which
+    you choose, you may need a third-party library to handle the
+    protocol.
+
+    IRC, AIM, and CLI: no modules needed
+    SILC: pysilc-0.5/silc-toolkit-1.1.8 -- Other versions may not work!
+
+    Madcow also comes with a suite of plugins that provide
+    functionality.  Most of these use the core Python library, however
+    a few need third-party libraries.  If a plugin does not have the
+    required components it will be disabled at runtime.  You can find a
+    description of each plugin in madcow.ini-sample
+
+    memebot.py: sqlobject, pysqlite or MySQLdb
+
+
+BASIC USAGE
+
+    Copy madcow.ini-sample to madcow.ini, edit options, and run:
+
+    $ python madcow.py
+
+    In IRC, message the bot with 'help' to see a list of commands. To
+    trigger him publicly, most commands require that you address the
+    bot, for example:
+
+        <cj_> madcow: wiki dinosaurs
+        <madcow> Dinosaur - Dinosaurs were the dominant vertebrate
+                 animals of terrestrial ecosystems for over 160 million
+                 years, from the late Triassic period to the end of the
+                 Cretaceous period, when most of them became extinct in
+                 the CretaceousTertiary extinction event.
+
+    By default, madcow runs as a commandline tool which does NOT
+    require addressing. Change the protocol to irc in madcow.ini (and
+    edit the connection options in [irc]) to connect to IRC.  You may
+    override the protocol by passing the -p <proto> option.
+
+    *** WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! ***
+
+    Most modules are disabled by default.  Please look through the
+    [modules] section of madcow.ini to customize your bot.  SOME
+    MODULES PRODUCE POTENTIALLY OFFENSIVE MATERIAL OR ARE "SPAMMY".  If
+    you are using your bot in a serious context (such as a work IRC
+    server) or a channel with people who are irritated by chatty bots,
+    please keep this in mind before bringing Madcow online.  I
+    completely disclaim ANY responsibility for trouble you might get
+    yourself in as a result of taking this bot online without testing
+    it first!  However, if you are in a channel that embraces obnoxious
+    behavior (or at least tolerates it), also see my Irssi plugin
+    gay.pl (named insub.pl in MacPorts and FreeBSD Ports) at:
+    http://gruntle.org/projects/irssi/gay/.
+
+
+SLIGHTLY MORE ADVANCED USAGE
+
+    If "NOBOT" (without the quotes) appears anywhere in a line, Madcow
+    will pretend it didn't see it.  This means it won't log URLs, log
+    the line to the public chat file (if enabled), or respond to it in
+    any way.  This is useful if you wish to keep something private such
+    as the url to naked pictures of yourself.
+
+    If a command begins with ^, it will colorize the output in rainbow
+    pattern.
+
+
+AUTO-OPS / ADMIN
+
+    In madcow.ini, set owner name to your IRC nick. Message bot with
+    'admin register <password>'. This will register you as an admin.
+    Other users may now register, and you can give them auto-op flag
+    with /msg madcow admin chflag <user> +o. You can also set the
+    default flags in madcow.ini to give any user that registers
+    auto-ops.
+
+    If you wish to batch-add users for auto-op access without them
+    registering, edit data/db-madcow-passwd and add a line for each
+    user:
+
+    nick:*:o
+
+    Note they will not be able to login in this case.
+
+
+ADVANCED USAGE
+
+    By default, the bot will use IRC. If you wish to use SILC or AIM,
+    uncomment the appropriate line in madcow.ini. You can also specify
+    a config file to use on the command line (./madcow.py --help for
+    full list of options).
+
+    If you use this script to run multiple bots, you may wish to change
+    the "dbNamespace" directive in config. This will keep your database
+    files separate for each bot. If you do not change this, they will
+    share the same data.
+
+    If you wish to test the bots behavior before deploying, run:
+
+    $ ./madcow.py -p cli
+
+    NOTE: When deployed in a public chat channel (such as IRC or SILC),
+    the bot will only respond to most queries when it is addressed.
+    This consists of appending the bot's given nickname in the
+    commandline.  For example:
+
+    madcow: quote aapl
+    madcow - translate from english to german: this beer is really good
+
+    If you wish to enable the "grufti response" module, you must copy
+    grufti-responses.txt-sample to grufti-responses.txt.  This is a
+    database of hard-coded match/response directives. It will choose a
+    random reply whenever it sees a match. It does not need to be
+    addressed.  By default the matchfile comes with a set of Zippy and
+    Simpsons quotes.  You can delete these and add your own if you
+    wish, or just symlink the provided response file.  See
+    README.grufti for more detail on the syntax and advanced features.
+
+MEGAHAL
+
+    MegaHAL is a markov chain bot.  If you enable the module for this,
+    you will need to compile the C extension.  To do this:
+
+    $ cd <madcow>/include/pymegahal
+    $ ./build.py
+
+    This will automatically build megahal.so and install it into your
+    include directory, assuming it compiles cleanly on your platform.
+
+
+WRITING EXTENSIONS
+
+    In the modules/ dir, copy template.py to your new module.  Edit the
+    various options in the MatchObject() class and make the response()
+    function return desired output.  See existing modules for example
+    usage. The file must end in .py and exist in the modules
+    subdirectory to load.
+
+    If you write something cool and want to share, send it to
+    cjones@gruntle.org.
+
+
+WRITING OUTPUT PLUGINS
+
+    If you wish to write support for a different protocol, this is done
+    by making a new file with the name of the protocol you wish to
+    support inside the protocols directory, and giving it a class
+    called OutputHandler.  It *must* subclass madcow.MadCow.
+
+    The new class must have a start() method defined and the __init__
+    method must accept certain parameters. Please see existing
+    protocols for an example.  Currently we have: cli.py, irc.py,
+    silc.py and aim.py.
+
+    If you are developing for a new protocol you may request assistance
+    from me at cjones@insub.org.
+
+
+WRITING PLUGINS THAT RUN PERIODICALLY
+
+    You can write a module that, instead of being triggered by chatter
+    in channel, is invoked on a schedule. For example, if you want a
+    module that checks a website every 5 minutes for an update then
+    notifies the channel. These go in the 'periodic' directory, and you
+    should use the template.py in that directory. The process()
+    function of the PeriodicEvent class should return a string or None
+    (for no response).
+
+
+CONTRIBUTORS
+
+    This release has module contributions from the following people:
+
+    - toast: silcplugin.py, slutcheck.py, jinx.py, tweetprinter.py
+    - twid: woot.py, roll.py
+    - killfile: bbcnews.py
+    - james johnston: joke.py
+
+    Some third-party tools have been included for convenience, such as
+    Mark Pilgrim's RSS parser, Joel Rosdahl's irclib and BeautifulSoup.
+    These third party programs are redistributed under the terms and
+    conditions of their respective licenses, which are all compatible
+    with GPLv3.
+
+
+CONTACT
+
+    You may reach me by e-mail at cjones@gruntle.org or AIM as
+    seejayunderscore.
