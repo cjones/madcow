@@ -33,13 +33,14 @@ class MegaHAL(object):
     update_freq = 1 * 60 * 60  # 1 hour
     update_max = 50
 
-    def __init__(self, basedir, charset):
+    def __init__(self, basedir, charset, logger=None):
         self.basedir = basedir
         self.charset = charset
         self.brain = None
         self.last_updated = None
         self.last_changed = None
         self.updates = 0
+        self.log = logger
 
     def setid(self, id):
         id = id.encode(self.charset, 'replace')
@@ -127,9 +128,8 @@ class Main(Module):
                 raise BuildError('could not build MegaHAL automatically')
 
         # create the bot with a default personality
-        self.megahal = MegaHAL(
-                basedir=os.path.join(self.madcow.base, 'data/megahal'),
-                charset=self.madcow.charset)
+        self.megahal = MegaHAL(basedir=os.path.join(self.madcow.base, 'data/megahal'),
+                               charset=self.madcow.charset, logger=self.log)
         self.megahal.setid('madcow')
 
     def response(self, nick, args, kwargs):

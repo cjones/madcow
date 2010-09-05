@@ -93,9 +93,8 @@ MODULES = ['alias',               # allow users to make command aliases
 
 # these are modules that run on their own periodically if enabled. settings are below
 TASKS = ['updater',             # check for updates to madcow
-         #'armoryfeed',         # subscribe to an armory feed and provide updates on kills/drops (see below)
-         #'ircops',             # automatically provide ops in irc
-         #'twitter',            # gateway for tweet timeline
+         'ircops',             # automatically provide ops in irc
+         'twitter',            # gateway for tweet timeline
          ]
 
 PRIVATE_MODULES = ['lyrics']  # list of modules (from MODULES above) that only respond in private message
@@ -194,7 +193,3 @@ HTTP_COOKIES = True
 # check for madcow updates once a day and announce new versions in channel
 UPDATER_FREQ = 86400
 UPDATER_ANNOUNCE_CHANNELS = 'ALL'  # or list of channels
-
-# watch world of warcraft armory rss feed and report events to channel
-WOW_ARMORY_FEED_FREQ = 300
-WOW_ARMORY_CHANNELS = 'ALL'  # or list of channels

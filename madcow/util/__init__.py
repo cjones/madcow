@@ -242,7 +242,7 @@ def strip_html(data):
     return HTMLStripper(data).stripped
 
 
-def get_logger(name=None, dir=None, unique=True, timestamp_format=None, max_unique_files=None, level=None,
+def get_logger(name=None, dir=None, unique=False, timestamp_format=None, max_unique_files=None, level=None,
                format=None, time_format=None, encoding=None, stream=None, store_errors=False, store_warnings=False):
 
     # create a logger with defaults from settings, if set
@@ -273,7 +273,6 @@ def get_logger(name=None, dir=None, unique=True, timestamp_format=None, max_uniq
     else:
         path = os.path.join(dir, name + '.log')
     logger.add_file(path)
-    logger.info('Logfile opened: %s', os.path.basename(path))
     return logger
 
 

@@ -4,7 +4,6 @@ import sys
 import re
 import codecs
 import chardet
-import logging as log
 
 DEFAULT = u'ascii'
 meta_re = re.compile(r'<meta\s+(.*?)\s*>', re.I | re.DOTALL)
@@ -20,6 +19,8 @@ def convert(data, headers=None):
 
 def detect(data, headers=None):
     """Return charset of data"""
+    from madcow.util import get_logger
+    log = get_logger()
 
     # try to figure out the encoding first from meta tags
     charset = metacharset(data)

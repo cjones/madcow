@@ -204,4 +204,3 @@ class Main(Module):
                     return u'%s: %s' % (nick, response)
             except AttributeError:
                 pass
-        return u'%s: I got nothin' % nick

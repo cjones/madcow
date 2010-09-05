@@ -1,7 +1,7 @@
 """Generate ASCII text using figlet! """
 
 import re
-from pyfiglet import Figlet
+import pyfiglet
 from madcow.util import Module, encoding
 import random
 import os
@@ -31,8 +31,9 @@ class Main(Module):
     )
 
     def init(self):
-        zipfile = os.path.join(self.madcow.base, u'include/fonts.zip')
-        self.figlet = Figlet(zipfile=zipfile)
+        zipfile = os.path.join(os.path.dirname(pyfiglet.__file__), 'fonts.zip')
+        print zipfile
+        self.figlet = pyfiglet.Figlet(zipfile=zipfile)
 
     def response(self, nick, args, kwargs):
         self.figlet.setFont(font=random.choice(self.fonts))

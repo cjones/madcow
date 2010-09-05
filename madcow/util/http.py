@@ -23,7 +23,6 @@ import sys
 import urllib2
 import urlparse
 import urllib
-import logging as log
 import encoding
 from gzip import GzipFile
 import re
@@ -55,7 +54,6 @@ class UserAgent(object):
     def open(self, url, opts=None, data=None, referer=None, size=-1,
              add_headers=None):
         """Open URL and return unicode content"""
-        log.debug(u'fetching url: %s' % url)
         url = list(urlparse.urlparse(url))
         if opts:
             for key in opts:
