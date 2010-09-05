@@ -20,7 +20,7 @@
 """Plugin to return random quote from WikiQuotes"""
 
 from urlparse import urljoin
-import logging as log
+
 import random
 import re
 
@@ -218,12 +218,12 @@ class Main(Module):
                 max = _max
             return self.get_random_quote(author=author, max=max)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: problem with query: %s' % (nick, error)
 
 
 if __name__ == u'__main__':
-    log.root.setLevel(log.DEBUG)
+    self.log.root.setLevel(self.log.DEBUG)
     from madcow.util import test_module
     test_module(Main)

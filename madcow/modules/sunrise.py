@@ -19,7 +19,7 @@
 
 """Get sunrise or sunset from google"""
 
-import logging as log
+
 import re
 
 from madcow.util import Module, stripHTML
@@ -62,8 +62,8 @@ class Main(Module):
                 location = args[1]
             response = self.google.sunrise_sunset(query, location)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             response = u"That place doesn't have a sun, sorry."
         return u'%s: %s' % (nick, response)
 

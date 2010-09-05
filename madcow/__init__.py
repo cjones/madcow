@@ -37,7 +37,7 @@ except ImportError:
 PREFIX = os.path.realpath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(PREFIX, 'include'))
 
-from madcow.util import gateway, get_logger, http
+from madcow.util import gateway, get_logger, http, Request
 from madcow.conf import settings
 from madcow.util.color import ColorLib
 from madcow.util.auth import AuthLib
@@ -87,8 +87,8 @@ class Madcow(object):
 
         # load modules
         self.modules = Modules(self, 'modules', settings.MODULES)
-        self.periodics = Modules(self, 'tasks', settings.TASKS)
-        self.usage_lines = self.modules.help + self.periodics.help
+        self.tasks = Modules(self, 'tasks', settings.TASKS)
+        self.usage_lines = self.modules.help + self.tasks.help
         self.usage_lines.append(u'help - this screen')
         self.usage_lines.append(u'version - get bot version')
 
@@ -149,7 +149,7 @@ class Madcow(object):
         """Reload all modules"""
         self.log.info(u'reloading modules')
         self.modules.load_modules()
-        self.periodics.load_modules()
+        self.tasks.load_modules()
 
     ### OUTPUT FUNCTIONS
 
@@ -197,7 +197,7 @@ class Madcow(object):
         """Run module response method and output any response"""
         obj, nick, args, kwargs = request
         try:
-            response = obj.response(nick, args, kwargs)
+            response = obj.get_response(nick, args, kwargs)
         except Exception, error:
             self.log.warn(u'Uncaught module exception')
             self.log.exception(error)
@@ -390,7 +390,7 @@ class PeriodicEvents(Service):
         """While bot is alive, process periodic event queue"""
         delay = 5
         now = time.time()
-        for mod_name, mod in self.bot.periodics.modules.iteritems():
+        for mod_name, mod in self.bot.tasks.modules.iteritems():
             self.last_run[mod_name] = now - mod[u'obj'].frequency + delay
 
         while self.bot.running:
@@ -400,7 +400,7 @@ class PeriodicEvents(Service):
     def process_queue(self):
         """Process queue"""
         now = time.time()
-        for mod_name, mod in self.bot.periodics.modules.iteritems():
+        for mod_name, mod in self.bot.tasks.modules.iteritems():
             obj = mod[u'obj']
             if (now - self.last_run[mod_name]) < obj.frequency:
                 continue

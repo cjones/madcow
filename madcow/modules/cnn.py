@@ -20,7 +20,7 @@
 """CNN Headline"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 import feedparser
 #from madcow.util.http import geturl   # mimic browser
@@ -42,8 +42,8 @@ class Main(Module):
             body = stripHTML(item.description).strip()
             return u' | '.join([item.link, body, item.updated])
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, error)
 
 

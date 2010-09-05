@@ -22,11 +22,10 @@ import os
 from select import select
 import re
 import socket
-import logging as log
 import datetime
 from urlparse import urljoin
 import errno
-from madcow.util import Request
+from madcow.util import Request, get_logger
 from madcow.conf import settings
 
 class InvalidPayload(Exception):
@@ -56,15 +55,15 @@ class GatewayService(object):
     def run(self):
         """While bot is alive, listen for connections"""
         if not settings.GATEWAY_ENABLED:
-            log.info(u'GatewayService is disabled')
             return
+        self.log = get_logger('gateway', unique=False)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((self.bot.config.gateway.bind, self.bot.config.gateway.port))
         sock.listen(5)
         while self.bot.running:
             client, addr = sock.accept()
-            log.info(u'connection from %s' % repr(addr))
+            self.log.info(u'connection from %s' % repr(addr))
             handler = GatewayServiceHandler(self, client, addr)
             handler.start()
 
@@ -119,16 +118,16 @@ class GatewayServiceHandler(Thread):
                 self.data_received(data)
                 continue
             except InvalidPayload, error:
-                log.info(u'invalid payload from %s: %s' % (self.addr, error))
+                self.server.log.info(u'invalid payload from %s: %s' % (self.addr, error))
             except CloseConnection:
-                log.info(u'closing connection to %s' % repr(self.addr))
+                self.server.log.info(u'closing connection to %s' % repr(self.addr))
             except ConnectionTimeout:
-                log.info(u'connection timeout to %s' % repr(self.addr))
+                self.server.log.info(u'connection timeout to %s' % repr(self.addr))
             except ConnectionClosed:
-                log.info(u'connection closed by %s' % repr(self.addr))
+                self.server.log.info(u'connection closed by %s' % repr(self.addr))
             except Exception, error:
-                log.warn(u'uncaught exception from %s: %s' % (self.addr, error))
-                log.exception(error)
+                self.server.log.warn(u'uncaught exception from %s: %s' % (self.addr, error))
+                self.server.log.exception(error)
             break
         self.client.close()
 

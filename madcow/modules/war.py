@@ -23,7 +23,7 @@ import re
 import feedparser
 from madcow.util import Module, stripHTML
 from madcow.util.http import geturl
-import logging as log
+
 from madcow.util.color import ColorLib
 
 __version__ = u'0.3'
@@ -52,8 +52,8 @@ class Terror(object):
             color = self._color_map[level.lower()]
             return self.colorlib.get_color(color, text=level)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'UNKNOWN'
 
 
@@ -68,8 +68,8 @@ class DoomsDay(object):
             time = self._re_time.search(doc).group(1)
             return time
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'UNKNOWN'
 
 
@@ -90,8 +90,8 @@ class IraqWar(object):
             data = data.strip()
             return data
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'UNKNOWN'
 
 
@@ -114,8 +114,8 @@ class Main(Module):
         try:
             return FORMAT % (self.terror.level(), self.doom.time(), self.iraq.bodycount())
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: problem with query: %s' % (nick, error)
 
 

@@ -21,7 +21,7 @@
 
 from urlparse import urljoin
 from random import choice
-import logging as log
+
 import re
 
 from madcow.util.http import getsoup
@@ -147,8 +147,8 @@ class Main(Module):
             else:
                 response = self.lookup_verse(query, book)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             response = choice(self.errors)
         return u'%s: %s' % (nick, response)
 

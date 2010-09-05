@@ -22,7 +22,7 @@
 from madcow.util import Module
 import re
 from learn import Main as Learn
-import logging as log
+
 
 __version__ = u'0.1'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -107,6 +107,6 @@ class Main(Module):
             if kr.reply:
                 return unicode(kr.reply)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: problem with command: %s' % (nick, error)

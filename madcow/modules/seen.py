@@ -23,7 +23,7 @@ import re
 import time
 import os
 from madcow.util import Module
-import logging as log
+
 
 try:
     import dbm
@@ -105,5 +105,5 @@ class Main(Module):
             return u'%s: %s was last seen %s ago on %s saying "%s"' % (
                     nick, user, last, channel, message)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)

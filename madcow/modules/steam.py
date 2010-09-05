@@ -20,7 +20,7 @@
 """Track users on steam"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 from madcow.util.http import geturl
 from urlparse import urljoin
@@ -75,8 +75,8 @@ class Main(Module):
                 output = ['No users ' + message]
             return '\n'.join(output)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, error)
 
 

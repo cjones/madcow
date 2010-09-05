@@ -24,7 +24,7 @@ import re
 import os
 import random
 from madcow.util import Module
-import logging as log
+
 import shutil
 import encoding
 
@@ -50,7 +50,7 @@ class Main(Module):
             if not os.path.exists(filename):
                 sample = os.path.join(madcow.base, self._sample)
                 shutil.copyfile(sample, filename)
-                log.warn(u'created %s' % self._filename)
+                self.log.warn(u'created %s' % self._filename)
             with open(filename, 'rb') as fp:
                 doc = fp.read()
             for block in self.reMatchBlocks.findall(doc):
@@ -74,8 +74,8 @@ class Main(Module):
                     matches.append(regex)
                 self.data.append((matches, responses))
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             self.enabled = False
 
     def parseTokens(self, response):
@@ -94,5 +94,5 @@ class Main(Module):
                         return encoding.convert(result)
 
         except Exception, error:
-            log.warn(u'error in %s: %s' % (self.__module__, error))
-            log.exception(error)
+            self.log.warn(u'error in %s: %s' % (self.__module__, error))
+            self.log.exception(error)

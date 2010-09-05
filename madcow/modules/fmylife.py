@@ -22,7 +22,7 @@
 from madcow.util import Module, stripHTML
 from madcow.util.http import getsoup
 from urlparse import urljoin
-import logging as log
+
 import re
 
 class Main(Module):
@@ -43,8 +43,8 @@ class Main(Module):
                                      stripHTML(' '.join(link.renderContents()
                                                         for link in post('a', 'fmllink')).decode('utf-8', 'ignore')))
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: Today I couldn\'t seem to access fmylife.com.. FML' % nick
 
 

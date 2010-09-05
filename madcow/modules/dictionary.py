@@ -21,7 +21,7 @@
 
 from urlparse import urljoin
 from urllib import quote
-import logging as log
+
 import re
 
 from madcow.util import Module
@@ -44,8 +44,8 @@ class Main(Module):
         try:
             response = self.lookup(args[0])
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             response = 'Stop making words up'
         return u'%s: %s' % (nick, response)
 

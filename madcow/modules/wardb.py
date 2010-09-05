@@ -20,7 +20,7 @@
 """Lookup Warhammer Online items"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 from madcow.util.http import geturl
 from urlparse import urljoin
@@ -99,8 +99,8 @@ class Main(Module):
         try:
             return self.lookup_item(args[0])
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
 
 
 if __name__ == '__main__':

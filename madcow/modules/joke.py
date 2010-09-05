@@ -24,7 +24,7 @@ from madcow.util.http import geturl
 import re
 from urlparse import urljoin
 import urllib
-import logging as log
+
 
 class Main(Module):
 
@@ -59,8 +59,8 @@ class Main(Module):
             result = re.sub(r'\s{2,}', u' ', result)
             return result.strip()
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u"%s: I had a problem with that, sorry." % nick
 
 

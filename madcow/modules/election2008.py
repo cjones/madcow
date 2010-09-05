@@ -20,7 +20,7 @@
 """Predicted Electoral Vote Count"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 from madcow.util.http import geturl
 from madcow.util.color import ColorLib
@@ -75,8 +75,8 @@ class Main(Module):
             return u'%s: Projected Senate Seats 2010: %s' % (
                     nick, u', '.join(output))
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, error)
 
 

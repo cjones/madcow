@@ -124,11 +124,11 @@ class Main(Module):
             try:
                 message = self.parse(args[1])
             except BabelError, error:
-                log.error(error)
+                self.log.error(error)
                 message = error
             except Exception, error:
-                log.warn('error in %s' % self.__module__)
-                log.exception(error)
+                self.log.warn('error in %s' % self.__module__)
+                self.log.exception(error)
                 message = error
         else:
             message = ', '.join(self.langs)

@@ -28,7 +28,7 @@ import urlparse
 import datetime
 import random
 from madcow.util import Module
-import logging as log
+
 from cgi import parse_qsl
 from urllib import urlencode
 
@@ -140,12 +140,12 @@ class MemeBot(Module):
         try:
             sqlhub.processConnection = connectionForURI(uri)
         except Exception, error:
-            log.warn('invalid uri: %s (%s)' % (uri, error))
+            self.log.warn('invalid uri: %s (%s)' % (uri, error))
             self.enabled = False
             return
 
         # show raw SQL being dispatched if loglevel is debug
-        if log.root.level <= log.DEBUG:
+        if self.log.root.level <= self.log.DEBUG:
             URL._connection.debug = True
             Author._connection.debug = True
             Channel._connection.debug = True
@@ -286,8 +286,8 @@ class MemeBot(Module):
             me.points_new = me.points_new + 1
 
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
 
     def score_response(self, x, y):
         scores = self.get_scores()

@@ -60,6 +60,6 @@ class Main(Module):
             return u"%s: summoned %s" % (nick, sendto)
 
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u"%s: I couldn't make that summon: %s" % (nick, error)

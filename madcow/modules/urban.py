@@ -19,7 +19,7 @@
 
 """Module stub"""
 
-import logging as log
+
 import re
 
 from madcow.util import Module, stripHTML
@@ -54,8 +54,8 @@ class Main(Module):
             else:
                 response = self.random()
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             response = u'So obscure, not even urban dictionary knows it'
         return u'%s: %s' % (nick, response)
 

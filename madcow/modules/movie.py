@@ -21,7 +21,7 @@
 
 from madcow.util.http import geturl
 from urlparse import urljoin
-import logging as log
+
 import re
 
 from BeautifulSoup import BeautifulSoup
@@ -68,8 +68,8 @@ class Main(Module):
             else:
                 raise ValueError('invalid args')
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             response = u'Error processing your request'
         return u'%s: %s' % (nick, response)
 
@@ -85,7 +85,7 @@ class Main(Module):
                 rating = rating.strip()
                 out.append('%s: %s' % (source, rating))
             except:
-                log.exception('no match')
+                self.log.exception('no match')
                 pass
         if not out:
             out.append('No match')
@@ -125,7 +125,7 @@ class Main(Module):
                 for row in p.table('tr'):
                     link = row('td')[2].a
                     normalized = self.normalize(link.renderContents())
-                    log.debug('Comparing: %r == %r', normalized, name)
+                    self.log.debug('Comparing: %r == %r', normalized, name)
                     if normalized == name:
                         url = urljoin(self.imdb_url, link['href'])
                         break

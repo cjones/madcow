@@ -24,7 +24,7 @@ from pyfiglet import Figlet
 from madcow.util import Module
 import random
 import os
-import logging as log
+
 import encoding
 
 __author__ = u'James Johnston <jjohnston@email4life.com>'
@@ -62,8 +62,8 @@ class Main(Module):
             return encoding.convert(text)
 
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: figlet :(' % nick
 
 

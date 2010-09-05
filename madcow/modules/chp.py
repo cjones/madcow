@@ -22,7 +22,7 @@
 import re
 from madcow.util import Module, stripHTML
 from madcow.util.http import geturl
-import logging as log
+
 
 class Main(Module):
 
@@ -54,8 +54,8 @@ class Main(Module):
             else:
                 return u'%s: No incidents found' % nick
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: I failed to perform that lookup' % nick
 
 

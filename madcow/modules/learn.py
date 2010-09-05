@@ -21,7 +21,7 @@
 
 import re
 from madcow.util import Module
-import logging as log
+
 import os
 
 try:
@@ -81,6 +81,6 @@ class Main(Module):
             self.set(db, key, val)
             return u'%s: set %s\'s %s to %s' % (nick, key, db, val)
         except Exception, error:
-            log.warn(u'error in %s: %s' % (self.__module__, error))
-            log.exception(error)
+            self.log.warn(u'error in %s: %s' % (self.__module__, error))
+            self.log.exception(error)
             return u"%s: couldn't set that" % nick

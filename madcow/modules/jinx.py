@@ -23,7 +23,7 @@
 
 import time
 from madcow.util import Module
-import logging as log
+
 
 class ChatLine(object):
 
@@ -96,10 +96,10 @@ class Main(Module):
         try:
             line = args[0]
             cl = ChatLine(nick, line)
-            self.log.add(cl)
-            oldline = self.log.getMatchingLine(cl)
+            self.self.log.add(cl)
+            oldline = self.self.log.getMatchingLine(cl)
             if oldline and oldline.nick != nick:
                 return u"Jinx! %s owes %s a coke!" % (nick, oldline.nick)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)

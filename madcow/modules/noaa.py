@@ -22,7 +22,7 @@ Alternative to wunderground that has more accurate data,
 but only works within the united states.
 """
 
-import logging as log
+
 import re
 
 from madcow.util import Module, stripHTML
@@ -65,8 +65,8 @@ class Main(Module):
                 location = args[1]
             response = self.getweather(location)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             response = u'Something bad happened'
         return u'%s: %s' % (nick, response)
 

@@ -2,7 +2,7 @@
 
 """Texts from last night"""
 
-import logging as log
+
 import random
 import re
 from BeautifulSoup import BeautifulSoup
@@ -26,8 +26,8 @@ class Main(Module):
         try:
             return u'%s: %s' % (nick, get_text())
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, error)
 
 

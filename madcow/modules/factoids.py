@@ -20,7 +20,7 @@
 """Emulate Perl InfoBot's factoid feature"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 from re import I
 import os
@@ -486,8 +486,8 @@ class Main(Module):
             result = self.factoids.parse(args[0], nick, kwargs[u'req'])
             return encoding.convert(result)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, self.error)
 
 

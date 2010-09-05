@@ -37,7 +37,7 @@ the number of results for both are equal, the phrase is 0% slutty.
 import re
 from madcow.util import Module
 from madcow.util.http import geturl
-import logging as log
+
 from urlparse import urljoin
 
 #match_re = re.compile(r'Results .* of about <b>([\d,]+)</b> for')
@@ -101,14 +101,14 @@ class Main(Module):
             rating = slutrating(query)
             return u"%s is %.2f%% slutty." % (query, rating * 100)
         except TypeError, error:
-            log.exception('what')
+            self.log.exception('what')
             return u"%s: Sorry, google isn't being cooperative.." % nick
         except WordFiltered, error:
             return u"%s: Hmm, google is filtering the word '%s'.." % (
                     nick, error.word)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: I failed to perform that lookup' % nick
 
 

@@ -24,7 +24,7 @@ import feedparser
 from madcow.util import Module, stripHTML
 from madcow.util.http import geturl
 from urlparse import urljoin
-import logging as log
+
 
 class Main(Module):
 
@@ -51,8 +51,8 @@ class Main(Module):
             page = stripHTML(rss.channel.link)
             return u'%s: [%s] %s' % (nick, page, entry)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u"%s: Couldn't load the page LJ returned D:" % nick
 
 

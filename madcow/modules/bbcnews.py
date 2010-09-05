@@ -24,7 +24,7 @@ import feedparser
 from madcow.util import Module
 import urllib
 from urlparse import urljoin
-import logging as log
+
 
 class Main(Module):
 
@@ -48,8 +48,8 @@ class Main(Module):
             return u' | '.join([item.link, item.description, item.updated])
 
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, self._error)
 
 

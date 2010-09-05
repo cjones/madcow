@@ -22,7 +22,7 @@
 from madcow.util import Module, stripHTML
 from madcow.util.http import geturl
 from urllib import quote
-import logging as log
+
 from madcow.util.color import ColorLib
 import locale
 import csv
@@ -106,8 +106,8 @@ class Main(Module):
         except UnknownSymbol, error:
             response = u"Symbol %s not found, market may have crashed" % error.symbolname
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             response = u'%s: %s' % (nick, error)
         return response
 

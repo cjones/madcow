@@ -20,7 +20,7 @@
 """Get song lyrics from lyricwiki"""
 
 from urlparse import urljoin
-import logging as log
+
 import re
 
 from madcow.util import Module, stripHTML
@@ -73,8 +73,8 @@ class Main(Module):
                 raise ValueError('no results')
             return u'%s:\n%s' % (title, lyrics)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, "Couldn't find them, they must suck")
 
     def render(self, node):

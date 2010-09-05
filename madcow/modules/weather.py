@@ -26,7 +26,7 @@ from urlparse import urljoin
 from BeautifulSoup import BeautifulSoup
 import feedparser
 from learn import Main as Learn
-import logging as log
+
 from madcow.util.color import ColorLib
 from madcow.util import encoding
 
@@ -121,7 +121,7 @@ class Weather(object):
                         u'\x1b[0m'
 
         except Exception, error:
-            log.exception(error)
+            self.log.exception(error)
 
         output = []
         for key, val in data.items():
@@ -165,8 +165,8 @@ class Main(Module):
         try:
             return u'%s: %s' % (nick, self.weather.forecast(query))
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u"Couldn't find that place, maybe a bomb dropped on it"
 
 

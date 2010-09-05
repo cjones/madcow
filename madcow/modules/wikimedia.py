@@ -7,7 +7,7 @@ from madcow.util.http import geturl
 from madcow.util import stripHTML
 from madcow.util import Module
 from urlparse import urljoin
-import logging as log
+
 import re
 
 # wiki configuration
@@ -213,8 +213,8 @@ class Main(Module):
                 except AttributeError:
                     pass
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
 
 if __name__ == '__main__':
     from madcow.util import test_module

@@ -24,7 +24,7 @@ from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
 from madcow.util import Module, stripHTML
 import re
-import logging as log
+
 from madcow.conf import settings
 
 class Delicious(object):
@@ -81,7 +81,7 @@ class Main(Module):
                 self.delicious.post(url, tags=[nick])
         except Exception, error:
             # XXX meh.. people post jokey urls a lot, no point spamming logs
-            #log.warn(u'error in module %s' % self.__module__)
-            #log.exception(error)
+            #self.log.warn(u'error in module %s' % self.__module__)
+            #self.log.exception(error)
             pass
 

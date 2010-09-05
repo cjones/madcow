@@ -23,7 +23,7 @@ from BeautifulSoup import BeautifulSoup
 from madcow.util.http import geturl
 from madcow.util import stripHTML
 from madcow.util import Module
-import logging as log
+
 import re
 
 __version__ = '0.1'
@@ -52,8 +52,8 @@ class TrekFailure(Module):
                     self.fail_re.search(
                         fail.findNext('h1').renderContents()).group(1))))
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: Too much fail for technobabble' % (nick, error)
 
 Main = TrekFailure

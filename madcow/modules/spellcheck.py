@@ -20,7 +20,7 @@
 """Spellcheck using google"""
 
 from urlparse import urljoin
-import logging as log
+
 import re
 
 from madcow.util import Module, stripHTML
@@ -47,8 +47,8 @@ class Main(Module):
             else:
                 res = u'spelled correctly'
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             res = u'I had trouble with that'
         return u'%s: %s' % (nick, res)
 

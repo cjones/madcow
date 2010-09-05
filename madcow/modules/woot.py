@@ -22,7 +22,7 @@
 import re
 import feedparser
 from madcow.util import Module, stripHTML
-import logging as log
+
 
 class Main(Module):
 
@@ -44,8 +44,8 @@ class Main(Module):
                 summary = summary[:self.max - 4] + u' ...'
             return u'%s [%s] %s' % (title, link, summary)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: error reading woot page' % nick
 
 

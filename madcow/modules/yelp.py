@@ -24,7 +24,7 @@ from madcow.util.http import geturl
 from madcow.util import Module
 from learn import Main as Learn
 from urlparse import urljoin
-import logging as log
+
 import re
 from madcow.conf import settings
 
@@ -89,8 +89,8 @@ class Main(Module):
                                  'address': address, 'url': url}
 
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             return u"%s: I couldn't look that up" % nick
 
 

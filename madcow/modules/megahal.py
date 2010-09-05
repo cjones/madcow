@@ -20,7 +20,7 @@
 """MegaHAL Interface"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 import os
 import time
@@ -76,11 +76,11 @@ class MegaHAL(object):
             if not exists:
                 raise InvalidID(u'unknown brain: ' + id)
             megahal.save()
-            log.info('saved brain')
+            self.log.info('saved brain')
         if not exists:
             os.makedirs(brain)
-            log.info(u'made megahal directory: ' + brain)
-        log.debug('initializing brain with: ' + brain)
+            self.log.info(u'made megahal directory: ' + brain)
+        self.log.debug('initializing brain with: ' + brain)
         megahal.init(brain)
         self.brain = brain
         return u'set brain to: ' + id
@@ -104,10 +104,10 @@ class MegaHAL(object):
         update = False
         if self.last_changed - self.last_updated > self.update_freq:
             update = True
-            log.debug('updating megahal because enough time has passed')
+            self.log.debug('updating megahal because enough time has passed')
         if self.updates > self.update_max:
             update = True
-            log.debug('updating because enough updates have happened')
+            self.log.debug('updating because enough updates have happened')
         if update:
             self.update()
 
@@ -132,14 +132,14 @@ class Main(Module):
         try:
             import megahal
         except ImportError:
-            log.warn("couldn't find megahal.so, i will try to build it")
+            self.log.warn("couldn't find megahal.so, i will try to build it")
 
             from subprocess import Popen, PIPE, STDOUT
             child = Popen(['./build.py'], stdout=PIPE, stderr=STDOUT,
                           cwd=os.path.join(madcow.base, 'include/pymegahal'))
             for line in child.stdout:
                 try:
-                    log.warn(line.strip())
+                    self.log.warn(line.strip())
                 except:
                     pass
             child.wait()
@@ -164,7 +164,7 @@ class Main(Module):
             elif command == u'mh':
                 return self.megahal.process(args[1])
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, error)
 

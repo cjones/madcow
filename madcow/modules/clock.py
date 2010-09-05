@@ -21,7 +21,7 @@
 
 from madcow.util import Module
 from google import Google
-import logging as log
+
 import re
 
 __version__ = '0.1'
@@ -49,8 +49,8 @@ class WorldClock(Module):
                 return u"%s: They don't do the whole time thing in \"%s\"" % (
                         nick, query)
         except Exception, error:
-            log.warn('error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn('error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, error)
 
 

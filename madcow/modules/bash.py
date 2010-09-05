@@ -23,7 +23,7 @@ import re
 import random
 from madcow.util import Module, stripHTML
 from madcow.util.http import geturl
-import logging as log
+
 
 class Bash(object):
 
@@ -95,8 +95,8 @@ class Main(Module):
             entry = random.choice(entries)
             return '\n'.join(filter(None, stripHTML(entry).strip().splitlines()))
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, self._error)
 
 

@@ -20,7 +20,7 @@
 """High Precision Care-O-Meter"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 from google import Google
 
@@ -78,8 +78,8 @@ class Main(Module):
             return u'%s: %s' % (self.title, bar)
 
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, self.error)
 
 

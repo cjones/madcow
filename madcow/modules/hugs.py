@@ -25,7 +25,7 @@ from madcow.util.http import geturl
 from BeautifulSoup import BeautifulSoup
 from urlparse import urljoin
 import random
-import logging as log
+
 
 class Main(Module):
 
@@ -50,8 +50,8 @@ class Main(Module):
             conf = conf.strip()
             return conf
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: I had some issues with that..' % nick
 
 

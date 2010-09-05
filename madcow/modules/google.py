@@ -21,7 +21,7 @@
 
 from madcow.util import Module
 import re
-import logging as log
+
 from madcow.util.google import Google
 
 __version__ = u'0.3'
@@ -41,8 +41,8 @@ class Main(Module):
             query = args[0]
             return u'%s: %s = %s' % (nick, query, self.google.lucky(query))
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: Not so lucky today..' % nick
 
 

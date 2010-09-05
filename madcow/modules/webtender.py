@@ -23,7 +23,7 @@ import re
 from madcow.util import Module, stripHTML
 from madcow.util.http import geturl
 from urlparse import urljoin
-import logging as log
+
 
 class Main(Module):
 
@@ -53,8 +53,8 @@ class Main(Module):
             response = stripHTML(response)
             return response
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u"%s: Something ungood happened looking that up, sry" % nick
 
 

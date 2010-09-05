@@ -20,7 +20,7 @@
 """Countdown to Obamanation"""
 
 from madcow.util import Module
-import logging as log
+
 import re
 import time
 
@@ -46,8 +46,8 @@ class Main(Module):
             return u'%s: Bush has been gone: %s %dms' % (
                     nick, self.human_readable(e), ms)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: %s' % (nick, error)
 
         #    e = self.oday - time.time()

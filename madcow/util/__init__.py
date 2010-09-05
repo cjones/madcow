@@ -98,11 +98,11 @@ class Module(object):
 
     def __init__(self, madcow=None):
         self.madcow = madcow
-        self.log = get_logger(self.name, unique=False)
+        self.log = get_logger('modules', unique=False)
 
-    def get_response(self, nick, args, **kwargs):
+    def get_response(self, nick, args, kwargs):
         try:
-            return self.response(nick, args, **kwargs)
+            return self.response(nick, args, kwargs)
         except Exception, error:
             self.log.exception('problem with module %s with args %r', self.name, args)
             if self.error is None:
@@ -119,7 +119,29 @@ class Module(object):
 
     @property
     def name(self):
+        return 'XXX'
         return os.path.basename(__file__).replace('.py', '')
+
+
+class Task(object):
+
+    priority = 0
+    enabled = True
+    frequency = 60
+
+    def __init__(self, madcow):
+        self.madcow = madcow
+        self.init()
+        self.log = get_logger('tasks', unique=False)
+
+    def init(self):
+        pass
+
+    def get_response(self, *args):
+        try:
+            return self.response(*args)
+        except Exception, error:
+            self.log.exception('problem with task %s', self.name)
 
 
 class Request(object):

@@ -22,7 +22,7 @@
 import re
 from madcow.util import Module
 from google import Google
-import logging as log
+
 
 class Main(Module):
 
@@ -39,8 +39,8 @@ class Main(Module):
             response = self.google.calculator(query)
             return u'%s: %s' % (nick, response)
         except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(error)
             return u'%s: No results (bad syntax?)' % nick
 
 
