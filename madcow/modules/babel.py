@@ -19,12 +19,12 @@
 
 """Translation service using Google Translate"""
 
-from include.utils import Module
+from utils import Module
 import logging as log
 import re
-from include.useragent import geturl
-from include import simplejson
-from include.utils import stripHTML
+from useragent import geturl
+from import simplejson
+from utils import stripHTML
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -203,7 +203,7 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     import sys
     sys.argv.append('translate: jasdjfsdf')
     test_module(Main)

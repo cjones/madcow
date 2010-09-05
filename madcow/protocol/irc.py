@@ -16,7 +16,7 @@
 # along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 import textwrap
-from include import irclib
+from import irclib
 from madcow import Madcow, Request, delim_re
 import random
 import logging as log
@@ -275,5 +275,7 @@ class IRCProtocol(Madcow):
         self.last_names_update = unix_time()
 
 
-ProtocolHandler = IRCProtocol
+class ProtocolHandler(IRCProtocol):
+
+    allow_detach = True
 

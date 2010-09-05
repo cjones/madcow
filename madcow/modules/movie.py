@@ -19,13 +19,13 @@
 
 """Rate movies on IMDB/RT/MetaCritic"""
 
-from include.useragent import geturl
+from useragent import geturl
 from urlparse import urljoin
 import logging as log
 import re
 
-from include.BeautifulSoup import BeautifulSoup
-from include.utils import Module, stripHTML
+from BeautifulSoup import BeautifulSoup
+from utils import Module, stripHTML
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -172,5 +172,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

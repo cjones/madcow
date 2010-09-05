@@ -17,9 +17,9 @@
 
 """AIM Protocol"""
 
-from include.twisted.internet import protocol, reactor
-from include.twisted.words.protocols import oscar
-from include.utils import stripHTML
+from twisted.internet import protocol, reactor
+from twisted.words.protocols import oscar
+from utils import stripHTML
 from madcow import Madcow, Request
 from time import sleep
 import logging as log
@@ -213,6 +213,9 @@ class OSCARConnection(oscar.BOSConnection):
         self.bot.process_message(req)
 
 
-ProtocolHandler = AIMProtocol
 OSCARAuth = oscar.OscarAuthenticator
 OSCARAuth.BOSClass = OSCARConnection
+
+class ProtocolHandler(AIMProtocol):
+
+    allow_detach = True

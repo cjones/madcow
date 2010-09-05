@@ -21,9 +21,8 @@ from urlparse import urljoin
 import urllib2
 import re
 
-from include.BeautifulSoup import BeautifulSoup
-from utils import stripHTML, superscript
-import useragent
+from BeautifulSoup import BeautifulSoup
+from madcow.util import stripHTML, superscript
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'

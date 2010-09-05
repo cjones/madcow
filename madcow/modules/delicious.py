@@ -19,10 +19,10 @@
 
 """Post URLs to delicious"""
 
-from include.useragent import UserAgent
+from useragent import UserAgent
 from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
-from include.utils import Module, stripHTML
+from utils import Module, stripHTML
 import re
 import logging as log
 

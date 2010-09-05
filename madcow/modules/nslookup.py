@@ -21,7 +21,7 @@
 
 import re
 import socket
-from include.utils import Module
+from utils import Module
 
 class Main(Module):
 
@@ -46,5 +46,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

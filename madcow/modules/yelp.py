@@ -19,9 +19,9 @@
 
 """Restaraunt reviews"""
 
-from include.BeautifulSoup import BeautifulSoup
-from include.useragent import geturl
-from include.utils import Module
+from BeautifulSoup import BeautifulSoup
+from useragent import geturl
+from utils import Module
 from learn import Main as Learn
 from urlparse import urljoin
 import logging as log
@@ -94,5 +94,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

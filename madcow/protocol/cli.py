@@ -16,10 +16,11 @@
 # along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-from madcow import Madcow, Request
 import os
 import re
-from include.shell import Shell
+from madcow.util.shell import Shell
+from madcow import Madcow
+from madcow.util import Request
 
 COLOR_SCHEME = 'ansi'
 
@@ -92,6 +93,5 @@ class ConsoleProtocol(Madcow):
 
 
 class ProtocolHandler(ConsoleProtocol):
-    pass
 
-
+    allow_detach = False

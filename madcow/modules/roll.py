@@ -22,8 +22,8 @@
 import re
 import random
 import math
-from include.utils import Module
-from include.colorlib import ColorLib
+from utils import Module
+from colorlib import ColorLib
 
 class Main(Module):
 
@@ -93,5 +93,5 @@ class Main(Module):
                 save_versus, nick, result)
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

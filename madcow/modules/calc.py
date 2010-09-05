@@ -20,8 +20,8 @@
 """Use Google as a calculator"""
 
 import re
-from include.utils import Module
-from include.google import Google
+from utils import Module
+from google import Google
 import logging as log
 
 class Main(Module):
@@ -45,5 +45,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

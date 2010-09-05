@@ -20,7 +20,7 @@
 """Manage aliases"""
 
 from __future__ import with_statement
-from include.utils import Module
+from utils import Module
 import logging as log
 import re
 import os

@@ -20,15 +20,15 @@
 """Get weather report"""
 
 import re
-from include.utils import stripHTML, Module
-from include.useragent import geturl
+from utils import stripHTML, Module
+from useragent import geturl
 from urlparse import urljoin
-from include.BeautifulSoup import BeautifulSoup
-from include import feedparser
+from BeautifulSoup import BeautifulSoup
+from import feedparser
 from learn import Main as Learn
 import logging as log
-from include.colorlib import ColorLib
-from include import encoding
+from colorlib import ColorLib
+from import encoding
 
 __version__ = u'0.2'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -185,5 +185,5 @@ def normalize(name):
     return name
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

@@ -90,4 +90,6 @@ class IPythonHandler(Madcow):
         Madcow.process_message(self, req)
 
 
-ProtocolHandler = IPythonHandler
+class ProtocolHandler(IPythonHandler):
+
+    allow_detach = False

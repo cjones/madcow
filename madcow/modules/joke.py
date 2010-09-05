@@ -19,8 +19,8 @@
 
 """Get a random joke"""
 
-from include.utils import Module, stripHTML
-from include.useragent import geturl
+from utils import Module, stripHTML
+from useragent import geturl
 import re
 from urlparse import urljoin
 import urllib
@@ -65,5 +65,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

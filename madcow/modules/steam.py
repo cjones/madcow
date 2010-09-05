@@ -19,10 +19,10 @@
 
 """Track users on steam"""
 
-from include.utils import Module
+from utils import Module
 import logging as log
 import re
-from include.useragent import geturl
+from useragent import geturl
 from urlparse import urljoin
 
 __version__ = u'0.1'
@@ -89,5 +89,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

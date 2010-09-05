@@ -20,8 +20,8 @@
 """Look up drink mixing ingredients"""
 
 import re
-from include.utils import Module, stripHTML
-from include.useragent import geturl
+from utils import Module, stripHTML
+from useragent import geturl
 from urlparse import urljoin
 import logging as log
 
@@ -59,5 +59,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

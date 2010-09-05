@@ -19,7 +19,7 @@
 
 """MegaHAL Interface"""
 
-from include.utils import Module
+from utils import Module
 import logging as log
 import re
 import os
@@ -130,7 +130,7 @@ class Main(Module):
         # if megahal.so doesn't exist, let's try to build it
         global megahal
         try:
-            from include import megahal
+            from import megahal
         except ImportError:
             log.warn("couldn't find megahal.so, i will try to build it")
 
@@ -146,7 +146,7 @@ class Main(Module):
 
             # let's try that again, shall we?
             try:
-                from include import megahal
+                from import megahal
             except ImportError:
                 raise BuildError('could not build MegaHAL automatically')
 

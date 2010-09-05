@@ -25,9 +25,9 @@ but only works within the united states.
 import logging as log
 import re
 
-from include.utils import Module, stripHTML
-from include.useragent import getsoup
-from include.colorlib import ColorLib
+from utils import Module, stripHTML
+from useragent import getsoup
+from colorlib import ColorLib
 from learn import Main as Learn
 
 __version__ = '1.0'
@@ -129,5 +129,5 @@ class Main(Module):
 
 
 if __name__ == '__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

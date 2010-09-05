@@ -19,8 +19,8 @@
 
 """I'm feeling lucky"""
 
-from include.google import Google
-from include.utils import Module
+from google import Google
+from utils import Module
 import re
 import logging as log
 
@@ -47,5 +47,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

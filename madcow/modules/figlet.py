@@ -20,12 +20,12 @@
 """Generate ASCII text using figlet! """
 
 import re
-from include.pyfiglet import Figlet
-from include.utils import Module
+from pyfiglet import Figlet
+from utils import Module
 import random
 import os
 import logging as log
-from include import encoding
+from import encoding
 
 __author__ = u'James Johnston <jjohnston@email4life.com>'
 
@@ -68,5 +68,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

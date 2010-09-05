@@ -3,7 +3,7 @@
 """Test suite for madcow devel, put in module dir and run from CLI"""
 
 from madcow import Request
-from include.utils import Module
+from utils import Module
 import sys
 import re
 

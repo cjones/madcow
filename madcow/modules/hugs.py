@@ -20,9 +20,9 @@
 """Get a random confession from grouphug.us"""
 
 import re
-from include.utils import Module, stripHTML
-from include.useragent import geturl
-from include.BeautifulSoup import BeautifulSoup
+from utils import Module, stripHTML
+from useragent import geturl
+from BeautifulSoup import BeautifulSoup
 from urlparse import urljoin
 import random
 import logging as log
@@ -56,5 +56,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

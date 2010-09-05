@@ -24,9 +24,9 @@ import logging as log
 import random
 import re
 
-from include.BeautifulSoup import BeautifulSoup
-from include.utils import stripHTML, Module
-from include.useragent import geturl
+from BeautifulSoup import BeautifulSoup
+from utils import stripHTML, Module
+from useragent import geturl
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
 _linebreak = re.compile(r'[\r\n]+')
@@ -225,5 +225,5 @@ class Main(Module):
 
 if __name__ == u'__main__':
     log.root.setLevel(log.DEBUG)
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

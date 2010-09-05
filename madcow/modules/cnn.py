@@ -19,12 +19,12 @@
 
 """CNN Headline"""
 
-from include.utils import Module
+from utils import Module
 import logging as log
 import re
-from include import feedparser
-#from include.useragent import geturl   # mimic browser
-from include.utils import stripHTML    # strip HTML/unescape entities
+from import feedparser
+#from useragent import geturl   # mimic browser
+from utils import stripHTML    # strip HTML/unescape entities
 
 __version__ = u'0.1'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -48,5 +48,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

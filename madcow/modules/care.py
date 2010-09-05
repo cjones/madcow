@@ -19,10 +19,10 @@
 
 """High Precision Care-O-Meter"""
 
-from include.utils import Module
+from utils import Module
 import logging as log
 import re
-from include.google import Google
+from google import Google
 
 __version__ = u'0.1'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -84,5 +84,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

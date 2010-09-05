@@ -19,8 +19,8 @@
 
 """Use Google to get time's in various places"""
 
-from include.utils import Module
-from include.google import Google
+from utils import Module
+from google import Google
 import logging as log
 import re
 
@@ -58,5 +58,5 @@ Main = WorldClock
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

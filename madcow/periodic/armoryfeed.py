@@ -18,8 +18,8 @@
 """Follows wow character RSS feeds"""
 
 from urllib import urlencode
-from include import feedparser
-from include.utils import stripHTML
+from import feedparser
+from utils import stripHTML
 
 ARMORY_URL = 'http://www.wowarmory.com/character-feed.atom?%s'
 

@@ -23,10 +23,10 @@ from __future__ import with_statement
 import re
 import os
 import random
-from include.utils import Module
+from utils import Module
 import logging as log
 import shutil
-from include import encoding
+from import encoding
 
 class Main(Module):
 

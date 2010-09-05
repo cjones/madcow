@@ -29,7 +29,7 @@ import silc
 import time
 import logging as log
 from time import sleep, time as unix_time
-from include import encoding
+from import encoding
 
 COLOR_SCHEME = 'mirc'
 
@@ -157,4 +157,6 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
         self._privmsg(self.send_private_message, user, message)
 
 
-ProtocolHandler = SilcPlugin
+class ProtocolHandler(SilcPlugin):
+
+    allow_detach = True

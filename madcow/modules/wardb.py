@@ -19,12 +19,12 @@
 
 """Lookup Warhammer Online items"""
 
-from include.utils import Module
+from utils import Module
 import logging as log
 import re
-from include.useragent import geturl
+from useragent import geturl
 from urlparse import urljoin
-from include.colorlib import ColorLib
+from colorlib import ColorLib
 
 __version__ = u'0.1'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -104,5 +104,5 @@ class Main(Module):
 
 
 if __name__ == '__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

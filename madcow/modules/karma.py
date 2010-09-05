@@ -19,7 +19,7 @@
 
 """Infobot style karma"""
 
-from include.utils import Module
+from utils import Module
 import re
 from learn import Main as Learn
 import logging as log

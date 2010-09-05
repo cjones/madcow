@@ -37,8 +37,9 @@ except ImportError:
 PREFIX = os.path.realpath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(PREFIX, 'include'))
 
-from madcow.util import gateway
-from madcow.settings import Config
+from madcow.util import gateway, get_logger
+from madcow.conf import settings
+from madcow.util import http
 
 VERSION = 1, 7, 0
 
@@ -745,7 +746,7 @@ def daemonize():
     signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
 
-def run(base, settings=None):
+def run(base):
     """Execute the main bot"""
 
     # if this is a new bot, create base and stop
@@ -755,8 +756,8 @@ def run(base, settings=None):
         if not os.path.exists(dir):
             os.makedirs(dir)
             new_bot = True
-    settings_file = os.path.join(base, 'settings.ini')
-    default_settings_file = os.path.join(PREFIX, 'settings', 'default.ini')
+    settings_file = os.path.join(base, 'settings.py')
+    default_settings_file = os.path.join(PREFIX, 'conf', 'defaults.py')
     if not os.path.exists(settings_file):
         shutil.copy(default_settings_file, settings_file)
         os.chmod(settings_file, 0644)
@@ -764,35 +765,19 @@ def run(base, settings=None):
     if new_bot:
         raise MadcowError('A new bot has been created at %s, please modify config and rerun' % base)
 
-    config = Config(settings_file, default_settings_file, overrides=settings)
-    config.values['main']['logfile'] = 'newlogfile.txt'
-    config.save('/home/cjones/wtf.ini')
-    print config.main.logfile
+    os.environ['MADCOW_BASE'] = base
+    log = get_logger(stream=sys.stdout)
+    log.error('why hello there')
+
+    protocol = __import__('madcow.protocol', globals(), locals(), [settings.PROTOCOL])
+    protocol = getattr(protocol, settings.PROTOCOL).ProtocolHandler
+
+    http.setup(cookies=settings.HTTP_COOKIES, agent=settings.HTTP_AGENT, timeout=settings.HTTP_TIMEOUT)
 
 
 def main():
     """Entry point to set up bot and run it"""
 
-    # init log facility
-    if opts.loglevel is None:
-        try:
-            loglevel = log._levelNames[config.main.loglevel.upper()]
-        except KeyError:
-            loglevel = None
-    else:
-        loglevel = opts.loglevel
-    if loglevel is not None:
-        log.root.setLevel(loglevel)
-
-    # load specified protocol
-    if opts.protocol:
-        protocol = config.main.module = opts.protocol
-    else:
-        protocol = config.main.module
-
-    # setup global UserAgent
-    ua.setup(cookies=config.http.cookies, agent=config.http.agent,
-             timeout=config.http.timeout)
 
     # daemonize if requested, but not when interactive!
     # note: this must happen BEFORE forking, otherwise the pid it
@@ -895,6 +880,3 @@ def main():
 
     log.info(u'madcow is shutting down')
     return 0
-
-if __name__ == '__main__':
-    sys.exit(main())

@@ -20,8 +20,8 @@
 """This module looks up area codes and returns the most likely city"""
 
 import re
-from include.utils import Module
-from include.useragent import getsoup
+from utils import Module
+from useragent import getsoup
 import logging as log
 
 def render(node):
@@ -56,5 +56,5 @@ class Main(Module):
 if __name__ == u'__main__':
     import sys
     sys.argv.append('area 707')
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

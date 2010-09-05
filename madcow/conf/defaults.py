@@ -11,13 +11,22 @@ DETACH = False  # set to True to run as a daemon (UNIX only)
 WORKERS = 5  # how many threads to process requests
 LOG_PUBLIC = True  # set to False to avoid logging public chatter
 IGNORE_NICKS = ['spammer', 'otherbot']  # list of nicknames to completely ignore
-LOGLEVEL = 'WARN'  # valid options: DEBUG, INFO, WARN, ERROR
-LOGFILE = 'log/madcow.log'  # file (relative to base) to log errors
 PIDFILE = 'madcow.pid'  # file (relative to base) for pid for current bot
-CHARSET = 'utf-8'  # encoding of your system or the protocol you are communicating over
+ENCODING = 'utf-8'  # encoding of your system or the protocol you are communicating over
 OWNER_NICK = 'yournick'  # in irc/silc/aim set to your name to be given auto-admin
 ALLOW_REGISTRATION = True  # allow other users to register with the bot
 DEFAULT_FLAGS = ''  # flags given to registered users o=auto-op (irc only), a=admin
+
+###############
+### LOGGING ###
+###############
+
+LOGGING_LEVEL = 'INFO'  # DEBUG, INFO, WARN, ERROR
+LOGGING_FORMAT = '[%(time)s - %(level)s] %(message)s'
+LOGGING_TIME_FORMAT = '%Y/%m/%d %H:%M:%S'
+LOGGING_ENCODING = ENCODING
+UNIQUE_TIMESTAMP_FORMAT = '%Y%m%d'
+UNIQUE_MAX_FILES = 1000
 
 ###############
 ### MODULES ###

@@ -2,10 +2,10 @@
 
 """Handles WikiMedia queries"""
 
-from include.BeautifulSoup import BeautifulSoup
-from include.useragent import geturl
-from include.utils import stripHTML
-from include.utils import Module
+from BeautifulSoup import BeautifulSoup
+from useragent import geturl
+from utils import stripHTML
+from utils import Module
 from urlparse import urljoin
 import logging as log
 import re
@@ -217,5 +217,5 @@ class Main(Module):
             log.exception(error)
 
 if __name__ == '__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

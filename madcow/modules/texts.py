@@ -5,10 +5,10 @@
 import logging as log
 import random
 import re
-from include.BeautifulSoup import BeautifulSoup
-from include.useragent import getsoup
-from include.utils import stripHTML
-from include.utils import Module
+from BeautifulSoup import BeautifulSoup
+from useragent import getsoup
+from utils import stripHTML
+from utils import Module
 import re
 
 __version__ = '0.1'
@@ -37,7 +37,7 @@ def get_text():
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     import sys
     sys.argv.append('txt')
     test_module(Main)

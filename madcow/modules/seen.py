@@ -22,7 +22,7 @@
 import re
 import time
 import os
-from include.utils import Module
+from utils import Module
 import logging as log
 
 try:

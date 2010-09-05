@@ -22,11 +22,11 @@
 import logging as log
 import re
 
-from include.utils import Module, stripHTML
-from include.useragent import getsoup
-from include.colorlib import ColorLib
+from utils import Module, stripHTML
+from useragent import getsoup
+from colorlib import ColorLib
 from learn import Main as Learn
-from include.google import Google
+from google import Google
 
 __version__ = '1.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -68,5 +68,5 @@ class Main(Module):
         return u'%s: %s' % (nick, response)
 
 if __name__ == '__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

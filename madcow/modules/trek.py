@@ -19,10 +19,10 @@
 
 """Star Trek failure generator"""
 
-from include.BeautifulSoup import BeautifulSoup
-from include.useragent import geturl
-from include.utils import stripHTML
-from include.utils import Module
+from BeautifulSoup import BeautifulSoup
+from useragent import geturl
+from utils import stripHTML
+from utils import Module
 import logging as log
 import re
 
@@ -59,5 +59,5 @@ class TrekFailure(Module):
 Main = TrekFailure
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

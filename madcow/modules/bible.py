@@ -24,8 +24,8 @@ from random import choice
 import logging as log
 import re
 
-from include.useragent import getsoup
-from include.utils import Module, stripHTML, superscript
+from useragent import getsoup
+from utils import Module, stripHTML, superscript
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -181,6 +181,6 @@ class Main(Module):
 
 
 if __name__ == '__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)
 

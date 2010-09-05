@@ -21,7 +21,7 @@
 
 import re
 from learn import Main as Learn
-from include.utils import Module
+from utils import Module
 from smtplib import SMTP
 import logging as log
 

@@ -20,11 +20,11 @@
 """NEVAR FORGET"""
 
 import re
-from include import feedparser
-from include.utils import Module, stripHTML
-from include.useragent import geturl
+from import feedparser
+from utils import Module, stripHTML
+from useragent import geturl
 import logging as log
-from include.colorlib import ColorLib
+from colorlib import ColorLib
 
 __version__ = u'0.3'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -120,5 +120,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

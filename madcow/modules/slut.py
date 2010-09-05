@@ -35,8 +35,8 @@ the number of results for both are equal, the phrase is 0% slutty.
 """
 
 import re
-from include.utils import Module
-from include.useragent import geturl
+from utils import Module
+from useragent import geturl
 import logging as log
 from urlparse import urljoin
 
@@ -113,5 +113,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)

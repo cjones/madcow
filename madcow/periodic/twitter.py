@@ -22,8 +22,8 @@
 
 """Prints tweets to the channel."""
 
-from include.utils import stripHTML
-from include import twitter
+from utils import stripHTML
+from import twitter
 import time
 import logging as log
 

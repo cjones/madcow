@@ -23,8 +23,8 @@ from urlparse import urljoin
 import logging as log
 import re
 
-from include.utils import Module, stripHTML
-from include.useragent import getsoup
+from utils import Module, stripHTML
+from useragent import getsoup
 
 __version__ = '2.0'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -53,5 +53,5 @@ class Main(Module):
         return u'%s: %s' % (nick, res)
 
 if __name__ == u'__main__':
-    from include.utils import test_module
+    from utils import test_module
     test_module(Main)
