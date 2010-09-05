@@ -1,6 +1,5 @@
 """Interface to Megahal Brain"""
 
-from __future__ import with_statement
 from struct import Struct
 import sys
 import os
