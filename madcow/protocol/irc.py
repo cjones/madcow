@@ -1,26 +1,9 @@
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 import textwrap
-from import irclib
-from madcow import Madcow, Request, delim_re
+import irclib
+from madcow import Madcow, Request
 import random
-import logging as log
 from time import sleep, time as unix_time
+from madcow.conf import settings
 
 COLOR_SCHEME = 'mirc'
 
@@ -31,52 +14,44 @@ class IRCProtocol(Madcow):
     events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg',
               u'namreply', u'pong', u'action']
 
-    def __init__(self, config, prefix, scheme=None):
-        if scheme is None:
-            scheme = COLOR_SCHEME
-        super(IRCProtocol, self).__init__(config, prefix, scheme)
-
+    def __init__(self, base):
+        super(IRCProtocol, self).__init__(base, scheme=COLOR_SCHEME)
         # this is crazy noisy
-        # if log.root.level <= log.DEBUG:
+        # if self.log.root.level <= self.log.DEBUG:
         #     irclib.DEBUG = 1
         # else:
         #     irclib.DEBUG = 0
         self.irc = irclib.IRC()
         self.server = self.irc.server()
         for event in self.events:
-            log.info(u'[IRC] * Registering event: %s' % event)
+            self.log.info(u'[IRC] * Registering event: %s' % event)
             self.server.add_global_handler(event, getattr(self, u'on_' + event), 0)
-        if self.config.irc.channels is not None:
-            self.channels = delim_re.split(self.config.irc.channels)
-        else:
-            self.channels = []
+        self.channels = settings.IRC_CHANNELS
         self.names = {}
         self.last_names_update = unix_time()
 
         # throttling
-        self.delay = self.config.irc.delay / float(1000)
+        self.delay = settings.IRC_DELAY_LINES / float(1000)
         self.last_response = 0.0
 
         # keepalive
-        self.keepalive = self.config.irc.keepalive
+        self.keepalive = settings.IRC_KEEPALIVE
         if self.keepalive:
             self.last_keepalive = self.last_pong = unix_time()
-            self.keepalive_freq = self.config.irc.keepalive_freq
-            self.keepalive_timeout = self.config.irc.keepalive_timeout
+            self.keepalive_freq = settings.IRC_KEEPALIVE_FREQ
+            self.keepalive_timeout = settings.IRC_KEEPALIVE_TIMEOUT
 
     def connect(self):
-        log.info(u'[IRC] * Connecting to %s:%s' % (
-            self.config.irc.host, self.config.irc.port))
-        self.server.connect(self.config.irc.host, self.config.irc.port,
-                            self.config.irc.nick, ssl=self.config.irc.ssl,
-                            password=self.config.irc.password)
+        self.log.info('[IRC] * Connecting to %s:%s', settings.IRC_HOST, settings.IRC_PORT)
+        self.server.connect(settings.IRC_HOST, settings.IRC_PORT, settings.BOTNAME, ssl=settings.IRC_SSL,
+                            password=settings.IRC_PASSWORD)
         if self.keepalive:
             self.last_keepalive = self.last_pong = unix_time()
 
     def stop(self):
         Madcow.stop(self)
-        log.info(u'[IRC] * Quitting IRC')
-        message = self.config.irc.quitMessage
+        self.log.info('[IRC] * Quitting IRC')
+        message = settings.IRC_QUIT_MESSAGE
         if message is None:
             message = u'no reason'
         self.server.disconnect(message)
@@ -95,23 +70,22 @@ class IRCProtocol(Madcow):
                     if now - self.last_keepalive > self.keepalive_freq:
                         self.server.ping(now)
                         self.last_keepalive = now
-                        log.debug('PING %s' % now)
+                        self.log.debug('PING %s' % now)
 
                     # server seems unresponsive
                     if now - self.last_pong > self.keepalive_timeout:
-                        log.warn('server appears to have gone away')
+                        self.log.warn('server appears to have gone away')
                         self.server.disconnect('server unresponsive')
 
             except KeyboardInterrupt:
                 self.running = False
             except irclib.ServerNotConnectedError:
                 # There's a bug where sometimes on_disconnect doesn't fire
-                if self.config.irc.reconnect and self.running:
-                    sleep(self.config.irc.reconnectWait)
+                if settings.IRC_RECONNECT and self.running:
+                    sleep(settings.IRC_RECONNECT_WAIT)
                     self.connect()
-            except Exception, error:
-                log.error(u'Error in IRC loop')
-                log.exception(error)
+            except:
+                self.log.exception('Error in IRC loop')
 
     def on_pong(self, server, event):
         # this should never happen, but don't take any chances
@@ -122,11 +96,11 @@ class IRCProtocol(Madcow):
         try:
             pong = float(pong)
         except Exception, error:
-            log.error('unexpected PONG reply: %s' % pong)
-            log.exception(error)
+            self.log.error('unexpected PONG reply: %s' % pong)
+            self.log.exception(error)
             return
         now = unix_time()
-        log.debug('PONG: latency = %s' % (now - pong))
+        self.log.debug('PONG: latency = %s' % (now - pong))
         self.last_pong = now
 
     def on_action(self, server, event):
@@ -137,40 +111,37 @@ class IRCProtocol(Madcow):
 
     def on_welcome(self, server, event):
         """welcome event triggers startup sequence"""
-        log.info(u'[IRC] * Connected')
+        self.log.info(u'[IRC] * Connected')
 
         # identify with nickserv
-        if self.config.irc.nickServUser and self.config.irc.nickServPass:
-            self._privmsg(self.config.irc.nickServUser,
-                    u'IDENTIFY %s' % self.config.irc.nickServPass)
+        if settings.IRC_IDENTIFY_NICKSERV:
+            self._privmsg(settings.IRC_NICKSERV_USER, 'IDENTIFY ' + settings.IRC_NICKSERV_PASS)
 
         # become an oper
-        if self.config.irc.oper:
-            log.info(u'[IRC] * Becoming an OPER')
-            self.server.oper(self.config.irc.operUser, self.config.irc.operPass)
+        if settings.IRC_OPER:
+            self.log.info(u'[IRC] * Becoming an OPER')
+            self.server.oper(settings.IRC_OPER_USER, settings.IRC_OPER_PASS)
 
         # join all channels
         for channel in self.channels:
-            log.info(u'[IRC] * Joining: %s' % channel)
+            self.log.info('[IRC] * Joining: %s', channel)
             self.server.join(channel)
 
     def on_disconnect(self, server, event):
         """disconnected from IRC"""
-        log.warn(u'[IRC] * Disconnected from server')
-        if self.config.irc.reconnect and self.running:
-            sleep(self.config.irc.reconnectWait)
+        self.log.warn(u'[IRC] * Disconnected from server')
+        if settings.IRC_RECONNECT and self.running:
+            sleep(settings.IRC_RECONNECT_WAIT)
             self.connect()
 
     def on_kick(self, server, event):
         """kicked from channel"""
-        log.warn(u'[IRC] * %s was kicked from %s by %s' % (
-            event.arguments()[0], event.target(), event.source()))
+        self.log.warn('[IRC] * %s was kicked from %s by %s', event.arguments()[0], event.target(), event.source())
         if event.arguments()[0].lower() == server.get_nickname().lower():
-            if self.config.irc.rejoin:
-                if self.config.irc.rejoinWait > 0:
-                    sleep(self.config.irc.rejoinWait)
+            if settings.IRC_REJOIN:
+                sleep(settings.IRC_REJOIN_WAIT)
                 server.join(event.target())
-                self._privmsg(event.target(), self.config.irc.rejoinReply)
+                self._privmsg(event.target(), settings.IRC_REJOIN_MESSAGE)
 
     def protocol_output(self, message, req=None):
         """output to IRC"""
@@ -183,7 +154,7 @@ class IRCProtocol(Madcow):
             message = self.colorlib.rainbow(message, style=style)
 
         # MUST wrap if unset because irc will boot you for exceeding maxlen
-        wrap = self.config.irc.wrapsize
+        wrap = settings.IRC_FORCE_WRAP
         if not wrap or wrap > 400:
             wrap = 400
 
@@ -238,7 +209,7 @@ class IRCProtocol(Madcow):
             req.sendto = req.channel
             req.addressed = False
 
-        req.message = req.message.decode(self.config.main.charset, 'replace')
+        req.message = req.message.decode(settings.ENCODING, 'replace')
 
         # strip control codes from incoming lines
         req.message = self.colorlib.strip_color(req.message)
@@ -258,7 +229,7 @@ class IRCProtocol(Madcow):
 
     def on_namreply(self, server, event):
         """NAMES requested, cache their opped status"""
-        log.debug(u'[IRC] Updating NAMES list')
+        self.log.debug(u'[IRC] Updating NAMES list')
         args = event.arguments()
         channel = args[1]
         nicks = {}
@@ -278,4 +249,3 @@ class IRCProtocol(Madcow):
 class ProtocolHandler(IRCProtocol):
 
     allow_detach = True
-

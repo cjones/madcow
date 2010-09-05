@@ -168,15 +168,11 @@ class Madcow(object):
 
     def handle_response(self, response, req=None):
         """encode output, lock threads, and call protocol_output"""
-        try:
-            self.lock.acquire()
+        with self.lock:
             try:
                 self.protocol_output(response, req)
-            except Exception, error:
-                self.log.error('error in output: %r', response)
-                self.log.exception(error)
-        finally:
-            self.lock.release()
+            except:
+                self.log.exception('error in output: %r', response)
 
     def protocol_output(self, message, req=None):
         """Override with protocol-specific output method"""
@@ -337,13 +333,13 @@ class Madcow(object):
         message = req.message
         if req.action:
             message = u'ACTION: %s' % message
-        line = u'%s <%s> %s\n' % (strftime(u'%T'), req.nick, message)
-        path = os.path.join(PREFIX, 'log', '%s-irc-%s-%s' % (req.channel, strftime(u'%F')))
-        logfile = open(path, u'a')
-        try:
-            logfile.write(line.encode(self.charset, 'replace'))
-        finally:
-            logfile.close()
+        line = u'%s <%s> %s' % (time.strftime('%T'), req.nick, message)
+        logdir = os.path.join(PREFIX, 'log', 'public')
+        if not os.path.exists(logdir):
+            os.makedirs(logdir)
+        logfile = os.path.join(logdir, '%s-%s' % (req.channel, time.strftime('%F')))
+        with open(logfile, 'a') as fp:
+            print >> fp, line.encode(self.charset, 'replace')
 
     ### MISC FUNCTIONS ###
 

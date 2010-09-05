@@ -15,7 +15,6 @@ class Main(Task):
                                access_token_key=settings.TWITTER_TOKEN_KEY,
                                access_token_secret=settings.TWITTER_TOKEN_SECRET)
         self.api.SetCache(None)  # this fills up /tmp :(
-        self.updatelast()
         self.last = time.time()
 
     def response(self, *args):
