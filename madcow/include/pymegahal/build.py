@@ -3,9 +3,8 @@ import shutil
 from tempfile import mkdtemp
 import os
 
-# hack to maybe work with cygwin
-
 def build(dst):
+    """Build megahal lib and copy to dst"""
     build_dir = mkdtemp()
     try:
         setup(name='megahal',
