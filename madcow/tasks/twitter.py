@@ -30,6 +30,7 @@ import logging as log
 class Main(object):
 
     priority = 0
+    enabled = True
 
     def __init__(self, madcow):
         self.madcow = madcow

@@ -25,6 +25,7 @@ from urlparse import urljoin
 from madcow.util import Module, stripHTML
 import re
 import logging as log
+from madcow.conf import settings
 
 class Delicious(object):
 
@@ -64,8 +65,8 @@ class Main(Module):
 
     def __init__(self, madcow=None):
         try:
-            username = madcow.config.delicious.username
-            password = madcow.config.delicious.password
+            username = DELICIOUS_USERNAME
+            password = DELICIOUS_PASSWORD
         except:
             username = u''
             password = u''

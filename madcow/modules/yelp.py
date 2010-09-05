@@ -26,6 +26,7 @@ from learn import Main as Learn
 from urlparse import urljoin
 import logging as log
 import re
+from madcow.conf import settings
 
 __version__ = '0.2'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -44,7 +45,7 @@ class Main(Module):
 
     def __init__(self, madcow=None):
         try:
-            self.default_location = madcow.config.yelp.default_location
+            self.default_location = settings.YELP_DEFAULT_LOCATION
         except:
             self.default_location = DEFAULT_LOCATION
         try:

@@ -465,8 +465,6 @@ class Admin(object):
 
     def parse(self, req):
         """Parse request for admin commands and execute, returns output"""
-        if not self.bot.config.admin.enabled:
-            return
         try:
             command = self._admin_cmd_re.search(req.message).group(1)
         except AttributeError:
@@ -590,15 +588,15 @@ class Admin(object):
 
     def register_user(self, user, passwd):
         """Register with the bot"""
-        if not self.bot.config.admin.allowRegistration:
+        if not settings.ALLOW_REGISTRATION:
             return u"Registration is disabled."
         if self.authlib.user_exists(user):
             return u"User already registered."
-        flags = self.bot.config.admin.defaultFlags
+        flags = settings.DEFAULT_FLAGS
         if not flags:
             flags = u'r'
         flags = set(flags)
-        if user.lower() == self.bot.config.main.owner.lower():
+        if user.lower() == settings.OWNER_NICK.lower():
             flags.add(u'a')
         flags = u''.join(flags)
         self.authlib.add_user(user, passwd, flags)

@@ -27,6 +27,7 @@ import datetime
 from urlparse import urljoin
 import errno
 from madcow.util import Request
+from madcow.conf import settings
 
 class InvalidPayload(Exception):
 
@@ -54,7 +55,7 @@ class GatewayService(object):
 
     def run(self):
         """While bot is alive, listen for connections"""
-        if not self.bot.config.gateway.enabled:
+        if not settings.GATEWAY_ENABLED:
             log.info(u'GatewayService is disabled')
             return
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -141,8 +142,7 @@ class GatewayServiceHandler(Thread):
             try:
                 # parse headers
                 hdrs, self.buf = self.headsep.split(self.buf, 1)
-                hdrs = hdrs.decode(self.server.bot.config.main.charset,
-                                   'replace')
+                hdrs = hdrs.decode(settings.ENCODING, 'replace')
                 hdrs = self.newline.split(hdrs)
                 hdrs = [hdr.split(u':', 1) for hdr in hdrs]
                 hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]
@@ -188,8 +188,8 @@ class GatewayServiceHandler(Thread):
 
     def save_payload(self):
         pad = len(str(self.maxfiles))
-        imagepath = self.server.bot.config.gateway.imagepath
-        baseurl = self.server.bot.config.gateway.imageurl
+        imagepath = settings.GATEWAY_IMAGE_PATH
+        baseurl = settings.GATEWAY_IMAGE_URL
         if not imagepath or not baseurl:
             raise InvalidPayload(u'images are not configured')
 

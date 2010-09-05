@@ -47,15 +47,15 @@ class Main(Module):
             anick = nick.encode('ascii', 'replace')
 
             body = 'To: %s <%s>\n' % (sendto.encode('ascii', 'replace'), email)
-            body += 'From: %s\n' % (self.config.smtp.sender)
+            body += 'From: %s\n' % settings.SMTP_FROM
             body += 'Subject: Summon from %s' % anick
             body += '\n'
             body += 'You were summoned by %s. Reason: %s' % (anick, reason)
 
-            smtp = SMTP(self.config.smtp.server)
-            if len(self.config.smtp.user):
-                smtp.login(self.config.smtp.user, self.config.smtp.password)
-            smtp.sendmail(self.config.smtp.sender, [email], body)
+            smtp = SMTP(settings.SMTP_SERVER)
+            if settings.SMTP_USER and settings.SMTP_PASS:
+                smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
+            smtp.sendmail(settings.SMTP_FROM, [email], body)
 
             return u"%s: summoned %s" % (nick, sendto)
 

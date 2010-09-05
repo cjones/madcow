@@ -26,6 +26,7 @@ ARMORY_URL = 'http://www.wowarmory.com/character-feed.atom?%s'
 class Main(object):
 
     priority = 0
+    enabled = True
 
     def __init__(self, madcow):
         self.enabled = madcow.config.armory.enabled

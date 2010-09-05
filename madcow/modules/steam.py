@@ -42,17 +42,9 @@ class Main(Module):
     game_re = re.compile(r'<p\s+id="statusInGameText">(.*?)</p>', re.DOTALL)
 
     def __init__(self, madcow):
-        if not madcow.config.steam.enabled:
-            self.enabled = False
-            return
-        if not madcow.config.steam.group:
-            self.enabled = False
-            log.error('steam module enabled but no group set!')
-            return
-        self.online = madcow.config.steam.online
-        self.group_url = urljoin(self.base_group_url,
-                                 madcow.config.steam.group)
-
+        if not settings.STEAM_GROUP:
+            raise ValueError('no steam group set')
+        self.group_url = urljoin(self.base_group_url, settings.STEAM_GROUP)
 
     def response(self, nick, args, kwargs):
         try:
@@ -72,11 +64,11 @@ class Main(Module):
                     except AttributeError:
                         game = 'Non-Steam Game'
                     ingame.append('%s: %s' % (data['name'], game))
-                elif data['status'] == 'Online' and self.online:
+                elif data['status'] == 'Online' and settings.STEAM_SHOW_ONLINE:
                     online.append('%s: Online' % data['name'])
             output = ingame + online
             if not output:
-                if self.online:
+                if settings.STEAM_SHOW_ONLINE:
                     message = 'Online'
                 else:
                     message = 'In-Game'
