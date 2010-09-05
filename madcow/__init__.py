@@ -87,14 +87,14 @@ class Madcow(object):
 
         # load modules
         self.modules = Modules(self, 'modules', settings.MODULES)
-        #self.periodics = Modules(self, 'tasks', settings.TASKS)
+        self.periodics = Modules(self, 'tasks', settings.TASKS)
         self.usage_lines = self.modules.help + self.periodics.help
         self.usage_lines.append(u'help - this screen')
         self.usage_lines.append(u'version - get bot version')
 
         # signal handlers
         if signal:
-            signal.signal(signalSIGHUP, self.signal_handler)
+            signal.signal(signal.SIGHUP, self.signal_handler)
             signal.signal(signal.SIGTERM, self.signal_handler)
 
         # initialize threads
@@ -161,7 +161,7 @@ class Madcow(object):
         """Check if there's any message in response queue and process"""
         try:
             self.handle_response(*self.response_queue.get_nowait())
-        except Empty:
+        except queue.Empty:
             pass
         except Exception, error:
             self.log.exception(error)
@@ -389,17 +389,17 @@ class PeriodicEvents(Service):
     def run(self):
         """While bot is alive, process periodic event queue"""
         delay = 5
-        now = unix_time()
+        now = time.time()
         for mod_name, mod in self.bot.periodics.modules.iteritems():
             self.last_run[mod_name] = now - mod[u'obj'].frequency + delay
 
         while self.bot.running:
             self.process_queue()
-            sleep(self._process_frequency)
+            time.sleep(self._process_frequency)
 
     def process_queue(self):
         """Process queue"""
-        now = unix_time()
+        now = time.time()
         for mod_name, mod in self.bot.periodics.modules.iteritems():
             obj = mod[u'obj']
             if (now - self.last_run[mod_name]) < obj.frequency:
