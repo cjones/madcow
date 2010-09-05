@@ -47,9 +47,9 @@ static struct PyMethodDef mh_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-void initmegahal()
+void initcmegahal()
 {
-    Py_InitModule("megahal", mh_methods);
+    Py_InitModule("cmegahal", mh_methods);
     if(PyErr_Occurred())
         Py_FatalError("can't initialize module megahal");
 }

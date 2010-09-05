@@ -18,7 +18,7 @@ class Main(Task):
         self.last = time.time()
 
     def response(self, *args):
-        return 'this is a response'
+        self.log.info('checking twitter for new tweets')
         status = self.api.GetRateLimitStatus()
         self.log.debug('rate limit status: %r' % status)
         if status['remaining_hits'] < 10:
@@ -27,7 +27,7 @@ class Main(Task):
         self.log.debug(u'getting tweets...')
         tweets = self.api.GetFriendsTimeline()
 
-        log.debug(u'found %d tweets, parsing' % len(tweets))
+        self.log.debug(u'found %d tweets, parsing' % len(tweets))
         lines = []
         for tweet in reversed(tweets):
             time_of_tweet = tweet.GetCreatedAtInSeconds()

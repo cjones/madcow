@@ -3,7 +3,9 @@
 import re
 import os
 import time
+import sys
 from madcow.util import Module
+import shutil
 
 class MegaHALError(Exception):
 
@@ -33,7 +35,7 @@ class MegaHAL(object):
     update_freq = 1 * 60 * 60  # 1 hour
     update_max = 50
 
-    def __init__(self, basedir, charset, logger=None):
+    def __init__(self, basedir, charset, logger=None, srcdb=None):
         self.basedir = basedir
         self.charset = charset
         self.brain = None
@@ -41,6 +43,7 @@ class MegaHAL(object):
         self.last_changed = None
         self.updates = 0
         self.log = logger
+        self.srcdb = srcdb
 
     def setid(self, id):
         id = id.encode(self.charset, 'replace')
@@ -57,6 +60,9 @@ class MegaHAL(object):
         if not exists:
             os.makedirs(brain)
             self.log.info(u'made megahal directory: ' + brain)
+            for filename in os.listdir(self.srcdb):
+                if filename.startswith('megahal.'):
+                    shutil.copy(os.path.join(self.srcdb, filename), os.path.join(brain, filename))
         self.log.debug('initializing brain with: ' + brain)
         megahal.init(brain)
         self.brain = brain
@@ -103,33 +109,38 @@ class Main(Module):
     help += u'\nbrain <name> - switch to megahal brain'
 
     def init(self):
+        src = os.path.join(self.madcow.prefix, 'include', 'pymegahal')
 
         # if megahal.so doesn't exist, let's try to build it
         global megahal
         try:
-            import megahal
+            import cmegahal as megahal
         except ImportError:
-            self.log.warn("couldn't find megahal.so, i will try to build it")
-
+            self.log.warn("couldn't find cmegahal.so, i will try to build it")
             from subprocess import Popen, PIPE, STDOUT
-            child = Popen(['./build.py'], stdout=PIPE, stderr=STDOUT,
-                          cwd=os.path.join(self.madcow.base, 'include/pymegahal'))
-            for line in child.stdout:
-                try:
-                    self.log.warn(line.strip())
-                except:
-                    pass
-            child.wait()
+            from tempfile import mkdtemp
+            from shutil import rmtree
+            tmp = mkdtemp()
+            try:
+                p = Popen([sys.executable, 'setup.py', 'build', '--build-base', tmp, '--build-lib', self.madcow.base],
+                          cwd=src, stdout=PIPE, stderr=STDOUT)
+                for line in p.stdout:
+                    self.log.warn(line)
+                p.wait()
+            finally:
+                if os.path.exists(tmp):
+                    rmtree(tmp)
 
             # let's try that again, shall we?
             try:
-                import megahal
+                import cmegahal as megahal
             except ImportError:
                 raise BuildError('could not build MegaHAL automatically')
 
         # create the bot with a default personality
-        self.megahal = MegaHAL(basedir=os.path.join(self.madcow.base, 'data/megahal'),
-                               charset=self.madcow.charset, logger=self.log)
+        default = os.path.join(self.madcow.base, 'db', 'megahal')
+        self.megahal = MegaHAL(basedir=default, charset=self.madcow.charset, logger=self.log,
+                               srcdb=os.path.join(src, 'db'))
         self.megahal.setid('madcow')
 
     def response(self, nick, args, kwargs):

@@ -175,9 +175,14 @@ class IRCProtocol(Madcow):
             output[i] = output[i].replace('\x00', '')
 
         # send to IRC socket
-        for line in output:
-            if line:
-                self._privmsg(req.sendto, line)
+        if req.sendto == 'ALL':
+            channels = self.channels
+        else:
+            channels = [req.sendto]
+        for channel in channels:
+            for line in output:
+                if line:
+                    self._privmsg(channel, line)
 
     def _privmsg(self, sendto, line):
         delta = unix_time() - self.last_response

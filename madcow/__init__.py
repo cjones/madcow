@@ -102,6 +102,10 @@ class Madcow(object):
         self.response_queue = queue.Queue()
         self.lock = threading.RLock()
 
+    @property
+    def prefix(self):
+        return PREFIX
+
     def start(self):
         """Start the bot"""
         self.running = True
@@ -163,8 +167,8 @@ class Madcow(object):
             self.handle_response(*self.response_queue.get_nowait())
         except queue.Empty:
             pass
-        except Exception, error:
-            self.log.exception(error)
+        except:
+            self.log.exception('error reading response queue')
 
     def handle_response(self, response, req=None):
         """encode output, lock threads, and call protocol_output"""
@@ -186,17 +190,16 @@ class Madcow(object):
             request = self.request_queue.get()
             try:
                 self.process_module_item(request)
-            except Exception, error:
-                self.log.exception(error)
+            except:
+                self.log.exception('error processing request')
 
     def process_module_item(self, request):
         """Run module response method and output any response"""
         obj, nick, args, kwargs = request
         try:
             response = obj.get_response(nick, args, kwargs)
-        except Exception, error:
-            self.log.warn(u'Uncaught module exception')
-            self.log.exception(error)
+        except:
+            self.log.exception(u'Uncaught module exception')
             return
 
         if response is not None and len(response) > 0:
@@ -337,7 +340,7 @@ class Madcow(object):
         logdir = os.path.join(self.base, 'log', 'public')
         if not os.path.exists(logdir):
             os.makedirs(logdir)
-        logfile = os.path.join(logdir, '%s-%s' % (req.channel, time.strftime('%F')))
+        logfile = os.path.join(logdir, 'public-%s-%s.log' % (req.channel.replace('#', ''), time.strftime('%F')))
         with open(logfile, 'a') as fp:
             print >> fp, line.encode(self.charset, 'replace')
 

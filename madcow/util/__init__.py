@@ -93,8 +93,11 @@ class Response(object):
 
     def __init__(self, madcow):
         self.madcow = madcow
-        self.log = get_logger(self.type, unique=False)
         self.init()
+
+    @property
+    def log(self):
+        return self.madcow.log
 
     def init(self):
         pass
