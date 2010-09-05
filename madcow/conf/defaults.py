@@ -94,7 +94,7 @@ MODULES = ['alias',               # allow users to make command aliases
 # these are modules that run on their own periodically if enabled. settings are below
 TASKS = ['updater',             # check for updates to madcow
          'ircops',             # automatically provide ops in irc
-         'twitter',            # gateway for tweet timeline
+         'tweets',            # gateway for tweet timeline
          ]
 
 PRIVATE_MODULES = ['lyrics']  # list of modules (from MODULES above) that only respond in private message
