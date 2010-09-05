@@ -321,8 +321,7 @@ class Madcow(object):
 
             request = (obj, req.nick, args, kwargs,)
 
-            if (settings.PROTOCOL in (u'cli', u'ipython') or
-                not obj.allow_threading):
+            if (settings.PROTOCOL in (u'cli', u'ipython') or not obj.allow_threading):
                 self.log.debug('running non-threaded code for module %s', mod_name)
                 self.process_module_item(request)
             else:

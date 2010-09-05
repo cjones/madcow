@@ -82,29 +82,28 @@ class HTMLStripper(HTMLParser):
         return ''.join(self._stripped)
 
 
-class Module(object):
+class Response(object):
 
-    """Base module class"""
+    """Base response class"""
 
-    _any = re.compile(r'^(.+)$')
-    pattern = re.compile('')
     enabled = True
-    require_addressing = True
-    help = None
     priority = 50
-    terminate = True
-    allow_threading = True
+    type = None
     error = None
 
-    def __init__(self, madcow=None):
+    def __init__(self, madcow):
         self.madcow = madcow
-        self.log = get_logger('modules', unique=False)
+        self.log = get_logger(self.type, unique=False)
+        self.init()
+
+    def init(self):
+        pass
 
     def get_response(self, nick, args, kwargs):
         try:
             return self.response(nick, args, kwargs)
         except Exception, error:
-            self.log.exception('problem with module %s with args %r', self.name, args)
+            self.log.exception('problem with %s %s with args %r', self.type, self.name, args)
             if self.error is None:
                 message = 'erroring running %s: %s' % (self.name, error)
             else:
@@ -117,31 +116,36 @@ class Module(object):
             if message:
                 return u'%s: %s' % (nick, message)
 
+    def response(self, nick, args, kwargs):
+        raise NotImplementedError
+
     @property
     def name(self):
         return 'XXX'
         return os.path.basename(__file__).replace('.py', '')
 
+    def response(self, nick, args, kwargs):
+        raise NotImplementedError
 
-class Task(object):
 
-    priority = 0
-    enabled = True
+class Module(object):
+
+    """Base module class"""
+
+    _any = re.compile(r'^(.+)$')
+    pattern = re.compile('')
+    require_addressing = True
+    help = None
+    terminate = True
+    allow_threading = True
+    type = 'module'
+
+
+
+class Task(Response):
+
     frequency = 60
-
-    def __init__(self, madcow):
-        self.madcow = madcow
-        self.init()
-        self.log = get_logger('tasks', unique=False)
-
-    def init(self):
-        pass
-
-    def get_response(self, *args):
-        try:
-            return self.response(*args)
-        except Exception, error:
-            self.log.exception('problem with task %s', self.name)
+    type = 'task'
 
 
 class Request(object):

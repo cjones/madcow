@@ -1,35 +1,12 @@
 #!/usr/bin/env python
-#
-# Copyright (C) 2007-2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """LOLXIANS"""
 
 from urlparse import urljoin
 from random import choice
-
 import re
-
 from madcow.util.http import getsoup
 from madcow.util import Module, stripHTML, superscript
-
-__version__ = '2.0'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
-__all__ = []
 
 class Main(Module):
 
@@ -133,24 +110,18 @@ class Main(Module):
               'WYC': u'Wycliffe New Testament',
               'YLT': u"Young's Literal Translation"}
 
-    errors = [u'God did not like that.',
-              u"Watch it, you're just pissing God off now.",
-              u'Consider yourself smited for that blasphemous query.',
-              u'Go to hell.',
-              ]
+    error = [u'God did not like that.',
+             u"Watch it, you're just pissing God off now.",
+             u'Consider yourself smited for that blasphemous query.',
+             u'Go to hell.',
+             ]
 
     def response(self, nick, args, kwargs):
         list_bibles, query, book = args
-        try:
-            if list_bibles:
-                return self.list_bibles()
-            else:
-                response = self.lookup_verse(query, book)
-        except Exception, error:
-            self.log.warn('error in module %s' % self.__module__)
-            self.log.exception(error)
-            response = choice(self.errors)
-        return u'%s: %s' % (nick, response)
+        if list_bibles:
+            return self.list_bibles()
+        else:
+            return u'%s: %s' % (nick, self.lookup_verse(query, book))
 
     def list_bibles(self):
         """Get list of bibles available"""
@@ -178,9 +149,3 @@ class Main(Module):
                               superscript(match.group(1)))
 
         return stripHTML(res).strip()
-
-
-if __name__ == '__main__':
-    from madcow.util import test_module
-    test_module(Main)
-

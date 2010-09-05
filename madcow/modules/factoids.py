@@ -1,26 +1,6 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """Emulate Perl InfoBot's factoid feature"""
 
 from madcow.util import Module
-
 import re
 from re import I
 import os
@@ -31,10 +11,6 @@ try:
     import dbm
 except ImportError:
     import anydbm as dbm
-
-__version__ = u'0.1'
-__author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = []
 
 class Factoids(object):
 
@@ -471,27 +447,16 @@ class Factoids(object):
 
 
 class Main(Module):
+
     pattern = Module._any
     require_addressing = False
     priority = 99
     allow_threading = False
     terminate = False
 
-    def __init__(self, madcow=None):
-        self.madcow = madcow
+    def init(self):
         self.factoids = Factoids(parent=self)
 
     def response(self, nick, args, kwargs):
-        try:
-            result = self.factoids.parse(args[0], nick, kwargs[u'req'])
-            return encoding.convert(result)
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            return u'%s: %s' % (nick, self.error)
-
-
-if __name__ == u'__main__':
-    from madcow.util import test_module
-    test_module(Main)
-
+        result = self.factoids.parse(args[0], nick, kwargs[u'req'])
+        return encoding.convert(result)

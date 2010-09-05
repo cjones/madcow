@@ -82,9 +82,8 @@ class Main(Module):
     allow_threading = False
     command_re = re.compile(r'^\s*alias\s+(add|list|del)\s*?(?:\s+(.+?)\s*)?$', re.I)
 
-    def __init__(self, madcow=None):
-        self.madcow = madcow
-        self.db = AliasDB(os.path.join(madcow.base, 'db', 'alias'), charset=madcow.charset)
+    def init(self):
+        self.db = AliasDB(os.path.join(self.madcow.base, 'db', 'alias'), charset=self.madcow.charset)
 
     def response(self, nick, args, kwargs):
         line = args[0]
