@@ -4,7 +4,7 @@
 
 import re
 import random
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 
 class Bash(object):
@@ -72,4 +72,4 @@ class Main(Module):
         if query:
             entries = filter(None, entries)
         entry = random.choice(entries)
-        return '\n'.join(filter(None, stripHTML(entry).strip().splitlines()))
+        return '\n'.join(filter(None, strip_html(entry).strip().splitlines()))

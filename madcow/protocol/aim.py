@@ -19,7 +19,7 @@
 
 from twisted.internet import protocol, reactor
 from twisted.words.protocols import oscar
-from utils import stripHTML
+from utils import strip_html
 from madcow import Madcow, Request
 from time import sleep
 import logging as log
@@ -192,7 +192,7 @@ class OSCARConnection(oscar.BOSConnection):
         """Process incoming messages and dispatch to main bot"""
         if user.name == self.bot.botname():
             return
-        message = stripHTML(message)
+        message = strip_html(message)
         req = Request(message=message)
 
         # lines that start with ^ will have their output rainbowed

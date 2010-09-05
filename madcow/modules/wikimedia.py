@@ -4,7 +4,7 @@
 
 from BeautifulSoup import BeautifulSoup
 from madcow.util.http import geturl
-from madcow.util import stripHTML
+from madcow.util import strip_html
 from madcow.util import Module
 from urlparse import urljoin
 
@@ -90,7 +90,7 @@ class WikiMedia(object):
                            for p in soup.findAll('p'))
 
         # clean up rendered text
-        content = stripHTML(content)                    # strip markup
+        content = strip_html(content)                    # strip markup
         content = self.citations_re.sub(u'', content)   # remove citations
         content = self.parens_re.sub(u'', content)      # remove parentheticals
         content = self.whitespace_re.sub(u' ', content) # compress whitespace

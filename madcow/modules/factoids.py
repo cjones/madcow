@@ -5,7 +5,7 @@ import re
 from re import I
 import os
 import random
-import encoding
+from madcow.util import encoding
 
 try:
     import dbm

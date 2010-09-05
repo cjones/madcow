@@ -22,7 +22,7 @@ import urllib2
 import re
 
 from BeautifulSoup import BeautifulSoup
-from madcow.util import stripHTML, superscript
+from madcow.util import strip_html, superscript
 from madcow.util.http import UserAgent
 
 __version__ = '0.3'
@@ -101,7 +101,7 @@ class Google(object):
             parts.append(part)
         response = u''.join(parts)
 
-        return stripHTML(response)
+        return strip_html(response)
 
     def sunrise_sunset(self, query, location):
         """Ask google for the sunrise or sunset from location"""
@@ -109,7 +109,7 @@ class Google(object):
         image = soup.find('img', src=self.sun_re)
         row1 = image.findNext('td')
         row2 = row1.findNext('td')
-        result = stripHTML(u'%s (%s)' % (self.decode(row1), self.decode(row2)))
+        result = strip_html(u'%s (%s)' % (self.decode(row1), self.decode(row2)))
         return self.whitespace_re.sub(u' ', result.strip())
 
     def clock(self, query):
@@ -122,7 +122,7 @@ class Google(object):
                 time.find('table').extract()
             except AttributeError:
                 pass
-            return stripHTML(time.renderContents().decode('utf-8')).strip()
+            return strip_html(time.renderContents().decode('utf-8')).strip()
         except:
             pass
 

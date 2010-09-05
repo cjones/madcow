@@ -22,7 +22,7 @@
 
 """Prints tweets to the channel."""
 
-from utils import stripHTML
+from utils import strip_html
 from import twitter
 import time
 import logging as log
@@ -90,7 +90,7 @@ class Main(object):
             if time_of_tweet < self.lastupdate:
                 log.debug(u'ignoring old tweet')
                 continue
-            lines.append(u">> tweet from %s: %s <<" % (t.user.screen_name, stripHTML(t.text)))
+            lines.append(u">> tweet from %s: %s <<" % (t.user.screen_name, strip_html(t.text)))
 
         if lines:
             self.updatelast()

@@ -21,7 +21,7 @@
 
 import re
 import feedparser
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 
 
 class Main(Module):
@@ -38,7 +38,7 @@ class Main(Module):
             rss = feedparser.parse(self.url)
             entry = rss.entries[3]
             title, summary, link = map(
-                    stripHTML, [entry.title, entry.summary, entry.link])
+                    strip_html, [entry.title, entry.summary, entry.link])
             summary = self.break_re.sub(u' ', summary)
             if len(summary) > self.max:
                 summary = summary[:self.max - 4] + u' ...'

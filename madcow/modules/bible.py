@@ -6,7 +6,7 @@ from urlparse import urljoin
 from random import choice
 import re
 from madcow.util.http import getsoup
-from madcow.util import Module, stripHTML, superscript
+from madcow.util import Module, strip_html, superscript
 
 class Main(Module):
 
@@ -148,4 +148,4 @@ class Main(Module):
             res = res.replace(match.group(0),
                               superscript(match.group(1)))
 
-        return stripHTML(res).strip()
+        return strip_html(res).strip()

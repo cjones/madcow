@@ -25,7 +25,7 @@ but only works within the united states.
 
 import re
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from madcow.util.color import ColorLib
 from learn import Main as Learn
@@ -82,7 +82,7 @@ class Main(Module):
             return u'NOAA website is having issues'
         current = current.findNext('table').table.table
         temp = current.td.font.renderContents().replace('<br />', '|')
-        temp = stripHTML(temp.decode('utf-8')).replace('\n', '').strip()
+        temp = strip_html(temp.decode('utf-8')).replace('\n', '').strip()
         cond, _, tempf, tempc = temp.split('|')
         tempc = tempc.replace('(', '').replace(')', '')
         tempf, tempc = self.docolor(tempf, tempc)
@@ -124,7 +124,7 @@ class Main(Module):
 
     @staticmethod
     def render(node):
-        data = stripHTML(node.renderContents().decode('utf-8', 'ignore'))
+        data = strip_html(node.renderContents().decode('utf-8', 'ignore'))
         return data.strip()
 
 

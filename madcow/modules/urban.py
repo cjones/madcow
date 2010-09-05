@@ -22,7 +22,7 @@
 
 import re
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from urlparse import urljoin
 
@@ -127,7 +127,7 @@ class Main(Module):
         data = node.renderContents()
         if isinstance(data, str):
             data = data.decode('utf-8', 'ignore')
-        return Main.newline_re.sub(' ', stripHTML(data)).strip()
+        return Main.newline_re.sub(' ', strip_html(data)).strip()
 
 if __name__ == '__main__':
     from madcow.util import test_module

@@ -20,7 +20,7 @@
 """Get weather report"""
 
 import re
-from madcow.util import stripHTML, Module
+from madcow.util import strip_html, Module
 from madcow.util.http import geturl
 from urlparse import urljoin
 from BeautifulSoup import BeautifulSoup
@@ -83,7 +83,7 @@ class Weather(object):
         # total misunderstanding of how unicode works on the part of the
         # authors, so we need to jump through some hoops to make it work
         conditions = conditions.encode(u'raw-unicode-escape')
-        conditions = stripHTML(conditions)
+        conditions = strip_html(conditions)
         conditions = encoding.convert(conditions)
         fields = self._bar.split(conditions)
         data = {}
@@ -176,7 +176,7 @@ badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
 def normalize(name):
     """Normalize city name for easy comparison"""
-    name = stripHTML(name)
+    name = strip_html(name)
     name = year.sub(u'', name)
     name = badchars.sub(u' ', name)
     name = name.lower()

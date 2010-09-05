@@ -7,7 +7,7 @@ import random
 import re
 from BeautifulSoup import BeautifulSoup
 from madcow.util.http import getsoup
-from madcow.util import stripHTML
+from madcow.util import strip_html
 from madcow.util import Module
 import re
 

@@ -31,7 +31,7 @@ prefix, configfile = find_madcow()
 sys.path.insert(0, prefix)
 
 from madcow import DEFAULTS
-from include.utils import stripHTML
+from include.utils import strip_html
 from include.config import Config
 
 __version__ = '0.5'
@@ -113,7 +113,7 @@ def main():
             charset = lookup_charset(part.get_content_charset())
             payload = payload.decode(charset, 'replace')
             if subtype == 'html':
-                payload = stripHTML(payload)
+                payload = strip_html(payload)
             payload = map(lambda item: item.strip(), payload.splitlines())
             if u'--' in payload:
                 payload = payload[:payload.index(u'--')]

@@ -23,7 +23,7 @@ from urlparse import urljoin
 
 import re
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 
 __version__ = '2.0'
@@ -43,7 +43,7 @@ class Main(Module):
             soup = getsoup(self.google_search, opts, referer=self.google_url)
             a = soup.body.find('a', 'spell')
             if a:
-                res = stripHTML(a.renderContents().decode('utf-8', 'ignore'))
+                res = strip_html(a.renderContents().decode('utf-8', 'ignore'))
             else:
                 res = u'spelled correctly'
         except Exception, error:

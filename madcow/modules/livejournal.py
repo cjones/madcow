@@ -21,7 +21,7 @@
 
 import re
 import feedparser
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 from urlparse import urljoin
 
@@ -47,8 +47,8 @@ class Main(Module):
                 user = re.search(u'"currentJournal": "(.*?)"', doc).group(1)
             url = urljoin(self.baseURL, u'/users/%s/data/rss' % user)
             rss = feedparser.parse(url)
-            entry = stripHTML(rss.entries[0].description)[:self.max]
-            page = stripHTML(rss.channel.link)
+            entry = strip_html(rss.entries[0].description)[:self.max]
+            page = strip_html(rss.channel.link)
             return u'%s: [%s] %s' % (nick, page, entry)
         except Exception, error:
             self.log.warn(u'error in module %s' % self.__module__)

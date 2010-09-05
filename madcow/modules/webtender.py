@@ -20,7 +20,7 @@
 """Look up drink mixing ingredients"""
 
 import re
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 from urlparse import urljoin
 
@@ -50,7 +50,7 @@ class Main(Module):
             instructions = self.instructions.search(doc).group(1)
             response = u'%s: %s - %s - %s' % (
                     nick, title, u', '.join(ingredients), instructions)
-            response = stripHTML(response)
+            response = strip_html(response)
             return response
         except Exception, error:
             self.log.warn(u'error in module %s' % self.__module__)

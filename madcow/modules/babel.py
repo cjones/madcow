@@ -4,7 +4,7 @@
 
 import re
 import simplejson
-from madcow.util import stripHTML
+from madcow.util import strip_html
 from madcow.util.http import geturl
 from madcow.util import Module
 
@@ -176,4 +176,4 @@ class Main(Module):
         except KeyError:
             lang = dst
         lang = lang.capitalize()
-        return stripHTML('[%s] %s' % (lang, res['responseData']['translatedText']))
+        return strip_html('[%s] %s' % (lang, res['responseData']['translatedText']))

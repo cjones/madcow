@@ -25,7 +25,7 @@ import random
 import re
 
 from BeautifulSoup import BeautifulSoup
-from madcow.util import stripHTML, Module
+from madcow.util import strip_html, Module
 from madcow.util.http import geturl
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
@@ -88,7 +88,7 @@ class Wiki(object):
         content = u' '.join(content)
 
         # clean up rendered text
-        content = stripHTML(content)                 # strip markup
+        content = strip_html(content)                 # strip markup
         content = Wiki._citations.sub(u'', content)   # remove citations
         content = Wiki._parens.sub(u'', content)      # remove parentheticals
         content = Wiki._whitespace.sub(u' ', content) # compress whitespace
@@ -182,7 +182,7 @@ class Main(Module):
         contents = li.contents
         contents = [unicode(part) for part in contents]
         quote = u' '.join(contents)
-        quote = stripHTML(quote)
+        quote = strip_html(quote)
         quote = _linebreak.sub(u' ', quote)
         quote = _whitespace.sub(u' ', quote)
         quote = quote.strip()

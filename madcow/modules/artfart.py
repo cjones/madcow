@@ -6,7 +6,7 @@ from urlparse import urljoin
 import re
 import random
 import urllib
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 
 class Main(Module):
@@ -32,5 +32,5 @@ class Main(Module):
         results = self.artfart.findall(doc)
         result = random.choice(results)
         title, art = result
-        art = stripHTML(art)
+        art = strip_html(art)
         return u'>>> %s <<<\n%s' % (title, art)

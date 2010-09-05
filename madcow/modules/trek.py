@@ -21,7 +21,7 @@
 
 from BeautifulSoup import BeautifulSoup
 from madcow.util.http import geturl
-from madcow.util import stripHTML
+from madcow.util import strip_html
 from madcow.util import Module
 
 import re
@@ -44,7 +44,7 @@ class TrekFailure(Module):
     def response(self, nick, args, kwargs):
         try:
             fail = BeautifulSoup(geturl(self.url)).h1
-            return self.spaces_re.sub(' ', stripHTML(
+            return self.spaces_re.sub(' ', strip_html(
                 u'%s: %s: %s %s: %s' % (
                     nick, self.col('red', text='FAIL'),
                     self.fail_re.search(fail.renderContents()).group(1),

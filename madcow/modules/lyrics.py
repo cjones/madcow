@@ -23,7 +23,7 @@ from urlparse import urljoin
 
 import re
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from google import Google, NonRedirectResponse
 
@@ -49,7 +49,7 @@ class Main(Module):
     def normalize(self, lyrics):
         verses = self._verse_break.split(lyrics)
         verses = [self._line_break.sub(' / ', verse) for verse in verses]
-        verses = [stripHTML(verse) for verse in verses]
+        verses = [strip_html(verse) for verse in verses]
         return '\n'.join(verses).strip()
 
     def response(self, nick, args, kwargs):

@@ -128,7 +128,7 @@ class Response(object):
         raise NotImplementedError
 
 
-class Module(object):
+class Module(Response):
 
     """Base module class"""
 
@@ -139,7 +139,6 @@ class Module(object):
     terminate = True
     allow_threading = True
     type = 'module'
-
 
 
 class Task(Response):
@@ -239,7 +238,7 @@ def superscript(text):
     return text.translate(SUPER_MAP)
 
 
-def stripHTML(data):
+def strip_html(data):
     return HTMLStripper(data).stripped
 
 

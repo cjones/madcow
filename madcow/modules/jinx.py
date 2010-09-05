@@ -24,7 +24,6 @@
 import time
 from madcow.util import Module
 
-
 class ChatLine(object):
 
     """Records a single line of IRC chat"""
@@ -90,16 +89,12 @@ class Main(Module):
         self.enabled = True
         self.pattern = Module._any
         self.require_addressing = False
-        self.log = ChatLog()
+        self.chatlog = ChatLog()
 
     def response(self, nick, args, kwargs):
-        try:
-            line = args[0]
-            cl = ChatLine(nick, line)
-            self.self.log.add(cl)
-            oldline = self.self.log.getMatchingLine(cl)
-            if oldline and oldline.nick != nick:
-                return u"Jinx! %s owes %s a coke!" % (nick, oldline.nick)
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
+        line = args[0]
+        cl = ChatLine(nick, line)
+        self.chatlog.add(cl)
+        oldline = self.chatlog.getMatchingLine(cl)
+        if oldline and oldline.nick != nick:
+            return u"Jinx! %s owes %s a coke!" % (nick, oldline.nick)

@@ -25,7 +25,7 @@ from urlparse import urljoin
 import re
 
 from BeautifulSoup import BeautifulSoup
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -110,7 +110,7 @@ class Main(Module):
             raise ValueError('no exact matches')
         soup = BeautifulSoup(geturl(url, referer=self.rt_search))
         info = soup.body.find('div', 'movie_info_area')
-        return stripHTML(info.h1.renderContents()), info.a['title']
+        return strip_html(info.h1.renderContents()), info.a['title']
 
     def rate_imdb(self, name):
         """Get user rating from IMDB"""
@@ -134,7 +134,7 @@ class Main(Module):
             else:
                 raise ValueError('no exact matches')
             soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
-        return stripHTML(soup.title.renderContents()), soup.body.find('div', 'starbar-meta').b.renderContents()
+        return strip_html(soup.title.renderContents()), soup.body.find('div', 'starbar-meta').b.renderContents()
 
     def gettop(self):
         """Get box office ratings"""
@@ -143,7 +143,7 @@ class Main(Module):
         data = []
         for row in table('tr')[1:]:
             items = row('td')
-            data.append({'title': stripHTML(items[2].a.renderContents()),
+            data.append({'title': strip_html(items[2].a.renderContents()),
                          'weekend': items[3].renderContents().strip(),
                          'gross': items[4].renderContents().strip()})
         tsize = max(len(item['title']) for item in data)
@@ -160,7 +160,7 @@ class Main(Module):
 
     def normalize(self, name):
         """Normalize a movie title for easy comparison"""
-        name = stripHTML(name)
+        name = strip_html(name)
         name = self.year_re.sub('', name)              # strip trailing year
         name = self.rev_article_re.sub(r'\2 \1', name) # Movie, The = The Movie
         name = self.articles_re.sub('', name)          # strip leading the/an

@@ -1,6 +1,6 @@
 """Get a random confession from fmylife.com"""
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from urlparse import urljoin
 import re
@@ -20,5 +20,5 @@ class Main(Module):
         soup.find('div', id='submit').extract()
         post = soup.body.find('div', 'post')
         return u'%s: (%d) %s' % (nick, int(post.find('a', 'fmllink')['href'].split('/')[-1]),
-                                 stripHTML(' '.join(link.renderContents()
+                                 strip_html(' '.join(link.renderContents()
                                                     for link in post('a', 'fmllink')).decode('utf-8', 'ignore')))

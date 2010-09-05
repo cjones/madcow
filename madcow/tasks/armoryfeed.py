@@ -19,7 +19,7 @@
 
 from urllib import urlencode
 from import feedparser
-from utils import stripHTML
+from utils import strip_html
 
 ARMORY_URL = 'http://www.wowarmory.com/character-feed.atom?%s'
 
@@ -49,5 +49,5 @@ class Main(object):
                 if entry.id not in self.cache:
                     self.cache.add(entry.id)
                     if not self.first_run:
-                        yield '%s: %s' % (character, stripHTML(entry.subtitle))
+                        yield '%s: %s' % (character, strip_html(entry.subtitle))
         self.first_run = False

@@ -4,7 +4,7 @@
 
 import re
 import feedparser
-from madcow.util import stripHTML, Module
+from madcow.util import strip_html, Module
 
 class Main(Module):
 
@@ -14,5 +14,5 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         item = feedparser.parse(self.url).entries[0]
-        body = stripHTML(item.description).strip()
+        body = strip_html(item.description).strip()
         return u' | '.join([item.link, body, item.updated])

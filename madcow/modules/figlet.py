@@ -2,10 +2,9 @@
 
 import re
 from pyfiglet import Figlet
-from madcow.util import Module
+from madcow.util import Module, encoding
 import random
 import os
-import encoding
 
 __author__ = u'James Johnston <jjohnston@email4life.com>'
 
@@ -17,7 +16,7 @@ class Main(Module):
     help = u'figlet <text> - ASCII text generator'
 
     # pre-approved list of fonts to use
-    self.fonts = (
+    fonts = (
         u'5lineoblique', u'acrobatic', u'alligator', u'alligator2', u'asc_____',
         u'ascii___', u'avatar', u'big', u'bigchief', u'block', u'bubble',
         u'bulbhead', u'chunky', u'colossal', u'computer', u'cosmic',
@@ -32,7 +31,7 @@ class Main(Module):
     )
 
     def init(self):
-        zipfile = os.path.join(madcow.base, u'include/fonts.zip')
+        zipfile = os.path.join(self.madcow.base, u'include/fonts.zip')
         self.figlet = Figlet(zipfile=zipfile)
 
     def response(self, nick, args, kwargs):

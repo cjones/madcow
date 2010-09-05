@@ -6,7 +6,7 @@ from urlparse import urljoin
 from urllib import quote
 import re
 from madcow.util.http import getsoup
-from madcow.util import stripHTML, Module
+from madcow.util import strip_html, Module
 
 class Main(Module):
 
@@ -26,6 +26,6 @@ class Main(Module):
         soup = getsoup(url, referer=self.base_url)
         for br in soup('br'):
             br.extract()
-        val = stripHTML(soup.renderContents().decode('utf-8'))
+        val = strip_html(soup.renderContents().decode('utf-8'))
         val = val.replace(u'\xa0', ' ').replace('\n', ' ')
         return self.whitespace_re.sub(' ', val).strip()

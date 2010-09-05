@@ -22,7 +22,7 @@
 
 import re
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from madcow.util.color import ColorLib
 from learn import Main as Learn

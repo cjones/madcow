@@ -19,7 +19,7 @@
 
 """Get a random joke"""
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 import re
 from urlparse import urljoin
@@ -51,7 +51,7 @@ class Main(Module):
         try:
             doc = geturl(url)
             result = self.joke.findall(doc)[0]
-            result = stripHTML(result)
+            result = strip_html(result)
 
             # cleanup output a bit.. some funny whitespace in it -cj
             result = result.replace(u'\x14', u' ')

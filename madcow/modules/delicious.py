@@ -5,7 +5,7 @@
 from madcow.util.http import UserAgent
 from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 import re
 from madcow.conf import settings
 
@@ -26,7 +26,7 @@ class Delicious(object):
     def post(self, url, tags):
         try:
             html = self.ua.open(url, size=2048)
-            title = stripHTML(self.title.search(html).group(1))
+            title = strip_html(self.title.search(html).group(1))
         except AttributeError:
             title = url
         opts = {u'url': url,

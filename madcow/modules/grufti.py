@@ -3,9 +3,8 @@
 import re
 import os
 import random
-from madcow.util import Module
+from madcow.util import Module, encoding
 import shutil
-import encoding
 
 class Main(Module):
 

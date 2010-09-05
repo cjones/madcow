@@ -19,7 +19,7 @@
 
 """Get stock quote from yahoo ticker"""
 
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 from urllib import quote
 
@@ -57,7 +57,7 @@ class Yahoo(object):
             data = csv.reader([line]).next()
             symbol = data[0]
             name = data[1]
-            trade_time, last_trade = stripHTML(data[3]).split(" - ")
+            trade_time, last_trade = strip_html(data[3]).split(" - ")
             last_trade = locale.atof(last_trade)
             try:
                 last_close = locale.atof(data[2])

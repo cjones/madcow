@@ -3,7 +3,7 @@
 """Get traffic info from CHP website (bay area only)"""
 
 import re
-from madcow.util import Module, stripHTML
+from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 
 class Main(Module):
@@ -24,7 +24,7 @@ class Main(Module):
         results = []
         doc = geturl(self.url)
         for i in self.incidents.findall(doc):
-            data = [stripHTML(c) for c in self.data.findall(i)][1:]
+            data = [strip_html(c) for c in self.data.findall(i)][1:]
             if len(data) != 4:
                 continue
             if check.search(data[2]):
