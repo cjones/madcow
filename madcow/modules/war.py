@@ -1,34 +1,10 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """NEVAR FORGET"""
 
 import re
 import feedparser
 from madcow.util import Module, strip_html
 from madcow.util.http import geturl
-
 from madcow.util.color import ColorLib
-
-__version__ = u'0.3'
-__author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = []
 
 FORMAT = u'Terror: %s, DoomsDay: %s, BodyCount: %s'
 
@@ -101,24 +77,11 @@ class Main(Module):
     require_addressing = True
     help = u'terror - NEVAR FORGET'
 
-    def __init__(self, madcow=None):
-        if madcow is not None and hasattr(madcow, 'colorlib'):
-            colorlib = madcow.colorlib
-        else:
-            colorlib = ColorLib(u'ansi')
+    def init(self):
+        colorlib = self.madcow.colorlib
         self.terror = Terror(colorlib)
         self.doom = DoomsDay()
         self.iraq = IraqWar()
 
     def response(self, nick, args, kwargs):
-        try:
-            return FORMAT % (self.terror.level(), self.doom.time(), self.iraq.bodycount())
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            return u'%s: problem with query: %s' % (nick, error)
-
-
-if __name__ == u'__main__':
-    from madcow.util import test_module
-    test_module(Main)
+        return FORMAT % (self.terror.level(), self.doom.time(), self.iraq.bodycount())

@@ -1,34 +1,10 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """Lookup Warhammer Online items"""
 
 from madcow.util import Module
-
 import re
 from madcow.util.http import geturl
 from urlparse import urljoin
 from madcow.util.color import ColorLib
-
-__version__ = u'0.1'
-__author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = []
 
 class Main(Module):
 
@@ -58,12 +34,8 @@ class Main(Module):
             u'2': u'white',
             u'1': u'light gray'}
 
-    def __init__(self, madcow=None):
-        self.madcow = madcow
-        if madcow:
-            self.colorlib = madcow.colorlib
-        else:
-            self.colorlib = ColorLib(u'ansi')
+    def init(self):
+        self.colorlib = self.madcow.colorlib
 
     def lookup_item(self, item):
         page = geturl(self._search_url, opts={u'search_text': item})
@@ -96,13 +68,4 @@ class Main(Module):
         return u'%s: %s' % (name, bonus)
 
     def response(self, nick, args, kwargs):
-        try:
-            return self.lookup_item(args[0])
-        except Exception, error:
-            self.log.warn('error in module %s' % self.__module__)
-            self.log.exception(error)
-
-
-if __name__ == '__main__':
-    from madcow.util import test_module
-    test_module(Main)
+        return self.lookup_item(args[0])

@@ -1,13 +1,9 @@
-#!/usr/bin/env python
-
 """Handles WikiMedia queries"""
 
 from BeautifulSoup import BeautifulSoup
 from madcow.util.http import geturl
-from madcow.util import strip_html
-from madcow.util import Module
+from madcow.util import strip_html, Module
 from urlparse import urljoin
-
 import re
 
 # wiki configuration
@@ -187,11 +183,8 @@ class Main(Module):
     help = make_help(WIKIS)
     match_fmt = r'^\s*(?:%s)(?:\s+(.+?))?\s*$'
 
-    def __init__(self, madcow=None, wikis=None):
-        self.madcow = madcow
-        if wikis is None:
-            wikis = WIKIS
-        self.wikis = {}
+    def init(self):
+        self.wikis = WIKIS
         for wiki, opts in wikis.iteritems():
             match_re = self.match_fmt % '|'.join(opts['keys'])
             match_re = re.compile(match_re, re.I)
@@ -199,23 +192,16 @@ class Main(Module):
             self.wikis[wiki] = {'match_re': match_re, 'handler': handler}
 
     def response(self, nick, args, kwargs):
-        try:
-            message = args[0]
-            for wiki, opts in self.wikis.iteritems():
-                try:
-                    query = opts['match_re'].search(message).group(1)
-                    if query:
-                        response = opts['handler'].getsummary(query)
-                    else:
-                        response = opts['handler'].getrandom()
-                    if response:
-                        return u'%s: %s' % (nick, response)
-                except AttributeError:
-                    pass
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-
-if __name__ == '__main__':
-    from madcow.util import test_module
-    test_module(Main)
+        message = args[0]
+        for wiki, opts in self.wikis.iteritems():
+            try:
+                query = opts['match_re'].search(message).group(1)
+                if query:
+                    response = opts['handler'].getsummary(query)
+                else:
+                    response = opts['handler'].getrandom()
+                if response:
+                    return u'%s: %s' % (nick, response)
+            except AttributeError:
+                pass
+        return u'%s: I got nothin' % nick

@@ -1,38 +1,13 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """Get weather report"""
 
 import re
-from madcow.util import strip_html, Module
+from madcow.util import strip_html, Module, encoding
 from madcow.util.http import geturl
 from urlparse import urljoin
 from BeautifulSoup import BeautifulSoup
 import feedparser
 from learn import Main as Learn
-
 from madcow.util.color import ColorLib
-from madcow.util import encoding
-
-__version__ = u'0.2'
-__author__ = u'cj_ <cjones@gruntle.org>'
-__all__ = [u'Weather', u'Main']
 
 USAGE = u'set location <nick> <location>'
 
@@ -136,12 +111,10 @@ class Main(Module):
     pattern = re.compile(u'^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
     require_addressing = True
     help = u'fc [location] - look up weather forecast'
+    error = u"Couldn't find that place, maybe a bomb dropped on it"
 
-    def __init__(self, madcow=None):
-        if madcow is not None:
-            colorlib = madcow.colorlib
-        else:
-            colorlib = ColorLib(u'ansi')
+    def init(self):
+        colorlib = self.madcow.colorlib
         self.weather = Weather(colorlib)
         try:
             self.learn = Learn(madcow=madcow)
@@ -162,12 +135,7 @@ class Main(Module):
         if not query:
             return u'%s: unknown nick. %s' % (nick, USAGE)
 
-        try:
-            return u'%s: %s' % (nick, self.weather.forecast(query))
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            return u"Couldn't find that place, maybe a bomb dropped on it"
+        return u'%s: %s' % (nick, self.weather.forecast(query))
 
 
 whitespace = re.compile(r'\s+')
@@ -183,7 +151,3 @@ def normalize(name):
     name = name.strip()
     name = whitespace.sub(u' ', name)
     return name
-
-if __name__ == u'__main__':
-    from madcow.util import test_module
-    test_module(Main)

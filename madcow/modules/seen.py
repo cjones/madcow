@@ -1,29 +1,9 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """Keep track of what people last said"""
 
 import re
 import time
 import os
 from madcow.util import Module
-
 
 try:
     import dbm
@@ -40,8 +20,8 @@ class Main(Module):
     help = u'seen <nick> - query bot about last time someone was seen speaking'
     seen = re.compile(u'^\s*seen\s+(\S+)\s*$', re.I)
 
-    def __init__(self, madcow):
-        self.charset = madcow.charset
+    def init(self):
+        self.charset = self.madcow.charset
         self.dbfile = os.path.join(madcow.base, 'db', 'seen')
 
     def dbm(self):
@@ -93,17 +73,13 @@ class Main(Module):
         channel = kwargs[u'channel']
         line = args[0]
 
-        try:
-            self.set(nick, channel, line)
-            match = self.seen.search(line)
-            if not match:
-                return
-            user = match.group(1)
-            message, channel, last = self.get(user)
-            if not message:
-                return u"%s: I haven't seen %s say anything plz" % (nick, user)
-            return u'%s: %s was last seen %s ago on %s saying "%s"' % (
-                    nick, user, last, channel, message)
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
+        self.set(nick, channel, line)
+        match = self.seen.search(line)
+        if not match:
+            return
+        user = match.group(1)
+        message, channel, last = self.get(user)
+        if not message:
+            return u"%s: I haven't seen %s say anything plz" % (nick, user)
+        return u'%s: %s was last seen %s ago on %s saying "%s"' % (
+                nick, user, last, channel, message)

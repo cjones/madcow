@@ -1,33 +1,9 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007-2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """MegaHAL Interface"""
-
-from madcow.util import Module
 
 import re
 import os
 import time
-
-__version__ = u'0.2'
-__author__ = u'Chris Jones <cjones@gruntle.org>'
-__all__ = []
+from madcow.util import Module
 
 class MegaHALError(Exception):
 
@@ -125,7 +101,7 @@ class Main(Module):
     help = u'mh <line> - talk to megahal'
     help += u'\nbrain <name> - switch to megahal brain'
 
-    def __init__(self, madcow):
+    def init(self):
 
         # if megahal.so doesn't exist, let's try to build it
         global megahal
@@ -136,7 +112,7 @@ class Main(Module):
 
             from subprocess import Popen, PIPE, STDOUT
             child = Popen(['./build.py'], stdout=PIPE, stderr=STDOUT,
-                          cwd=os.path.join(madcow.base, 'include/pymegahal'))
+                          cwd=os.path.join(self.madcow.base, 'include/pymegahal'))
             for line in child.stdout:
                 try:
                     self.log.warn(line.strip())
@@ -152,19 +128,13 @@ class Main(Module):
 
         # create the bot with a default personality
         self.megahal = MegaHAL(
-                basedir=os.path.join(madcow.base, 'data/megahal'),
-                charset=madcow.charset)
+                basedir=os.path.join(self.madcow.base, 'data/megahal'),
+                charset=self.madcow.charset)
         self.megahal.setid('madcow')
 
     def response(self, nick, args, kwargs):
-        try:
-            command = args[0].lower()
-            if command == u'brain':
-                return self.megahal.setid(args[1])
-            elif command == u'mh':
-                return self.megahal.process(args[1])
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            return u'%s: %s' % (nick, error)
-
+        command = args[0].lower()
+        if command == u'brain':
+            return self.megahal.setid(args[1])
+        elif command == u'mh':
+            return self.megahal.process(args[1])

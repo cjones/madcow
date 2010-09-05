@@ -21,7 +21,6 @@ raise ImportError('this needs to be rewritten to not use fucking sql, jesus')
 
 """Watch URLs in channel, punish people for living under a rock"""
 
-from __future__ import with_statement
 import re
 import os
 import urlparse

@@ -1,28 +1,3 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones and Bryan Burns
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-#
-#  slut.py
-#  madcow-1.31
-#
-#  Created by Bryan Burns on 2007-06-20.
-#
-
 """
 Slutcheck - Uses google "safesearch" to determine how "slutty" a word or
 phrase is.  (To get an accurate slut rating for a phrase it should be
@@ -37,10 +12,8 @@ the number of results for both are equal, the phrase is 0% slutty.
 import re
 from madcow.util import Module
 from madcow.util.http import geturl
-
 from urlparse import urljoin
 
-#match_re = re.compile(r'Results .* of about <b>([\d,]+)</b> for')
 match_re = re.compile(r'About ([\d,]+) results')
 filter_re = re.compile(r'The word <b>"(\w+)"</b> has been filtered from the search')
 baseURL = u'http://www.google.com/'
@@ -94,6 +67,7 @@ class Main(Module):
     pattern = re.compile(u'^\s*slutcheck\s+(.+)')
     require_addressing = True
     help = u"slutcheck <phrase> - see how slutty the phrase is"
+    error = u'I failed to perform that lookup'
 
     def response(self, nick, args, kwargs):
         try:
@@ -104,14 +78,4 @@ class Main(Module):
             self.log.exception('what')
             return u"%s: Sorry, google isn't being cooperative.." % nick
         except WordFiltered, error:
-            return u"%s: Hmm, google is filtering the word '%s'.." % (
-                    nick, error.word)
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            return u'%s: I failed to perform that lookup' % nick
-
-
-if __name__ == u'__main__':
-    from madcow.util import test_module
-    test_module(Main)
+            return u"%s: Hmm, google is filtering the word '%s'.. 100% slutty!" % (nick, error.word)

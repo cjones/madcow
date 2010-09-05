@@ -1,39 +1,15 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007-2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """Module stub"""
 
-
 import re
-
 from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from urlparse import urljoin
-
-__version__ = '2.0'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
-__all__ = []
 
 class Main(Module):
 
     pattern = re.compile(r'^\s*urban(?:\s+(.+?)(?:\s+(\d+))?)?\s*$', re.I)
     help = 'urban <term> [#] - lookup word/phrase on urban dictionary'
+    error = u'So obscure, not even urban dictionary knows it'
 
     urban_url = 'http://www.urbandictionary.com/'
     urban_search = urljoin(urban_url, '/define.php')
@@ -45,18 +21,13 @@ class Main(Module):
     RESULTS_PER_PAGE = 7
 
     def response(self, nick, args, kwargs):
-        try:
-            query, idx = args
-            if query:
-                if idx:
-                    idx = int(idx)
-                response = self.lookup(query, idx)
-            else:
-                response = self.random()
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            response = u'So obscure, not even urban dictionary knows it'
+        query, idx = args
+        if query:
+            if idx:
+                idx = int(idx)
+            response = self.lookup(query, idx)
+        else:
+            response = self.random()
         return u'%s: %s' % (nick, response)
 
     def lookup(self, query, idx=None):
@@ -128,7 +99,3 @@ class Main(Module):
         if isinstance(data, str):
             data = data.decode('utf-8', 'ignore')
         return Main.newline_re.sub(' ', strip_html(data)).strip()
-
-if __name__ == '__main__':
-    from madcow.util import test_module
-    test_module(Main)

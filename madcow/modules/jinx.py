@@ -1,24 +1,4 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007-2008 Christopher Jones and Bryan Burns
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-#
 # Created by Bryan Burns on 2007-07-17.
-#
 # Handle coke allocation
 
 import time
@@ -84,11 +64,10 @@ class Main(Module):
     priority = 1
     terminate = False
     allow_threading = False
+    pattern = Module._any
+    require_addressing = False
 
-    def __init__(self, madcow=None):
-        self.enabled = True
-        self.pattern = Module._any
-        self.require_addressing = False
+    def init(self):
         self.chatlog = ChatLog()
 
     def response(self, nick, args, kwargs):

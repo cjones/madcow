@@ -1,35 +1,10 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007-2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """Rate movies on IMDB/RT/MetaCritic"""
 
 from madcow.util.http import geturl
 from urlparse import urljoin
-
 import re
-
 from BeautifulSoup import BeautifulSoup
 from madcow.util import Module, strip_html
-
-__version__ = '2.0'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
-__all__ = []
 
 class Main(Module):
 
@@ -54,23 +29,16 @@ class Main(Module):
     badchars_re = re.compile(r'[^a-z0-9 ]', re.I)
     whitespace_re = re.compile(r'\s+')
 
-    def __init__(self, *args, **kwargs):
-        self.sources = [('IMDB', self.rate_imdb),
-                        ('RT', self.rate_rt)]
-        super(Main, self).__init__(*args, **kwargs)
+    def init(self):
+        self.sources = [('IMDB', self.rate_imdb), ('RT', self.rate_rt)]
 
     def response(self, nick, args, kwargs):
-        try:
-            if args[0] == 'rate':
-                response = self.rate(args[1])
-            elif args[2] == 'topmovies':
-                response = self.gettop()
-            else:
-                raise ValueError('invalid args')
-        except Exception, error:
-            self.log.warn('error in module %s' % self.__module__)
-            self.log.exception(error)
-            response = u'Error processing your request'
+        if args[0] == 'rate':
+            response = self.rate(args[1])
+        elif args[2] == 'topmovies':
+            response = self.gettop()
+        else:
+            raise ValueError('invalid args')
         return u'%s: %s' % (nick, response)
 
     def rate(self, name):
@@ -169,8 +137,3 @@ class Main(Module):
         name = name.strip()                            # strip whitespace
         name = self.whitespace_re.sub(' ', name)       # compress whitespace
         return name
-
-
-if __name__ == u'__main__':
-    from madcow.util import test_module
-    test_module(Main)

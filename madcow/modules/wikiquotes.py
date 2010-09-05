@@ -1,29 +1,8 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
-
 """Plugin to return random quote from WikiQuotes"""
 
 from urlparse import urljoin
-
 import random
 import re
-
 from BeautifulSoup import BeautifulSoup
 from madcow.util import strip_html, Module
 from madcow.util.http import geturl
@@ -166,7 +145,7 @@ class Main(Module):
     require_addressing = True
     help = u'wikiquote - get random quote from wikiquotes'
 
-    def __init__(self, madcow=None):
+    def init(self):
         self.wiki = WikiQuotes()
 
     def get_random_quote(self, author=_author, max=_max):
@@ -209,21 +188,10 @@ class Main(Module):
         return quote
 
     def response(self, nick, args, kwargs):
-        try:
-            author = args[0]
-            if author:
-                max = 1
-            else:
-                author = _author
-                max = _max
-            return self.get_random_quote(author=author, max=max)
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            return u'%s: problem with query: %s' % (nick, error)
-
-
-if __name__ == u'__main__':
-    self.log.root.setLevel(self.log.DEBUG)
-    from madcow.util import test_module
-    test_module(Main)
+        author = args[0]
+        if author:
+            max = 1
+        else:
+            author = _author
+            max = _max
+        return self.get_random_quote(author=author, max=max)
