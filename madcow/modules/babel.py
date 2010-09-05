@@ -1,34 +1,12 @@
 #!/usr/bin/env python
-#
-# Copyright (C) 2007-2008 Chris Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """Translation service using Google Translate"""
 
-from madcow.util import Module
-import logging as log
 import re
-from madcow.util.http import geturl
 import simplejson
 from madcow.util import stripHTML
-
-__version__ = '2.0'
-__author__ = 'Chris Jones <cjones@gruntle.org>'
-__all__ = []
+from madcow.util.http import geturl
+from madcow.util import Module
 
 class BabelError(Exception):
 
@@ -39,8 +17,7 @@ class Main(Module):
 
     """Translation service using Google Translate"""
 
-    pattern = r'^\s*(tr(?:ans(?:late)?)?(.+?)|list\s+lang(s|uages))\s*$'
-    pattern = re.compile(pattern, re.I)
+    pattern = re.compile(r'^\s*(tr(?:ans(?:late)?)?(.+?)|list\s+lang(s|uages))\s*$', re.I)
     help = 'translate <lang> to <lang> [to <lang> ...]: text'
     help += '\nlist languages - show all translate languages'
     default_lang = 'english'
@@ -200,10 +177,3 @@ class Main(Module):
             lang = dst
         lang = lang.capitalize()
         return stripHTML('[%s] %s' % (lang, res['responseData']['translatedText']))
-
-
-if __name__ == u'__main__':
-    from madcow.util import test_module
-    import sys
-    sys.argv.append('translate: jasdjfsdf')
-    test_module(Main)

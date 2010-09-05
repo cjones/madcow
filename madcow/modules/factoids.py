@@ -190,8 +190,7 @@ class Factoids(object):
 
     # DBM functions
     def get_dbm(self, dbname):
-        dbfile = u'db-%s-%s' % (self.parent.madcow.namespace, dbname.lower())
-        dbfile = os.path.join(self.parent.madcow.prefix, u'data', dbfile)
+        dbfile = os.path.join(self.parent.madcow.base, 'db', dbname.lower())
         return dbm.open(dbfile, u'c', 0640)
 
     def get(self, dbname, key):

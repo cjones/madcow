@@ -31,9 +31,6 @@ import re
 __version__ = u'0.5'
 __author__ = u'cj_ <cjones@gruntle.org> / toast <toast@evilscheme.org>'
 
-_namespace = u'madcow'
-_dir = u'..'
-
 class UnknownSymbol(Exception):
     """Unknown Symbol Exception"""
     def __init__(self, symbolname):

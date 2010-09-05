@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
+raise ImportError('this needs to be rewritten to not use fucking sql, jesus')
+
 """Watch URLs in channel, punish people for living under a rock"""
 
 from __future__ import with_statement
@@ -123,7 +125,7 @@ class MemeBot(Module):
         engine = config.db_engine
         uri = engine + '://'
         if engine == 'sqlite':
-            uri += os.path.join(madcow.prefix,
+            uri += os.path.join(madcow.base,
                                 'data/db-%s-memes' % madcow.namespace)
         else:
             user = config.db_user

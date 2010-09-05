@@ -98,9 +98,28 @@ class Module(object):
 
     def __init__(self, madcow=None):
         self.madcow = madcow
+        self.log = get_logger(self.name, unique=False)
 
-    def response(self, nick, args, **kwargs):
-        return u'not implemented'
+    def get_response(self, nick, args, **kwargs):
+        try:
+            return self.response(nick, args, **kwargs)
+        except Exception, error:
+            self.log.exception('problem with module %s with args %r', self.name, args)
+            if self.error is None:
+                message = 'erroring running %s: %s' % (self.name, error)
+            else:
+                if isinstance(self.error, basestring):
+                    message = self.error
+                elif isinstance(self.error, (tuple, list)):
+                    message = random.choice(self.error)
+                else:
+                    message = None
+            if message:
+                return u'%s: %s' % (nick, message)
+
+    @property
+    def name(self):
+        return os.path.basename(__file__).replace('.py', '')
 
 
 class Request(object):

@@ -23,6 +23,7 @@ import re
 
 from BeautifulSoup import BeautifulSoup
 from madcow.util import stripHTML, superscript
+from madcow.util.http import UserAgent
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -71,7 +72,7 @@ class Google(object):
     whitespace_re = re.compile(r'\s{2,}')
 
     def __init__(self):
-        self.ua = useragent.UserAgent(handlers=[NoRedirects, NoErrors])
+        self.ua = UserAgent(handlers=[NoRedirects, NoErrors])
 
     def lucky(self, query):
         """Return I'm Feeling Lucky URL for given query"""

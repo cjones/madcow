@@ -136,7 +136,7 @@ class Main(Module):
 
             from subprocess import Popen, PIPE, STDOUT
             child = Popen(['./build.py'], stdout=PIPE, stderr=STDOUT,
-                          cwd=os.path.join(madcow.prefix, 'include/pymegahal'))
+                          cwd=os.path.join(madcow.base, 'include/pymegahal'))
             for line in child.stdout:
                 try:
                     log.warn(line.strip())
@@ -152,7 +152,7 @@ class Main(Module):
 
         # create the bot with a default personality
         self.megahal = MegaHAL(
-                basedir=os.path.join(madcow.prefix, 'data/megahal'),
+                basedir=os.path.join(madcow.base, 'data/megahal'),
                 charset=madcow.charset)
         self.megahal.setid('madcow')
 

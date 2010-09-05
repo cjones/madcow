@@ -1,33 +1,10 @@
 #!/usr/bin/env python
-#
-# Copyright (C) 2007-2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-# for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
 
 """Manage aliases"""
 
-from __future__ import with_statement
-from madcow.util import Module
-import logging as log
 import re
 import os
-
-__version__ = u'0.1'
-__author__ = u'Chris Jones <cjones@gruntle.org>'
-__all__ = [u'Main']
+from madcow.util import Module
 
 class AliasError(Exception):
 
@@ -42,8 +19,7 @@ class Alias(object):
         self.key = key
         self.val = val
         # \b doesn't work with unicode chars
-        self.pattern = re.compile(ur'^\s*' + re.escape(key) + ur'(:|\s+|$)',
-                                  re.I)
+        self.pattern = re.compile(ur'^\s*' + re.escape(key) + ur'(:|\s+|$)', re.I)
 
 
 class AliasDB(object):
@@ -55,9 +31,9 @@ class AliasDB(object):
         self.charset = charset
         self.aliases = []
         if not os.path.exists(path):
-            with open(path, u'wb') as file:
+            with open(path, 'wb') as file:
                 pass
-        with open(path, u'rb') as file:
+        with open(path, 'rb') as file:
             for line in file:
                 try:
                     key, val = line.strip().split(None, 1)
@@ -68,7 +44,7 @@ class AliasDB(object):
                     raise AliasError(u'problem parsing db: %s' % error)
 
     def save(self):
-        with open(self.path, u'wb') as file:
+        with open(self.path, 'wb') as file:
             for alias in self:
                 key = alias.key.encode(self.charset, 'replace')
                 val = alias.val.encode(self.charset, 'replace')
@@ -104,30 +80,22 @@ class Main(Module):
     priority = 0
     terminate = False
     allow_threading = False
-    command_re = re.compile(r'^\s*alias\s+(add|list|del)\s*?(?:\s+(.+?)\s*)?$',
-                            re.I)
+    command_re = re.compile(r'^\s*alias\s+(add|list|del)\s*?(?:\s+(.+?)\s*)?$', re.I)
 
     def __init__(self, madcow=None):
         self.madcow = madcow
-        self.db = AliasDB(os.path.join(madcow.prefix, u'data',
-                                       u'db-%s-alias' % madcow.namespace),
-                          charset=madcow.charset)
+        self.db = AliasDB(os.path.join(madcow.base, 'db', 'alias'), charset=madcow.charset)
 
     def response(self, nick, args, kwargs):
+        line = args[0]
         try:
-            line = args[0]
-            try:
-                command, args = self.command_re.search(line).groups()
-                kwargs[u'req'].matched = True
-                return self.runcommand(command, args)
-            except AliasError, error:
-                return u'%s: %s' % (nick, error)
-            except AttributeError:
-                self.checkalias(line, kwargs)
-        except Exception, error:
-            log.warn(u'error in module %s' % self.__module__)
-            log.exception(error)
+            command, args = self.command_re.search(line).groups()
+            kwargs[u'req'].matched = True
+            return self.runcommand(command, args)
+        except AliasError, error:
             return u'%s: %s' % (nick, error)
+        except AttributeError:
+            self.checkalias(line, kwargs)
 
     def runcommand(self, command, args):
         """User invoked alias command"""
@@ -181,4 +149,3 @@ class Main(Module):
             if new != line:
                 kwargs[u'req'].message = new
                 break
-

@@ -22,6 +22,7 @@
 import re
 from madcow.util import Module
 import logging as log
+import os
 
 try:
     import dbm
@@ -38,12 +39,10 @@ class Main(Module):
 
     def __init__(self, madcow=None):
         self.charset = madcow.charset
-        self.prefix = madcow.prefix
-        self.namespace = madcow.namespace
+        self.prefix = madcow.base
 
     def dbfile(self, db):
-        dbfile = u'%s/data/db-%s-%s' % (self.prefix, self.namespace, db)
-        return dbfile
+        return os.path.join(self.prefix, 'db', db)
 
     def dbm(self, db):
         dbfile = self.dbfile(db)

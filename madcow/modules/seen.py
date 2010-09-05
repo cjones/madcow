@@ -42,8 +42,7 @@ class Main(Module):
 
     def __init__(self, madcow):
         self.charset = madcow.charset
-        self.dbfile = os.path.join(madcow.prefix,
-                u'data/db-%s-seen' % madcow.namespace)
+        self.dbfile = os.path.join(madcow.base, 'db', 'seen')
 
     def dbm(self):
         return dbm.open(self.dbfile, u'c', 0640)

@@ -19,7 +19,7 @@ def main():
           description='Madcow infobot',
           license='GPL',
           version=__version__,
-          py_modules=['madcow'],
+          packages=['madcow'],
           classifiers=['Development Status :: 5 - Production/Stable',
                        'Environment :: Console',
                        'License :: OSI Approved :: GNU General Public License (GPL)',

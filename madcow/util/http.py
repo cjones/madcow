@@ -25,7 +25,6 @@ import urlparse
 import urllib
 import logging as log
 import encoding
-import google
 from gzip import GzipFile
 import re
 
@@ -78,6 +77,7 @@ class UserAgent(object):
         response = self.opener.open(request)
         data = response.read(size)
 
+        import google
         if isinstance(response, google.Response):
             headers = None
         else:

@@ -46,9 +46,9 @@ class Main(Module):
     def __init__(self, madcow=None):
         try:
             self.data = []
-            filename = os.path.join(madcow.prefix, u'grufti-responses.txt')
+            filename = os.path.join(madcow.base, u'grufti-responses.txt')
             if not os.path.exists(filename):
-                sample = os.path.join(madcow.prefix, self._sample)
+                sample = os.path.join(madcow.base, self._sample)
                 shutil.copyfile(sample, filename)
                 log.warn(u'created %s' % self._filename)
             with open(filename, 'rb') as fp:

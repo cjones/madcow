@@ -91,6 +91,13 @@ MODULES = ['alias',               # allow users to make command aliases
            #'woot',                # latest woot offer
            ]
 
+# these are modules that run on their own periodically if enabled. settings are below
+TASKS = ['updater',             # check for updates to madcow
+         #'armoryfeed',         # subscribe to an armory feed and provide updates on kills/drops (see below)
+         #'ircops',             # automatically provide ops in irc
+         #'twitter',            # gateway for tweet timeline
+         ]
+
 PRIVATE_MODULES = ['lyrics']  # list of modules (from MODULES above) that only respond in private message
 
 #######################
@@ -172,7 +179,6 @@ GATEWAY_IMAGE_PATH = '/tmp/images'
 GATEWAY_IMAGE_URL = 'http://example.com/images/'
 
 # watch a twitter account and bridge tweets to channels you are in
-TWITTER_ENABLED = False
 TWITTER_CONSUMER_KEY = None
 TWITTER_CONSUMER_SECRET = None
 TWITTER_TOKEN_KEY = None
@@ -186,11 +192,9 @@ HTTP_AGENT = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 HTTP_COOKIES = True
 
 # check for madcow updates once a day and announce new versions in channel
-UPDATER_ENABLED = True
 UPDATER_FREQ = 86400
 UPDATER_ANNOUNCE_CHANNELS = 'ALL'  # or list of channels
 
 # watch world of warcraft armory rss feed and report events to channel
-WOW_ARMORY_FEED_ENABLED = False
 WOW_ARMORY_FEED_FREQ = 300
 WOW_ARMORY_CHANNELS = 'ALL'  # or list of channels

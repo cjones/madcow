@@ -37,7 +37,7 @@ class Main(Module):
     help = u'figlet <text> - ASCII text generator'
 
     def __init__(self, madcow=None):
-        zipfile = os.path.join(madcow.prefix, u'include/fonts.zip')
+        zipfile = os.path.join(madcow.base, u'include/fonts.zip')
         self.figlet = Figlet(zipfile=zipfile)
 
         # pre-approved list of fonts to use

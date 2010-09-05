@@ -23,7 +23,6 @@ import re
 from learn import Main as Learn
 from madcow.util import Module
 from smtplib import SMTP
-import logging as log
 
 class Main(Module):
 
@@ -33,7 +32,6 @@ class Main(Module):
 
     def __init__(self, madcow):
         self.learn = Learn(madcow)
-        self.config = madcow.config
 
     def response(self, nick, args, kwargs):
         try:
