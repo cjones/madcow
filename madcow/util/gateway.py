@@ -59,7 +59,7 @@ class GatewayService(object):
         self.log = get_logger('gateway', unique=False)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind((self.bot.config.gateway.bind, self.bot.config.gateway.port))
+        sock.bind((settings.GATEWAY_ADDR, settings.GATEWAY_PORT))
         sock.listen(5)
         while self.bot.running:
             client, addr = sock.accept()

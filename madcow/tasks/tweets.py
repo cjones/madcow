@@ -18,6 +18,7 @@ class Main(Task):
         self.last = time.time()
 
     def response(self, *args):
+        return 'this is a response'
         status = self.api.GetRateLimitStatus()
         self.log.debug('rate limit status: %r' % status)
         if status['remaining_hits'] < 10:

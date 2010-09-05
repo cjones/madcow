@@ -9,6 +9,7 @@ class Main(Task):
     def __init__(self, madcow):
         self.madcow = madcow
         self.frequency = settings.UPDATER_FREQ
+        self.output = None
         if settings.PROTOCOL != 'irc':
             raise ValueError('ircops only relevant for irc protocol')
 

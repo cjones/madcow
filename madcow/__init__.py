@@ -334,7 +334,7 @@ class Madcow(object):
         if req.action:
             message = u'ACTION: %s' % message
         line = u'%s <%s> %s' % (time.strftime('%T'), req.nick, message)
-        logdir = os.path.join(PREFIX, 'log', 'public')
+        logdir = os.path.join(self.base, 'log', 'public')
         if not os.path.exists(logdir):
             os.makedirs(logdir)
         logfile = os.path.join(logdir, '%s-%s' % (req.channel, time.strftime('%F')))
