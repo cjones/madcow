@@ -24,9 +24,10 @@ class Main(Module):
         self.data = []
         filename = os.path.join(self.madcow.base, 'response.grufti')
         if not os.path.exists(filename):
-            raise ValueError
-            shutil.copyfile(sample, filename)
-            self.log.warn(u'created %s' % self._filename)
+            from madcow import PREFIX
+            src = os.path.join(PREFIX, 'conf', 'response.grufti')
+            shutil.copyfile(src, filename)
+            self.log.warn('created %s', filename)
         with open(filename, 'rb') as fp:
             doc = fp.read()
         for block in self.reMatchBlocks.findall(doc):

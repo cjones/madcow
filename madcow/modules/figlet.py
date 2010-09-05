@@ -32,7 +32,6 @@ class Main(Module):
 
     def init(self):
         zipfile = os.path.join(os.path.dirname(pyfiglet.__file__), 'fonts.zip')
-        print zipfile
         self.figlet = pyfiglet.Figlet(zipfile=zipfile)
 
     def response(self, nick, args, kwargs):

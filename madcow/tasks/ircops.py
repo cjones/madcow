@@ -6,8 +6,7 @@ from madcow.util import Task
 
 class Main(Task):
 
-    def __init__(self, madcow):
-        self.madcow = madcow
+    def init(self):
         self.frequency = settings.UPDATER_FREQ
         self.output = None
         if settings.PROTOCOL != 'irc':

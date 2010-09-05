@@ -103,7 +103,7 @@ class Response(object):
         try:
             return self.response(nick, args, kwargs)
         except Exception, error:
-            self.log.exception('problem with %s %s with args %r', self.type, self.name, args)
+            self.madcow.log.exception('problem with %s %s with args %r', self.type, self.name, args)
             if self.error is None:
                 message = 'erroring running %s: %s' % (self.name, error)
             else:
@@ -165,71 +165,6 @@ class Request(object):
 
     def __init__(self, **kwargs):
         self.__dict__.update(self.defaults, **kwargs)
-
-
-def cache_property(timeout=None):
-
-    """Caching property decorator"""
-
-    cache = {}
-
-    def decorator(method):
-
-        def inner(*args, **kwargs):
-            if method in cache:
-                if unix_time() - cache[method]['lastrun'] > timeout:
-                    del cache[method]
-            if method not in cache:
-                cache[method] = dict(lastrun=unix_time(),
-                                     result=method(*args, **kwargs))
-            return cache[method]['result']
-
-        inner.__doc__ = method.__doc__
-        inner.__name__ = method.__name__
-        return property(inner)
-    return decorator
-
-
-def find_madcow():
-    """Find where we are run from and config file location"""
-    if __file__.startswith(sys.argv[0]):
-        prefix = sys.argv[0]
-    else:
-        prefix = __file__
-    parts = os.path.abspath(os.path.dirname(prefix)).split(os.sep)
-    found = False
-    prefix = None
-    while parts:
-        prefix = os.sep.join(parts)
-        config = os.path.join(prefix, 'madcow.ini')
-        if os.path.exists(config):
-            found = True
-            break
-        parts.pop()
-    if not found:
-        raise Exception('No config file found')
-    return prefix, config
-
-
-def test_module(mod, argv=None):
-    if argv is None:
-        argv = sys.argv[1:]
-    prefix, configfile = find_madcow()
-    sys.path.insert(0, prefix)
-    from madcow import Madcow, DEFAULTS
-    from config import Config
-    log.basicConfig(level=log.ERROR)
-    defaults = os.path.join(prefix, DEFAULTS)
-    config = Config(configfile, defaults)
-    madcow = Madcow(config, prefix, 'ansi')
-    main = mod(madcow)
-    try:
-        args = main.pattern.search(u' '.join(argv)).groups()
-    except:
-        print 'no match, double-check regex'
-        return 1
-    print main.response(nick=os.environ[u'USER'], args=args, kwargs={}).encode('utf-8')
-    return 0
 
 
 def superscript(text):
