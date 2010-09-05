@@ -3,11 +3,12 @@
 from optparse import OptionParser
 import sys
 import os
+
+sys.dont_write_bytecode = True
+
 import madcow
 
-madcow = type('masdf', (object,), {'__version__': '0.1'})()
-
-__usage__ = '%prog [-b <basedir>] [section:key=val ...]'
+__usage__ = '%prog [-b <basedir>]'
 __doc__ = 'Run the Madcow infobot'
 
 DEFAULT_BASE = os.path.realpath(os.path.join(os.environ.get('HOME', ''), '.madcow'))
@@ -16,15 +17,14 @@ def main(argv=None):
     optparse = OptionParser(__usage__, version=madcow.__version__, description=__doc__)
     optparse.add_option('-b', '--base', metavar='<dir>', default=DEFAULT_BASE, help='madcow base (%default)')
     opts, args = optparse.parse_args(argv)
-    settings = {}
-    for arg in args:
-        try:
-            section, setting = arg.split(':', 1)
-            key, val = setting.split('=', 1)
-        except ValueError:
-            optparse.error('format for setting overrides is: section:key=val')
-        settings.setdefault(section, {})[key] = val
-    madcow.run(base=opts.base, settings=settings)
+    if args:
+        optparse.error('%prog expects no arguments')
+    try:
+        madcow.run(base=opts.base)
+    except Exception, error:
+        raise
+        print >> sys.stderr, 'Error: %s' % error
+        return 1
     return 0
 
 if __name__ == '__main__':
