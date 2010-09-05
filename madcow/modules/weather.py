@@ -20,15 +20,15 @@
 """Get weather report"""
 
 import re
-from utils import stripHTML, Module
-from useragent import geturl
+from madcow.util import stripHTML, Module
+from madcow.util.http import geturl
 from urlparse import urljoin
 from BeautifulSoup import BeautifulSoup
-from import feedparser
+import feedparser
 from learn import Main as Learn
 import logging as log
-from colorlib import ColorLib
-from import encoding
+from madcow.util.color import ColorLib
+from madcow.util import encoding
 
 __version__ = u'0.2'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -185,5 +185,5 @@ def normalize(name):
     return name
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

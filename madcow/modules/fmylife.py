@@ -19,8 +19,8 @@
 
 """Get a random confession from fmylife.com"""
 
-from utils import Module, stripHTML
-from useragent import getsoup
+from madcow.util import Module, stripHTML
+from madcow.util.http import getsoup
 from urlparse import urljoin
 import logging as log
 import re
@@ -49,5 +49,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

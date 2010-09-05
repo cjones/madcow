@@ -20,7 +20,7 @@
 """Manage aliases"""
 
 from __future__ import with_statement
-from utils import Module
+from madcow.util import Module
 import logging as log
 import re
 import os

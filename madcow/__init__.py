@@ -37,9 +37,10 @@ except ImportError:
 PREFIX = os.path.realpath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(PREFIX, 'include'))
 
-from madcow.util import gateway, get_logger
+from madcow.util import gateway, get_logger, http
 from madcow.conf import settings
-from madcow.util import http
+from madcow.util.color import ColorLib
+from madcow.util.auth import AuthLib
 
 VERSION = 1, 7, 0
 
@@ -68,58 +69,38 @@ class Madcow(object):
 
     ### INITIALIZATION FUNCTIONS ###
 
-    def __init__(self, config, prefix, scheme=None):
+    def __init__(self, base, scheme=None):
         """Initialize bot"""
+        self.base = base
+        self.log = get_logger('madcow', unique=False, stream=sys.stdout)
         self.colorlib = ColorLib(scheme)
-        self.config = config
-        self.prefix = prefix
         self.cached_nick = None
-        self.namespace = self.config.modules.dbnamespace
         self.running = False
 
-        # parse ignore list
-        if self.config.main.ignorelist is not None:
-            self.ignore_list = self.config.main.ignorelist
-            self.ignore_list = delim_re.split(self.ignore_list)
-            self.ignore_list = [nick.lower() for nick in self.ignore_list]
-            log.info(u'Ignoring nicks: %s', u', '.join(self.ignore_list))
-        else:
-            self.ignore_list = []
-
-        # bot aliases
-        if self.config.main.aliases:
-            self.aliases = delim_re.split(self.config.main.aliases)
-        else:
-            self.aliases = []
+        self.ignore_list = [nick.lower() for nick in settings.IGNORE_NICKS]
 
         # set encoding
-        self.charset = CHARSET
-        if self.config.main.charset:
-            try:
-                self.charset = codecs.lookup(self.config.main.charset).name
-            except LookupError:
-                log.warn('unknown charset %s, using default %s',
-                         self.config.main.charset, self.charset)
+        self.charset = codecs.lookup(settings.ENCODING).name
 
         # create admin instance
         self.admin = Admin(self)
 
         # load modules
-        self.modules = Modules(self, u'modules', self.prefix)
-        self.periodics = Modules(self, u'periodic', self.prefix)
+        self.modules = Modules(self, 'modules', settings.MODULES)
+        #self.periodics = Modules(self, 'tasks', settings.TASKS)
         self.usage_lines = self.modules.help + self.periodics.help
         self.usage_lines.append(u'help - this screen')
         self.usage_lines.append(u'version - get bot version')
 
         # signal handlers
-        if SIGNALS:
-            signal(SIGHUP, self.signal_handler)
-            signal(SIGTERM, self.signal_handler)
+        if signal:
+            signal.signal(signalSIGHUP, self.signal_handler)
+            signal.signal(signal.SIGTERM, self.signal_handler)
 
         # initialize threads
-        self.request_queue = Queue()
-        self.response_queue = Queue()
-        self.lock = RLock()
+        self.request_queue = queue.Queue()
+        self.response_queue = queue.Queue()
+        self.lock = threading.RLock()
 
     def start(self):
         """Start the bot"""
@@ -127,15 +108,15 @@ class Madcow(object):
 
         # start services
         for service in Service.__subclasses__():
-            log.info('starting service: %s', service.__name__)
+            self.log.info('starting service: %s', service.__name__)
             thread = service(self)
             thread.setDaemon(True)
             thread.start()
 
         # start worker threads
-        for i in range(self.config.main.workers):
+        for i in range(settings.WORKERS):
             name = u'ModuleWorker%d' % (i + 1)
-            log.debug('Starting Thread: %s', name)
+            self.log.debug('Starting Thread: %s', name)
             thread = threading.Thread(target=self.request_handler, name=name)
             thread.setDaemon(True)
             thread.start()
@@ -159,14 +140,14 @@ class Madcow(object):
     def signal_handler(self, sig, *args):
         """Handles signals"""
         if sig == SIGTERM:
-            log.warn(u'got SIGTERM, signaling shutting down')
+            self.log.warn(u'got SIGTERM, signaling shutting down')
             self.running = False
         elif sig == SIGHUP:
             self.reload_modules()
 
     def reload_modules(self):
         """Reload all modules"""
-        log.info(u'reloading modules')
+        self.log.info(u'reloading modules')
         self.modules.load_modules()
         self.periodics.load_modules()
 
@@ -183,7 +164,7 @@ class Madcow(object):
         except Empty:
             pass
         except Exception, error:
-            log.exception(error)
+            self.log.exception(error)
 
     def handle_response(self, response, req=None):
         """encode output, lock threads, and call protocol_output"""
@@ -192,8 +173,8 @@ class Madcow(object):
             try:
                 self.protocol_output(response, req)
             except Exception, error:
-                log.error('error in output: %r', response)
-                log.exception(error)
+                self.log.error('error in output: %r', response)
+                self.log.exception(error)
         finally:
             self.lock.release()
 
@@ -210,7 +191,7 @@ class Madcow(object):
             try:
                 self.process_module_item(request)
             except Exception, error:
-                log.exception(error)
+                self.log.exception(error)
 
     def process_module_item(self, request):
         """Run module response method and output any response"""
@@ -218,8 +199,8 @@ class Madcow(object):
         try:
             response = obj.response(nick, args, kwargs)
         except Exception, error:
-            log.warn(u'Uncaught module exception')
-            log.exception(error)
+            self.log.warn(u'Uncaught module exception')
+            self.log.exception(error)
             return
 
         if response is not None and len(response) > 0:
@@ -237,7 +218,7 @@ class Madcow(object):
             self.cached_nick = botname
             nicks = []
             pre_nicks = []
-            for nick in [botname] + self.aliases:
+            for nick in [botname] + settings.ALIASES:
                 nick_e = re.escape(nick)
                 nicks.append(nick_e)
                 if nick_e[-1] not in self._punc:
@@ -288,25 +269,22 @@ class Madcow(object):
         """Process requests"""
         if u'NOBOT' in req.message:
             return
-        if self.config.main.logpublic and not req.private:
+        if settings.LOG_PUBLIC and not req.private:
             self.logpublic(req)
         if req.nick.lower() in self.ignore_list:
-            log.info(u'Ignored %r from %s', req.message, req.nick)
+            self.log.info(u'Ignored %r from %s', req.message, req.nick)
             return
         if req.feedback:
             self.output(u'yes?', req)
             return
         if req.addressed and req.message.lower() == u'help':
-            if self.config.main.module == u'irc':
+            if settings.PROTOCOL == 'irc':
                 req.sendto = req.nick
-            elif self.config.main.module == u'silcplugin':
-                self.lock.acquire()
-                try:
+            elif settings.PROTOCOL == 'silc':
+                with self.lock:
                     req.sendto = req.silc_sender
                     req.private = True
                     req.channel = u'privmsg'
-                finally:
-                    self.lock.release()
             self.output(self.usage(), req)
             return
         if req.addressed and req.message.lower() == u'version':
@@ -318,11 +296,11 @@ class Madcow(object):
             if response is not None and len(response):
                 self.output(response, req)
                 return
-        if self.config.main.module == u'cli' and req.message == u'reload':
+        if settings.PROTOCOL == u'cli' and req.message == u'reload':
             self.reload_modules()
         for mod_name, mod in self.modules.by_priority():
             obj = mod['obj']
-            log.debug('trying: %s', mod_name)
+            self.log.debug('trying: %s', mod_name)
             if obj.require_addressing and not req.addressed:
                 continue
             try:
@@ -343,16 +321,16 @@ class Madcow(object):
 
             request = (obj, req.nick, args, kwargs,)
 
-            if (self.config.main.module in (u'cli', u'ipython') or
+            if (settings.PROTOCOL in (u'cli', u'ipython') or
                 not obj.allow_threading):
-                log.debug('running non-threaded code for module %s', mod_name)
+                self.log.debug('running non-threaded code for module %s', mod_name)
                 self.process_module_item(request)
             else:
-                log.debug('launching thread for module: %s', mod_name)
+                self.log.debug('launching thread for module: %s', mod_name)
                 self.request_queue.put(request)
 
             if obj.terminate and req.matched:
-                log.debug('terminating because %s matched', mod_name)
+                self.log.debug('terminating because %s matched', mod_name)
                 break
 
     def logpublic(self, req):
@@ -361,7 +339,7 @@ class Madcow(object):
         if req.action:
             message = u'ACTION: %s' % message
         line = u'%s <%s> %s\n' % (strftime(u'%T'), req.nick, message)
-        path = os.path.join(self.prefix, u'logs', u'%s-irc-%s-%s' % (self.namespace, req.channel, strftime(u'%F')))
+        path = os.path.join(PREFIX, 'log', '%s-irc-%s-%s' % (req.channel, strftime(u'%F')))
         logfile = open(path, u'a')
         try:
             logfile.write(line.encode(self.charset, 'replace'))
@@ -480,9 +458,10 @@ class Admin(object):
     def __init__(self, bot):
         self.bot = bot
         self.users = {}
-        self.authlib = AuthLib(u'%s/data/db-%s-passwd' % (bot.prefix,
-                                                          bot.namespace),
-                               bot.charset)
+        self.authlib = AuthLib(
+                os.path.join(bot.base, 'db', 'passwd'),
+                bot.charset,
+                )
 
     def parse(self, req):
         """Parse request for admin commands and execute, returns output"""
@@ -640,84 +619,39 @@ class Modules(object):
     """This class dynamically loads plugins and instantiates them"""
 
     _pyext = re.compile(r'\.py$')
-    _ignore_mods = (u'__init__', u'template')
 
-    def __init__(self, madcow, subdir, prefix):
+    def __init__(self, madcow, subdir, names):
         self.madcow = madcow
         self.subdir = subdir
-        self.mod_dir = os.path.join(prefix, self.subdir)
+        self.names = names
         self.modules = {}
         self.help = []
         self.load_modules()
 
     def load_modules(self):
         """Load/reload modules"""
-        disabled = list(self._ignore_mods)
-        for mod_name, enabled in self.madcow.config.modules:
-            if not enabled:
-                disabled.append(mod_name)
-        private = delim_re.split(self.madcow.config.modules.private)
-        log.info('reading modules from %s', self.mod_dir)
-        try:
-            filenames = os.listdir(self.mod_dir)
-        except Exception, error:
-            log.warn("Couldn't load modules from %s: %s", self.mod_dir, error)
-            log.exception(error)
-            return
-        for filename in filenames:
-            if not self._pyext.search(filename):
-                continue
-            mod_name = self._pyext.sub(u'', filename)
-            if mod_name in disabled:
-                log.debug('skipping %s: disabled', mod_name)
-                continue
-            if mod_name in self.modules:
-                mod = self.modules[mod_name][u'mod']
-                try:
+        self.madcow.log.info('loading modules')
+        for name in self.names:
+            try:
+                mod = __import__('madcow.' + self.subdir, globals(), locals(), [name])
+                mod = getattr(mod, name)
+                if not mod.Main.enabled:
+                    raise MadcowError('this module is marked as disabled')
+                if name in self.modules:
                     reload(mod)
-                    log.debug('reloaded module %s', mod_name)
-                except Exception, error:
-                    log.warn("couldn't reload %s: %s", mod_name, error)
-                    del self.modules[mod_name]
-                    continue
-            else:
-                try:
-                    mod = __import__(u'%s.%s' % (self.subdir, mod_name),
-                                     globals(), locals(), [u'Main'])
-                except Exception, error:
-                    log.warn("couldn't load module %s: %s", mod_name, error)
-                    continue
-                self.modules[mod_name] = {u'mod': mod,
-                                          u'private': mod_name in private}
-            try:
-                obj = mod.Main(self.madcow)
+                self.modules[name] = {
+                        'mod': mod,
+                        'obj': mod.Main(self.madcow),
+                        'private': name in settings.PRIVATE_MODULES,
+                        }
+                help = getattr(self.modules[name]['obj'], 'help', None)
+                if help:
+                    self.help.append(help)
+                self.madcow.log.info('loaded module: %s', name)
             except Exception, error:
-                log.warn("failure loading %s: %s", mod_name, error)
-                del self.modules[mod_name]
-                continue
-            if not obj.enabled:
-                log.debug("skipped loading %s: disabled", mod_name)
-                del self.modules[mod_name]
-                continue
-            try:
-                if not obj.help:
-                    raise AttributeError
-                self.help.append(obj.help)
-            except AttributeError:
-                log.debug('no help for module: %s', mod_name)
-            self.modules[mod_name][u'obj'] = obj
-            log.debug('loaded module: %s', mod_name)
-
-        # if debug level set, show execution order/details of modules
-        if log.root.level <= log.DEBUG:
-            try:
-                for mod_name, mod in self.by_priority():
-                    log.debug('%-13s: pri=%3s thread=%-5s stop=%s',
-                              mod_name, obj.priority,
-                              obj.allow_threading,
-                              obj.terminate)
-            except AttributeError:
-                pass
+                self.madcow.log.warn('failed to load %s: %s', name, error)
+                if name in self.modules:
+                    del self.modules[name]
 
     def by_priority(self):
         """Return list of tuples for modules, sorted by priority"""
@@ -766,117 +700,33 @@ def run(base):
         raise MadcowError('A new bot has been created at %s, please modify config and rerun' % base)
 
     os.environ['MADCOW_BASE'] = base
-    log = get_logger(stream=sys.stdout)
-    log.error('why hello there')
+    log = get_logger('madcow', stream=sys.stdout, unique=False)
 
-    protocol = __import__('madcow.protocol', globals(), locals(), [settings.PROTOCOL])
-    protocol = getattr(protocol, settings.PROTOCOL).ProtocolHandler
+    try:
+        log.info('setting up http')
+        http.setup(cookies=settings.HTTP_COOKIES, agent=settings.HTTP_AGENT, timeout=settings.HTTP_TIMEOUT)
 
-    http.setup(cookies=settings.HTTP_COOKIES, agent=settings.HTTP_AGENT, timeout=settings.HTTP_TIMEOUT)
+        log.info('loading protocol handler')
+        protocol = __import__('madcow.protocol', globals(), locals(), [settings.PROTOCOL])
+        protocol = getattr(protocol, settings.PROTOCOL).ProtocolHandler
 
-
-def main():
-    """Entry point to set up bot and run it"""
-
-
-    # daemonize if requested, but not when interactive!
-    # note: this must happen BEFORE forking, otherwise the pid it
-    # records will be incorrect and fuck up any rc scripts.
-    if config.main.detach or opts.detach:
-        if __name__ != u'__main__':
-            log.warn(u'not detaching in interactive shell')
-        elif protocol == u'cli':
-            log.warn(u'not detaching for commandline client')
-        else:
+        if settings.DETACH and protocol.allow_detach:
+            log.info('turning into a daemon')
             daemonize()
 
-    # if specified, log to file as well
-    if config.main.logfile:
-        logfile = config.main.logfile
-        if not logfile.startswith('/'):
-            logfile = os.path.join(prefix, logfile)
-        handler = log.FileHandler(logfile)
-        handler.setFormatter(log.root.handlers[0].formatter)
-        log.root.addHandler(handler)
-        log.info('logging messages to %s', logfile)
+        if os.path.exists(settings.PIDFILE):
+            log.warn('removing stale pidfile')
+            os.remove(settings.PIDFILE)
+        with open(settings.PIDFILE, 'wb') as fp:
+            fp.write(str(os.getpid()))
 
-    # determine pidfile to use (commandline overrides config)
-    if opts.pidfile:
-        pidfile = opts.pidfile
-    else:
-        pidfile = config.main.pidfile
+        protocol(base).start()
 
-    # write pidfile. from this point on, capture ALL exceptions
-    # so that the pidfile can be removed when we're done
-    if pidfile:
-        if os.path.exists(pidfile):
-            log.warn('removing stale pidfile: %s', pidfile)
-            os.remove(pidfile)
-        try:
-            pidfp = open(pidfile, u'wb')
-            try:
-                pidfp.write(unicode(os.getpid()))
-            finally:
-                pidfp.close()
-        except Exception, error:
-            log.warn('failed to write %s: %s', pidfile, error)
-            log.exception(error)
+    except:
+        log.exception('A fatal error ocurred')
+        raise
 
-    # import protocol handler
-    handler = None
-    try:
-        module = __import__(u'protocols', globals(), locals(), [protocol])
-        handler = getattr(module, protocol).ProtocolHandler
-    except ImportError, error:
-        # give useful error messages for some known failures (*cough* piece
-        # of shit SILC *cough*)
-        if unicode(error) == u'No module named silc':
-            log.error(u'you must install silc-toolkit and pysilc!')
-        else:
-            try:
-                so = re.search(r'Shared object "(libsilc.*?)" not found',
-                               unicode(error)).group(1)
-                log.error(u'pysilc cannot find silc-toolkit, try setting '
-                          u'LD_LIBRARY_PATH to the location of ' + so)
-            except AttributeError:
-                log.error('error loading protocol %s: %s', protocol, error)
-    except AttributeError:
-        log.error(u'no handler found for protocol: ' + protocol)
-    except Exception, error:
-        log.exception(error)
-
-    # try psyco optimization
-    if config.main.psyco and protocol != u'ipython':
-        try:
-            import psyco
-            psyco.cannotcompile(re.compile)
-            psyco.full()
-            log.info(u'psyco full scan complete')
-        except ImportError:
-            pass
-
-    if handler:
-        # actually run bot
-        try:
-            bot = handler(config, prefix)
-            bot.start()
-        except Exception, error:
-            log.error(u'fatal error in bot, shutting down')
-            log.exception(error)
-
-        # this would be in a finally block, but 2.4 compatibility :/
-        try:
-            bot.stop()
-        except Exception, error:
-            log.exception(error)
-
-    if pidfile and os.path.exists(pidfile):
-        log.info(u'removing pidfile')
-        try:
-            os.remove(pidfile)
-        except Exception, error:
-            log.warn('failed to remove pidfile %s', pidfile)
-            log.exception(error)
-
-    log.info(u'madcow is shutting down')
-    return 0
+    finally:
+        if os.path.exists(settings.PIDFILE):
+            log.info('removing pidfile')
+            os.remove(settings.PIDFILE)

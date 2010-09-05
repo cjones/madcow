@@ -21,7 +21,7 @@
 
 import re
 import socket
-from utils import Module
+from madcow.util import Module
 
 class Main(Module):
 
@@ -46,5 +46,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

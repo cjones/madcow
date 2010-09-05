@@ -21,11 +21,11 @@
 
 import re
 from pyfiglet import Figlet
-from utils import Module
+from madcow.util import Module
 import random
 import os
 import logging as log
-from import encoding
+import encoding
 
 __author__ = u'James Johnston <jjohnston@email4life.com>'
 
@@ -68,5 +68,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

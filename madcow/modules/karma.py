@@ -19,7 +19,7 @@
 
 """Infobot style karma"""
 
-from utils import Module
+from madcow.util import Module
 import re
 from learn import Main as Learn
 import logging as log

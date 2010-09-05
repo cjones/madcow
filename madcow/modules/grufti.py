@@ -23,10 +23,10 @@ from __future__ import with_statement
 import re
 import os
 import random
-from utils import Module
+from madcow.util import Module
 import logging as log
 import shutil
-from import encoding
+import encoding
 
 class Main(Module):
 

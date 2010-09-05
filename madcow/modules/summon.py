@@ -21,7 +21,7 @@
 
 import re
 from learn import Main as Learn
-from utils import Module
+from madcow.util import Module
 from smtplib import SMTP
 import logging as log
 

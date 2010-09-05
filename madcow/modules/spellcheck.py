@@ -23,8 +23,8 @@ from urlparse import urljoin
 import logging as log
 import re
 
-from utils import Module, stripHTML
-from useragent import getsoup
+from madcow.util import Module, stripHTML
+from madcow.util.http import getsoup
 
 __version__ = '2.0'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -53,5 +53,5 @@ class Main(Module):
         return u'%s: %s' % (nick, res)
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

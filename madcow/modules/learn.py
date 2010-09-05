@@ -20,7 +20,7 @@
 """Module to handle learning"""
 
 import re
-from utils import Module
+from madcow.util import Module
 import logging as log
 
 try:

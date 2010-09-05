@@ -19,11 +19,11 @@
 
 """Predicted Electoral Vote Count"""
 
-from utils import Module
+from madcow.util import Module
 import logging as log
 import re
-from useragent import geturl
-from colorlib import ColorLib
+from madcow.util.http import geturl
+from madcow.util.color import ColorLib
 
 __version__ = u'0.1'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -81,5 +81,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

@@ -25,7 +25,7 @@ import os
 import urlparse
 import datetime
 import random
-from utils import Module
+from madcow.util import Module
 import logging as log
 from cgi import parse_qsl
 from urllib import urlencode

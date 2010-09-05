@@ -3,9 +3,9 @@
 """Handles WikiMedia queries"""
 
 from BeautifulSoup import BeautifulSoup
-from useragent import geturl
-from utils import stripHTML
-from utils import Module
+from madcow.util.http import geturl
+from madcow.util import stripHTML
+from madcow.util import Module
 from urlparse import urljoin
 import logging as log
 import re
@@ -217,5 +217,5 @@ class Main(Module):
             log.exception(error)
 
 if __name__ == '__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

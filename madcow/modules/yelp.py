@@ -20,8 +20,8 @@
 """Restaraunt reviews"""
 
 from BeautifulSoup import BeautifulSoup
-from useragent import geturl
-from utils import Module
+from madcow.util.http import geturl
+from madcow.util import Module
 from learn import Main as Learn
 from urlparse import urljoin
 import logging as log
@@ -94,5 +94,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

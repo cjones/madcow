@@ -24,9 +24,9 @@ from urllib import quote
 import logging as log
 import re
 
-from utils import Module
-from useragent import getsoup
-from utils import stripHTML
+from madcow.util import Module
+from madcow.util.http import getsoup
+from madcow.util import stripHTML
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -61,5 +61,5 @@ class Main(Module):
 
 
 if __name__ == '__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

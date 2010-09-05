@@ -22,8 +22,8 @@
 import re
 import random
 import math
-from utils import Module
-from colorlib import ColorLib
+from madcow.util import Module
+from madcow.util.color import ColorLib
 
 class Main(Module):
 
@@ -93,5 +93,5 @@ class Main(Module):
                 save_versus, nick, result)
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

@@ -19,13 +19,13 @@
 
 """Rate movies on IMDB/RT/MetaCritic"""
 
-from useragent import geturl
+from madcow.util.http import geturl
 from urlparse import urljoin
 import logging as log
 import re
 
 from BeautifulSoup import BeautifulSoup
-from utils import Module, stripHTML
+from madcow.util import Module, stripHTML
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -172,5 +172,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

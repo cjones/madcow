@@ -19,10 +19,10 @@
 
 """I'm feeling lucky"""
 
-from google import Google
-from utils import Module
+from madcow.util import Module
 import re
 import logging as log
+from madcow.util.google import Google
 
 __version__ = u'0.3'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -47,5 +47,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

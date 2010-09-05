@@ -20,7 +20,7 @@
 """Use Google as a calculator"""
 
 import re
-from utils import Module
+from madcow.util import Module
 from google import Google
 import logging as log
 
@@ -45,5 +45,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

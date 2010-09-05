@@ -19,12 +19,12 @@
 
 """Translation service using Google Translate"""
 
-from utils import Module
+from madcow.util import Module
 import logging as log
 import re
-from useragent import geturl
-from import simplejson
-from utils import stripHTML
+from madcow.util.http import geturl
+import simplejson
+from madcow.util import stripHTML
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -203,7 +203,7 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     import sys
     sys.argv.append('translate: jasdjfsdf')
     test_module(Main)

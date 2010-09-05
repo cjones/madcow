@@ -34,11 +34,9 @@ class ConsoleProtocol(Madcow):
                   u'nick <nick> - change your nick',
                   u'clear - clear screen']
 
-    def __init__(self, config, prefix, scheme=None):
-        if scheme is None:
-            scheme = COLOR_SCHEME
-        super(ConsoleProtocol, self).__init__(config, prefix, scheme)
-        self.user_nick = os.environ[u'USER']
+    def __init__(self, base):
+        super(ConsoleProtocol, self).__init__(base)
+        self.user_nick = os.environ.get('USER', 'UNKNOWN')
         self.shell = Shell(polls=[self.check_response_queue])
         self.usage_lines += self._cli_usage
 

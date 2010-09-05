@@ -24,8 +24,8 @@ from random import choice
 import logging as log
 import re
 
-from useragent import getsoup
-from utils import Module, stripHTML, superscript
+from madcow.util.http import getsoup
+from madcow.util import Module, stripHTML, superscript
 
 __version__ = '2.0'
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -181,6 +181,6 @@ class Main(Module):
 
 
 if __name__ == '__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)
 

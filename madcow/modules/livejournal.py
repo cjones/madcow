@@ -20,9 +20,9 @@
 """Read from LiveJournal"""
 
 import re
-from import feedparser
-from utils import Module, stripHTML
-from useragent import geturl
+import feedparser
+from madcow.util import Module, stripHTML
+from madcow.util.http import geturl
 from urlparse import urljoin
 import logging as log
 
@@ -57,5 +57,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

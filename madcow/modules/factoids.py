@@ -19,13 +19,13 @@
 
 """Emulate Perl InfoBot's factoid feature"""
 
-from utils import Module
+from madcow.util import Module
 import logging as log
 import re
 from re import I
 import os
 import random
-from import encoding
+import encoding
 
 try:
     import dbm
@@ -493,6 +493,6 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)
 

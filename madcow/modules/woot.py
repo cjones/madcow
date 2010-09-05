@@ -20,8 +20,8 @@
 """get the current woot - author: Twid"""
 
 import re
-from import feedparser
-from utils import Module, stripHTML
+import feedparser
+from madcow.util import Module, stripHTML
 import logging as log
 
 class Main(Module):
@@ -50,5 +50,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

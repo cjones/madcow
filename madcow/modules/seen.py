@@ -22,7 +22,7 @@
 import re
 import time
 import os
-from utils import Module
+from madcow.util import Module
 import logging as log
 
 try:

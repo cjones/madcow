@@ -25,8 +25,8 @@ import random
 import re
 
 from BeautifulSoup import BeautifulSoup
-from utils import stripHTML, Module
-from useragent import geturl
+from madcow.util import stripHTML, Module
+from madcow.util.http import geturl
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
 _linebreak = re.compile(r'[\r\n]+')
@@ -225,5 +225,5 @@ class Main(Module):
 
 if __name__ == u'__main__':
     log.root.setLevel(log.DEBUG)
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

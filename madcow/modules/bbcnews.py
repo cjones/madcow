@@ -20,8 +20,8 @@
 """Scrape BBC news"""
 
 import re
-from import feedparser
-from utils import Module
+import feedparser
+from madcow.util import Module
 import urllib
 from urlparse import urljoin
 import logging as log
@@ -54,5 +54,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

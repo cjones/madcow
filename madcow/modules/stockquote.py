@@ -19,11 +19,11 @@
 
 """Get stock quote from yahoo ticker"""
 
-from utils import Module, stripHTML
-from useragent import geturl
+from madcow.util import Module, stripHTML
+from madcow.util.http import geturl
 from urllib import quote
 import logging as log
-from colorlib import ColorLib
+from madcow.util.color import ColorLib
 import locale
 import csv
 import re
@@ -118,5 +118,5 @@ class Main(Module):
 if __name__ == u'__main__':
     import sys
     sys.argv.append('quote CADUSD=X')
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

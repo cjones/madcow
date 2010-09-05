@@ -19,8 +19,8 @@
 
 """Get a random offensive ASCII art"""
 
-from utils import Module, stripHTML
-from useragent import geturl
+from madcow.util import Module, stripHTML
+from madcow.util.http import geturl
 import re
 from urlparse import urljoin
 import random
@@ -60,5 +60,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

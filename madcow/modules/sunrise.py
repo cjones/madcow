@@ -22,9 +22,9 @@
 import logging as log
 import re
 
-from utils import Module, stripHTML
-from useragent import getsoup
-from colorlib import ColorLib
+from madcow.util import Module, stripHTML
+from madcow.util.http import getsoup
+from madcow.util.color import ColorLib
 from learn import Main as Learn
 from google import Google
 
@@ -68,5 +68,5 @@ class Main(Module):
         return u'%s: %s' % (nick, response)
 
 if __name__ == '__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

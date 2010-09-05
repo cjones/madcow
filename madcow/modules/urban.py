@@ -22,8 +22,8 @@
 import logging as log
 import re
 
-from utils import Module, stripHTML
-from useragent import getsoup
+from madcow.util import Module, stripHTML
+from madcow.util.http import getsoup
 from urlparse import urljoin
 
 __version__ = '2.0'
@@ -130,5 +130,5 @@ class Main(Module):
         return Main.newline_re.sub(' ', stripHTML(data)).strip()
 
 if __name__ == '__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

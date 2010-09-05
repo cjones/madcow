@@ -20,11 +20,11 @@
 """NEVAR FORGET"""
 
 import re
-from import feedparser
-from utils import Module, stripHTML
-from useragent import geturl
+import feedparser
+from madcow.util import Module, stripHTML
+from madcow.util.http import geturl
 import logging as log
-from colorlib import ColorLib
+from madcow.util.color import ColorLib
 
 __version__ = u'0.3'
 __author__ = u'cj_ <cjones@gruntle.org>'
@@ -120,5 +120,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

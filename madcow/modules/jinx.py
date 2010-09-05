@@ -22,7 +22,7 @@
 # Handle coke allocation
 
 import time
-from utils import Module
+from madcow.util import Module
 import logging as log
 
 class ChatLine(object):

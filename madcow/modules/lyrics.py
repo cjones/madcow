@@ -23,8 +23,8 @@ from urlparse import urljoin
 import logging as log
 import re
 
-from utils import Module, stripHTML
-from useragent import getsoup
+from madcow.util import Module, stripHTML
+from madcow.util.http import getsoup
 from google import Google, NonRedirectResponse
 
 __version__ = '2.0'
@@ -82,7 +82,7 @@ class Main(Module):
 
 
 if __name__ == '__main__':
-    from utils import test_module
+    from madcow.util import test_module
     import sys
     sys.argv.append('sing around the world daft punk')
     test_module(Main)

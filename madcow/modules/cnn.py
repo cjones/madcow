@@ -19,12 +19,12 @@
 
 """CNN Headline"""
 
-from utils import Module
+from madcow.util import Module
 import logging as log
 import re
-from import feedparser
-#from useragent import geturl   # mimic browser
-from utils import stripHTML    # strip HTML/unescape entities
+import feedparser
+#from madcow.util.http import geturl   # mimic browser
+from madcow.util import stripHTML    # strip HTML/unescape entities
 
 __version__ = u'0.1'
 __author__ = u'Chris Jones <cjones@gruntle.org>'
@@ -48,5 +48,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

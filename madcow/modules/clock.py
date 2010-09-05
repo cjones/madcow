@@ -19,7 +19,7 @@
 
 """Use Google to get time's in various places"""
 
-from utils import Module
+from madcow.util import Module
 from google import Google
 import logging as log
 import re
@@ -58,5 +58,5 @@ Main = WorldClock
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

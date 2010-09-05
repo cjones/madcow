@@ -19,7 +19,7 @@
 
 """Countdown to Obamanation"""
 
-from utils import Module
+from madcow.util import Module
 import logging as log
 import re
 import time
@@ -80,5 +80,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)

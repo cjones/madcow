@@ -6,9 +6,9 @@ import logging as log
 import random
 import re
 from BeautifulSoup import BeautifulSoup
-from useragent import getsoup
-from utils import stripHTML
-from utils import Module
+from madcow.util.http import getsoup
+from madcow.util import stripHTML
+from madcow.util import Module
 import re
 
 __version__ = '0.1'
@@ -37,7 +37,7 @@ def get_text():
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     import sys
     sys.argv.append('txt')
     test_module(Main)

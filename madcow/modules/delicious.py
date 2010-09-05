@@ -19,10 +19,10 @@
 
 """Post URLs to delicious"""
 
-from useragent import UserAgent
+from madcow.util.http import UserAgent
 from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
-from utils import Module, stripHTML
+from madcow.util import Module, stripHTML
 import re
 import logging as log
 

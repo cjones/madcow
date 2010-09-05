@@ -19,10 +19,10 @@
 
 """Track users on steam"""
 
-from utils import Module
+from madcow.util import Module
 import logging as log
 import re
-from useragent import geturl
+from madcow.util.http import geturl
 from urlparse import urljoin
 
 __version__ = u'0.1'
@@ -89,5 +89,5 @@ class Main(Module):
 
 
 if __name__ == u'__main__':
-    from utils import test_module
+    from madcow.util import test_module
     test_module(Main)
