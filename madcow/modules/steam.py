@@ -4,6 +4,7 @@ from madcow.util import Module
 import re
 from madcow.util.http import geturl
 from urlparse import urljoin
+from madcow.conf import settings
 
 class Main(Module):
 

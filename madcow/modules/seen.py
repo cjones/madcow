@@ -22,7 +22,7 @@ class Main(Module):
 
     def init(self):
         self.charset = self.madcow.charset
-        self.dbfile = os.path.join(madcow.base, 'db', 'seen')
+        self.dbfile = os.path.join(self.madcow.base, 'db', 'seen')
 
     def dbm(self):
         return dbm.open(self.dbfile, u'c', 0640)

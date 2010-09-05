@@ -70,7 +70,7 @@ class Main(Module):
     help = u'quote <symbol> - get latest stock quote'
 
     def init(self):
-        self.colorlib = madcow.colorlib
+        self.colorlib = self.madcow.colorlib
 
     def response(self, nick, args, kwargs):
         query = args[0]

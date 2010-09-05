@@ -184,8 +184,8 @@ class Main(Module):
     match_fmt = r'^\s*(?:%s)(?:\s+(.+?))?\s*$'
 
     def init(self):
-        self.wikis = WIKIS
-        for wiki, opts in wikis.iteritems():
+        self.wikis = {}
+        for wiki, opts in WIKIS.iteritems():
             match_re = self.match_fmt % '|'.join(opts['keys'])
             match_re = re.compile(match_re, re.I)
             handler = WikiMedia(opts['baseurl'], **opts['kwargs'])

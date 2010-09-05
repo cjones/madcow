@@ -18,7 +18,7 @@ class Main(Module):
     error = 'Something bad happened'
 
     def init(self):
-        self.colorlib = madcow.colorlib
+        self.colorlib = self.madcow.colorlib
         try:
             self.learn = Learn(madcow=self.madcow)
         except:
