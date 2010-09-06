@@ -105,27 +105,11 @@ class Response(object):
     def get_response(self, nick, args, kwargs):
         try:
             return self.response(nick, args, kwargs)
-        except Exception, error:
-            self.madcow.log.exception('problem with %s %s with args %r', self.type, self.name, args)
-            if self.error is None:
-                message = 'erroring running %s: %s' % (self.name, error)
-            else:
-                if isinstance(self.error, basestring):
-                    message = self.error
-                elif isinstance(self.error, (tuple, list)):
-                    message = random.choice(self.error)
-                else:
-                    message = None
-            if message:
-                return u'%s: %s' % (nick, message)
+        except:
+            self.madcow.log.exception('problem with %s: args=%r', self.type, args)
 
     def response(self, nick, args, kwargs):
         raise NotImplementedError
-
-    @property
-    def name(self):
-        return 'XXX'
-        return os.path.basename(__file__).replace('.py', '')
 
     def response(self, nick, args, kwargs):
         raise NotImplementedError

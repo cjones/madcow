@@ -45,17 +45,8 @@ class Main(Module):
     require_addressing = False
     url = re.compile(r'https?://\S+', re.I)
 
-    def __init__(self, madcow=None):
-        try:
-            username = DELICIOUS_USERNAME
-            password = DELICIOUS_PASSWORD
-        except:
-            username = u''
-            password = u''
-        if not username or not password:
-            self.enabled = False
-            return
-        self.delicious = Delicious(username, password)
+    def init(self):
+        self.delicious = Delicious(settings.DELICIOUS_USERNAME, settings.DELICIOUS_PASSWORD)
 
     def response(self, nick, args, kwargs):
         for url in self.url.findall(args[0]):
