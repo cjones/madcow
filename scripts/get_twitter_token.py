@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/env python
 #
 # Copyright 2007 The Python-Twitter Developers
 #
@@ -17,7 +17,9 @@
 
 import os
 import sys
-sys.path.insert(0, '/home/cjones/madcow/include')
+import madcow
+
+sys.path.insert(0, os.path.join(os.path.dirname(madcow.__file__), 'include'))
 
 # parse_qsl moved to urlparse module in v2.6
 try:
@@ -32,8 +34,13 @@ ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
 AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
 SIGNIN_URL        = 'https://api.twitter.com/oauth/authenticate'
 
-consumer_key    = 'g4RfEj7eJh3jbDNGrZa0g'
-consumer_secret = 'Tk6Kw5zhstfKHFaGLlRdUcG0crTkSWPmtJ8h2a07o'
+print '1. Go to http://dev.twitter.com/apps/new'
+print '2. Fill out the form. Set the application type to "client"'
+print '3. Enter in your Consumer key and Consumer secret here'
+print
+
+consumer_key    = raw_input('Consumer key: ')
+consumer_secret = raw_input('Consumer secret: ')
 
 if consumer_key is None or consumer_secret is None:
   print 'You need to edit this script and provide values for the'
@@ -85,7 +92,9 @@ else:
     print 'The request for a Token did not succeed: %s' % resp['status']
     print access_token
   else:
-    print 'Your Twitter Access Token key: %s' % access_token['oauth_token']
-    print '          Access Token secret: %s' % access_token['oauth_token_secret']
-    print ''
-
+    print 'Here are your auth keys for settings.py:'
+    print
+    print 'TWITTER_CONSUMER_KEY = %r' % consumer_key
+    print 'TWITTER_CONSUMER_SECRET = %r' % consumer_secret
+    print 'TWITTER_TOKEN_KEY = %r' % access_token['oauth_token']
+    print 'TWITTER_TOKEN_SECRET = %r' % access_token['oauth_token_secret']
