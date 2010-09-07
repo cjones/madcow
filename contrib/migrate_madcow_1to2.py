@@ -463,7 +463,4 @@ def main(argv=None):
     return 0
 
 if __name__ == '__main__':
-    fromdir, todir = '/data/backup/madcow', '/home/cjones/test'
-    if os.path.exists(todir):
-        shutil.rmtree(todir)
-    sys.exit(main([fromdir, todir]))
+    sys.exit(main())
