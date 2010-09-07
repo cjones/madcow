@@ -1,4 +1,3 @@
-fc broken
 delicious busted
 test all migration data
 test all protocols
@@ -7,45 +6,12 @@ make detach overrideable
 test ignore
 calc needs support for currency
 
-care
-chp
-clock
-cnn
-dictionary
-election2008
-factoids
-figlet
-fmylife
-google
-grufti
-hugs
-jinx
-joke
-karma
-learn
-livejournal
-lyrics
-megahal
-memebot
-movie
-noaa
-nslookup
-obama
-roll
-seen
-slut
-spellcheck
-stockquote
-summon
-sunrise
-texts
-trek
-urban
-war
-wardb
-weather
-webtender
-wikimedia
-wikiquotes
-woot
-yelp
+/home/cjones/madcow/madcow/include/pyfiglet.py:168: DeprecationWarning: object.__init__() takes no parameters
+  str.__init__(self, *args, **kwargs)
+
+quote: [2010/09/07 02:01:44 - ERROR] AttributeError: 'Main' object has no attribute 'yahoo'
+
+summon: [2010/09/07 02:02:26 - ERROR] NameError: global name 'settings' is not defined
+
+weather: fc by itself broken..
+wikimedia: all kinds of busted

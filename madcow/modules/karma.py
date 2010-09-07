@@ -66,7 +66,10 @@ class Main(Module):
 
     pattern = Module._any
     require_addressing = False
-    help = u"<nick>[++/--] - adjust someone's karma"
+    help = u'\n'.join([
+        u"<nick>[++/--] - adjust someone's karma",
+        u"karma <nick> - see what someone's karma is",
+        ])
     allow_threading = False
 
     def init(self):

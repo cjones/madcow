@@ -84,9 +84,9 @@ MODULES = ['alias',               # allow users to make command aliases
            #'roll',                # roll ad&d dice
            #'slut',                # how slutty is the phrase? (safesearch vs. regular)
            #'steam',               # allow queries into your steam group about who's online
+           #'terror',              # current status of TERROR
            #'texts',               # random texts from last night
            #'trek',                # generate star trek technobabble
-           #'war',                 # current war status
            #'wardb',               # look up warhammer online items and show stats
            #'webtender',           # how to make drinks!
            #'woot',                # latest woot offer

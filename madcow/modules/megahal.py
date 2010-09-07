@@ -105,8 +105,11 @@ class Main(Module):
 
     pattern = re.compile(r'^\s*(brain|mh)\s+(.+?)\s*$', re.I)
     allow_threading = False
-    help = u'mh <line> - talk to megahal'
-    help += u'\nbrain <name> - switch to megahal brain'
+    help = u'\n'.join([
+        u'mh <line> - talk to megahal',
+        u'brain <name> - switch to megahal brain',
+        u'mh #save - force sync of brain to disk',
+        ])
 
     def init(self):
         src = os.path.join(self.madcow.prefix, 'include', 'pymegahal')

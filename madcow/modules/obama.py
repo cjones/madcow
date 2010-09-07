@@ -15,6 +15,7 @@ class Main(Module):
              (u'week', 4),
              (u'month', 12),
              (u'year', 0)]
+    help = u'obama - get precise time since we got a rid of bush'
 
     def response(self, nick, args, kwargs):
         e = time.time() - self.oday

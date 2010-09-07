@@ -169,7 +169,7 @@ madcow/modules/sunrise.py
 madcow/modules/texts.py
 madcow/modules/trek.py
 madcow/modules/urban.py
-madcow/modules/war.py
+madcow/modules/terror.py
 madcow/modules/wardb.py
 madcow/modules/weather.py
 madcow/modules/webtender.py

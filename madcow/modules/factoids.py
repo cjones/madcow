@@ -453,6 +453,13 @@ class Main(Module):
     priority = 99
     allow_threading = False
     terminate = False
+    help = u'\n'.join([
+        'this module picks up factoids using natural language parsing. try stuff like:',
+        'foo is bar.',
+        'foo is also baz.',
+        'what is foo?',
+        'forget foo',
+        ])
 
     def init(self):
         self.factoids = Factoids(parent=self)

@@ -20,6 +20,8 @@ class Main(Module):
     reToken = re.compile(u'({{\s*(.*?)\s*}})')
     reIsRegex = re.compile(u'^/(.+)/$')
 
+    help = 'grufti responses are pre-defined triggers'
+
     def init(self):
         self.data = []
         filename = os.path.join(self.madcow.base, 'response.grufti')

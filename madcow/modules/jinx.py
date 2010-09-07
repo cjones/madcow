@@ -66,6 +66,7 @@ class Main(Module):
     allow_threading = False
     pattern = Module._any
     require_addressing = False
+    help = u'this module watches people who say the same thing within 5 seconds'
 
     def init(self):
         self.chatlog = ChatLog()
