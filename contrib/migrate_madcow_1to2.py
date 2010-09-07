@@ -133,8 +133,10 @@ def migrate(fromdir, todir):
                     test = module
                 if config.get('modules', test) == 'yes':
                     settings.MODULES.append(module)
+                else:
+                    print >> sys.stderr, 'WARN: %r module is disabled' % module
             except NoOptionError:
-                pass
+                print >> sys.stderr, 'WARN: unknown module: %r' % module
     if config.get('steam', 'enabled') == 'yes':
         settings.MODULES.append('steam')
     settings.STEAM_GROUP = config.get('steam', 'group')
