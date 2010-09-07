@@ -119,6 +119,7 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         list_bibles, query, book = args
         if list_bibles:
+            kwargs['req'].make_private()
             return self.list_bibles()
         else:
             return u'%s: %s' % (nick, self.lookup_verse(query, book))
