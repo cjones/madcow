@@ -212,7 +212,5 @@ madcow/include/pymegahal/db/megahal.ban
 madcow/include/pymegahal/db/megahal.trn
 madcow/include/pymegahal/setup.py
 madcow/include/pymegahal/megahal.h
-contrib/madcow.cron
 contrib/migrate_madcow_1to2.py
-contrib/rc.madcow
 contrib/get_twiter_auth_keys.py
