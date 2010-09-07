@@ -22,7 +22,8 @@ except ImportError:
 
 __version__ = '0.1'
 
-brain_files = ['megahal.aux', 'megahal.ban', 'megahal.dic', 'megahal.brn', 'megahal.swp', 'megahal.trn']
+BRAIN_FILES = ['megahal.aux', 'megahal.ban', 'megahal.dic', 'megahal.brn', 'megahal.swp', 'megahal.trn']
+RENAMED_MODULES = {'terror': 'war', 'election': 'election2008', 'translate': 'babel'}
 
 def copy(src, dst):
     shutil.copy(src, dst)
@@ -126,7 +127,11 @@ def migrate(fromdir, todir):
         if module.endswith('.py') and module != '__init__.py':
             module = module.replace('.py', '')
             try:
-                if config.get('modules', module) == 'yes':
+                try:
+                    test = RENAMED_MODULES[module]
+                except KeyError:
+                    test = module
+                if config.get('modules', test) == 'yes':
                     settings.MODULES.append(module)
             except NoOptionError:
                 pass
@@ -298,7 +303,7 @@ def migrate(fromdir, todir):
                 megahal_to = os.path.join(dbdir, filename)
                 for basedir, subdirs, filenames in os.walk(megahal_from):
                     for filename in filenames:
-                        if filename in brain_files:
+                        if filename in BRAIN_FILES:
                             src = os.path.join(basedir, filename)
                             dstpath = src.replace(megahal_from + os.sep, '')
                             dst = os.path.join(megahal_to,  dstpath)
