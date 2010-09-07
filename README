@@ -5,12 +5,38 @@ REQUIREMENTS
     SILC: pysilc-0.5/silc-toolkit-1.1.8 -- Other versions may not work!
 
 
-BASIC USAGE
+INSTALLATION
+
+    $ python setup.py build
+    $ sudo python setup.py install
+
+
+RUNNING THE BOT
 
     $ madcow [-b <dirname>]
 
     This will create a new bot in ~/.madcow unless changed with the -b
     option. Go into here and edit settings.py and rerun the bot.
+
+
+USING IT THE OLD WAY
+
+    If you want to use it the old way (one big dir, no installation) you
+    can do so like this:
+
+    $ mv scripts/madcow madcow.py
+    $ ./madcow.py -b .
+
+
+MIGRATING FROM 1.x
+
+    If you are using a 1.x version of the bot, you can use the migration
+    script in contrib/ to migrate the datafiles/logs into the new format.
+
+    $ ./contrib/migrate_madcow_1to2.py /path/to/old/madcow ~/.madcow
+
+
+BASIC USAGE:
 
     In IRC, message the bot with 'help' to see a list of commands. To
     trigger him publicly, most commands require that you address the
@@ -32,11 +58,7 @@ BASIC USAGE
     channel with people who are irritated by chatty bots, please keep
     this in mind before bringing Madcow online. I completely disclaim
     ANY responsibility for trouble you might get yourself in as a result
-    of taking this bot online without testing it first!  However, if you
-    are in a channel that embraces obnoxious behavior (or at least
-    tolerates it), also see my Irssi plugin gay.pl (named insub.pl in
-    MacPorts and FreeBSD Ports) at:
-    http://gruntle.org/projects/irssi/gay/.
+    of taking this bot online without testing it first!
 
 
 SLIGHTLY MORE ADVANCED USAGE
@@ -61,12 +83,20 @@ AUTO-OPS / ADMIN
     auto-ops.
 
     If you wish to batch-add users for auto-op access without them
-    registering, edit data/db-madcow-passwd and add a line for each
-    user:
+    registering, edit db/passwd and add a line for each user:
 
     nick:*:o
 
     Note they will not be able to login in this case.
+
+
+TWITTER
+
+    Set up a twitter account and follow the people you want to see
+    updates from. Then run the contrib/get_twiter_auth_keys.py script
+    and follow the directions. At the end of the process you should
+    have 4 settings you can copy-paste into your settings.py. Be sure
+    to delete the settings already there, or paste at the bottom.
 
 
 CONTACT
