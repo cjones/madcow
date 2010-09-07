@@ -116,26 +116,21 @@ class Main(Module):
     def init(self):
         colorlib = self.madcow.colorlib
         self.weather = Weather(colorlib)
-        try:
-            self.learn = Learn(madcow=madcow)
-        except:
-            self.learn = None
+        self.learn = Learn(madcow=self.madcow)
 
     def response(self, nick, args, kwargs):
-
-        args = args[0] if args else None
-
-        if not args and self.learn:
-            query = self.learn.lookup(u'location', nick)
-        elif args.startswith(u'@') and self.learn:
-            query = self.learn.lookup(u'location', args[1:])
-        else:
-            query = args
-
+        query = args[0]
         if not query:
-            return u'%s: unknown nick. %s' % (nick, USAGE)
-
-        return u'%s: %s' % (nick, self.weather.forecast(query))
+            location = self.learn.lookup('location', nick)
+        elif query.startswith('@'):
+            location = self.learn.lookup('location', query[1:])
+        else:
+            location = query
+        if location:
+            message = self.weather.forecast(location)
+        else:
+            message = u"I couldn't look that up"
+        return u'%s: %s' % (nick, message)
 
 
 whitespace = re.compile(r'\s+')

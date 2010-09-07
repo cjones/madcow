@@ -4,6 +4,7 @@ import re
 from learn import Main as Learn
 from madcow.util import Module
 from smtplib import SMTP
+from madcow.conf import settings
 
 class Main(Module):
 
