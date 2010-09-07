@@ -35,7 +35,6 @@ UNIQUE_MAX_FILES = 1000
 
 MODULES = ['alias',               # allow users to make command aliases
            'area',                # look up area codes
-           'translate',           # language translations
            'bbcnews',             # bbc news headlines
            'calc',                # google calculator
            'clock',               # world clock
@@ -52,6 +51,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'stockquote',          # get yahoo stock quotes
            'summon',              # summon users (send email/sms)
            'sunrise',             # get sunrise/sunset from google for your area
+           'translate',           # language translations
            'urban',               # look up word/phrase on urban dictionary
            'weather',             # look up weather from wunderground
            'wikimedia',           # look up summaries from various wikis

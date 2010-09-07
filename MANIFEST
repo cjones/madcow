@@ -128,7 +128,7 @@ madcow/modules/__init__.py
 madcow/modules/alias.py
 madcow/modules/area.py
 madcow/modules/artfart.py
-madcow/modules/babel.py
+madcow/modules/translate.py
 madcow/modules/bash.py
 madcow/modules/bbcnews.py
 madcow/modules/bible.py
