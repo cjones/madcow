@@ -22,7 +22,6 @@ def main(argv=None):
     try:
         madcow.run(base=opts.base)
     except Exception, error:
-        raise
         print >> sys.stderr, 'Error: %s' % error
         return 1
     return 0

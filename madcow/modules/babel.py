@@ -18,8 +18,11 @@ class Main(Module):
     """Translation service using Google Translate"""
 
     pattern = re.compile(r'^\s*(tr(?:ans(?:late)?)?(.+?)|list\s+lang(s|uages))\s*$', re.I)
-    help = 'translate <lang> to <lang> [to <lang> ...]: text'
-    help += '\nlist languages - show all translate languages'
+    help = '\n'.join([
+        'translate: <text> - auto-detect language and convert to english',
+        'translate: from <lang> to <lang> [to <lang> ...]: text - specify translation',
+        'list languages - list all available languages',
+        ])
     default_lang = 'english'
     url = 'http://ajax.googleapis.com/ajax/services/language/translate'
 
@@ -168,12 +171,11 @@ class Main(Module):
 
     def translate(self, text, src, dst):
         """Perform the translation"""
-        opts = {'langpair': '%s|%s' % (self.langs[src], self.langs[dst]),
-                'v': '1.0', 'q': text}
-        res = simplejson.loads(geturl(self.url, opts))
+        opts = {'langpair': '%s|%s' % (self.langs[src], self.langs[dst]), 'v': '1.0', 'q': text}
+        res = simplejson.loads(geturl(self.url, opts))['responseData']
+        text = strip_html(res['translatedText'])
         try:
-            lang = self.lookup.get(res['responseData']['detectedSourceLanguage'], 'unknown')
+            text = u'[detected %s] %s' % (self.lookup[res['detectedSourceLanguage']].capitalize(), text)
         except KeyError:
-            lang = dst
-        lang = lang.capitalize()
-        return strip_html('[%s] %s' % (lang, res['responseData']['translatedText']))
+            pass
+        return text

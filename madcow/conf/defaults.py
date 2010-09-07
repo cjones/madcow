@@ -35,7 +35,7 @@ UNIQUE_MAX_FILES = 1000
 
 MODULES = ['alias',               # allow users to make command aliases
            'area',                # look up area codes
-           'babel',               # language translations
+           'translate',           # language translations
            'bbcnews',             # bbc news headlines
            'calc',                # google calculator
            'clock',               # world clock
@@ -95,7 +95,7 @@ MODULES = ['alias',               # allow users to make command aliases
 # these are modules that run on their own periodically if enabled. settings are below
 TASKS = ['updater',             # check for updates to madcow
          'ircops',             # automatically provide ops in irc
-         'tweets',            # gateway for tweet timeline
+         #'tweets',            # gateway for tweet timeline
          ]
 
 PRIVATE_MODULES = ['lyrics']  # list of modules (from MODULES above) that only respond in private message
