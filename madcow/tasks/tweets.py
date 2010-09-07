@@ -15,25 +15,30 @@ class Main(Task):
                                access_token_key=settings.TWITTER_TOKEN_KEY,
                                access_token_secret=settings.TWITTER_TOKEN_SECRET)
         self.api.SetCache(None)  # this fills up /tmp :(
-        self.last = time.time()
+        self.last_id = None
+
+    @staticmethod
+    def get_max_id(tweets):
+        return max(tweets, key=lambda tweet: tweet.id).id
 
     def response(self, *args):
         self.log.info('checking twitter for new tweets')
         status = self.api.GetRateLimitStatus()
-        self.log.debug('rate limit status: %r' % status)
+        self.log.debug('rate limit status: %r', status)
         if status['remaining_hits'] < 10:
             raise ValueError('Hitting the Twitter limit, backing off!')
 
-        self.log.debug(u'getting tweets...')
-        tweets = self.api.GetFriendsTimeline()
-
-        self.log.debug(u'found %d tweets, parsing' % len(tweets))
-        lines = []
-        for tweet in reversed(tweets):
-            time_of_tweet = tweet.GetCreatedAtInSeconds()
-            if time_of_tweet >= self.last:
-                lines.append(u">> tweet from %s: %s <<" % (tweet.user.screen_name, strip_html(tweet.text)))
-
-        if lines:
-            self.last = time.time()
-            return u"\n".join(lines)
+        # first run, just throw away all
+        if self.last_id is None:
+            self.last_id = self.get_max_id(self.api.GetFriendsTimeline())
+            self.log.info('set last twitter id to %d', self.last_id)
+        else:
+            tweets = self.api.GetFriendsTimeline(since_id=self.last_id)
+            if tweets:
+                lines = []
+                for tweet in reversed(tweets):
+                    if tweet.id > self.last_id:
+                        lines.append(u">> tweet from %s: %s <<" % (tweet.user.screen_name, strip_html(tweet.text)))
+                self.last_id = self.get_max_id(tweets)
+                if lines:
+                    return u'\n'.join(lines)
