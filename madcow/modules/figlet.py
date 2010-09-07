@@ -31,10 +31,9 @@ class Main(Module):
     )
 
     def init(self):
-        zipfile = os.path.join(os.path.dirname(pyfiglet.__file__), 'fonts.zip')
-        self.figlet = pyfiglet.Figlet(zipfile=zipfile)
+        self.zipfile = os.path.join(os.path.dirname(pyfiglet.__file__), 'fonts.zip')
 
     def response(self, nick, args, kwargs):
-        self.figlet.setFont(font=random.choice(self.fonts))
-        text = self.figlet.renderText(args[0])
-        return encoding.convert(text)
+        figlet = pyfiglet.Figlet(zipfile=self.zipfile)
+        figlet.set_font(font_name=random.choice(self.fonts))
+        return encoding.convert(figlet.render_text(args[0]))

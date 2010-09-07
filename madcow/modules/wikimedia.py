@@ -27,16 +27,6 @@ WIKIS = {'wikipedia': {
                  'error': 'Search results',
                  },
              },
-         'christopedia': {
-             'keys': ['ch'],
-             'baseurl': 'http://christopedia.us/',
-             'kwargs': {
-                 'random': '/Special:Random',
-                 'search': '/Special:Search',
-                 'advert': ' - Christopedia, the Christian encyclopedia',
-                 'error': 'Search results',
-                 },
-             },
          'encyclopediadramatica': {
              'keys': ['ed', 'drama'],
              'baseurl': 'http://encyclopediadramatica.com/',

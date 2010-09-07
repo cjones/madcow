@@ -3,8 +3,3 @@ test all protocols
 make detach overrideable
 calc needs support for currency
 auto-osp?
-
-/home/cjones/madcow/madcow/include/pyfiglet.py:168: DeprecationWarning: object.__init__() takes no parameters
-  str.__init__(self, *args, **kwargs)
-
-wikimedia: all kinds of busted
