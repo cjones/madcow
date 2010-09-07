@@ -54,7 +54,7 @@ def main():
           version=__version__,
           packages=packages,
           data_files=data_files,
-          scripts=['scripts/madcow', 'scripts/twitter_auth'],
+          scripts=['scripts/madcow'],
           classifiers=['Development Status :: 5 - Production/Stable',
                        'Environment :: Console',
                        'License :: OSI Approved :: GNU General Public License (GPL)',

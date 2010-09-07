@@ -198,7 +198,6 @@ madcow/util/http.py
 madcow/util/logging.py
 madcow/util/shell.py
 scripts/madcow
-scripts/twitter_auth
 madcow/conf/response.grufti
 madcow/include/BeautifulSoup.py
 madcow/include/feedparser.py
@@ -217,3 +216,4 @@ madcow/include/pymegahal/megahal.h
 contrib/madcow.cron
 contrib/migrate_madcow_1to2.py
 contrib/rc.madcow
+contrib/get_twiter_auth_keys.py
