@@ -208,7 +208,7 @@ def migrate(fromdir, todir):
     settings.GATEWAY_IMAGE_PATH = config.get('gateway', 'imagePath')
     settings.GATEWAY_IMAGE_URL = config.get('gateway', 'imageURL')
     settings.GATEWAY_PORT = config.getint('gateway', 'port')
-    settings.GATEWAY_SAVE_IMAGES = settings.GATEWAY_IMAGE_URL and settings.GATEWAY_IMAGE_PATH
+    settings.GATEWAY_SAVE_IMAGES = bool(settings.GATEWAY_IMAGE_URL and settings.GATEWAY_IMAGE_PATH)
     settings.ADMIN_ENABLED = config.get('admin', 'enabled') == 'yes'
     settings.ALLOW_REGISTRATION = config.get('admin', 'allowRegistration') == 'yes'
     settings.DEFAULT_FLAGS = config.get('admin', 'defaultFlags')
