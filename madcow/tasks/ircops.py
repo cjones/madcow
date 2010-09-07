@@ -7,10 +7,10 @@ from madcow.util import Task
 class Main(Task):
 
     def init(self):
-        self.frequency = settings.UPDATER_FREQ
-        self.output = None
         if settings.PROTOCOL != 'irc':
             raise ValueError('ircops only relevant for irc protocol')
+        self.frequency = settings.IRC_GIVE_OPS_FREQ
+        self.output = None
 
     def response(self, *args):
         # determine who can be opped
