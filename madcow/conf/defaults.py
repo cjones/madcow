@@ -127,7 +127,6 @@ IRC_DELAY_LINES = 0  # miliseconds
 IRC_KEEPALIVE = True
 IRC_KEEPALIVE_FREQ = 30
 IRC_KEEPALIVE_TIMEOUT = 120
-IRC_GIVE_OPS = False
 IRC_GIVE_OPS_FREQ = 30
 
 # settings for the aim protocol
