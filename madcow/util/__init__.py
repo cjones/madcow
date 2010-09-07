@@ -153,6 +153,15 @@ class Request(object):
     def __init__(self, **kwargs):
         self.__dict__.update(self.defaults, **kwargs)
 
+    def make_private(self):
+        if settings.PROTOCOL == 'irc':
+            self.sendto = self.nick
+        elif settings.PROTOCOL == 'silc':
+            with self.lock:
+                self.sendto = self.silc_sender
+                self.private = True
+                self.channel = u'privmsg'
+
 
 def superscript(text):
     if isinstance(text, str):

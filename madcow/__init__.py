@@ -49,6 +49,7 @@ __author__ = 'Chris Jones <cjones@gruntle.org>'
 __url__ = 'http://code.google.com/p/madcow/'
 
 delim_re = re.compile(r'\s*[,;]\s*')
+help_re = re.compile(r'^help(?:\s+(\w+))?$')
 
 class MadcowError(Exception):
 
@@ -227,14 +228,10 @@ class Madcow(object):
             pre_nicks = '(?:%s)' % '|'.join(pre_nicks)
             pre_pat = r'^\s*%s\s*(.+)$' % pre_nicks
             self._addrpre_re = re.compile(pre_pat, re.I)
-            self._cor1_re = re.compile(
-                    r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nicks, re.I)
-            self._cor2_re = re.compile(
-                    r'^\s*no[ ,]+(.+)$', re.I)
-            self._feedback_re = re.compile(
-                    r'^\s*%s[ !]*\?[ !]*$' % nicks, re.I)
-            self._addrend_re = re.compile(
-                    r'^(.+),\s+%s\W*$' % nicks, re.I)
+            self._cor1_re = re.compile(r'^\s*no[ ,]+%s[ ,:-]+\s*(.+)$' % nicks, re.I)
+            self._cor2_re = re.compile(r'^\s*no[ ,]+(.+)$', re.I)
+            self._feedback_re = re.compile(r'^\s*%s[ !]*\?[ !]*$' % nicks, re.I)
+            self._addrend_re = re.compile(r'^(.+),\s+%s\W*$' % nicks, re.I)
 
         if self._feedback_re.search(req.message):
             req.feedback = req.addressed = True
@@ -273,23 +270,32 @@ class Madcow(object):
         if req.nick.lower() in self.ignore_list:
             self.log.info(u'Ignored %r from %s', req.message, req.nick)
             return
+
+        # builtins
         if req.feedback:
             self.output(u'yes?', req)
             return
-        if req.addressed and req.message.lower() == u'help':
-            if settings.PROTOCOL == 'irc':
-                req.sendto = req.nick
-            elif settings.PROTOCOL == 'silc':
-                with self.lock:
-                    req.sendto = req.silc_sender
-                    req.private = True
-                    req.channel = u'privmsg'
-            self.output(self.usage(), req)
-            return
-        if req.addressed and req.message.lower() == u'version':
-            res = u'madcow %s by %s: %s' % (__version__, __author__, MADCOW_URL)
-            self.output(res, req)
-            return
+        if req.addressed:
+            lmessage = req.message.lower().strip()
+            help_result = help_re.search(lmessage)
+            if help_result is not None:
+                if settings.PRIVATE_HELP:
+                    req.make_private()
+                module = help_result.group(1)
+                if module:
+                    if module in self.modules.modules:
+                        self.output(self.modules.modules[module]['obj'].help, req)
+                    elif module == u'all':
+                        self.output(self.usage(), req)
+                    else:
+                        self.output(u'Unknown module %s' % module, req)
+                else:
+                    self.output(u'usage: help [<module>|all]', req)
+                    self.output(u'modules: %s' % u' '.join(sorted(self.modules.modules)), req)
+                return
+            if lmessage == u'version':
+                self.output(u'madcow %s by %s: %s' % (__version__, __author__, __url__), req)
+                return
         if req.private:
             response = self.admin.parse(req)
             if response is not None and len(response):
@@ -317,7 +323,6 @@ class Madcow(object):
             # see if we can filter some of this information..
             kwargs = {u'req': req}
             kwargs.update(req.__dict__)
-
             request = (obj, req.nick, args, kwargs,)
 
             if (settings.PROTOCOL in (u'cli', u'ipython') or not obj.allow_threading):
@@ -680,19 +685,16 @@ def run(base):
     """Execute the main bot"""
 
     # if this is a new bot, create base and stop
-    new_bot = False
+    base = os.path.realpath(base)
     for subdir in 'db', 'log':
         dir = os.path.join(base, subdir)
         if not os.path.exists(dir):
             os.makedirs(dir)
-            new_bot = True
     settings_file = os.path.join(base, 'settings.py')
     default_settings_file = os.path.join(PREFIX, 'conf', 'defaults.py')
     if not os.path.exists(settings_file):
         shutil.copy(default_settings_file, settings_file)
         os.chmod(settings_file, 0644)
-        new_bot = True
-    if new_bot:
         raise MadcowError('A new bot has been created at %s, please modify config and rerun' % base)
 
     os.environ['MADCOW_BASE'] = base

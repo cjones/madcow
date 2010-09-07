@@ -16,6 +16,7 @@ ENCODING = 'utf-8'  # encoding of your system or the protocol you are communicat
 OWNER_NICK = 'yournick'  # in irc/silc/aim set to your name to be given auto-admin
 ALLOW_REGISTRATION = True  # allow other users to register with the bot
 DEFAULT_FLAGS = ''  # flags given to registered users o=auto-op (irc only), a=admin
+PRIVATE_HELP = True  # if True, redirects "help" output to private message
 
 ###############
 ### LOGGING ###
