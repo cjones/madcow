@@ -1,7 +1,6 @@
 README
 CHANGELOG
 COPYING
-setup.cfg
 setup.py
 madcow/__init__.py
 madcow/conf/__init__.py
