@@ -79,8 +79,9 @@ def validate_list(name, objects):
 
 def migrate(fromdir, todir):
     os.makedirs(todir)
-    for subdir in 'db', 'log':
-        os.makedirs(os.path.join(todir, subdir))
+    dbdir = os.path.join(todir, 'db')
+    if not os.path.exists(dbdir):
+        os.makedirs(dbdir)
     data = None
     config = ConfigParser()
     config.read(os.path.join(fromdir, 'include', 'defaults.ini'))
@@ -99,7 +100,7 @@ def migrate(fromdir, todir):
     nicks.add(config.get('silcplugin', 'nick'))
     settings.PROTOCOL = config.get('main', 'module')
     settings.IRC_HOST = config.get('irc', 'host')
-    settings.IRC_PORT = config.get('irc', 'port')
+    settings.IRC_PORT = config.getint('irc', 'port')
     settings.IRC_SSL = config.get('irc', 'ssl') == 'yes'
     settings.IRC_PASSWORD = config.get('irc', 'password')
     settings.IRC_RECONNECT = config.get('irc', 'reconnect') == 'yes'
@@ -312,6 +313,27 @@ def migrate(fromdir, todir):
         migrate_memebot(config, dbdir, fromdir)
     except Exception, error:
         print >> sys.stderr, "couldn't migrate memebot: %s" % error
+
+    src = os.path.join(fromdir, 'logs')
+    if os.path.isdir(src):
+        print 'copying logs'
+        logdir = os.path.join(todir, 'log')
+        os.makedirs(logdir)
+        dst = os.path.join(logdir, 'public')
+        main_log = []
+        name = 'madcow.log'
+        count = [0]
+        def check(basedir, filenames):
+            count[0] += len(filenames)
+            if name in filenames:
+                main_log.append(os.path.join(basedir, name))
+                count[0] -= 1
+                return [name]
+            return []
+        shutil.copytree(src, dst, ignore=check)
+        print 'copied %d public logs' % count[0]
+        if main_log:
+            copy(main_log[0], os.path.join(logdir, name))
 
 
 def migrate_memebot(config, dbdir, fromdir):
