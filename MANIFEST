@@ -139,7 +139,7 @@ madcow/modules/clock.py
 madcow/modules/cnn.py
 madcow/modules/delicious.py
 madcow/modules/dictionary.py
-madcow/modules/election2008.py
+madcow/modules/election.py
 madcow/modules/factoids.py
 madcow/modules/figlet.py
 madcow/modules/fmylife.py

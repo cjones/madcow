@@ -40,7 +40,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'clock',               # world clock
            'cnn',                 # show cnn headline
            'dictionary',          # definition of words
-           'election2008',        # current electoral vote predictor for 2008 US election
+           'election',        # current electoral vote predictor for 2008 US election
            'google',              # i'm feeling lucky query
            'learn',               # used for various modules to cache per-user data
            'movie',               # rate movie on imdb & rotten tomatoes

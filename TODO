@@ -5,11 +5,8 @@ test all protocols
 test aliasing
 make detach overrideable
 test ignore
+calc needs support for currency
 
-bash
-bbcnews
-bible
-calc
 care
 chp
 clock
