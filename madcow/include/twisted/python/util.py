@@ -235,7 +235,7 @@ def padTo(n, seq, default=None):
     return blank
 
 def getPluginDirs():
-    from import twisted
+    import twisted
     systemPlugins = os.path.join(os.path.dirname(os.path.dirname(
                             os.path.abspath(twisted.__file__))), 'plugins')
     userPlugins = os.path.expanduser("~/TwistedPlugins")

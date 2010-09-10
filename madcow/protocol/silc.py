@@ -29,7 +29,7 @@ import silc
 import time
 import logging as log
 from time import sleep, time as unix_time
-from import encoding
+import encoding
 
 COLOR_SCHEME = 'mirc'
 

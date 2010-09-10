@@ -19,12 +19,12 @@
 
 from twisted.internet import protocol, reactor
 from twisted.words.protocols import oscar
-from utils import strip_html
+from madcow.util import strip_html, get_logger
 from madcow import Madcow, Request
 from time import sleep
-import logging as log
 import textwrap
 import re
+from madcow.conf import settings
 
 #COLOR_SCHEME = 'html'
 COLOR_SCHEME = None
@@ -41,28 +41,25 @@ class AIMProtocol(Madcow):
     tag_re = re.compile(r'(<(\S+?).*?>.*?</\2>)', re.DOTALL)
     whitespace_re = re.compile(r'(\s+)')
 
-    def __init__(self, config, prefix, scheme=None):
-        if scheme is None:
-            scheme = COLOR_SCHEME
-        super(AIMProtocol, self).__init__(config, prefix, scheme)
+    def __init__(self, base):
+        super(AIMProtocol, self).__init__(base, scheme=COLOR_SCHEME)
 
     def run(self):
         """Log in to AOL's servers and enter main event loop"""
-        log.info(u'[AIM] Logging into aol.com')
+        self.log.info(u'[AIM] Logging into aol.com')
         p = protocol.ClientCreator(reactor, OSCARAuth,
-                                   self.config.aim.username,
-                                   self.config.aim.password, icq=0)
+                                   settings.AIM_USERNAME,
+                                   settings.AIM_PASSWORD, icq=0)
         p.connectTCP(*self.server)
-        log.info('[AIM] Connected')
+        self.log.info('[AIM] Connected')
         p.protocolClass.BOSClass.bot = self
-
         reactor.callInThread(self.poll)
         reactor.run()
-        log.info(u'[AIM] Connection closed')
+        self.log.info(u'[AIM] Connection closed')
 
     def botname(self):
         """Name used for addressing purposes"""
-        return self.config.aim.username
+        return settings.AIM_USERNAME
 
     def protocol_output(self, message, req=None):
         """This is how we send shit to AOL.. what a mess"""
@@ -110,7 +107,7 @@ class AIMProtocol(Madcow):
                 sleep(1)
 
         except Exception, error:
-            log.exception(error)
+            self.log.exception(error)
 
     def poll(self):
         """This thread looks for responses and dispatches them to clients"""
@@ -155,22 +152,22 @@ class OSCARConnection(oscar.BOSConnection):
     def initDone(self):
         """After auth, we need to set a few things up"""
         self.bot.oscar_connection = self
-        log.info(u'[AIM] Initialization finished')
+        self.bot.log.info(u'[AIM] Initialization finished')
         self.requestSelfInfo()
         self.requestSSI()
-        log.info(u'[AIM] Retreiving buddy list')
+        self.bot.log.info(u'[AIM] Retreiving buddy list')
         self.activateSSI()
-        self.setProfile(self.bot.config.aim.profile)
+        self.setProfile(settings.AIM_PROFILE)
         self.setIdleTime(0)
         self.clientReady()
-        log.info(u'[AIM] Client ready')
+        self.bot.log.info(u'[AIM] Client ready')
 
     def receiveChatInvite(self, user, message, exchange, fullName, instance,
                           shortName, inviteTime):
         """Someone invited us to a chat room :("""
-        log.info(u'[AIM] Invited to chat %s by %s' % (shortName, user.name))
-        if self.bot.config.aim.autojoin:
-            log.info(u'[AIM] Accepting chat invite')
+        self.bot.log.info(u'[AIM] Invited to chat %s by %s' % (shortName, user.name))
+        if settings.AIM_AUTOJOIN_CHAT:
+            self.bot.log.info(u'[AIM] Accepting chat invite')
             self.joinChat(exchange, fullName, instance)
 
     def receiveMessage(self, user, multiparts, flags):
@@ -194,21 +191,13 @@ class OSCARConnection(oscar.BOSConnection):
             return
         message = strip_html(message)
         req = Request(message=message)
-
-        # lines that start with ^ will have their output rainbowed
-        #if req.message.startswith(u'^'):
-        #    req.message = req.message[1:]
-        #    req.colorize = True
-        #else:
-        #    req.colorize = False
-
         req.nick = user.name
         req.channel = u'AIM'
         req.aim = self
         req.private = private
         req.addressed = addressed
         req.chat = chat
-        log.info(u'[AIM] <%s> %s' % (req.nick, req.message))
+        self.bot.log.info(u'[AIM] <%s> %s' % (req.nick, req.message))
         self.bot.check_addressing(req)
         self.bot.process_message(req)
 

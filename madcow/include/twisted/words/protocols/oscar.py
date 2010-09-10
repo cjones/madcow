@@ -616,6 +616,7 @@ class BOSConnection(SNACBased):
             log.msg(tlvs)
 
     def _cbGetChatInfoForInvite(self, info, user, message):
+        print 'yes...'
         apply(self.receiveChatInvite, (user,message)+info)
 
     def oscar_09_03(self, snac):

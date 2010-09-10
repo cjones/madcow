@@ -33,6 +33,6 @@ this is not currently possible.
 """
 
 import sys
-del sys.modules['include.twisted.internet.reactor']
+del sys.modules['twisted.internet.reactor']
 from twisted.internet import selectreactor
 selectreactor.install()
