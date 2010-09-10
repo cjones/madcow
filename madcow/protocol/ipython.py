@@ -52,11 +52,11 @@ class IPythonHandler(Madcow):
 
     """This object is autoloaded by the bot"""
 
-    def __init__(self, config, dir, scheme=None):
+    def __init__(self, base, scheme=None):
         """Protocol-specific initializations"""
         if scheme is None:
             scheme = COLOR_SCHEME
-        super(IPythonHandler, self).__init__(config, dir, scheme)
+        super(IPythonHandler, self).__init__(base, scheme)
 
     def stop(self):
         """Protocol-specific shutdown procedure"""
