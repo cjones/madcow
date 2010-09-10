@@ -24,38 +24,37 @@
 #
 # UPDATE: confirmed to work with pysilc-0.5 and silc-toolkit-1.1.8
 
-import madcow
 import silc
 import time
-import logging as log
-from time import sleep, time as unix_time
-import encoding
+from madcow.conf import settings
+from madcow import Madcow, Request
 
 COLOR_SCHEME = 'mirc'
 
-class SilcPlugin(madcow.Madcow, silc.SilcClient):
+class SilcPlugin(Madcow, silc.SilcClient):
 
-    def __init__(self, config, prefix, scheme=None):
+    def __init__(self, base, scheme=None):
         if scheme is None:
             scheme = COLOR_SCHEME
-        madcow.Madcow.__init__(self, config, prefix, scheme)
-        keys = silc.create_key_pair('silc.pub', 'silc.priv', passphrase='')
-        nick = self.config.silcplugin.nick
+        madcow.Madcow.__init__(self, base, scheme=scheme)
+        passphrase = settings.SILC_PASSPHRASE
+        if not passphrase:
+            passphrase = ''
+        keys = silc.create_key_pair('silc.pub', 'silc.priv', passphrase=passphrase)
+        nick = settings.BOTNAME
         silc.SilcClient.__init__(self, keys, nick, nick, nick)
-        self.channels = madcow.delim_re.split(self.config.silcplugin.channels)
+        self.channels = settings.SILC_CHANNELS
 
         # throttling
-        self.delay = self.config.silcplugin.delay / float(1000)
+        self.delay = settings.SILC_DELAY / float(1000)
         self.last_response = 0.0
 
     def botname(self):
-        return self.config.silcplugin.nick
+        return settings.BOTNAME
 
     def connect(self):
-        log.info(u'connecting to %s:%s' % (self.config.silcplugin.host,
-                                          self.config.silcplugin.port))
-        self.connect_to_server(self.config.silcplugin.host,
-                               self.config.silcplugin.port)
+        self.log.info(u'connecting to %s:%s' % (settings.SILC_HOST, settings.SILC_PORT))
+        self.connect_to_server(settings.SILC_HOST, settings.SILC_PORT)
 
     def run(self):
         self.run_one()  # hack to work with new silc
@@ -68,8 +67,7 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
                 self.running = False
                 break
             except Exception, error:
-                log.error(u'exception caught in silc loop')
-                log.exception(error)
+                self.log.exception(u'exception caught in silc loop')
             time.sleep(0.2)
 
     def private_message(self, sender, flags, message):
@@ -79,7 +77,7 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
         self.on_message(sender, channel, flags, message, False)
 
     def on_message(self, sender, channel, flags, message, private):
-        req = madcow.Request(message=message)
+        req = Request(message=message)
         req.nick = sender.nickname
         req.private = private
         req.silc_sender = sender
@@ -92,8 +90,8 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
             req.sendto = channel
             req.channel = channel.channel_name
 
-        req.message = req.message.decode(encoding.detect(req.message),
-                                         'replace')
+        import encoding
+        req.message = req.message.decode(encoding.detect(req.message), 'replace')
         req.message = self.colorlib.strip_color(req.message)
         self.check_addressing(req)
 
@@ -112,14 +110,14 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
     #  print u'SILC: Notify (Kick):', kicked, reason, kicker, channel
 
     def connected(self):
-        log.info(u'* Connected')
+        self.log.info(u'* Connected')
         for channel in self.channels:
             self.command_call(u'JOIN %s' % channel)
 
     def disconnected(self, msg):
-        log.warn(u'* Disconnected: %s' % msg)
-        if self.config.silcplugin.reconnect:
-            time.sleep(self.config.silcplugin.reconnectWait)
+        self.log.warn(u'* Disconnected: %s' % msg)
+        if settings.SILC_RECONNECT:
+            time.sleep(settings.SILC_RECONNECT_WAIT)
             self.connect()
 
     def protocol_output(self, message, req=None):
@@ -139,16 +137,16 @@ class SilcPlugin(madcow.Madcow, silc.SilcClient):
 
     def _privmsg(self, callback, sendto, message):
         for line in message.splitlines():
-            delta = unix_time() - self.last_response
+            delta = time.time() - self.last_response
             if delta < self.delay:
-                sleep(self.delay - delta)
+                time.sleep(self.delay - delta)
 
             # XXX i guess pysilc expects unicode.. so, no control over
             # what the encoding is, sadly... silc FTL
             #line = line.encode(self.charset, 'replace')
 
             callback(sendto, line)
-            self.last_response = unix_time()
+            self.last_response = time.time()
 
     def send_to_channel(self, channel, message):
         self._privmsg(self.send_channel_message, channel, message)
