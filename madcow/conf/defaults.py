@@ -4,7 +4,7 @@
 ### MAIN CONFIG ###
 ###################
 
-PROTOCOL = 'cli'  # irc, aim, silc, shell, cli
+PROTOCOL = 'cli'  # irc, aim, pysilc, shell, cli
 BOTNAME = 'madcow'  # will use this nickname in irc/silc and for addressing
 ALIASES = ['!']  # list of other nicks the bot will also respond to
 DETACH = False  # set to True to run as a daemon (UNIX only)

@@ -36,7 +36,7 @@ class SilcPlugin(Madcow, silc.SilcClient):
     def __init__(self, base, scheme=None):
         if scheme is None:
             scheme = COLOR_SCHEME
-        madcow.Madcow.__init__(self, base, scheme=scheme)
+        Madcow.__init__(self, base, scheme=scheme)
         passphrase = settings.SILC_PASSPHRASE
         if not passphrase:
             passphrase = ''
