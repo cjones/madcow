@@ -102,6 +102,15 @@ class Madcow(object):
         self.request_queue = queue.Queue()
         self.response_queue = queue.Queue()
         self.lock = threading.RLock()
+        self.ignore_res = []
+        if settings.IGNORE_REGEX:
+            for pattern in settings.IGNORE_REGEX:
+                try:
+                    regex = re.compile(pattern, re.I)
+                except Exception, error:
+                    self.log.warn('%r pattern did not compile', pattern)
+                    continue
+                self.ignore_res.append(regex)
 
     @property
     def prefix(self):
@@ -263,8 +272,9 @@ class Madcow(object):
 
     def process_message(self, req):
         """Process requests"""
-        if u'NOBOT' in req.message:
-            return
+        for ignore_re in self.ignore_res:
+            if ignore_re.search(req.message):
+                return
         if settings.LOG_PUBLIC and not req.private:
             self.logpublic(req)
         if req.nick.lower() in self.ignore_list:

@@ -11,6 +11,7 @@ DETACH = False  # set to True to run as a daemon (UNIX only)
 WORKERS = 5  # how many threads to process requests
 LOG_PUBLIC = True  # set to False to avoid logging public chatter
 IGNORE_NICKS = ['spammer', 'otherbot']  # list of nicknames to completely ignore
+IGNORE_REGEX = ['NOBOT', 'my\.secret\.domain']  # regular expressions that if they match on input text, will be ignored by the bot. this is handy to prevent certain urls being broadcast to delicious, if you have that enabled.
 PIDFILE = 'madcow.pid'  # file (relative to base) for pid for current bot
 ENCODING = 'utf-8'  # encoding of your system or the protocol you are communicating over
 OWNER_NICK = 'yournick'  # in irc/silc/aim set to your name to be given auto-admin
