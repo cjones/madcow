@@ -538,7 +538,7 @@ class Client(httplib2.Http):
         self.method = method
 
     def request(self, uri, method="GET", body=None, headers=None, 
-        redirections=httplib2.DEFAULT_MAX_REDIRECTS, connection_type=None):
+        redirections=httplib2.DEFAULT_MAX_REDIRECTS, connection_type=None, callback=None):
         DEFAULT_CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
         if not isinstance(headers, dict):
@@ -551,6 +551,10 @@ class Client(httplib2.Http):
             parameters = dict(parse_qsl(body))
         else:
             parameters = None
+        if callback is not None:
+            if parameters is None:
+                parameters = {}
+            parameters['oauth_callback'] = callback
 
         req = Request.from_consumer_and_token(self.consumer, 
             token=self.token, http_method=method, http_url=uri, 
