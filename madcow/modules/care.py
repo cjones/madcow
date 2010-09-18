@@ -8,8 +8,10 @@ from google import Google
 
 class Main(Module):
 
-    pattern = re.compile(r'^\s*care(?:(?:[- ]?o)?[- ]?meter)?\s+(.+)\s*$', re.I)
-    help = u'care <#> - display a care-o-meter'
+    pattern = re.compile(r'^\s*(care|dongs|boner)\s+(.+?)\s*$', re.I)
+    help = '\n'.join([
+        u'care <#> - display a care-o-meter',
+        u'dongs <#> - like care, but more penile'])
     error = u'invalid care factor'
     isnum = re.compile(r'^\s*[0-9.]+\s*$')
     sep = re.compile(r'\s*=\s*')
@@ -30,13 +32,16 @@ class Main(Module):
         self.range = self.max - self.min
 
     def response(self, nick, args, kwargs):
-        val = args[0]
+        command, val = args
         if not self.isnum.search(val):
             # try google calculator if not a number
-            val = self.google.calculator(val)
-            val = self.numsep.sub(r'\1\2', val)
-            val = self.sep.split(val)[1]
-            val = val.split()[0]
+            try:
+                val = self.google.calculator(val)
+                val = self.numsep.sub(r'\1\2', val)
+                val = self.sep.split(val)[1]
+                val = val.split()[0]
+            except:
+                return u"%s: what is this i don't even"
         val = float(val)
 
         # sanity check value
@@ -45,10 +50,12 @@ class Main(Module):
         elif val > self.max:
             val = self.max
 
-        # create bar
         pos = int(round((self.size - 1) * ((val - self.min) / self.range)))
-        bar = list(self.bar)
-        bar[pos] = u'o'
-        bar = u''.join(bar)
-        bar = u'|' + bar + u'|'
+        if command == 'care':
+            bar = list(self.bar)
+            bar[pos] = u'o'
+            bar = u''.join(bar)
+            bar = u'|' + bar + u'|'
+        else:
+            bar = u'8' + '=' * pos + 'e'
         return u'%s: %s' % (self.title, bar)
