@@ -22,6 +22,7 @@ class Main(Module):
     size = 40
     min = 0
     max = 100
+    maxboner = 3 * 400
 
     def init(self):
         self.google = Google()
@@ -33,6 +34,7 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         command, val = args
+        iscare = command == 'care'
         if not self.isnum.search(val):
             # try google calculator if not a number
             try:
@@ -48,7 +50,10 @@ class Main(Module):
         if val < self.min:
             val = self.min
         elif val > self.max:
-            val = self.max
+            if iscare:
+                val = self.max
+            else:
+                val = self.maxboner
 
         pos = int(round((self.size - 1) * ((val - self.min) / self.range)))
         if command == 'care':
@@ -56,6 +61,7 @@ class Main(Module):
             bar[pos] = u'o'
             bar = u''.join(bar)
             bar = u'|' + bar + u'|'
+            bar = u'%s: %s' % (self.title, bar)
         else:
             bar = u'8' + '=' * pos + 'e'
-        return u'%s: %s' % (self.title, bar)
+        return bar
