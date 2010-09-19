@@ -72,3 +72,4 @@ else:
     print 'DELICIOUS_CONSUMER_SECRET = %r' % consumer_secret
     print 'DELICIOUS_TOKEN_KEY = %r' % access_token['oauth_token']
     print 'DELICIOUS_TOKEN_SECRET = %r' % access_token['oauth_token_secret']
+    print 'DELICIOUS_SESSION_HANDLE = %r' % access_token['oauth_session_handle']
