@@ -6,15 +6,16 @@ from madcow.util.http import UserAgent
 from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
 from madcow.util import Module, strip_html
+from madcow.util.http import geturl, UA as useragent
 import re
 from madcow.conf import settings
+import oauth2 as oauth
 
 class DeliciousV1(object):
 
     """Simple API frontend"""
 
-    baseurl = u'https://api.del.icio.us/'
-    posturl = urljoin(baseurl, u'/v1/posts/add')
+    posturl = 'https://api.del.icio.us/v1/posts/add'
     title = re.compile(r'<title>(.*?)</title>', re.I+re.DOTALL)
 
     def __init__(self, username, password):
@@ -23,25 +24,32 @@ class DeliciousV1(object):
         auth_handler = HTTPBasicAuthHandler(password_mgr)
         self.ua = UserAgent(handlers=[auth_handler])
 
-    def post(self, url, tags):
+    @staticmethod
+    def get_title(url)
         try:
             html = self.ua.open(url, size=2048)
             title = strip_html(self.title.search(html).group(1))
-        except AttributeError:
+        except:
             title = url
-        opts = {u'url': url,
-                u'description': title,
-                u'tags': u' '.join(tags),
-                u'replace': u'no',
-                u'shared': u'yes'}
-        self.ua.open(self.posturl, opts=opts)
+        return title
+
+    def post(self, url, tags=None):
+        parameters = {'url': url, 'description': self.get_title(url), 'replace': u'no', 'shared': u'yes'}
+        if tags:
+            parameters['tags'] = u' '.join(tags)
+        for key, val in parameters.iteritems()
+            parameters[key] = val.encode('utf-8')
+        self.process(parameters)
+
+    def process(self, parameters):
+        self.ua.open(self.posturl, opts=parameters)
 
 
 class DeliciousV2(DeliciousV1):
 
     """Simple API frontend"""
 
-    posturl = urljoin(baseurl, u'/v2/posts/add')
+    posturl = 'http://api.del.icio.us/v2/posts/add'
 
     def __init__(self, consumer_key, consumer_secret, token_key, token_secret):
         import oauth2 as oauth
@@ -49,25 +57,14 @@ class DeliciousV2(DeliciousV1):
         self.token = oauth.Token(key=token_key, secret=token_secret)
         self.consumer = oauth.Consumer(key=consumer_key, secret=consumer_secret)
 
-    def post(self, url, tags):
-        req = oauth.Request.from_consumer_and_token(
-                self.consumer,
-                token=self.token,
-                http_method='POST',
-                http_url=self.posturl,
-                parameters=opts,
-                )
-        try:
-            html = self.ua.open(url, size=2048)
-            title = strip_html(self.title.search(html).group(1))
-        except AttributeError:
-            title = url
-        opts = {u'url': url,
-                u'description': title,
-                u'tags': u' '.join(tags),
-                u'replace': u'no',
-                u'shared': u'yes'}
-        self.ua.open(self.posturl, opts=opts)
+    def process(self, parameters):
+        request = oauth.Request.from_consumer_and_token(self.consumer,
+                                                        token=self.token,
+                                                        http_method='GET',
+                                                        http_url=self.posturl,
+                                                        parameters=parameters)
+        request.sign_request(self.method, self.consumer, self.token)
+        geturl(request.to_url().replace('+', '%20'))
 
 
 class Main(Module):
@@ -87,7 +84,7 @@ class Main(Module):
                                          settings.DELICIOUS_TOKEN_KEY,
                                          settings.DELICIOUS_TOKEN_SECRET)
         else:
-            raise ValueError('auth_type must be http or oauth')
+            raise ValueError('auth_type must be http or oauth, not %r' % settings.DELICIOUS_AUTH_TYPE)
 
     def response(self, nick, args, kwargs):
         for url in self.url.findall(args[0]):

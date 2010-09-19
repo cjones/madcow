@@ -155,8 +155,15 @@ STEAM_GROUP = None
 STEAM_SHOW_ONLINE = True
 
 # for delicious plugin
+DELICIOUS_AUTH_TYPE = 'http'  # http or oauth
+# http username/password
 DELICIOUS_USERNAME = None
 DELICIOUS_PASSWORD = None
+# oauth tokens (run contrib/get_delicious_auth_keys.py to get this)
+DELICIOUS_CONSUMER_KEY = None
+DELICIOUS_CONSUMER_SECRET = None
+DELICIOUS_TOKEN_KEY = None
+DELICIOUS_TOKEN_SECRET = None
 
 # for the yelp plugin
 YELP_DEFAULT_LOCATION = 'San Francisco, CA'
