@@ -1,5 +1,6 @@
 2.0.0: TBD
-    * TOTAL OVERHAUL
+    * refactor to work more like normal python packages
+    * add oauth support for delicious
 
 1.6.7: Thu Sep  2 16:20:17 PDT 2010
     * emergency fix for tweetprinter and google translate
