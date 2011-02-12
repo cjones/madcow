@@ -52,11 +52,10 @@ class Main(Module):
         cat = result.find('div', 'itemcategories').a.renderContents()
         rating = result.find('div', 'rating').img['alt']
         rating = rating.replace(' star rating', '')
-        reviews = result.find('a', 'reviews')
-        url = urljoin(BASEURL, reviews['href'])
-        reviews = reviews.renderContents()
+        reviews = result.find('span', 'reviews').renderContents()
         address = [i.strip() for i in result.address.findAll(text=True)]
         address = u', '.join(part for part in address if part)
+        url = urljoin(BASEURL, result.find('a', id='bizTitleLink0')['href'])
 
         # return rendered page
         return RESULT_FMT % {'nick': nick, 'name': name, 'cat': cat,
