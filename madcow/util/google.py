@@ -117,11 +117,8 @@ class Google(object):
         try:
             doc = self.ua.open(self.search, {'q': 'time in %s' % query})
             soup = BeautifulSoup(doc)
-            time = soup.find('img', src=self.clock_re).findNext('td')
-            try:
-                time.find('table').extract()
-            except AttributeError:
-                pass
+            table = soup.find('table', 'obcontainer')
+            time = table.find('td', style='font-size:medium')
             return strip_html(time.renderContents().decode('utf-8')).strip()
         except:
             pass
