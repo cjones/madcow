@@ -88,7 +88,6 @@ MODULES = ['alias',               # allow users to make command aliases
            #'terror',              # current status of TERROR
            #'texts',               # random texts from last night
            #'trek',                # generate star trek technobabble
-           #'wardb',               # look up warhammer online items and show stats
            #'webtender',           # how to make drinks!
            #'woot',                # latest woot offer
            ]
