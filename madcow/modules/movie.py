@@ -1,6 +1,6 @@
 """Rate movies on IMDB/RT/MetaCritic"""
 
-from madcow.util.http import geturl
+from madcow.util.http import geturl, getsoup
 from urlparse import urljoin
 import re
 from BeautifulSoup import BeautifulSoup
@@ -61,29 +61,26 @@ class Main(Module):
 
     def rate_rt(self, name):
         """Rating from rotten tomatoes"""
-        page = geturl(self.rt_search, {'search': name}, referer=self.rt_url)
-        soup = BeautifulSoup(page)
-        for table in soup.body('table'):
-            if table.caption.renderContents() == 'Movies':
-                break
+        soup = getsoup(self.rt_search, {'search': name}, referer=self.rt_url)
+        ourname = self.normalize(name)
+        results = soup.find('ul', id='movie_results_ul')
+        if results is None:
+            rating = soup.find('span', id='all-critics-meter').renderContents() + '%'
+            title = strip_html(soup.find('h1', 'movie_title').renderContents().encode('utf-8', 'ignore')).strip()
+            return title, rating
         else:
-            raise ValueError('no movies found in search results')
-        name = self.normalize(name)
-        for row in table.tbody('tr'):
-            link = row.a
-            if self.normalize(link.renderContents()) == name:
-                url = urljoin(self.rt_url, link['href'])
-                break
-        else:
-            raise ValueError('no exact matches')
-        soup = BeautifulSoup(geturl(url, referer=self.rt_search))
-        info = soup.body.find('div', 'movie_info_area')
-        return strip_html(info.h1.renderContents()), info.a['title']
+            for result in results('li'):
+                try:
+                    rating = strip_html(result.find('span', 'tMeterScore').renderContents()).strip()
+                    title = strip_html(result.find('div', 'media_block_content').h3.a.renderContents()).strip()
+                    if ourname == self.normalize(title):
+                        return title, rating
+                except AttributeError:
+                    pass
 
     def rate_imdb(self, name):
         """Get user rating from IMDB"""
-        page = geturl(self.imdb_search, {'s': 'tt', 'q': name},
-                      referer=self.imdb_url)
+        page = geturl(self.imdb_search, {'s': 'tt', 'q': name}, referer=self.imdb_url)
         soup = BeautifulSoup(page)
         if soup.title.renderContents() == 'IMDb Title Search':
             main = soup.body.find('div', id='main')
@@ -102,7 +99,9 @@ class Main(Module):
             else:
                 raise ValueError('no exact matches')
             soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
-        return strip_html(soup.title.renderContents()), soup.body.find('div', 'starbar-meta').b.renderContents()
+        rating = strip_html(soup.find('span', 'rating-rating').renderContents())
+        realname = strip_html(soup.title.renderContents().replace(' - IMDb', ''))
+        return realname, rating
 
     def gettop(self):
         """Get box office ratings"""
