@@ -24,7 +24,7 @@ class Main(Module):
             user = None
         if user is None or user == u'':
             doc = geturl(self.randomURL)
-            user = re.search(u'"currentJournal": "(.*?)"', doc).group(1)
+            user = re.search(u'"currentJournal":\s*"(.*?)"', doc).group(1)
         url = urljoin(self.baseURL, u'/users/%s/data/rss' % user)
         rss = feedparser.parse(url)
         entry = strip_html(rss.entries[0].description)[:self.max]
