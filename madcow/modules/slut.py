@@ -78,4 +78,4 @@ class Main(Module):
             self.log.exception('what')
             return u"%s: Sorry, google isn't being cooperative.." % nick
         except WordFiltered, error:
-            return u"%s: Hmm, google is filtering the word '%s'.. 100% slutty!" % (nick, error.word)
+            return u"%s: Hmm, google is filtering the word '%s'.. 100%% slutty!" % (nick, error.word)
