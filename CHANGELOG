@@ -1,4 +1,11 @@
-2.0.0: TBD
+2.0.2: Sun Feb 13 21:52:42 PST 2011
+    * point release to fix some missing files from manifest
+
+2.0.1: Sat Feb 12 01:53:14 PDT 2011
+    * remove obsolete wardb module (website shut down)
+    * update some modules suffering from bitrot: slutcheck, livejournal, yelp, movie ratings, google clock
+
+2.0.0: Sat Sep 18 23:47:21 PDT 2010
     * refactor to work more like normal python packages
     * add oauth support for delicious
 
