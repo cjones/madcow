@@ -66,7 +66,7 @@ class Madcow(object):
     _addrend_re = None
     _feedback_re = None
     _addrpre_re = None
-    _punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+    #_punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
 
     ### INITIALIZATION FUNCTIONS ###
 
@@ -230,8 +230,7 @@ class Madcow(object):
             for nick in [botname] + settings.ALIASES:
                 nick_e = re.escape(nick)
                 nicks.append(nick_e)
-                if nick_e[-1] not in self._punc:
-                    nick_e += '[-,: ]+'
+                nick_e += '[-,: ]+'
                 pre_nicks.append(nick_e)
             nicks = '(?:%s)' % '|'.join(nicks)
             pre_nicks = '(?:%s)' % '|'.join(pre_nicks)
@@ -252,7 +251,7 @@ class Madcow(object):
             pass
 
         try:
-            req.message = self._addrpre_re.search(req.message).group(1)
+            req.message = self._addrpre_re.search(req.message).group(1)  # XXX
             req.addressed = True
         except AttributeError:
             pass
@@ -269,6 +268,7 @@ class Madcow(object):
                 req.correction = True
             except AttributeError:
                 pass
+
 
     def process_message(self, req):
         """Process requests"""
@@ -355,7 +355,11 @@ class Madcow(object):
         logdir = os.path.join(self.base, 'log', 'public')
         if not os.path.exists(logdir):
             os.makedirs(logdir)
-        logfile = os.path.join(logdir, 'public-%s-%s.log' % (req.channel.replace('#', ''), time.strftime('%F')))
+
+        filename = ['public', req.channel.replace('#', '')]
+        if settings.LOG_BY_DATE:
+            filename.append(time.strftime('%F'))
+        logfile = os.path.join(logdir, '-'.join(filename) + '.log')
         with open(logfile, 'a') as fp:
             print >> fp, line.encode(self.charset, 'replace')
 

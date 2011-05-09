@@ -255,3 +255,11 @@ def convert_level(level):
     except (IndexError, ValueError), error:
         raise LoggerError('Invalid level', level, error)
     return level
+
+
+root = Logger()
+debug = root.debug
+info = root.info
+warn = root.warn
+error = root.error
+exception = root.exception

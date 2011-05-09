@@ -40,10 +40,10 @@ class Limerick(object):
 
 class Main(Module):
 
-    pattern = re.compile(u'^\s*(bash|qdb|limerick)(?:\s+(\S+))?', re.I)
+    pattern = re.compile(u'^\s*(bash|qdb)(?:\s+(\S+))?', re.I)
     require_addressing = True
-    help = u'<bash|qdb|limerick> [#|query] - get stupid IRC quotes'
-    sources = {u'bash': Bash(), u'qdb': QDB(), u'limerick': Limerick()}
+    help = u'<bash|qdb> [#|query] - get stupid IRC quotes'
+    sources = {u'bash': Bash(), u'qdb': QDB()}
     error = u'Having some issues, make some stupid quotes yourself'
 
     def response(self, nick, args, kwargs):

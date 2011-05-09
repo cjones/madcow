@@ -12,15 +12,14 @@ class IRCProtocol(Madcow):
     """Implements IRC protocol for madcow"""
 
     events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg',
-              u'namreply', u'pong', u'action']
+              u'namreply', u'pong', u'action', u'nicknameinuse']
 
     def __init__(self, base):
         super(IRCProtocol, self).__init__(base, scheme=COLOR_SCHEME)
-        # this is crazy noisy
-        # if self.log.root.level <= self.log.DEBUG:
-        #     irclib.DEBUG = 1
-        # else:
-        #     irclib.DEBUG = 0
+        if settings.IRC_DEBUG:
+            irclib.DEBUG = 1
+        else:
+            irclib.DEBUG = 0
         self.irc = irclib.IRC()
         self.server = self.irc.server()
         for event in self.events:
@@ -55,6 +54,12 @@ class IRCProtocol(Madcow):
         if message is None:
             message = u'no reason'
         self.server.disconnect(message)
+
+    def on_nicknameinuse(self, server, event):
+        old = self.botname()
+        new = old + '_'
+        self.log.warn('%s in use, trying %s', old, new)
+        server.nick(new)
 
     def run(self):
         self.connect()

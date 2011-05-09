@@ -22,7 +22,7 @@ class Main(Task):
         return max(tweets, key=lambda tweet: tweet.id).id
 
     def response(self, *args):
-        self.log.info('checking twitter for new tweets')
+        self.log.debug('checking twitter for new tweets')
         status = self.api.GetRateLimitStatus()
         self.log.debug('rate limit status: %r', status)
         if status['remaining_hits'] < 10:

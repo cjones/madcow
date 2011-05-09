@@ -29,11 +29,11 @@ WIKIS = {'wikipedia': {
              },
          'encyclopediadramatica': {
              'keys': ['ed', 'drama'],
-             'baseurl': 'http://encyclopediadramatica.com/',
+             'baseurl': 'http://ohinternet.com/',
              'kwargs': {
                  'random': '/Special:Random',
                  'search': '/Special:Search',
-                 'advert': ' - Encyclopedia Dramatica',
+                 'advert': ' - Oh Internet',
                  'error': 'Search results',
                  },
              },
