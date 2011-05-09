@@ -1,3 +1,16 @@
+2.0.3: Mon May  9 01:52:18 PDT 2011
+    * handle nick-in-use in IRC (adds _ to nick until it works)
+    * new option in settings IRC_DEBUG for very verbose messages
+    * new option in settings LOG_BY_DATE to turn on/off logging public messages to date-based files
+    * clean up some noisy debug statements
+    * fix bug in addressing for nicks ending in _
+    * fix encyclopediadramatic to work with ohinternet
+    * fix steam player listing
+    * remove lymiric module, site is gone
+    * remove bbc searching, they don't seem to support this api anymore
+    * fix keyword clash between translate and star trek module
+    * fix a logging error in some conditions
+
 2.0.2: Sun Feb 13 21:52:42 PST 2011
     * point release to fix some missing files from manifest
 
