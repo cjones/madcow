@@ -66,7 +66,7 @@ class Madcow(object):
     _addrend_re = None
     _feedback_re = None
     _addrpre_re = None
-    #_punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+    _punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
 
     ### INITIALIZATION FUNCTIONS ###
 
@@ -230,7 +230,8 @@ class Madcow(object):
             for nick in [botname] + settings.ALIASES:
                 nick_e = re.escape(nick)
                 nicks.append(nick_e)
-                nick_e += '[-,: ]+'
+                if nick_e[-1] not in self._punc:
+                    nick_e += '[-,: ]+'
                 pre_nicks.append(nick_e)
             nicks = '(?:%s)' % '|'.join(nicks)
             pre_nicks = '(?:%s)' % '|'.join(pre_nicks)
