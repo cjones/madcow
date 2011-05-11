@@ -11,8 +11,8 @@ class IRCProtocol(Madcow):
 
     """Implements IRC protocol for madcow"""
 
-    events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg',
-              u'namreply', u'pong', u'action', u'nicknameinuse']
+    events = [u'welcome', u'disconnect', u'kick', u'privmsg', u'pubmsg', u'mode', 'nick',
+              u'namreply', u'pong', u'action', u'nicknameinuse', u'topic', u'join']
 
     def __init__(self, base):
         super(IRCProtocol, self).__init__(base, scheme=COLOR_SCHEME)
@@ -54,6 +54,35 @@ class IRCProtocol(Madcow):
         if message is None:
             message = u'no reason'
         self.server.disconnect(message)
+
+    def on_nick(self, server, event):
+        """Handler for nick change"""
+        old = irclib.nm_to_n(event.source())
+        new = event.target()
+        for channel, nicks in self.names.iteritems():
+            if old in nicks:
+                self.logpublic(channel, '-+- %s is now known as %s' % (old, new))
+                nicks[new] = nicks[old]
+                del nicks[old]
+
+    def on_join(self, server, event):
+        """Handler for join channel"""
+        nick, host = event.source().split('!', 1)
+        channel = event.target()
+        self.logpublic(channel, '-+- %s [%s] has joined %s' % (nick, host, channel))
+
+    def on_mode(self, server, event):
+        """Handler for mode changes"""
+        nick = irclib.nm_to_n(event.source())
+        channel = event.target()
+        self.logpublic(channel, '-+- mode/%s [%s] by %s' % (channel, ' '.join(event.arguments()), nick))
+
+    def on_topic(self, server, event):
+        """Handler for topic changes"""
+        nick = irclib.nm_to_n(event.source())
+        channel = event.target()
+        topic = event.arguments()[0]
+        self.logpublic(channel, '-+- %s changed the topic of %s to: %s' % (nick, channel, topic))
 
     def on_nicknameinuse(self, server, event):
         old = self.botname()
@@ -141,12 +170,18 @@ class IRCProtocol(Madcow):
 
     def on_kick(self, server, event):
         """kicked from channel"""
-        self.log.warn('[IRC] * %s was kicked from %s by %s', event.arguments()[0], event.target(), event.source())
-        if event.arguments()[0].lower() == server.get_nickname().lower():
+        kicker = irclib.nm_to_n(event.source())
+        channel = event.target()
+        kicked, reason = event.arguments()
+
+        self.logpublic(channel, '-+- %s was kicked from %s by %s [%s]' % (
+            kicked, channel, kicker, reason if reason else ''))
+        if kicked.lower() == server.get_nickname().lower():
+            self.log.warn('I was kicked by %s (%s)', kicker, reason)
             if settings.IRC_REJOIN:
                 sleep(settings.IRC_REJOIN_WAIT)
-                server.join(event.target())
-                self._privmsg(event.target(), settings.IRC_REJOIN_MESSAGE)
+                server.join(channel)
+                self._privmsg(channel, settings.IRC_REJOIN_MESSAGE)
 
     def protocol_output(self, message, req=None):
         """output to IRC"""
@@ -173,21 +208,12 @@ class IRCProtocol(Madcow):
             else:
                 output.append(line)
 
-        for i in range(len(output)):
-            # now we can encode it properly
-            output[i] = output[i].encode(self.charset, 'replace')
-            # IRC really doesn't like null characters
-            output[i] = output[i].replace('\x00', '')
-
         # send to IRC socket
-        if req.sendto == 'ALL':
-            channels = self.channels
-        else:
-            channels = [req.sendto]
-        for channel in channels:
-            for line in output:
-                if line:
+        for line in (line.encode(self.charset, 'replace').replace('\x00', '') for line in output):
+            if line:
+                for channel in (self.channels if req.sendto == 'ALL' else [req.sendto]):
                     self._privmsg(channel, line)
+                    self.logpublic(channel, '<%s> %s' % (self.botname(), line))
 
     def _privmsg(self, sendto, line):
         delta = unix_time() - self.last_response

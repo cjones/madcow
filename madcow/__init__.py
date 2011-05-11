@@ -277,7 +277,7 @@ class Madcow(object):
             if ignore_re.search(req.message):
                 return
         if settings.LOG_PUBLIC and not req.private:
-            self.logpublic(req)
+            self.logmessage(req)
         if req.nick.lower() in self.ignore_list:
             self.log.info(u'Ignored %r from %s', req.message, req.nick)
             return
@@ -347,22 +347,20 @@ class Madcow(object):
                 self.log.debug('terminating because %s matched', mod_name)
                 break
 
-    def logpublic(self, req):
+    def logmessage(self, req):
         """Logs public chatter"""
-        message = req.message
-        if req.action:
-            message = u'ACTION: %s' % message
-        line = u'%s <%s> %s' % (time.strftime('%T'), req.nick, message)
+        self.logpublic(req.channel, (u' * %s %s' if req.action else u'<%s> %s') % (req.nick, req.message))
+
+    def logpublic(self, channel, line):
         logdir = os.path.join(self.base, 'log', 'public')
         if not os.path.exists(logdir):
             os.makedirs(logdir)
-
-        filename = ['public', req.channel.replace('#', '')]
+        filename = ['public', channel.replace('#', '')]
         if settings.LOG_BY_DATE:
             filename.append(time.strftime('%F'))
         logfile = os.path.join(logdir, '-'.join(filename) + '.log')
         with open(logfile, 'a') as fp:
-            print >> fp, line.encode(self.charset, 'replace')
+            print >> fp, '%s %s' % (time.strftime('%T'), line.encode(self.charset, 'replace'))
 
     ### MISC FUNCTIONS ###
 
