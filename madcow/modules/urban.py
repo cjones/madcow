@@ -22,12 +22,15 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         query, idx = args
-        if query:
-            if idx:
-                idx = int(idx)
-            response = self.lookup(query, idx)
-        else:
-            response = self.random()
+        try:
+            if query:
+                if idx:
+                    idx = int(idx)
+                response = self.lookup(query, idx)
+            else:
+                response = self.random()
+        except Exception, error:
+            response = u"That doesn't even exist in urban dictionary, stop making stuff up."
         return u'%s: %s' % (nick, response)
 
     def lookup(self, query, idx=None):

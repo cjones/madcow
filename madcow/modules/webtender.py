@@ -19,15 +19,16 @@ class Main(Module):
     error = u"Something ungood happened looking that up, sry"
 
     def response(self, nick, args, kwargs):
-        query = args[0]
-        doc = geturl(self.search, opts={u'verbose': u'on', u'name': query})
-        drink = self.drink.search(doc).group(1)
-        url = urljoin(self.baseurl, drink)
-        doc = geturl(url)
-        title = self.title.search(doc).group(1)
-        ingredients = self.ingredients.findall(doc)
-        instructions = self.instructions.search(doc).group(1)
-        response = u'%s: %s - %s - %s' % (
-                nick, title, u', '.join(ingredients), instructions)
-        response = strip_html(response)
-        return response
+        try:
+            query = args[0]
+            doc = geturl(self.search, opts={u'verbose': u'on', u'name': query})
+            drink = self.drink.search(doc).group(1)
+            url = urljoin(self.baseurl, drink)
+            doc = geturl(url)
+            title = self.title.search(doc).group(1)
+            ingredients = self.ingredients.findall(doc)
+            instructions = self.instructions.search(doc).group(1)
+            response = strip_html(u'%s - %s - %s' % (title, u', '.join(ingredients), instructions))
+        except Exception, error:
+            response = u"That's a made-up drink, sorry."
+        return u'%s: %s' % (nick, response)

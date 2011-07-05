@@ -116,6 +116,8 @@ class Main(Module):
              u'Go to hell.',
              ]
 
+    white_re = re.compile(r'\s+')
+
     def response(self, nick, args, kwargs):
         list_bibles, query, book = args
         if list_bibles:
@@ -138,15 +140,24 @@ class Main(Module):
             return u'Unknown bible.. why do you hate god so much?'
         opts = {'search': query, 'version': book}
         soup = getsoup(self.bg_search, opts, referer=self.bg_search)
-        res = soup.body.find('div', 'result-text-style-normal')
-        res = res.renderContents().decode('utf-8', 'ignore')
+        passage = soup.find('div', 'passage-wrap')
+        for name in 'heading passage-class-0', 'publisher-info-bottom':
+            passage.find('div', name).extract()
+        response = []
+        for para in passage('p'):
+            response.append(para.renderContents())
+        res = ' '.join(response).decode('utf-8', 'ignore')
 
         # convert superscript verse markers to unicode
         while True:
             match = self.sup_re.search(res)
             if not match:
                 break
-            res = res.replace(match.group(0),
-                              superscript(match.group(1)))
+            res = res.replace(match.group(0), superscript(match.group(1)))
 
-        return strip_html(res).strip()
+        # XXX this is like this for a reason
+        res = strip_html(res).replace(u'\xa0', u' ')
+        while u'  ' in res:
+            res = res.replace(u'  ', u' ')
+        res = res.strip()
+        return res

@@ -38,7 +38,7 @@ class Main(Module):
                     else:
                         status = None
                 else:
-                    status = strip_html(game.renderContents()).split('\n')[-1]
+                    status = strip_html(game.renderContents()).split('\n')[-1].replace(' - Join', '')
                 if status:
                     players.append('%s: %s' % (name, status))
         if players:

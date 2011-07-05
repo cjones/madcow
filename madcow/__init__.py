@@ -42,7 +42,7 @@ from madcow.conf import settings
 from madcow.util.color import ColorLib
 from madcow.util.auth import AuthLib
 
-VERSION = 2, 0, 4
+VERSION = 2, 0, 5
 
 __version__ = '.'.join(str(_) for _ in VERSION)
 __author__ = 'Chris Jones <cjones@gruntle.org>'
