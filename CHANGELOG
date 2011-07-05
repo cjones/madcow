@@ -1,3 +1,9 @@
+2.0.5: Tue Jul  5 16:00:20 PDT 2011
+    * friendy (ish) error messages for some modules where lookup fails
+    * cleanup steam output
+    * fix CHP module
+    * fix bible module
+
 2.0.4: Wed May 11 00:04:45 PDT 2011
     * improve public logging for irc to include own speech and some public events
     * fix bug with punctuation-style aliasing
