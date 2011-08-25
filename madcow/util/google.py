@@ -72,7 +72,7 @@ class Google(object):
     whitespace_re = re.compile(r'\s{2,}')
 
     def __init__(self):
-        self.ua = UserAgent(handlers=[NoRedirects, NoErrors])
+        self.ua = UserAgent(handlers=[NoRedirects, NoErrors], agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_1) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.215 Safari/535.1")
 
     def lucky(self, query):
         """Return I'm Feeling Lucky URL for given query"""
@@ -84,14 +84,18 @@ class Google(object):
             raise NonRedirectResponse
         return result
 
+    calc_re = re.compile(r'calculator')
+    white_re = re.compile(r'\s+')
+
     def calculator(self, query):
         """Try to use google calculator for given query"""
         opts = dict(self.calcopts)
         opts[u'q'] = query
         doc = self.ua.open(self.search, opts=opts)
-        if not self.reConversionDetected.search(doc):
-            raise Exception, u'no conversion detected'
-        response = self.reConversionResult.search(doc).group(1)
+        soup = BeautifulSoup(doc)
+        response = soup.find('img', src=self.calc_re).parent.findNext('h2').renderContents()
+        response = ' '.join(response.splitlines())
+        response = response.decode('utf-8', 'ignore')
 
         # turn super scripts into utf8
         parts = []
@@ -100,8 +104,8 @@ class Google(object):
                 part = superscript(part)
             parts.append(part)
         response = u''.join(parts)
-
-        return strip_html(response)
+        response = self.white_re.sub(' ', strip_html(response).strip())
+        return response
 
     def sunrise_sunset(self, query, location):
         """Ask google for the sunrise or sunset from location"""
@@ -121,7 +125,7 @@ class Google(object):
             time = table.find('td', style='font-size:medium')
             return strip_html(time.renderContents().decode('utf-8')).strip()
         except:
-            pass
+            raise
 
     @staticmethod
     def decode(node):

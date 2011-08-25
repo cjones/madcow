@@ -22,7 +22,7 @@ class Main(Module):
     terminate = False
     require_addressing = False
     help = 'score [name | x - y] - get memescore'
-    match_url_re = re.compile(r'(http://\S+)', re.I)
+    match_url_re = re.compile(r'(https?://\S+)', re.I)
     score_request_re = re.compile(r'^\s*score(?:(?:\s+|[:-]+\s*)(\S+?)(?:\s*-\s*(\S+))?)?\s*$', re.I)
     colon_header_re = re.compile(r'^\s*(.*?)\s*:\s*$')
     get_frag_re = re.compile(r'^(.*)#([^;/?:@=&]*)$')
