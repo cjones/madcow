@@ -99,7 +99,7 @@ class Main(Module):
             else:
                 raise ValueError('no exact matches')
             soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
-        rating = strip_html(soup.find('span', 'rating-rating').renderContents())
+        rating = soup.find('span', itemprop='ratingValue').renderContents()
         realname = strip_html(soup.title.renderContents().replace(' - IMDb', ''))
         return realname, rating
 
