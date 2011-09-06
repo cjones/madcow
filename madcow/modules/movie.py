@@ -28,6 +28,7 @@ class Main(Module):
     articles_re = re.compile(r'^\s*(the|an?)\s+', re.I)
     badchars_re = re.compile(r'[^a-z0-9 ]', re.I)
     whitespace_re = re.compile(r'\s+')
+    and_re = re.compile(r'\s+and\s+', re.I)
 
     def init(self):
         self.sources = [('IMDB', self.rate_imdb), ('RT', self.rate_rt)]
@@ -86,16 +87,19 @@ class Main(Module):
             main = soup.body.find('div', id='main')
             name = self.normalize(name)
             url = None
-            for p in main('p', style=None):
-                for row in p.table('tr'):
-                    link = row('td')[2].a
-                    normalized = self.normalize(link.renderContents())
-                    self.log.debug('Comparing: %r == %r', normalized, name)
-                    if normalized == name:
-                        url = urljoin(self.imdb_url, link['href'])
-                        break
-                if url:
-                    break
+            for p in main('p'):
+                if p.b is not None:
+                    section = p.b.renderContents()
+                    if section in ('Titles (Exact Matches)', 'Popular Titles', 'Titles (Partial Matches)'):
+                        for a in p('a'):
+                            text = a.renderContents()
+                            if text:
+                                normalized = self.normalize(text)
+                                if normalized == name:
+                                    url = urljoin(self.imdb_url, a['href'])
+                                    break
+                        if url:
+                            break
             else:
                 raise ValueError('no exact matches')
             soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
@@ -135,4 +139,5 @@ class Main(Module):
         name = name.lower()                            # lowercase only
         name = name.strip()                            # strip whitespace
         name = self.whitespace_re.sub(' ', name)       # compress whitespace
+        name = self.and_re.sub(' ', name)              # the word "and"
         return name
