@@ -15,7 +15,7 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         rss = feedparser.parse(self.url)
-        entry = rss.entries[3]
+        entry = rss.entries[0]
         title, summary, link = map(
                 strip_html, [entry.title, entry.summary, entry.link])
         summary = self.break_re.sub(u' ', summary)
