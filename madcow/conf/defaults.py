@@ -91,6 +91,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'trek',                # generate star trek technobabble
            #'webtender',           # how to make drinks!
            #'woot',                # latest woot offer
+           #'djmemebot',           # memebot's django app backend integration
            ]
 
 # these are modules that run on their own periodically if enabled. settings are below
@@ -204,3 +205,6 @@ HTTP_COOKIES = True
 # check for madcow updates once a day and announce new versions in channel
 UPDATER_FREQ = 86400
 UPDATER_ANNOUNCE_CHANNELS = 'ALL'  # or list of channels
+
+# for django memebot integration
+DJMEMEBOT_PROJECT_ROOT = None
