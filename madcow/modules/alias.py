@@ -5,6 +5,7 @@
 import re
 import os
 from madcow.util import Module
+from madcow.util.textenc import *
 
 class AliasError(Exception):
 
@@ -26,9 +27,8 @@ class AliasDB(object):
 
     """Interface to alias flat file database"""
 
-    def __init__(self, path, charset='ascii'):
+    def __init__(self, path):
         self.path = path
-        self.charset = charset
         self.aliases = []
         if not os.path.exists(path):
             with open(path, 'wb') as file:
@@ -37,8 +37,8 @@ class AliasDB(object):
             for line in file:
                 try:
                     key, val = line.strip().split(None, 1)
-                    key = key.decode(self.charset, 'replace')
-                    val = val.decode(self.charset, 'replace')
+                    key = decode(key)
+                    val = decode(val)
                     self.aliases.append(Alias(key, val))
                 except Exception, error:
                     raise AliasError(u'problem parsing db: %s' % error)
@@ -46,8 +46,8 @@ class AliasDB(object):
     def save(self):
         with open(self.path, 'wb') as file:
             for alias in self:
-                key = alias.key.encode(self.charset, 'replace')
-                val = alias.val.encode(self.charset, 'replace')
+                key = encode(alias.key)
+                val = encode(alias.val)
                 print >> file, '%s %s' % (key, val)
 
     def delete(self, index):
@@ -83,7 +83,7 @@ class Main(Module):
     command_re = re.compile(r'^\s*alias\s+(add|list|del)\s*?(?:\s+(.+?)\s*)?$', re.I)
 
     def init(self):
-        self.db = AliasDB(os.path.join(self.madcow.base, 'db', 'alias'), charset=self.madcow.charset)
+        self.db = AliasDB(os.path.join(self.madcow.base, 'db', 'alias'))
 
     def response(self, nick, args, kwargs):
         line = args[0]

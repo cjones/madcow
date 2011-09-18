@@ -5,6 +5,8 @@ import re
 import codecs
 import chardet
 
+from textenc import encode, decode, get_encoding
+
 DEFAULT = u'ascii'
 meta_re = re.compile(r'<meta\s+(.*?)\s*>', re.I | re.DOTALL)
 attr_re = re.compile(r'\s*([a-zA-Z_][-.:a-zA-Z_0-9]*)(\s*=\s*(\'[^\']*\'|"[^"'
@@ -12,8 +14,14 @@ attr_re = re.compile(r'\s*([a-zA-Z_][-.:a-zA-Z_0-9]*)(\s*=\s*(\'[^\']*\'|"[^"'
 
 def convert(data, headers=None):
     """Return unicode object of data"""
-    if isinstance(data, str):
-        data = data.decode(detect(data, headers), u'replace')
+    if not isinstance(data, unicode):
+        try:
+            encoding = detect(data, headers)
+        except (SystemExit, KeyboardInterrupt):
+            raise
+        except:
+            encoding = None
+        data = decode(data, encoding)
     return data
 
 
@@ -82,14 +90,5 @@ def parseattrs(data):
         attrs[key.lower()] = val
     return attrs
 
-
-def get_encoding():
-    for encoding in sys.getfilesystemencoding(), sys.getdefaultencoding(), 'ascii':
-        try:
-            return codecs.lookup(encoding).name
-        except LookupError:
-            pass
-    else:
-        raise
 
 ENCODING = get_encoding()

@@ -4,6 +4,7 @@ from madcow import Madcow, Request
 import random
 from time import sleep, time as unix_time
 from madcow.conf import settings
+from madcow.util.textenc import *
 
 COLOR_SCHEME = 'mirc'
 
@@ -209,7 +210,7 @@ class IRCProtocol(Madcow):
                 output.append(line)
 
         # send to IRC socket
-        for line in (line.encode(self.charset, 'replace').replace('\x00', '') for line in output):
+        for line in (encode(line).replace('\x00', '') for line in output):
             if line:
                 for channel in (self.channels if req.sendto == 'ALL' else [req.sendto]):
                     self._privmsg(channel, line)
@@ -219,7 +220,7 @@ class IRCProtocol(Madcow):
         delta = unix_time() - self.last_response
         if delta < self.delay:
             sleep(self.delay - delta)
-        self.server.privmsg(sendto.encode(self.charset), line)
+        self.server.privmsg(encode(sendto), line)
         self.last_response = unix_time()
 
     def on_privmsg(self, server, event):
@@ -245,7 +246,7 @@ class IRCProtocol(Madcow):
             req.sendto = req.channel
             req.addressed = False
 
-        req.message = req.message.decode(settings.ENCODING, 'replace')
+        req.message = decode(req.message)
 
         # strip control codes from incoming lines
         req.message = self.colorlib.strip_color(req.message)

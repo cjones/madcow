@@ -7,13 +7,17 @@ import codecs
 import sys
 import os
 
+from textenc import encode, decode, get_encoding
+
 DEBUG, INFO, WARN, ERROR = xrange(4)
 LEVELS = ['DEBUG', 'INFO', 'WARN', 'ERROR']
 
 DEFAULT_LEVEL = INFO
 DEFAULT_FORMAT = '[%(time)s] %(level)s: %(message)s'
 DEFAULT_TIME_FORMAT = '%c'
-DEFAULT_ENCODING = sys.getfilesystemencoding() or sys.getdefaultencoding() or 'ascii'
+DEFAULT_ENCODING = get_encoding()
+
+NoTrap = SystemExit, KeyboardInterrupt
 
 lock = RLock()
 
@@ -48,8 +52,8 @@ class StreamHandler(object):
             pass
 
     def write(self, data):
-        if isinstance(data, unicode):
-            data = data.encode(self.encoding, 'ignore')
+        if not isinstance(data, str):
+            data = encode(data, self.encoding)
         self.stream.write(data)
         self.flush()
 
@@ -59,6 +63,8 @@ class StreamHandler(object):
     def __del__(self):
         try:
             self.close()
+        except NoTrap:
+            raise
         except:
             pass
 
@@ -150,34 +156,30 @@ class Logger(object):
         if isinstance(level, basestring):
             try:
                 level = LEVELS.index(level)
+            except NoTrap:
+                raise
             except:
                 level = len(LEVELS)
         if level >= self.level:
 
             # make sure this is unicode
-            if not isinstance(message, unicode):
-                if not isinstance(message, str):
-                    for encode in str, repr:
-                        try:
-                            message = encode(message)
-                            break
-                        except Exception, error:
-                            pass
-                    else:
-                        message = "Couldn't convert object to string: %s" % error
-                        if level < WARN:
-                            level = WARN
-                message = message.decode(self.encoding, 'ignore')
+            message = decode(message, self.encoding)
 
             # apply any format args.. try not to lose them if there is a problem
             if args:
                 try:
-                    message = message % args
+                    message = message % tuple(decode(arg, self.encoding)
+                                              if isinstance(arg, str) else arg
+                                              for arg in args)
+                except NoTrap:
+                    raise
                 except:
                     try:
                         message = u'message=%r, args=%r' % (message, args)
+                    except NoTrap:
+                        raise
                     except:
-                        pass
+                        message = u"couldn't format message!!"
 
             try:
                 level_name = LEVELS[level]
@@ -187,11 +189,11 @@ class Logger(object):
             self.level_count[level_name] += 1
 
             # make multi-line timestamped so stuff lines up regularly
+            timestamp = datetime.now().strftime(self.time_format)
             for line in message.splitlines():
                 line = line.rstrip()
                 if line:
-                    opts = {'message': line, 'time': datetime.now().strftime(self.time_format), 'level': level_name}
-                    line = self.format % opts
+                    line = self.format % {'message': line, 'time': timestamp, 'level': level_name}
                     for handler in self.handlers:
                         if level >= handler.level:
                             with lock:

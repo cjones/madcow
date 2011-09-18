@@ -47,4 +47,4 @@ class Main(Module):
         return u'%s:\n%s' % (title, lyrics)
 
     def render(self, node):
-        return node.renderContents().decode('utf-8', 'ignore')
+        return decode(node.renderContents(), 'utf-8')

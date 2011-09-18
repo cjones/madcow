@@ -3,6 +3,7 @@
 from urlparse import urljoin
 import re
 from madcow.util import Module, strip_html
+from madcow.util.textenc import *
 from madcow.util.http import getsoup
 
 class Main(Module):
@@ -18,7 +19,7 @@ class Main(Module):
         soup = getsoup(self.google_search, opts, referer=self.google_url)
         a = soup.body.find('a', 'spell')
         if a:
-            res = strip_html(a.renderContents().decode('utf-8', 'ignore'))
+            res = strip_html(decode(a.renderContents(), 'utf-8'))
         else:
             res = u'spelled correctly'
         return u'%s: %s' % (nick, res)

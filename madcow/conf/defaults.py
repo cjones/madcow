@@ -14,7 +14,7 @@ LOG_BY_DATE = True  # set to False to have channel logs all one file instead of 
 IGNORE_NICKS = ['spammer', 'otherbot']  # list of nicknames to completely ignore
 IGNORE_REGEX = ['NOBOT', 'my\.secret\.domain']  # regular expressions that if they match on input text, will be ignored by the bot. this is handy to prevent certain urls being broadcast to delicious, if you have that enabled.
 PIDFILE = 'madcow.pid'  # file (relative to base) for pid for current bot
-ENCODING = 'utf-8'  # encoding of your system or the protocol you are communicating over
+ENCODING = 'utf-8'  # default character set, None for auto (generally utf-8)
 OWNER_NICK = 'yournick'  # in irc/silc/aim set to your name to be given auto-admin
 ALLOW_REGISTRATION = True  # allow other users to register with the bot
 DEFAULT_FLAGS = ''  # flags given to registered users o=auto-op (irc only), a=admin

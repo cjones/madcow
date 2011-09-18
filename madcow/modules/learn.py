@@ -2,6 +2,7 @@
 
 import re
 from madcow.util import Module
+from madcow.util.textenc import *
 import os
 
 try:
@@ -18,7 +19,6 @@ class Main(Module):
     _allowed = [u'location', u'email', u'karma']
 
     def __init__(self, madcow=None):
-        self.charset = madcow.charset
         self.prefix = madcow.base
 
     def dbfile(self, db):
@@ -38,17 +38,17 @@ class Main(Module):
     def lookup(self, db, key):
         dbm = self.dbm(db)
         try:
-            key = key.lower().encode(self.charset, 'replace')
+            key = encode(key.lower())
             if dbm.has_key(key):
-                return dbm[key].decode(self.charset, 'replace')
+                return decode(dbm[key])
         finally:
             dbm.close()
 
     def set(self, db, key, val):
         dbm = self.dbm(db)
         try:
-            key = key.lower().encode(self.charset, 'replace')
-            val = val.encode(self.charset, 'replace')
+            key = encode(key.lower())
+            val = encode(val)
             dbm[key] = val
         finally:
             dbm.close()

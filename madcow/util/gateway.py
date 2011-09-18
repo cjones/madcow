@@ -27,6 +27,7 @@ from urlparse import urljoin
 import errno
 from madcow.util import Request, get_logger
 from madcow.conf import settings
+from madcow.util.textenc import encode, decode, get_encoding
 
 class InvalidPayload(Exception):
 
@@ -141,7 +142,7 @@ class GatewayServiceHandler(Thread):
             try:
                 # parse headers
                 hdrs, self.buf = self.headsep.split(self.buf, 1)
-                hdrs = hdrs.decode(settings.ENCODING, 'replace')
+                hdrs = decode(hdrs)
                 hdrs = self.newline.split(hdrs)
                 hdrs = [hdr.split(u':', 1) for hdr in hdrs]
                 hdrs = [(k.lower(), v.lstrip()) for k, v in hdrs]

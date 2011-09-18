@@ -5,8 +5,9 @@
 import re
 from madcow.util import Module
 from madcow.util.http import getsoup
+from madcow.util.textenc import *
 
-render = lambda node: node.renderContents().decode('utf-8', 'ignore').strip()
+render = lambda node: decode(node.renderContents(), 'utf-8').strip()
 proper = lambda name: ' '.join(word.capitalize() for word in name.split())
 
 class Main(Module):

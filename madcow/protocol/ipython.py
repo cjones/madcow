@@ -9,6 +9,8 @@ from IPython import ipapi
 from IPython import ultraTB
 from IPython.iplib import InteractiveShell
 
+from madcow.util.textenc import encode, decode, get_encoding
+
 COLOR_SCHEME = 'ansi'
 
 class InteractiveShellMadcow(InteractiveShell):
@@ -78,7 +80,7 @@ class IPythonHandler(Madcow):
         """Protocol-specific output method"""
         if req is not None and req.colorize is True:
             message = self.colorlib.rainbow(message)
-        print message.encode(self.charset, 'replace')
+        print encode(message)
 
     def process_message(self, message):
         """Create request object from recived message and process it"""

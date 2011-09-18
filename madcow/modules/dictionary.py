@@ -26,6 +26,6 @@ class Main(Module):
         soup = getsoup(url, referer=self.base_url)
         for br in soup('br'):
             br.extract()
-        val = strip_html(soup.renderContents().decode('utf-8'))
+        val = strip_html(decode(soup.renderContents(), 'utf-8'))
         val = val.replace(u'\xa0', ' ').replace('\n', ' ')
         return self.whitespace_re.sub(' ', val).strip()

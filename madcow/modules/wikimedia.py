@@ -3,6 +3,7 @@
 from BeautifulSoup import BeautifulSoup
 from madcow.util.http import geturl
 from madcow.util import strip_html, Module
+from madcow.util.textenc import *
 from urlparse import urljoin
 import re
 
@@ -72,8 +73,7 @@ class WikiMedia(object):
             spam.extract()
 
         # massage into plain text by concatenating paragraphs
-        content = ' '.join(p.renderContents().decode('utf-8')
-                           for p in soup.findAll('p'))
+        content = u' '.join(decode(p.renderContents(), 'utf-8') for p in soup.findAll('p'))
 
         # clean up rendered text
         content = strip_html(content)                    # strip markup

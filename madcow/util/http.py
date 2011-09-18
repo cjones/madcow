@@ -33,6 +33,7 @@ except ImportError:
     from StringIO import StringIO
 
 from BeautifulSoup import BeautifulSoup
+from textenc import encode, decode, get_encoding
 
 AGENT = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 VERSION = sys.version_info[0] * 10 + sys.version_info[1]
@@ -59,7 +60,7 @@ class UserAgent(object):
             for key in opts:
                 val = opts[key]
                 if isinstance(val, unicode):
-                    opts[key] = val.encode('utf-8', 'replace')
+                    opts[key] = encode(val, 'utf-8')
             query = [urllib.urlencode(opts)]
             if url[4]:
                 query.append(url[4])

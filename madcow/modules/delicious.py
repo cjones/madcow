@@ -7,6 +7,7 @@ from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
 from madcow.util import Module, strip_html
 from madcow.util.http import geturl, UA as useragent
+from madcow.util.textenc import *
 import re
 from madcow.conf import settings
 import oauth2 as oauth
@@ -41,7 +42,7 @@ class DeliciousV1(object):
         if tags:
             parameters['tags'] = u' '.join(tags)
         for key, val in parameters.iteritems():
-            parameters[key] = val.encode('utf-8')
+            parameters[key] = encode(val, 'utf-8')
         self.process(parameters)
 
     def process(self, parameters):

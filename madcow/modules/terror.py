@@ -5,6 +5,7 @@ import feedparser
 from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 from madcow.util.color import ColorLib
+from madcow.util.textenc import *
 
 FORMAT = u'Terror: %s, DoomsDay: %s, BodyCount: %s'
 
@@ -60,7 +61,7 @@ class IraqWar(object):
         try:
             doc = geturl(self._bodycount_url)
             data = self._bodycount_re.search(doc).group(1)
-            data = data.decode('ascii', 'replace')
+            data = decode(data, 'ascii')
             data = strip_html(data)
             data = self._re_whitespace.sub(u' ', data)
             data = data.strip()

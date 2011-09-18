@@ -6,6 +6,7 @@ from re import I
 import os
 import random
 from madcow.util import encoding
+from madcow.util.textenc import *
 
 try:
     import dbm
@@ -162,7 +163,6 @@ class Factoids(object):
 
     def __init__(self, parent):
         self.parent = parent
-        self.charset = self.parent.madcow.charset
 
     # DBM functions
     def get_dbm(self, dbname):
@@ -172,10 +172,10 @@ class Factoids(object):
     def get(self, dbname, key):
         dbm = self.get_dbm(dbname)
         try:
-            key = key.lower().encode(self.charset, 'replace')
+            key = encode(key.lower())
             val = dbm.get(key)
             if isinstance(val, str):
-                val = val.decode(self.charset, 'replace')
+                val = decode(val)
             return val
         finally:
             dbm.close()
@@ -183,8 +183,8 @@ class Factoids(object):
     def set(self, dbname, key, val):
         dbm = self.get_dbm(dbname)
         try:
-            key = key.lower().encode(self.charset, 'replace')
-            val = val.encode(self.charset, 'replace')
+            key = encode(key.lower())
+            val = encode(val)
             dbm[key] = val
         finally:
             dbm.close()
@@ -192,7 +192,7 @@ class Factoids(object):
     def unset(self, dbname, key):
         dbm = self.get_dbm(dbname)
         try:
-            key = key.lower().encode(self.charset, 'replace')
+            key = encode(key.lower())
             if dbm.has_key(key):
                 del dbm[key]
                 return True

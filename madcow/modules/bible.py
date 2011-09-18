@@ -7,6 +7,7 @@ from random import choice
 import re
 from madcow.util.http import getsoup
 from madcow.util import Module, strip_html, superscript
+from madcow.util.textenc import *
 
 class Main(Module):
 
@@ -146,7 +147,7 @@ class Main(Module):
         response = []
         for para in passage('p'):
             response.append(para.renderContents())
-        res = ' '.join(response).decode('utf-8', 'ignore')
+        res = decode(' '.join(response), 'utf-8')
 
         # convert superscript verse markers to unicode
         while True:

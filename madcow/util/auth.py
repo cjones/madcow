@@ -25,6 +25,8 @@ from hashlib import sha1
 from base64 import b64encode, b64decode
 import os
 
+from textenc import encode, decode
+
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'
 __all__ = ['UserNotFound', 'IllegalUserName', 'AuthLib']
@@ -41,9 +43,8 @@ class IllegalUserName(Exception):
 
 class AuthLib(object):
 
-    def __init__(self, path, charset):
+    def __init__(self, path):
         self.path = path
-        self.charset = charset
 
     def get_passwd(self):
         if os.path.exists(self.path):
@@ -56,15 +57,15 @@ class AuthLib(object):
             line = line.strip()
             if not line:
                 continue
-            username, password, flags = map(self.decode, line.split(':'))
-            passwd[username] = {u'password': password, u'flags': flags}
+            username, password, flags = decode(line).split(':', 2)
+            passwd[username] = {'password': password, 'flags': flags}
         return passwd
 
     def write_passwd(self, passwd):
         data = []
         for user, user_data in passwd.iteritems():
             line = u':'.join([user, user_data['password'], user_data['flags']])
-            data.append(self.encode(line))
+            data.append(encode(line))
         with open(self.path, 'wb') as file:
             file.write('\n'.join(data) + '\n')
 
@@ -72,22 +73,21 @@ class AuthLib(object):
         passwd = self.get_passwd()
         if user not in passwd:
             raise UserNotFound(user)
-        passwd[user][u'flags'] = flags
+        passwd[user]['flags'] = flags
         self.write_passwd(passwd)
 
     def change_password(self, user, plain):
         passwd = self.get_passwd()
         if user not in passwd:
             raise UserNotFound(user)
-        passwd[user][u'password'] = self.encrypt(self.encode(plain))
+        passwd[user]['password'] = self.encrypt(encode(plain))
         self.write_passwd(passwd)
 
     def add_user(self, user, plain, flags=''):
         if u':' in user:
             raise IllegalUserName(u'usernames cannot have : in them')
         passwd = self.get_passwd()
-        passwd[user] = {u'password': self.encrypt(plain) if plain else u'*',
-                        u'flags': flags}
+        passwd[user] = {'password': self.encrypt(plain) if plain else u'*', 'flags': flags}
         self.write_passwd(passwd)
 
     def delete_user(self, user):
@@ -101,7 +101,7 @@ class AuthLib(object):
         passwd = self.get_passwd()
         if user not in passwd:
             raise UserNotFound(user)
-        return self.check(passwd[user][u'password'], plain)
+        return self.check(passwd[user]['password'], plain)
 
     def user_exists(self, user):
         return user in self.get_passwd()
@@ -110,11 +110,11 @@ class AuthLib(object):
         passwd = self.get_passwd()
         if user not in passwd:
             raise UserNotFound(user)
-        return passwd[user][u'flags']
+        return passwd[user]['flags']
 
     def encrypt(self, plain):
-        digest, salt = self.get_digest(self.encode(plain))
-        return self.decode(b64encode(salt + digest))
+        digest, salt = self.get_digest(encode(plain))
+        return decode(b64encode(salt + digest))
 
     @staticmethod
     def get_digest(plain, salt=None):
@@ -125,17 +125,6 @@ class AuthLib(object):
     def check(self, encrypted, plain):
         if encrypted == '*':
             return False
-        salted = b64decode(self.encode(encrypted))
+        salted = b64decode(encode(encrypted))
         salt, digest = salted[:4], salted[4:]
-        return digest == self.get_digest(self.encode(plain), salt)[0]
-
-    def encode(self, data):
-        if isinstance(data, unicode):
-            data = data.encode(self.charset, 'replace')
-        return data
-
-    def decode(self, data):
-        if isinstance(data, str):
-            data = data.decode(self.charset, 'replace')
-        return data
-
+        return digest == self.get_digest(encode(plain), salt)[0]

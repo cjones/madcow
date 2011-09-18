@@ -7,6 +7,7 @@ import re
 from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from madcow.util.color import ColorLib
+from madcow.util.textenc import *
 from learn import Main as Learn
 
 class Main(Module):
@@ -48,7 +49,7 @@ class Main(Module):
             return u'NOAA website is having issues'
         current = current.findNext('table').table.table
         temp = current.td.font.renderContents().replace('<br />', '|')
-        temp = strip_html(temp.decode('utf-8')).replace('\n', '').strip()
+        temp = strip_html(decode(temp, 'utf-8')).replace('\n', '').strip()
         cond, _, tempf, tempc = temp.split('|')
         tempc = tempc.replace('(', '').replace(')', '')
         tempf, tempc = self.docolor(tempf, tempc)
@@ -90,5 +91,5 @@ class Main(Module):
 
     @staticmethod
     def render(node):
-        data = strip_html(node.renderContents().decode('utf-8', 'ignore'))
+        data = strip_html(decode(node.renderContents(), 'utf-8'))
         return data.strip()

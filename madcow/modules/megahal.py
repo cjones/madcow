@@ -5,6 +5,7 @@ import os
 import time
 import sys
 from madcow.util import Module
+from madcow.util.textenc import *
 import shutil
 
 class MegaHALError(Exception):
@@ -35,9 +36,8 @@ class MegaHAL(object):
     update_freq = 1 * 60 * 60  # 1 hour
     update_max = 50
 
-    def __init__(self, basedir, charset, logger=None, srcdb=None):
+    def __init__(self, basedir, logger=None, srcdb=None):
         self.basedir = basedir
-        self.charset = charset
         self.brain = None
         self.last_updated = None
         self.last_changed = None
@@ -46,7 +46,7 @@ class MegaHAL(object):
         self.srcdb = srcdb
 
     def setid(self, id):
-        id = id.encode(self.charset, 'replace')
+        id = encode(id)
         id = self.badchars_re.sub('', id).lower()
         if not id:
             raise InvalidID(u'invalid or missing brain id')
@@ -74,8 +74,8 @@ class MegaHAL(object):
         if line == '#save':
             self.update()
             return 'I saved the brain'
-        line = line.encode(self.charset, 'replace')
-        response = megahal.process(line).decode(self.charset, 'replace')
+        line = encode(line)
+        response = decode(megahal.process(line))
         self.last_changed = time.time()
         self.updates += 1
         self.update_sentinel()
@@ -142,8 +142,7 @@ class Main(Module):
 
         # create the bot with a default personality
         default = os.path.join(self.madcow.base, 'db', 'megahal')
-        self.megahal = MegaHAL(basedir=default, charset=self.madcow.charset, logger=self.log,
-                               srcdb=os.path.join(src, 'db'))
+        self.megahal = MegaHAL(basedir=default, logger=self.log, srcdb=os.path.join(src, 'db'))
         self.megahal.setid('madcow')
 
     def response(self, nick, args, kwargs):

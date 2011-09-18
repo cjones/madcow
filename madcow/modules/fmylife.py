@@ -2,6 +2,7 @@
 
 from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
+from madcow.util.textenc import *
 from urlparse import urljoin
 import re
 
@@ -19,6 +20,6 @@ class Main(Module):
         soup = getsoup(self.spec_url % int(args[0]) if args[0] else self.rand_url)
         soup.find('div', id='submit').extract()
         post = soup.body.find('div', 'post')
-        return u'%s: (%d) %s' % (nick, int(post.find('a', 'fmllink')['href'].split('/')[-1]),
-                                 strip_html(' '.join(link.renderContents()
-                                                    for link in post('a', 'fmllink')).decode('utf-8', 'ignore')))
+        id = int(post.find('a', 'fmllink')['href'].split('/')[-1])
+        body = strip_html(decode(' '.join(link.renderContents() for link in post('a', 'fmllink')), 'utf-8'))
+        return u'%s: (%d) %s' % (nick, id, body)

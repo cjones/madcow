@@ -1,4 +1,4 @@
-# Copyright (C) 2007, 2008 Christopher Jones
+# Copyright (C) 2007-2011 Christopher Jones
 #
 # This file is part of Madcow.
 #
@@ -41,8 +41,9 @@ from madcow.util import gateway, get_logger, http, Request
 from madcow.conf import settings
 from madcow.util.color import ColorLib
 from madcow.util.auth import AuthLib
+from madcow.util.textenc import encode, decode, set_preferred_encoding, get_encoding
 
-VERSION = 2, 1, 1
+VERSION = 2, 2, 0
 
 __version__ = '.'.join(str(_) for _ in VERSION)
 __author__ = 'Chris Jones <cjones@gruntle.org>'
@@ -81,7 +82,8 @@ class Madcow(object):
         self.ignore_list = [nick.lower() for nick in settings.IGNORE_NICKS]
 
         # set encoding
-        self.charset = codecs.lookup(settings.ENCODING).name
+        set_preferred_encoding(settings.ENCODING)
+        self.log.info('Preferred encoding set to %s', get_encoding())
 
         # create admin instance
         self.admin = Admin(self)
@@ -141,8 +143,7 @@ class Madcow(object):
         """Runs madcow loop"""
         while self.running:
             self.check_response_queue()
-            line = raw_input('>>> ').decode(sys.stdin.encoding, 'replace')
-            line = line.rstrip()
+            line = decode(raw_input('>>> '), sys.stdin.encoding).rstrip()
             req = Request(message=line)
             req.nick = os.environ['USER']
             req.channel = u'none'
@@ -190,7 +191,7 @@ class Madcow(object):
 
     def protocol_output(self, message, req=None):
         """Override with protocol-specific output method"""
-        print message.encode(sys.stdout.encoding, 'replace')
+        print encode(message, sys.stdout.encoding)
 
     ### MODULE PROCESSING ###
 
@@ -360,7 +361,7 @@ class Madcow(object):
             filename.append(time.strftime('%F'))
         logfile = os.path.join(logdir, '-'.join(filename) + '.log')
         with open(logfile, 'a') as fp:
-            print >> fp, '%s %s' % (time.strftime('%T'), line.encode(self.charset, 'replace'))
+            print >> fp, '%s %s' % (time.strftime('%T'), encode(line))
 
     ### MISC FUNCTIONS ###
 
@@ -474,10 +475,7 @@ class Admin(object):
     def __init__(self, bot):
         self.bot = bot
         self.users = {}
-        self.authlib = AuthLib(
-                os.path.join(bot.base, 'db', 'passwd'),
-                bot.charset,
-                )
+        self.authlib = AuthLib(os.path.join(bot.base, 'db', 'passwd'))
 
     def parse(self, req):
         """Parse request for admin commands and execute, returns output"""

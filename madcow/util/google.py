@@ -24,6 +24,7 @@ import re
 from BeautifulSoup import BeautifulSoup
 from madcow.util import strip_html, superscript
 from madcow.util.http import UserAgent
+from madcow.util.textenc import encode, decode
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'
@@ -95,7 +96,7 @@ class Google(object):
         soup = BeautifulSoup(doc)
         response = soup.find('img', src=self.calc_re).parent.findNext('h2').renderContents()
         response = ' '.join(response.splitlines())
-        response = response.decode('utf-8', 'ignore')
+        response = decode(response, 'utf-8')
 
         # turn super scripts into utf8
         parts = []
@@ -123,10 +124,10 @@ class Google(object):
             soup = BeautifulSoup(doc)
             table = soup.find('table', 'obcontainer')
             time = table.find('td', style='font-size:medium')
-            return strip_html(time.renderContents().decode('utf-8')).strip()
+            return strip_html(self.decode(time).strip())
         except:
             raise
 
     @staticmethod
     def decode(node):
-        return node.renderContents().decode('utf-8', 'ignore')
+        return decode(node.renderContents())

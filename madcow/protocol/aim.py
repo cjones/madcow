@@ -20,6 +20,7 @@
 from twisted.internet import protocol, reactor
 from twisted.words.protocols import oscar
 from madcow.util import strip_html, get_logger
+from madcow.util.textenc import *
 from madcow import Madcow, Request
 from time import sleep
 import textwrap
@@ -67,8 +68,8 @@ class AIMProtocol(Madcow):
             # so, utf16 doubles the size of the FLAP packets, which
             # really limits our max message size.  if none of the ordinals
             # are outside the 7bit ascii range, convert to ascii bytes
-            if not [ch for ch in message if ord(ch) > 127]:
-                message = message.encode('us-ascii')
+            if not any(map(lambda ch: ord(ch) > 127, message)):
+                message = encode(message, 'ascii')
 
             # i don't know what's going on here anymore.. let's try something
             # completely different!
@@ -176,7 +177,7 @@ class OSCARConnection(oscar.BOSConnection):
         for part in multiparts:
             message = part[0]
             if 'unicode' in part[1:]:
-                message = message.decode('utf-16-be')  # :(
+                message = decode(message, 'utf-16-be')  # :(
             output.append(message)
         message = u' '.join(output)
         self.on_message(user, message, True, True)

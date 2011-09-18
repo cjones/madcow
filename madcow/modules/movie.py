@@ -5,6 +5,7 @@ from urlparse import urljoin
 import re
 from BeautifulSoup import BeautifulSoup
 from madcow.util import Module, strip_html
+from madcow.util.textenc import *
 
 class Main(Module):
 
@@ -67,7 +68,7 @@ class Main(Module):
         results = soup.find('ul', id='movie_results_ul')
         if results is None:
             rating = soup.find('span', id='all-critics-meter').renderContents() + '%'
-            title = strip_html(soup.find('h1', 'movie_title').renderContents().encode('utf-8', 'ignore')).strip()
+            title = strip_html(encode(soup.find('h1', 'movie_title').renderContents(), 'utf-8')).strip()
             return title, rating
         else:
             for result in results('li'):

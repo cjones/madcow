@@ -2,6 +2,7 @@
 
 from madcow.util import Module, strip_html
 from madcow.util.http import geturl
+from madcow.util.textenc import *
 import re
 from urlparse import urljoin
 import urllib
@@ -25,7 +26,7 @@ class Main(Module):
         else:
             query = u' '.join(query.split())
             query = query.replace(u' ', u'_')
-            query = query.encode('utf-8', 'replace')
+            query = encode(query, 'utf-8')
             query = urllib.quote(query) + u'.php'
             url = urljoin(self.baseurl, query)
         doc = geturl(url)

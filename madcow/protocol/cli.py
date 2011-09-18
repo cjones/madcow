@@ -21,6 +21,7 @@ import re
 from madcow.util.shell import Shell
 from madcow import Madcow
 from madcow.util import Request
+from madcow.util.textenc import *
 
 COLOR_SCHEME = 'ansi'
 
@@ -50,7 +51,7 @@ class ConsoleProtocol(Madcow):
                 # this happens when you get EINTR from SIGHUP handling
                 continue
 
-            input = input.decode(sys.stdin.encoding, 'replace')
+            input = decode(input, sys.stdin.encoding)
 
             if input.lower() == u'quit':
                 break
@@ -87,7 +88,7 @@ class ConsoleProtocol(Madcow):
     def protocol_output(self, message, req=None):
         if req is not None and req.colorize is True:
             message = self.colorlib.rainbow(message)
-        print message.encode(self.charset, 'replace')
+        print encode(message, sys.stdout.encoding)
 
 
 class ProtocolHandler(ConsoleProtocol):

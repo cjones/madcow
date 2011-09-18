@@ -30,6 +30,7 @@ import re
 import sys
 import os
 from madcow.conf import settings
+from textenc import encode, decode, get_encoding
 
 DEFAULT_UNIQUE_TIMESTAMP_FORMAT = '%Y%m%d'
 DEFAULT_UNIQUE_MAX_FILES = 1000
@@ -165,7 +166,7 @@ class Request(object):
 
 def superscript(text):
     if isinstance(text, str):
-        text = text.decode('utf8', 'replace')
+        text = decode(text, 'utf-8')
     return text.translate(SUPER_MAP)
 
 

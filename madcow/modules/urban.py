@@ -3,6 +3,7 @@
 import re
 from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
+from madcow.util.textenc import *
 from urlparse import urljoin
 
 class Main(Module):
@@ -100,5 +101,5 @@ class Main(Module):
         """Render node to text"""
         data = node.renderContents()
         if isinstance(data, str):
-            data = data.decode('utf-8', 'ignore')
+            data = decode(data, 'utf-8')
         return Main.newline_re.sub(' ', strip_html(data)).strip()

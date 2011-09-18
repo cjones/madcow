@@ -236,4 +236,3 @@ class ColorLib(object):
             text = self._html_color.sub(u'', text)
         text = text.replace(self.reset(), u'')
         return text
-

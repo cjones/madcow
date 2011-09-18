@@ -4,6 +4,7 @@ import re
 import time
 import os
 from madcow.util import Module
+from madcow.util.textenc import *
 
 try:
     import dbm
@@ -21,7 +22,6 @@ class Main(Module):
     seen = re.compile(u'^\s*seen\s+(\S+)\s*$', re.I)
 
     def init(self):
-        self.charset = self.madcow.charset
         self.dbfile = os.path.join(self.madcow.base, 'db', 'seen')
 
     def dbm(self):
@@ -30,9 +30,9 @@ class Main(Module):
     def get(self, user):
         db = self.dbm()
         try:
-            user = user.lower().encode(self.charset, 'replace')
+            user = encode(user.lower())
             packed = db[user]
-            packed = packed.decode(self.charset, 'replace')
+            packed = decode(packed)
             channel, last, message = packed.split(u'/', 2)
 
             seconds = int(time.time() - float(last))
@@ -63,8 +63,8 @@ class Main(Module):
         packed = u'%s/%s/%s' % (channel, time.time(), message)
         db = self.dbm()
         try:
-            nick = nick.lower().encode(self.charset, 'replace')
-            packed = packed.encode(self.charset, 'replace')
+            nick = encode(nick.lower())
+            packed = encode(packed)
             db[nick] = packed
         finally:
             db.close()

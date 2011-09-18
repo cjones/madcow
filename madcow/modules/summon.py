@@ -5,6 +5,7 @@ from learn import Main as Learn
 from madcow.util import Module
 from smtplib import SMTP
 from madcow.conf import settings
+from madcow.util.textenc import *
 
 class Main(Module):
 
@@ -18,25 +19,16 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         sendto, reason = args
-        email = self.learn.lookup(u'email', sendto)
+        email = self.learn.lookup('email', sendto)
         if email is None:
             return u"%s: I don't know the email for %s" % (nick, sendto)
-
-        # just make all this shit ASCII, email is best that way...
-        email = email.encode('ascii', 'replace')
-        if reason:
-            reason = reason.encode('ascii', 'replace')
-        anick = nick.encode('ascii', 'replace')
-
-        body = 'To: %s <%s>\n' % (sendto.encode('ascii', 'replace'), email)
-        body += 'From: %s\n' % settings.SMTP_FROM
-        body += 'Subject: Summon from %s' % anick
-        body += '\n'
-        body += 'You were summoned by %s. Reason: %s' % (anick, reason)
-
+        body = u'\n'.join((u'To: %s <%s>' % (sendto, email),
+                           u'From: ' + settings.SMTP_FROM,
+                           u'Subject: Summon from ' + nick,
+                           u'',
+                           u'You were summoned by %s. Reason: %s' % (nick, reason)))
         smtp = SMTP(settings.SMTP_SERVER)
         if settings.SMTP_USER and settings.SMTP_PASS:
             smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
-        smtp.sendmail(settings.SMTP_FROM, [email], body)
-
+        smtp.sendmail(settings.SMTP_FROM, [encode(email, 'ascii')], encode(body))
         return u"%s: summoned %s" % (nick, sendto)
