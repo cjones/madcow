@@ -38,7 +38,7 @@ def browse(request):
     except StandardError:
         per_page = settings.BROWSE_LINKS_PER_PAGE
 
-    start = page * per_page
+    start = (page - 1) * per_page
     end = start + per_page
     links = Link.objects.all().order_by('-created')[start:end]
     return direct_to_template(request, 'memebot/browse.html', {'links': links})
