@@ -1,0 +1,70 @@
+"""Settings for gruntle project"""
+
+import os
+
+TEMPLATE_DEBUG = DEBUG = True
+
+MANAGERS = ADMINS = (
+        #('Your Name', 'youremail@example.com'),
+        )
+
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'gruntle',
+            'USER': 'gruntle',
+            'PASSWORD': 'gruntle',
+            'HOST': '',
+            'PORT': '',
+            }
+        }
+
+TIME_ZONE = 'America/Los_Angeles'
+LANGUAGE_CODE = 'en-us'
+SITE_ID = 1
+USE_I18N = True
+USE_L10N = True
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'memebot', 'media')
+MEDIA_URL = '/urls/media/'
+ADMIN_MEDIA_PREFIX = '/urls/admin/media/'
+SECRET_KEY = 'ChangeMeToSomethingUniqueAndRandomThatIsNotThisOK?'
+
+TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+        )
+
+MIDDLEWARE_CLASSES = (
+        'django.middleware.common.CommonMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        )
+
+ROOT_URLCONF = 'gruntle.urls'
+TEMPLATE_DIRS = ()
+
+INSTALLED_APPS = (
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.messages',
+        'django.contrib.admin',
+        'django.contrib.admindocs',
+        'gruntle.memebot',
+        )
+
+LOGIN_URL = '/urls/login/'
+LOGIN_REDIRECT_URL = '/urls/'
+DEV_SERVER_ADDR = '0.0.0.0:8000'
+AUTH_PROFILE_MODULE = 'memebot.UserProfile'
+
+MEMEBOT_POINTS_NEW = 1
+MEMEBOT_POINTS_OLD = -2
+MEMEBOT_POINTS_REPOSTS = 2
+ANONYMOUS_USER_EMAIL = 'nobody@localhost'
+UNKNOWN_USERNAME = 'unknown'
+BROWSE_LINKS_PER_PAGE = 25

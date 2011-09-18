@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}browse{% endblock %}
+{% block content %}
+<div id="browse">
+ <table id="browse-table">
+  <tbody>
+   {% for link in links %}
+   <tr>
+    <td><a href="{{ link.url }}">{{ link.url }}</a></td>
+    <td>{{ link.user.username }}</td>
+    <td>{{ link.created|date }}</td>
+   </tr>
+   {% endfor %}
+  </tbody>
+ </table>
+</div>
+{% endblock %}

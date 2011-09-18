@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}scores{% endblock %}
+{% block content %}
+<div id="scores">
+ <table id="score-table">
+  <thead>
+   <tr>
+    <th>score</th>
+    <th>nick</th>
+    <th>links</th>
+    <th>reposts</th>
+    <th>credits</th>
+   </tr>
+  </thead>
+  <tbody>
+   {% for profile in profiles %}
+   <tr>
+    <td>{{ profile.score }}</td>
+    <td>{{ profile.user.username }}</td>
+    <td>{{ profile.posted_new }}</td>
+    <td>{{ profile.posted_old }}</td>
+    <td>{{ profile.reposts }}</td>
+   </tr>
+   {% endfor %}
+  </tbody>
+ </table>
+</div>
+{% endblock %}

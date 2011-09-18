@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}home{% endblock %}
+{% block content %}
+<div id="home">
+ <ul id="links">
+  <li><a href="{% url browse %}">browse</a></li>
+  <li><a href="{% url scores %}">scores</a></li>
+  <li><a href="{% url profile %}">edit profile</a></li>
+  <li><a href="{% url logout %}">logout</a></li>
+ </ul>
+</div>
+{% endblock %}

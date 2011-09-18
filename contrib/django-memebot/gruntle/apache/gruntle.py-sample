@@ -1,0 +1,30 @@
+"""
+WSGI handler for a django project under apache+mod_wsgi
+
+The WSGIScriptAlias directive will be pointing to this file.  You
+must also set the ROOT_DIR below.
+"""
+
+import os
+import sys
+
+sys.dont_write_bytecode = True
+
+import django.core.handlers.wsgi
+
+# the directory the project is *in*.  So if your project is
+# /home/sigdb/sigdb3/secteam/ you would put /home/sigdb/sigdb3 here.
+ROOT_DIR = '/home/cjones/local'
+
+# name of the settings.py file to use
+os.environ['DJANGO_SETTINGS_MODULE'] = 'gruntle.settings'
+
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
+
+from django.conf import settings
+
+if settings.PROJECT_ROOT not in sys.path:
+    sys.path.append(settings.PROJECT_ROOT)
+
+application = django.core.handlers.wsgi.WSGIHandler()
