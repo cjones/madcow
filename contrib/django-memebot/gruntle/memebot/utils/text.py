@@ -147,7 +147,7 @@ class EncodingHandler(object):
 
     def sencode(self, val, encoding=None):
         """Encode and strip whitespace, None if empty"""
-        val = self.decode(val, encoding).strip()
+        val = self.encode(val, encoding).strip()
         if val:
             return val
 
