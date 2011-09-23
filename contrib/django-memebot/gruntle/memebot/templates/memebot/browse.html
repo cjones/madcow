@@ -1,14 +1,24 @@
 {% extends "base.html" %}
 {% block title %}browse{% endblock %}
+{% block head %}
+<!-- XXX remove me -->
+<style type="text/css">
+ td {
+  font-size: 12px;
+  padding-left: 8px;
+ }
+</style>
+{% endblock %}
 {% block content %}
 <div id="browse">
- <table id="browse-table">
+ <!-- XXX this is temp, need jquery table & stylesheet -->
+ <table id="browse-table" width="100%" cellpadding="2" cellspacing="2" border="0">
   <tbody>
    {% for link in links %}
    <tr>
+    <td nowrap>{{ link.user.username }}</td>
+    <td nowrap>{{ link.created|date:"Y-m-d H:i:s" }}</td>
     <td><a href="{{ link.url }}">{{ link.url }}</a></td>
-    <td>{{ link.user.username }}</td>
-    <td>{{ link.created|date }}</td>
    </tr>
    {% endfor %}
   </tbody>
