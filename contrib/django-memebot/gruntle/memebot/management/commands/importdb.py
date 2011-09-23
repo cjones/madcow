@@ -1,7 +1,11 @@
+"""Handle import from old shelve db"""
+
 import shelve
 import sys
-from django.core.management import BaseCommand
+
+from django.core.management import BaseCommand, CommandError
 from django.contrib.auth.models import User
+
 from gruntle.memebot.models import Link
 from gruntle.memebot.exceptions import OldMeme
 from gruntle.memebot.utils import DisableAutoTimestamps
@@ -11,7 +15,11 @@ class Command(BaseCommand):
     args = '<dbfile>'
     help = 'Import old memebot database'
 
-    def handle(self, db_file, **kwargs):
+    def handle(self, *args, **kwargs):
+        if len(args) != 1:
+            raise CommandError('invalid arguments, -h for help')
+        db_file = args[0]
+
         db = shelve.open(db_file)
         posts = sorted(db['urls'].itervalues(), key=lambda post: post['date'])
         size = len(posts)
