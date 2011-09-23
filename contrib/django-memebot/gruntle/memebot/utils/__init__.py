@@ -1,3 +1,5 @@
+"""Generic shared utility methods"""
+
 import sys
 
 class DisableAutoTimestamps(object):
@@ -28,9 +30,53 @@ class DisableAutoTimestamps(object):
         self.old_values = None
 
 
+class TrapError(StandardError):
+
+    """Raised if TrapError encounters an exception other than those we wish to not catch"""
+
+
+class TrapErrors(object):
+
+    """Context manager to catch all exceptions it is safe to fully trap"""
+
+    DO_NOT_TRAP = SystemExit, KeyboardInterrupt, EOFError
+
+    def __init__(self, reraise=True, notrap=None):
+        self.reraise = reraise
+        self.notrap = list(self.DO_NOT_TRAP)
+        if notrap is not None:
+            self.notrap.extend(notrap)
+
+    def __enter__(self):
+        """Enter context"""
+        return self
+
+    def __exit__(self, exc_type=None, exc_value=None, exc_traceback=None):
+        """Exit context: Determine how to handle exception state"""
+        if exc_value is not None and exc_type not in self.notrap:
+            if self.reraise:
+                raise TrapError(exc_type, exc_value, exc_traceback)
+            return True
+
+
+class zdict(dict):
+
+    """Dictionary object with default value of 0"""
+
+    __slots__ = ()
+
+    def __missing__(self, key):
+        """Returns 0 instead of raising KeyError"""
+        return 0
+
+
 def ipython(depth=0):
     """Embed IPython in running program"""
     from IPython.Shell import IPShellEmbed
     frame = sys._getframe(depth + 1)
     shell = IPShellEmbed(banner='Interactive mode, ^D to resume.', exit_msg='Resuming ...')
     shell(local_ns=frame.f_locals, global_ns=frame.f_globals)
+
+
+# default trapper that swallows errors
+trapped = TrapErrors(reraise=False)
