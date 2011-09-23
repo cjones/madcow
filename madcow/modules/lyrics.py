@@ -5,6 +5,7 @@ import re
 from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from madcow.util.google import Google, NonRedirectResponse
+from madcow.util.textenc import *
 
 class Main(Module):
 

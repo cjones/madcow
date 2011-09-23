@@ -23,8 +23,10 @@ del setup_environ
 
 import random
 import re
+
 from gruntle.memebot.exceptions import OldMeme
 from gruntle.memebot.models import Link, UserProfile
+
 from madcow.util import Module
 from madcow.util.textenc import *
 
@@ -86,59 +88,3 @@ class Main(Module):
                         random.choice(self.riffs),
                         exc.link.user.username,
                         exc.link.created.strftime('%Y-%m-%d %H:%M:%S'))
-
-    # def get_scores(self):
-    #     scores = [(nick, self.get_score_for_nick(nick)) for nick, author in self.db['nicks'].iteritems()]
-    #     return sorted(scores, key=lambda item: item[1], reverse=True)
-    # def score_response(self, x, y):
-    #     scores = self.get_scores()
-    #     size = len(scores)
-    #     if x is None:
-    #         scores = scores[:10]
-    #         x = 1
-    #     elif x.isdigit():
-    #         x = int(x)
-    #         if x == 0:
-    #             x = 1
-    #         if x > size:
-    #             x = size
-    #         if y and y.isdigit():
-    #             y = int(y)
-    #             if y > size:
-    #                 y = size
-    #             scores = scores[x-1:y]
-    #         else:
-    #             scores = [scores[x-1]]
-    #     else:
-    #         for i, data in enumerate(scores):
-    #             name, score = data
-    #             if name.lower() == x.lower():
-    #                 scores = [scores[i]]
-    #                 x = i+1
-    #                 break
-    #     out = []
-    #     for i, data in enumerate(scores):
-    #         name, score = data
-    #         out.append('#%s: %s (%s)' % (i + x, name, score))
-    #     return ', '.join(out)
-
-    # def __del__(self):
-    #     self.db.close()
-    #     self.queue.put(None)
-    #    def get_score(self, username):
-    #        username = username.lower()
-    #        try:
-    #            user = Alias.objects.get(username=username).user
-    #        except Alias.DoesNotExist:
-    #            try:
-    #                user = User.objects.get(username=username)
-    #            except User.DoesNotExist:
-    #                user = None
-    #
-    #        if user is None:
-    #            score = 0
-    #        else:
-    #            profile = user.get_profile()
-    #            score = profile.score
-    #        return score
-    #
