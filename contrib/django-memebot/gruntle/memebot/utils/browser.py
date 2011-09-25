@@ -42,7 +42,7 @@ PRESET_USER_AGENTS = {'ie6': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
                       'urllib': 'Python-urllib/1.17',
                       'urllib2': 'Python-urllib/2.7'}
 
-class Response(collections.namedtuple('Response', 'code msg orig_url real_url data_type main_type sub_type data')):
+class Response(collections.namedtuple('Response', 'code msg url real_url data_type main_type sub_type data complete')):
 
     @property
     def is_valid(self):
@@ -50,7 +50,7 @@ class Response(collections.namedtuple('Response', 'code msg orig_url real_url da
 
     @property
     def redirected(self):
-        return self.orig_url != self.real_url
+        return self.url != self.real_url
 
     @property
     def mime_type(self):
@@ -116,6 +116,7 @@ class Browser(object):
         if max_read is None:
             max_read = -1
         data = response.read(max_read)
+        read = len(data)
         if response.headers.get('content-encoding') == 'gzip':
             data = gzip.GzipFile(fileobj=stringio.StringIO(data), mode='r').read()
         if response.headers.maintype == 'text':
@@ -138,5 +139,6 @@ class Browser(object):
         else:
             data_type = 'unknown'
 
-        return Response(code=response.code, msg=response.msg, orig_url=url, real_url=response.url, data_type=data_type,
-                        main_type=response.headers.maintype, sub_type=response.headers.subtype, data=data)
+        return Response(code=response.code, msg=response.msg, url=url, real_url=response.url, data_type=data_type,
+                        main_type=response.headers.maintype, sub_type=response.headers.subtype, data=data,
+                        complete=((max_read == -1) or (read < max_read)))

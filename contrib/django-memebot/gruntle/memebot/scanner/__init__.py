@@ -44,10 +44,11 @@ def process_queue(log, user_agent=None, max_links=None, max_read=None, max_error
                             publish = True
                             link.resolved_url = response.real_url
                             link.mime_type = response.mime_type
+
                             '''
                         # print text.encode(u', '.join(text.format(u'%s=%r', key, getattr(response, key, None))
                         #                              for key in ('is_valid', 'redirected', 'mime_type', 'code',
-                        #                                          'msg', 'orig_url', 'real_url', 'data_type')))
+                        #                                          'msg', 'url', 'real_url', 'data_type')))
 
                             # content_type, content, title
     LINK_CONTENT_TYPES = [('image', 'Image Data'),           # content is raw image data to be displayed in-line
