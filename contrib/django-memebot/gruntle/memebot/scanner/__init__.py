@@ -11,11 +11,13 @@ if __name__ == '__main__':
 
 import datetime
 from django.conf import settings
-from gruntle.memebot.utils import TrapError, TrapErrors, locking, text, plural
+from gruntle.memebot.utils import TrapError, TrapErrors, locking, text, plural, get_logger
 from gruntle.memebot.utils.browser import Browser
+from gruntle.memebot.decorators import logged
 from gruntle.memebot.models import Link
 
-def process_queue(user_agent=None, max_links=None, max_read=None, max_errors=None, dry_run=False):
+@logged('process-queue', append=True)
+def process_queue(log, user_agent=None, max_links=None, max_read=None, max_errors=None, dry_run=False):
     """Process the pending link queue"""
     with locking.Lock('process-queue', 0):
         if max_links is None:
@@ -32,10 +34,8 @@ def process_queue(user_agent=None, max_links=None, max_read=None, max_errors=Non
             if max_errors is None:
                 max_errors = settings.PROCESSOR_MAX_ERRORS
             browser = Browser(user_agent=user_agent)
-            if dry_run:
-                print 'DRY RUN'
             for i, link in enumerate(links):
-                print text.encode(text.format('[%d/%d] Processing: %s', i + 1, num_links, link.url))
+                log.info('[%d/%d] Processing: %s', i + 1, num_links, link.url)
                 fatal = False
                 try:
                     with TrapErrors():
@@ -80,4 +80,4 @@ def process_queue(user_agent=None, max_links=None, max_read=None, max_errors=Non
                     link.save()
 
         else:
-            print text.encode('No new links to process')
+            log.info('No new links to process')

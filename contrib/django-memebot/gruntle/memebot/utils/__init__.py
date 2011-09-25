@@ -1,7 +1,13 @@
 """Generic shared utility methods"""
 
+import functools
+import datetime
+import binascii
+import tempfile
 import logging
+import errno
 import sys
+import os
 
 class DisableAutoTimestamps(object):
 
@@ -84,8 +90,77 @@ def plural(count, name, s='s'):
     return '%d %s%s' % (count, name, '' if count == 1 else s)
 
 
-def get_logger(name, level=None, stream=None, append=False):
-    pass
+def get_logger(name, level=None, stream=None, append=False, dir=None,
+               max_files=None, perms=None, date_format=None, record_format=None):
+
+    from gruntle.memebot.utils import text
+    from django.conf import settings
+
+    if level is None:
+        level = settings.LOG_LEVEL
+    if dir is None:
+        dir = settings.LOG_DIR
+    if max_files is None:
+        max_files = settings.LOG_MAX_FILES
+    if perms is None:
+        perms = settings.LOG_PERMS
+    if date_format is None:
+        date_format = settings.LOG_DATE_FORMAT
+    if record_format is None:
+        record_format = settings.LOG_RECORD_FORMAT
+
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+    if append:
+        file = os.path.join(dir, name + '.log')
+        if not os.path.exists(file):
+            fd = os.open(file, tempfile._text_openflags, perms)
+            os.close(fd)
+
+    else:
+        datestamp = datetime.date.today().strftime('%Y%m%d')
+        fmt = '%%0%dd' % len(str(max_files - 1))
+        for i in xrange(max_files):
+            file = os.path.join(dir, '.'.join((name, datestamp, fmt % i, 'log')))
+            with trapped:
+                fd = os.open(file, tempfile._text_openflags, perms)
+                os.close(fd)
+                break
+        else:
+            raise OSError(errno.EEXIST, os.strerror(errno.EEXIST), file)
+
+    logger = logging.Logger(binascii.hexlify(file), level=level)
+    formatter = logging.Formatter(record_format, date_format)
+
+    handler = logging.FileHandler(file, encoding=text.get_encoding())
+    handler.setFormatter(formatter)
+    handler.setLevel(level)
+    logger.addHandler(handler)
+
+    if stream is not None:
+        handler = logging.StreamHandler(stream)
+        handler.setFormatter(formatter)
+        handler.setLevel(level)
+        logger.addHandler(handler)
+
+    class LogWrapper(object):
+
+        WRAP_FUNCS = 'debug', 'info', 'warn', 'warning', 'error', 'fatal', 'critical', 'exception'
+
+        def __getattribute__(self, key):
+            wrapped_func = getattr(logger, key)
+            if key in type(self).WRAP_FUNCS:
+
+                @functools.wraps(wrapped_func)
+                def wrapper_func(*args, **kwargs):
+                    return wrapped_func(text.encode(text.format(*args, **kwargs)))
+
+                return wrapper_func
+            else:
+                return wrapped_func
+
+    return LogWrapper()
 
 
 # default trapper that swallows errors
