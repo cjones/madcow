@@ -21,6 +21,11 @@ try:
 except ImportError:
     etree = None
 
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
+
 from gruntle.memebot.utils import TrapError, TrapErrors, text
 
 # some user agents to choose from, for convenience
@@ -134,10 +139,19 @@ class Browser(object):
                 with TrapErrors():
                     data = etree.ElementTree(etree.fromstring(data, parser=self.xml_parser))
                     data_type = 'etree'
-            except TrapError, exc:
+            except TrapError:
                 data_type = 'broken_xml'
         else:
             data_type = 'unknown'
+
+        if response.headers.maintype == 'image' and Image is not None:
+            try:
+                with TrapErrors():
+                    fileobj = stringio.StringIO(data)
+                    data = Image.open(fileobj)
+                    data_type = 'image'
+            except TrapError:
+                data_type = 'broken_image'
 
         return Response(code=response.code, msg=response.msg, url=url, real_url=response.url, data_type=data_type,
                         main_type=response.headers.maintype, sub_type=response.headers.subtype, data=data,
