@@ -4,15 +4,20 @@ import traceback
 import sys
 from gruntle.memebot.utils import get_logger, text
 
-def logged(*args, **kwargs):
-    logger = get_logger(*args, **kwargs)
+def logged(*logger_args, **default_logger_kwargs):
 
     def decorator(wrapped_func):
 
         @functools.wraps(wrapped_func)
         def wrapper_func(*args, **kwargs):
             try:
-                return wrapped_func(*((logger,) + args), **kwargs)
+                logger_kwargs = dict(default_logger_kwargs)
+                logger_kwargs.setdefault('stream', kwargs.pop('log_stream', None))
+                logger = get_logger(*logger_args, **logger_kwargs)
+                new_args = [logger]
+                new_args.extend(args)
+                args = tuple(new_args)
+                return wrapped_func(*args, **kwargs)
             except (SystemExit, KeyboardInterrupt, EOFError):
                 raise
             except:
