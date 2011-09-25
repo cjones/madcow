@@ -1,5 +1,6 @@
 """Generic shared utility methods"""
 
+import logging
 import sys
 
 class DisableAutoTimestamps(object):
@@ -76,6 +77,15 @@ def ipython(depth=0):
     frame = sys._getframe(depth + 1)
     shell = IPShellEmbed(banner='Interactive mode, ^D to resume.', exit_msg='Resuming ...')
     shell(local_ns=frame.f_locals, global_ns=frame.f_globals)
+
+
+def plural(count, name, s='s'):
+    """Pluralize text helper"""
+    return '%d %s%s' % (count, name, '' if count == 1 else s)
+
+
+def get_logger(name, level=None, stream=None, append=False):
+    pass
 
 
 # default trapper that swallows errors

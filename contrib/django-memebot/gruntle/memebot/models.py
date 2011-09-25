@@ -3,22 +3,15 @@
 '''
 SETTINGS:
 - max bytes to fetch on initial request to determine content type/link state.. keep pretty low
-- max transient errors before giving up on this link (keep low? maybe use back-of approach instead of burn fast)
-- max redirects when resolving a url.. find out what typical failure threshold is for this
+- max transient errors before giving up on this link
 - (bool) download images or hotlink?
 - (bool) try to generate text summary? use title/url otherwise
 - list of scanners to run besides the default
 
 STATES:
-[new] just posted.. available to memebot and browse page if in raw mode
--> processor picks up [new,deferred]
-[processing] same availability as [new]. during this time, processor will do things:
-    - try to actually fetch the url: headers and first <n> bytes
     - if a transient error occurs (5xx), bump <fail_count> field. if <max fails>, put into [failed] and set
       <error>, for the record, otherwise place into [deferred]
     - if a fatal error (4xx), fail immediately.
-    - if a redirect (3xx), follow redirects until a non-redirect, loop, or <max redirects> is hit,
-      save the final url to <resolved_url> if we have something to save
     - if OK status, check headers for & save <mime_type>, then:
         - if media we want to cache (just images for now), fetch [up to <max binary size>], serialize as
           base64 and store in content field.
@@ -32,19 +25,6 @@ STATES:
           out in order. if we use the date we found the url, stuff that gets differed will get posted later but 
           with back-dated publish field
         - finally, set state to [published]
-
-[deferred] like new, just indicates its already been worked on once and had a temporary problem
-[published] shows up everywhere and ordered by published. These have available to them any of:
-    - A full title
-    - The *real* URL shorteners point to, which we should use (Q: check against these for oldmemes somehow?)
-    - Its MIME type
-    - Pre-cached stuff in content field we can put in the feed: actual image, youtube embed, article summary, etc.
-    - The date we "published" (finished processing) the link
-
-[hidden] field we can use to pull a URL from being displayed anywhere without actually deleting it.. probably
-         it should not count against you for memepoints either. what should it do though? it can't save it.. if
-         someone reposts it and then checks if it saved via someone else posting it, the lack of error will
-         leak that it's in the DB but hidden.. may be seen as a bug? maybe not a big deal.
 '''
 
 import urlparse
@@ -106,10 +86,6 @@ class LinkManager(models.Manager):
     def get_published(self):
         """Returns QuerySet of published links, ordered by publish date"""
         return self.filter(state='published').order_by('-published')
-
-    def get_ready(self):
-        """Returns QuerySet of links that are ready for processing"""
-        raise NotImplementedError
 
     def add_link(self, url, username, source_name, source_type, **kwargs):
         """
@@ -208,12 +184,9 @@ class Link(Model):
     """Represents a posted URL"""
 
     # state of current link life-cycle
-    LINK_STATES = [('new', 'Newly Posted'),
-                   ('processing', 'Being Processed'),
-                   ('deferred', 'Deferred To Next Run'),
-                   ('failed', 'Failed To Validate'),
-                   ('published', 'Published'),
-                   ('hidden', 'Hidden')]
+    LINK_STATES = [('new', 'New'),
+                   ('invalid', 'Invalid'),
+                   ('published', 'Published')]
 
     # hint for views about what is in the content field
     LINK_CONTENT_TYPES = [('image', 'Image Data'),           # content is raw image data to be displayed in-line
