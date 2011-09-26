@@ -45,14 +45,14 @@ UNKNOWN_USERNAME = 'unknown'  # if posted from an invalid nick, we can save as t
 # link browser config
 BROWSE_LINKS_PER_PAGE = 100
 
-# processor config
-PROCESSOR_USER_AGENT = 'firefox'          # browser to masquerade as (see utils/browser.py for more)
-PROCESSOR_MAX_LINKS = 1024                # how many links to process in one run
-PROCESSOR_MAX_READ = 1048576  # 1M        # files larger than this will not be read entirely
-PROCESSOR_MAX_ERRORS = 10                 # number of errors before giving up on the url
-PROCESSOR_IMAGE_TYPE = 'png'              # format to use when saving image locally
-PROCESSOR_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (will rescale)
-PROCESSOR_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
+# scanner config
+SCANNER_USER_AGENT = 'firefox'          # browser to masquerade as (see utils/browser.py for more)
+SCANNER_MAX_LINKS = 1024                # how many links to process in one run
+SCANNER_MAX_READ = 1048576  # 1M        # files larger than this will not be read entirely
+SCANNER_MAX_ERRORS = 10                 # number of errors before giving up on the url
+SCANNER_IMAGE_TYPE = 'png'              # format to use when saving image locally
+SCANNER_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (will rescale)
+SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
 
 # logging config
 LOG_LEVEL = 'INFO'

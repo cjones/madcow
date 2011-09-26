@@ -2,12 +2,12 @@
 
 if __name__ == '__main__':
     import os
-    args = ['./manage.py', 'processqueue', '-n']
+    args = ['./manage.py', 'scanner', '-n']
     os.chdir('/home/cjones/proj')
     os.execvp(args[0], args)
     os._exit(1)
 
-"""Core handler for processing/scanning Link objects"""
+"""Core handler for scanning Link objects"""
 
 import datetime
 
@@ -28,8 +28,8 @@ from gruntle.memebot.utils.browser import Browser
 from gruntle.memebot.decorators import logged
 from gruntle.memebot.models import Link
 
-@logged('process-queue', append=True)
-def process_queue(log, user_agent=None,
+@logged('scanner', append=True)
+def run(log, user_agent=None,
                        max_links=None,
                        max_read=None,
                        max_errors=None,
@@ -39,13 +39,13 @@ def process_queue(log, user_agent=None,
                        image_resize_alg=None,
                        ):
 
-    """Process the pending link queue"""
+    """Run pending links through scanner"""
 
-    with locking.Lock('process-queue', 0):
+    with locking.Lock('scanner', 0):
 
         # get links to process
         if max_links is None:
-            max_links = settings.PROCESSOR_MAX_LINKS
+            max_links = settings.SCANNER_MAX_LINKS
         links = Link.objects.filter(state='new').order_by('created')
         if max_links is not None:
             links = links[:max_links]
@@ -55,24 +55,24 @@ def process_queue(log, user_agent=None,
 
             # defaults from settings
             if user_agent is None:
-                user_agent = settings.PROCESSOR_USER_AGENT
+                user_agent = settings.SCANNER_USER_AGENT
             if max_read is None:
-                max_read = settings.PROCESSOR_MAX_READ
+                max_read = settings.SCANNER_MAX_READ
             if max_errors is None:
-                max_errors = settings.PROCESSOR_MAX_ERRORS
+                max_errors = settings.SCANNER_MAX_ERRORS
             if image_type is None:
-                image_type = settings.PROCESSOR_IMAGE_TYPE
+                image_type = settings.SCANNER_IMAGE_TYPE
             if image_max_size is None:
-                image_max_size = settings.PROCESSOR_IMAGE_MAX_SIZE
+                image_max_size = settings.SCANNER_IMAGE_MAX_SIZE
             if image_resize_alg is None:
-                image_resize_alg = settings.PROCESSOR_IMAGE_RESIZE_ALG
+                image_resize_alg = settings.SCANNER_IMAGE_RESIZE_ALG
                 if isinstance(image_resize_alg, (str, unicode)):
                     image_resize_alg = getattr(Image, image_resize_alg)
 
             browser = Browser(user_agent=user_agent)
             for i, link in enumerate(links):
                 log = log.get_named_child('%d/%d' % (i + 1, num_links))
-                log.info('Processing: %s', link.url)
+                log.info('Scanning: %s', link.url)
                 fatal = False
                 try:
                     with TrapErrors():
@@ -131,7 +131,7 @@ def process_queue(log, user_agent=None,
                                 fatal = True
 
                 except TrapError, exc:
-                    log.warn('Failure processing link', exc_info=exc.args)
+                    log.warn('Failure scanning link', exc_info=exc.args)
                     link.content_type = 'error'
                     link.content = exc
                     publish = False
@@ -150,4 +150,4 @@ def process_queue(log, user_agent=None,
                     link.save()
 
         else:
-            log.info('No new links to process')
+            log.info('No new links to scan')
