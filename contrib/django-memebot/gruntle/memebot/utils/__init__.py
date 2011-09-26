@@ -1,6 +1,7 @@
 """Generic shared utility methods"""
 
 import functools
+import traceback
 import datetime
 import binascii
 import tempfile
@@ -154,7 +155,11 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
 
                 @functools.wraps(wrapped_func)
                 def wrapper_func(*args, **kwargs):
-                    return wrapped_func(text.encode(text.format(*args, **kwargs)))
+                    exc_info = kwargs.pop('exc_info', None)
+                    wrapped_func(text.encode(text.format(*args, **kwargs)))
+                    if exc_info is not None:
+                        for line in traceback.format_exception(*exc_info):
+                            wrapped_func(text.chomp(text.encode(line)))
 
                 return wrapper_func
             else:
