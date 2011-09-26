@@ -74,9 +74,7 @@ def process_queue(log, user_agent=None, max_links=None, max_read=None, max_error
                     publish = False
 
                 if publish:
-                    link.state = 'published'
-                    link.error_count = 0
-                    link.published = datetime.datetime.now()
+                    link.publish(commit=False)
                 else:
                     link.error_count += 1
                     if fatal or (max_errors is not None and link.error_count >= max_errors):

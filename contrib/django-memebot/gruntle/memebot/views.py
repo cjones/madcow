@@ -48,9 +48,9 @@ def browse(request):
 
 
 @login_required
-def content(request, link_id=None):
+def content(request, publish_id=None):
     """View generic published content that is cached locally"""
-    link = get_object_or_404(Link, id=int(link_id), state='published')
+    link = get_object_or_404(Link, publish_id=int(publish_id), state='published')
     content = link.content
     if content is None:
         raise Http404

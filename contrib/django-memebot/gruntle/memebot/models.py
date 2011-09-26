@@ -1,5 +1,6 @@
 """MemeBot Data Model"""
 
+import datetime
 import urlparse
 import urllib
 import cgi
@@ -59,6 +60,13 @@ class LinkManager(models.Manager):
     def get_published(self):
         """Returns QuerySet of published links, ordered by publish date"""
         return self.filter(state='published').order_by('-published')
+
+    @property
+    def last_publish_id(self):
+        published = self.filter(publish_id__isnull=False).only('publish_id').order_by('-publish_id')
+        if published.count():
+            return published[0].publish_id
+        return 0
 
     def add_link(self, url, username, source_name, source_type, **kwargs):
         """
@@ -185,11 +193,12 @@ class Link(Model):
     state = models.CharField(null=False, blank=False, max_length=16, choices=LINK_STATES, default='new')
     error_count = models.IntegerField(null=False, blank=False, default=0)
     resolved_url = models.TextField(null=True, blank=True, default=None)
-    mime_type = models.CharField(null=True, blank=True, default='text/plain', max_length=64)
+    mime_type = models.CharField(null=True, blank=True, default=None, max_length=64)
     content_type = models.CharField(null=True, blank=True, default=None, max_length=16, choices=LINK_CONTENT_TYPES)
     content = SerializedDataField(null=True, blank=True, default=None, engine='zlib', level=9)
     title = models.TextField(null=True, blank=True, default=None)
     published = models.DateTimeField(null=True, blank=True, default=None)
+    publish_id = models.IntegerField(null=True, blank=True, default=None, unique=True)
 
     class Meta:
 
@@ -197,6 +206,22 @@ class Link(Model):
 
     def __unicode__(self):
         return self.url
+
+    def publish(self, commit=True):
+        dirty = False
+        if self.state != 'published':
+            self.state = 'published'
+            dirty = True
+        if self.published is None:
+            self.published = datetime.datetime.now()
+            dirty = True
+        if self.publish_id is None:
+            self.publish_id = Link.objects.last_publish_id + 1
+            dirty = True
+        if dirty and commit:
+            self.save()
+            dirty = False
+        return dirty
 
 
 class Note(Model):
