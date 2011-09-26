@@ -1,14 +1,15 @@
 from django.conf.urls.defaults import *
 from django.contrib import admin
+from django.conf import settings
 
 admin.autodiscover()
 
 urlpatterns = patterns('gruntle.memebot.views',
-        url(r'^$', 'index', name='index'),
-        url(r'^scores/$', 'scores', name='scores'),
-        url(r'^profile/$', 'profile', name='profile'),
-        url(r'^browse/$', 'browse', name='browse'),
-        url(r'^content/(?P<publish_id>\d+)/$', 'content', name='content'),
+        url(r'^$', 'index', name='memebot-index'),
+        url(r'^scores/$', 'scores', name='memebot-scores'),
+        url(r'^profile/$', 'profile', name='memebot-profile'),
+        url(r'^browse/$', 'browse', name='memebot-browse'),
+        url(r'^content/(?P<publish_id>\d+)/$', 'content', name='memebot-content'),
         )
 
 urlpatterns += patterns('',
@@ -17,6 +18,10 @@ urlpatterns += patterns('',
         )
 
 urlpatterns += patterns('django.contrib.auth.views',
-        url('^login/$', 'login', name='login'),
-        url('^logout/$', 'logout_then_login', name='logout'),
+        url('^login/$', 'login', name='auth-login'),
+        url('^logout/$', 'logout_then_login', name='auth-logout'),
         )
+
+if settings.DEV_SERVER:
+    urlpatterns += patterns('django.views.static',
+            (settings.MEDIA_URL_PATTERN, 'serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}))

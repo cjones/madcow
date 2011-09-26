@@ -1,19 +1,36 @@
-"""Settings for gruntle project"""
+"""Settings for gruntle memebot project"""
 
-import logging
 import os
+import re
 
-SITE_ROOT = '/'    # sub-directory you deployed to (e.g. /urls/)
+# True = always, False = never, None = dev server only
+DEBUG = None
+
+# list of (name, email) who will receive admin email
+ADMINS = (
+        #('Your Name', 'nobody@localhost'),
+        )
+
+# see /usr/share/zoneinfo for valid zones
 TIME_ZONE = 'America/Los_Angeles'
-ADMINS = (('Your Name', 'nobody@localhost'),)
-SECRET_KEY = 'ChangeMe!!!ChangeMe!!!ChangeMe!!!ChangeMe!!!Unique'
 
-DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                         'NAME': '',
-                         'USER': '',
-                         'PASSWORD': '',
-                         'HOST': '',
-                         'PORT': ''}}
+# this is used for some hashing algorithms, should be 50 characters
+SECRET_KEY = ''
+
+# where memebot keeps all its stuff
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': '',
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+            },
+        }
+
+# root of application (same as WSGIScriptAlias)
+SITE_PATH = '/'
 
 # memebot points scoring formula
 MEMEBOT_POINTS_NEW = 1          # points to award when a new link is posted
@@ -26,50 +43,59 @@ ANONYMOUS_USER_EMAIL = 'nobody@localhost'
 UNKNOWN_USERNAME = 'unknown'  # if posted from an invalid nick, we can save as this
 
 # link browser config
-BROWSE_LINKS_PER_PAGE = 25
+BROWSE_LINKS_PER_PAGE = 100
 
 # processor config
-PROCESSOR_USER_AGENT = 'firefox'                # browser to masquerade as (see utils/browser.py for more)
-PROCESSOR_MAX_LINKS = 1024                      # how many links to process in one run
-PROCESSOR_MAX_READ = 1048576  # 1M              # files larger than this will not be read entirely
-PROCESSOR_MAX_ERRORS = 10                       # number of errors before giving up on the url
-PROCESSOR_IMAGE_TYPE = 'png'                    # format to use when saving image locally
-PROCESSOR_IMAGE_MAX_SIZE = 640, 480             # max width/height of cached images (will rescale)
-PROCESSOR_IMAGE_RESIZE_ALG = 'ANTIALIAS'        # algorithm to use when rescaling (see PIL.Image.resize)
+PROCESSOR_USER_AGENT = 'firefox'          # browser to masquerade as (see utils/browser.py for more)
+PROCESSOR_MAX_LINKS = 1024                # how many links to process in one run
+PROCESSOR_MAX_READ = 1048576  # 1M        # files larger than this will not be read entirely
+PROCESSOR_MAX_ERRORS = 10                 # number of errors before giving up on the url
+PROCESSOR_IMAGE_TYPE = 'png'              # format to use when saving image locally
+PROCESSOR_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (will rescale)
+PROCESSOR_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
 
-# logging parameters
-LOG_LEVEL = logging.INFO
+# logging config
+LOG_LEVEL = 'INFO'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_RECORD_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
 LOG_MAX_FILES = 1000
 LOG_PERMS = 0644
 
 # file locations
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
+PROJECT_DIR = os.path.dirname(os.path.realpath(__file__))
+DATA_DIR = os.path.join(PROJECT_DIR, 'data')
 LOG_DIR = os.path.join(DATA_DIR, 'log')
 LOCK_DIR = os.path.join(DATA_DIR, 'lock')
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'memebot', 'media')
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'memebot', 'media')
 
-# url paths
-MEDIA_URL = os.path.join(SITE_ROOT, 'media', '')
-ADMIN_MEDIA_PREFIX = os.path.join(MEDIA_URL, 'admin', '')
-LOGIN_URL = os.path.join(SITE_ROOT, 'login', '')
-LOGIN_REDIRECT_URL = os.path.join(SITE_ROOT, '')
+# url locations (relative to SITE_PATH). automatically expanded (see configure_urls below)
+URL_PATHS = {'LOGIN_REDIRECT_URL': '/',
+             'LOGIN_URL': '/login/',
+             'LOGOUT_URL': '/logout/',
+             'MEDIA_URL': '/media/'}
 
-# misc settings you probably don't need to change
-LANGUAGE_CODE = 'en-us'
+URL_PATHS['ADMIN_MEDIA_PREFIX'] = os.path.join(URL_PATHS['MEDIA_URL'], 'admin')
+
+# misc site settings
 SITE_ID = 1
-USE_I18N = True
-USE_L10N = True
 ROOT_URLCONF = 'gruntle.urls'
-DEV_SERVER_ADDR = '0.0.0.0:8000'
 AUTH_PROFILE_MODULE = 'memebot.UserProfile'
 TEXT_ENCODING = 'utf-8'
 MANAGERS = ADMINS
-TEMPLATE_DEBUG = DEBUG = False
-TEMPLATE_DIRS = ()
 
+# dev server settings
+DEV_SERVER_ADDR = '0.0.0.0:8000'
+DEV_SERVER = os.environ.get('DEV_SERVER') is not None
+if DEBUG is None:
+    DEBUG = DEV_SERVER
+TEMPLATE_DEBUG = DEBUG
+
+# localization settings
+LANGUAGE_CODE = 'en-us'
+USE_I18N = True
+USE_L10N = True
+
+# things to load
 TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader')
 
@@ -87,3 +113,24 @@ INSTALLED_APPS = ('django.contrib.auth',
                   'django.contrib.admin',
                   'django.contrib.admindocs',
                   'gruntle.memebot')
+
+
+def configure_urls():
+    """Automatically generate some settings and url regex from URL_PATHS and SITE_PATH"""
+
+    def normalize(path, root='/'):
+        if path:
+            path = os.path.normpath(path)
+        while path.startswith('/'):
+            path = path[1:]
+        rel = os.path.join(path, '')
+        return os.path.join(root, rel), ('^' if rel else '') + rel
+
+    context = globals()
+    site_root, site_pattern = normalize(SITE_PATH)
+    context['SITE_PATTERN'] = site_pattern if DEV_SERVER else ''
+    for key, path in URL_PATHS.iteritems():
+        context[key], context[key + '_PATTERN'] = normalize(path, root=site_root)
+    context['MEDIA_URL_PATTERN'] += r'(?P<path>.*)'
+
+configure_urls()
