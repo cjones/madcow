@@ -21,7 +21,6 @@ class Command(BaseCommand):
         updates = {'state': state,
                    'error_count': 0,
                    'resolved_url': None,
-                   'mime_type': None,
                    'content_type': None,
                    'content': None,
                    'title': None,

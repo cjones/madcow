@@ -169,12 +169,6 @@ class Link(Model):
                    ('invalid', 'Invalid'),
                    ('published', 'Published')]
 
-    # hint for views about what is in the content field
-    LINK_CONTENT_TYPES = [('image', 'Image Data'),           # content is raw image data to be displayed in-line
-                          ('summary', 'Summary Text'),       # content is a text paragraph from an article/blog/essay
-                          ('rendered', 'Pre-Rendered HTML'), # hint from scanner, indicates content is already rendered
-                          ('error', 'Error Message')]        # why this link could not validate, text
-
     # custom object manager
     objects = LinkManager()
 
@@ -193,8 +187,7 @@ class Link(Model):
     state = models.CharField(null=False, blank=False, max_length=16, choices=LINK_STATES, default='new')
     error_count = models.IntegerField(null=False, blank=False, default=0)
     resolved_url = models.TextField(null=True, blank=True, default=None)
-    mime_type = models.CharField(null=True, blank=True, default=None, max_length=64)
-    content_type = models.CharField(null=True, blank=True, default=None, max_length=16, choices=LINK_CONTENT_TYPES)
+    content_type = models.CharField(null=True, blank=True, default=None, max_length=64)
     content = SerializedDataField(null=True, blank=True, default=None, engine='zlib', level=9)
     title = models.TextField(null=True, blank=True, default=None)
     published = models.DateTimeField(null=True, blank=True, default=None)

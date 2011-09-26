@@ -102,8 +102,7 @@ def run(log, user_agent=None,
                                     image = image.resize(new_size, image_resize_alg)
 
                                 # save as specified format
-                                link.mime_type = 'image/%s' % image_type.lower()
-                                link.content_type = 'image'
+                                link.content_type = 'image/%s' % image_type.lower()
                                 fileobj = stringio.StringIO()
                                 image.save(fileobj, image_type.upper())
                                 link.content = fileobj.getvalue()
@@ -119,20 +118,18 @@ def run(log, user_agent=None,
 
                             # no idea.. just save what we got
                             else:
-                                log.info('Content: Unknown (%s)', response.mime_type)
-                                link.mime_type = response.mime_type
+                                log.info('Content: Unknown (%s)', response.content_type)
+                                link.content_type = response.content_type
 
                         else:
                             log.info('Error: %d %s', response.code, response.msg)
                             publish = False
-                            link.content_type = 'error'
                             link.content = response.msg
                             if response.code == 404:
                                 fatal = True
 
                 except TrapError, exc:
                     log.warn('Failure scanning link', exc_info=exc.args)
-                    link.content_type = 'error'
                     link.content = exc
                     publish = False
 

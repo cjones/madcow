@@ -58,7 +58,7 @@ class Response(collections.namedtuple('Response', 'code msg url real_url data_ty
         return self.url != self.real_url
 
     @property
-    def mime_type(self):
+    def content_type(self):
         return '%s/%s' % (self.main_type, self.sub_type)
 
 
