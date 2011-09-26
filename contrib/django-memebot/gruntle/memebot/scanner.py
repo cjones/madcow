@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-
-if __name__ == '__main__':
-    import os
-    args = ['./manage.py', 'scanner', '-n']
-    os.chdir('/home/cjones/proj')
-    os.execvp(args[0], args)
-    os._exit(1)
-
 """Core handler for scanning Link objects"""
 
 import datetime
@@ -23,21 +14,20 @@ try:
 except ImportError:
     Image = None
 
-from gruntle.memebot.utils import TrapError, TrapErrors, locking, text, plural, get_logger
+from gruntle.memebot.utils import TrapError, TrapErrors, trapped, locking, text, plural, get_logger
 from gruntle.memebot.utils.browser import Browser
 from gruntle.memebot.decorators import logged
 from gruntle.memebot.models import Link
 
 @logged('scanner', append=True)
 def run(log, user_agent=None,
-                       max_links=None,
-                       max_read=None,
-                       max_errors=None,
-                       dry_run=False,
-                       image_type=None,
-                       image_max_size=None,
-                       image_resize_alg=None,
-                       ):
+             max_links=None,
+             max_read=None,
+             max_errors=None,
+             dry_run=False,
+             image_type=None,
+             image_max_size=None,
+             image_resize_alg=None):
 
     """Run pending links through scanner"""
 
