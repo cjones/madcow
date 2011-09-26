@@ -1,32 +1,5 @@
 """MemeBot Data Model"""
 
-'''
-SETTINGS:
-- max bytes to fetch on initial request to determine content type/link state.. keep pretty low
-- max transient errors before giving up on this link
-- (bool) download images or hotlink?
-- (bool) try to generate text summary? use title/url otherwise
-- list of scanners to run besides the default
-
-STATES:
-    - if a transient error occurs (5xx), bump <fail_count> field. if <max fails>, put into [failed] and set
-      <error>, for the record, otherwise place into [deferred]
-    - if a fatal error (4xx), fail immediately.
-    - if OK status, check headers for & save <mime_type>, then:
-        - if media we want to cache (just images for now), fetch [up to <max binary size>], serialize as
-          base64 and store in content field.
-        - articles should cache a summary paragraph if possible. Maybe Readability could help here. it can go
-          in Content field too (with text/html mime_type) if feasible, otherwise make <summary> field.
-        - a way to have extensible special handlers.. for example, a youtube.py module will know how to take
-          a youtube link and create embeddable content from the url, rather than scraping it naively.
-        - Store title in <title> field if it exists
-        - be sure to decode any text data with the real encoding of the page (check meta, http header, decl first)
-        - set <published> to the time it finally finished processing succesffully so that in rss, it comes
-          out in order. if we use the date we found the url, stuff that gets differed will get posted later but 
-          with back-dated publish field
-        - finally, set state to [published]
-'''
-
 import urlparse
 import urllib
 import cgi

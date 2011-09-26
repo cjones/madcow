@@ -10,7 +10,14 @@ if __name__ == '__main__':
 """Core handler for processing/scanning Link objects"""
 
 import datetime
+
+try:
+    import cStringIO as stringio
+except ImportError:
+    import StringIO as stringio
+
 from django.conf import settings
+
 from gruntle.memebot.utils import TrapError, TrapErrors, locking, text, plural, get_logger
 from gruntle.memebot.utils.browser import Browser
 from gruntle.memebot.decorators import logged
@@ -40,22 +47,20 @@ def process_queue(log, user_agent=None, max_links=None, max_read=None, max_error
                 try:
                     with TrapErrors():
                         response = browser.open(link.url, max_read=max_read)
-                        if response.code == 200:
+                        if response.is_valid:
                             publish = True
                             link.resolved_url = response.real_url
-                            link.mime_type = response.mime_type
 
-                            '''
-                        # print text.encode(u', '.join(text.format(u'%s=%r', key, getattr(response, key, None))
-                        #                              for key in ('is_valid', 'redirected', 'mime_type', 'code',
-                        #                                          'msg', 'url', 'real_url', 'data_type')))
+                            if response.data_type == 'image':
+                                link.mime_type = 'image/png'
+                                link.content_type = 'image'
+                                fileobj = stringio.StringIO()
+                                response.data.save(fileobj, 'PNG')
+                                link.content = fileobj.getvalue()
+                                # summary, rendered
+                            else:
+                                link.mime_type = response.mime_type
 
-                            # content_type, content, title
-    LINK_CONTENT_TYPES = [('image', 'Image Data'),           # content is raw image data to be displayed in-line
-                          ('summary', 'Summary Text'),       # content is a text paragraph from an article/blog/essay
-                          ('rendered', 'Pre-Rendered HTML'), # hint from scanner, indicates content is already rendered
-                          ('error', 'Error Message')]        # why this link could not validate, text
-                            '''
                         else:
                             publish = False
                             link.content_type = 'error'

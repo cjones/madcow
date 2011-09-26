@@ -1,6 +1,9 @@
 from django.views.generic.simple import direct_to_template
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.http import Http404, HttpResponse
+
 from gruntle.memebot.models import UserProfile, Link
 from gruntle.memebot.forms import ManageProfileForm
 
@@ -42,3 +45,13 @@ def browse(request):
     end = start + per_page
     links = Link.objects.all().order_by('-created')[start:end]
     return direct_to_template(request, 'memebot/browse.html', {'links': links})
+
+
+@login_required
+def content(request, link_id=None):
+    """View generic published content that is cached locally"""
+    link = get_object_or_404(Link, id=int(link_id), state='published')
+    content = link.content
+    if content is None:
+        raise Http404
+    return HttpResponse(content, link.mime_type)

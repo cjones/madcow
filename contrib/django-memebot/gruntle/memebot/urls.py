@@ -8,6 +8,7 @@ urlpatterns = patterns('gruntle.memebot.views',
         url(r'^scores/$', 'scores', name='scores'),
         url(r'^profile/$', 'profile', name='profile'),
         url(r'^browse/$', 'browse', name='browse'),
+        url(r'^content/(?P<link_id>\d+)/$', 'content', name='content'),
         )
 
 urlpatterns += patterns('',
