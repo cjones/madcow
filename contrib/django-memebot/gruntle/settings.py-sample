@@ -1,70 +1,90 @@
 """Settings for gruntle project"""
 
+import logging
 import os
 
-TEMPLATE_DEBUG = DEBUG = True
-
-MANAGERS = ADMINS = (
-        #('Your Name', 'youremail@example.com'),
-        )
-
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'gruntle',
-            'USER': 'gruntle',
-            'PASSWORD': 'gruntle',
-            'HOST': '',
-            'PORT': '',
-            }
-        }
-
+SITE_ROOT = '/'    # sub-directory you deployed to (e.g. /urls/)
 TIME_ZONE = 'America/Los_Angeles'
+ADMINS = (('Your Name', 'nobody@localhost'),)
+SECRET_KEY = 'ChangeMe!!!ChangeMe!!!ChangeMe!!!ChangeMe!!!Unique'
+
+DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                         'NAME': '',
+                         'USER': '',
+                         'PASSWORD': '',
+                         'HOST': '',
+                         'PORT': ''}}
+
+# memebot points scoring formula
+MEMEBOT_POINTS_NEW = 1          # points to award when a new link is posted
+MEMEBOT_POINTS_OLD = -2         # points to penalize when reposting old urls
+MEMEBOT_POINTS_REPOSTS = 2      # points to award user when someone reposts their url
+
+# when someone posts a link, whether to add them to database
+AUTO_USER_ADD = True
+ANONYMOUS_USER_EMAIL = 'nobody@localhost'
+UNKNOWN_USERNAME = 'unknown'  # if posted from an invalid nick, we can save as this
+
+# link browser config
+BROWSE_LINKS_PER_PAGE = 25
+
+# processor config
+PROCESSOR_USER_AGENT = 'firefox'                # browser to masquerade as (see utils/browser.py for more)
+PROCESSOR_MAX_LINKS = 1024                      # how many links to process in one run
+PROCESSOR_MAX_READ = 1048576  # 1M              # files larger than this will not be read entirely
+PROCESSOR_MAX_ERRORS = 10                       # number of errors before giving up on the url
+PROCESSOR_IMAGE_TYPE = 'png'                    # format to use when saving image locally
+PROCESSOR_IMAGE_MAX_SIZE = 640, 480             # max width/height of cached images (will rescale)
+PROCESSOR_IMAGE_RESIZE_ALG = 'ANTIALIAS'        # algorithm to use when rescaling (see PIL.Image.resize)
+
+# logging parameters
+LOG_LEVEL = logging.INFO
+LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+LOG_RECORD_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+LOG_MAX_FILES = 1000
+LOG_PERMS = 0644
+
+# file locations
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
+LOG_DIR = os.path.join(DATA_DIR, 'log')
+LOCK_DIR = os.path.join(DATA_DIR, 'lock')
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'memebot', 'media')
+
+# url paths
+SITE_ROOT = '/'  # if you deploy to a subdirectory, set that here (e.g. '/urls')
+MEDIA_URL = os.path.join(SITE_ROOT, 'media', '')
+ADMIN_MEDIA_PREFIX = os.path.join(MEDIA_URL, 'admin', '')
+LOGIN_URL = os.path.join(SITE_ROOT, 'login', '')
+LOGIN_REDIRECT_URL = os.path.join(SITE_ROOT, '')
+
+# misc settings you probably don't need to change
 LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'memebot', 'media')
-MEDIA_URL = '/urls/media/'
-ADMIN_MEDIA_PREFIX = '/urls/admin/media/'
-SECRET_KEY = 'ChangeMeToSomethingUniqueAndRandomThatIsNotThisOK?'
-
-TEMPLATE_LOADERS = (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-        )
-
-MIDDLEWARE_CLASSES = (
-        'django.middleware.common.CommonMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        )
-
 ROOT_URLCONF = 'gruntle.urls'
-TEMPLATE_DIRS = ()
-
-INSTALLED_APPS = (
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.sites',
-        'django.contrib.messages',
-        'django.contrib.admin',
-        'django.contrib.admindocs',
-        'gruntle.memebot',
-        )
-
-LOGIN_URL = '/urls/login/'
-LOGIN_REDIRECT_URL = '/urls/'
 DEV_SERVER_ADDR = '0.0.0.0:8000'
 AUTH_PROFILE_MODULE = 'memebot.UserProfile'
+TEXT_ENCODING = 'utf-8'
+MANAGERS = ADMINS
+TEMPLATE_DEBUG = DEBUG = False
+TEMPLATE_DIRS = ()
 
-MEMEBOT_POINTS_NEW = 1
-MEMEBOT_POINTS_OLD = -2
-MEMEBOT_POINTS_REPOSTS = 2
-ANONYMOUS_USER_EMAIL = 'nobody@localhost'
-UNKNOWN_USERNAME = 'unknown'
-BROWSE_LINKS_PER_PAGE = 25
+TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader')
+
+MIDDLEWARE_CLASSES = ('django.middleware.common.CommonMiddleware',
+                      'django.contrib.sessions.middleware.SessionMiddleware',
+                      'django.middleware.csrf.CsrfViewMiddleware',
+                      'django.contrib.auth.middleware.AuthenticationMiddleware',
+                      'django.contrib.messages.middleware.MessageMiddleware')
+
+INSTALLED_APPS = ('django.contrib.auth',
+                  'django.contrib.contenttypes',
+                  'django.contrib.sessions',
+                  'django.contrib.sites',
+                  'django.contrib.messages',
+                  'django.contrib.admin',
+                  'django.contrib.admindocs',
+                  'gruntle.memebot')
