@@ -71,7 +71,8 @@ def process_queue(log, user_agent=None,
 
             browser = Browser(user_agent=user_agent)
             for i, link in enumerate(links):
-                log.info('[%d/%d] Processing: %s', i + 1, num_links, link.url)
+                log = log.get_named_child('%d/%d' % (i + 1, num_links))
+                log.info('Processing: %s', link.url)
                 fatal = False
                 try:
                     with TrapErrors():
@@ -87,7 +88,7 @@ def process_queue(log, user_agent=None,
                             # a hotlinked image
                             if response.data_type == 'image' and Image is not None:
                                 image = response.data
-                                log.info('Link is a %s image, size = %d x %d', image.format, *image.size)
+                                log.info('Content: %s image, size = %d x %d', image.format, *image.size)
 
                                 # resize if too large
                                 ratios = set(float(msize) / size
@@ -109,7 +110,7 @@ def process_queue(log, user_agent=None,
 
                             # html page.. extract some info
                             elif response.data_type == 'soup':
-                                log.info('Link is an HTML page')
+                                log.info('Content: HTML page')
 
                                 # get title of page
                                 with trapped:
@@ -118,11 +119,11 @@ def process_queue(log, user_agent=None,
 
                             # no idea.. just save what we got
                             else:
-                                log.info('Unknown page, MIME = %s', response.mime_type)
+                                log.info('Content: Unknown (%s)', response.mime_type)
                                 link.mime_type = response.mime_type
 
                         else:
-                            log.info('Invalid link: %d %s', response.code, response.msg)
+                            log.info('Error: %d %s', response.code, response.msg)
                             publish = False
                             link.content_type = 'error'
                             link.content = response.msg

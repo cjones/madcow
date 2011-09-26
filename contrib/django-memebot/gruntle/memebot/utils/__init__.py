@@ -147,23 +147,41 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
 
     class LogWrapper(object):
 
+        """Add/change some functionality to stdlib's logger"""
+
         WRAP_FUNCS = 'debug', 'info', 'warn', 'warning', 'error', 'fatal', 'critical', 'exception'
 
+        def __init__(self, name=None):
+            self.name = name
+
+        @property
+        def prefix(self):
+            if self.name:
+                return text.encode(text.format('[%s] ', self.name))
+            return ''
+
         def __getattribute__(self, key):
-            wrapped_func = getattr(logger, key)
-            if key in type(self).WRAP_FUNCS:
+            try:
+                return super(LogWrapper, self).__getattribute__(key)
+            except AttributeError:
+                wrapped_func = getattr(logger, key)
+                if key in type(self).WRAP_FUNCS:
 
-                @functools.wraps(wrapped_func)
-                def wrapper_func(*args, **kwargs):
-                    exc_info = kwargs.pop('exc_info', None)
-                    wrapped_func(text.encode(text.format(*args, **kwargs)))
-                    if exc_info is not None:
-                        for line in traceback.format_exception(*exc_info):
-                            wrapped_func(text.chomp(text.encode(line)))
+                    @functools.wraps(wrapped_func)
+                    def wrapper_func(*args, **kwargs):
+                        exc_info = kwargs.pop('exc_info', None)
+                        wrapped_func(self.prefix + text.encode(text.format(*args, **kwargs)))
+                        if exc_info is not None:
+                            for line in traceback.format_exception(*exc_info):
+                                wrapped_func(self.prefix + text.chomp(text.encode(line)))
 
-                return wrapper_func
-            else:
-                return wrapped_func
+                    return wrapper_func
+                else:
+                    return wrapped_func
+
+        def get_named_child(self, name):
+            """Return named interface to this logger"""
+            return type(self)(name)
 
     return LogWrapper()
 
