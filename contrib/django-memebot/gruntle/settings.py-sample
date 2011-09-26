@@ -52,7 +52,6 @@ LOCK_DIR = os.path.join(DATA_DIR, 'lock')
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'memebot', 'media')
 
 # url paths
-SITE_ROOT = '/'  # if you deploy to a subdirectory, set that here (e.g. '/urls')
 MEDIA_URL = os.path.join(SITE_ROOT, 'media', '')
 ADMIN_MEDIA_PREFIX = os.path.join(MEDIA_URL, 'admin', '')
 LOGIN_URL = os.path.join(SITE_ROOT, 'login', '')
