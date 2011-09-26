@@ -77,12 +77,17 @@ def process_queue(log, user_agent=None,
                     with TrapErrors():
                         response = browser.open(link.url, max_read=max_read)
                         if response.is_valid:
+                            log.info('URL is valid')
                             publish = True
                             link.resolved_url = response.real_url
+
+                            if link.url != response.real_url:
+                                log.info('Redirected: %s', response.real_url)
 
                             # a hotlinked image
                             if response.data_type == 'image' and Image is not None:
                                 image = response.data
+                                log.info('Link is a %s image, size = %d x %d', image.format, *image.size)
 
                                 # resize if too large
                                 ratios = set(float(msize) / size
@@ -90,27 +95,34 @@ def process_queue(log, user_agent=None,
                                              if size > msize)
 
                                 if ratios:
-                                    image = image.resize(map(lambda x: x * min(ratios), image.size), image_resize_alg)
+                                    ratio = min(ratios)
+                                    new_size = tuple(int(size * ratio) for size in image.size)
+                                    log.info('Rescaling to: %d x %d', *new_size)
+                                    image = image.resize(new_size, image_resize_alg)
 
                                 # save as specified format
                                 link.mime_type = 'image/%s' % image_type.lower()
                                 link.content_type = 'image'
                                 fileobj = stringio.StringIO()
-                                response.data.save(fileobj, image_type.upper())
+                                image.save(fileobj, image_type.upper())
                                 link.content = fileobj.getvalue()
 
                             # html page.. extract some info
                             elif response.data_type == 'soup':
+                                log.info('Link is an HTML page')
 
                                 # get title of page
                                 with trapped:
                                     link.title = text.decode(response.data.title.string).strip()
+                                    log.info('Title: %r', link.title)
 
                             # no idea.. just save what we got
                             else:
+                                log.info('Unknown page, MIME = %s', response.mime_type)
                                 link.mime_type = response.mime_type
 
                         else:
+                            log.info('Invalid link: %d %s', response.code, response.msg)
                             publish = False
                             link.content_type = 'error'
                             link.content = response.msg
@@ -129,8 +141,11 @@ def process_queue(log, user_agent=None,
                     link.error_count += 1
                     if fatal or (max_errors is not None and link.error_count >= max_errors):
                         link.state = 'invalid'
+                        log.info('Link is marked as permanently invalid')
 
-                if not dry_run:
+                if dry_run:
+                    log.info('Dry run, not saving results')
+                else:
                     link.save()
 
         else:
