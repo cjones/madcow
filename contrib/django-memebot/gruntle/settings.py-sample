@@ -67,6 +67,8 @@ SCANNERS = (
 RSS_TITLE = u'Madcow Global RSS Feed (Beta)'
 RSS_DESCRIPTION = u'Temporary feed to test rendering and feed generation, etc.'
 RSS_ENCODING = u'UTF-8'
+RSS_COPYRIGHT = u'Copyright (c) 2011 Chris Jones <cjones@gmail.com>'
+RSS_IMAGE = None  # image_url, title, link
 
 # logging config
 LOG_LEVEL = 'INFO'
