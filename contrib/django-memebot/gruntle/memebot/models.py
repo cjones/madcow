@@ -214,6 +214,22 @@ class Link(Model):
         """The scanner-defined template used to render this link in RSS"""
         return self.get_scanner().rss_template
 
+    @models.permalink
+    def get_absolute_url(self):
+        """URL to this links cached content"""
+        if self.state == 'published' and self.content is not None:
+            return ('content', [self.publish_id])
+
+    absolute_url = property(get_absolute_url)
+
+    @models.permalink
+    def get_rss_url(self):
+        """URL to this links RSS item"""
+        if self.state == 'published':
+            return ('view-rss', [self.publish_id])
+
+    rss_url = property(get_rss_url)
+
     def publish(self, commit=True):
         """Publish this link"""
         dirty = False
