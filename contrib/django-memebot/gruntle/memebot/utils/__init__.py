@@ -7,6 +7,7 @@ import binascii
 import tempfile
 import logging
 import errno
+import time
 import sys
 import os
 
@@ -195,6 +196,13 @@ def first(*args):
     for arg in args:
         if arg:
             return arg
+
+
+def local_to_gmt(dt=None):
+    """Convert a datetime object in localtime to gmt time.. stupidest shit ever"""
+    if dt is None:
+        dt = datetime.datetime.now()
+    return datetime.datetime.fromtimestamp(time.mktime(time.gmtime(time.mktime(dt.timetuple()))))
 
 
 # default trapper that swallows errors
