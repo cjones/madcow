@@ -26,7 +26,8 @@ class Command(BaseCommand):
                    'title': None,
                    'published': None,
                    'publish_id': None,
-                   'scanner': None}
+                   'scanner': None,
+                   'attr_storage': None}
 
         sql = []
         params = []

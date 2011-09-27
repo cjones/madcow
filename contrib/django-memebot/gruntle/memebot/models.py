@@ -12,8 +12,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import models
 
+from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager
 from gruntle.memebot.exceptions import OldMeme
-from gruntle.memebot.fields import SerializedDataField
 
 class Model(models.Model):
 
@@ -193,6 +193,8 @@ class Link(Model):
     published = models.DateTimeField(null=True, blank=True, default=None)
     publish_id = models.IntegerField(null=True, blank=True, default=None, unique=True)
     scanner = models.TextField(null=True, blank=True, default=None)
+    attr_storage = PickleField(null=True, blank=True, default=None)
+    attr = AttributeManager(storage_field='attr_storage')
 
     class Meta:
 
