@@ -9,6 +9,7 @@ import os
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.conf import settings
 from django.db import models
 
@@ -19,12 +20,36 @@ class Model(models.Model):
 
     """Abstract: Base model"""
 
+    # for generating GUIDs
+    _guid_fmt = 'tag:%(domain)s,%(date)s:/%(app)s/%(model)s/%(id)d/%(timestamp)s'
+    _guid_id_fields = 'publish_id', 'external_id', 'id'
+
+    # all models inherit these timestamps
     created = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     modified = models.DateTimeField(null=False, blank=False, auto_now=True)
 
     class Meta:
 
         abstract = True
+
+    @property
+    def guid(self):
+        """Global unique identifier for this object"""
+        site = Site.objects.get_current()
+        model = type(self)
+        for field in model._guid_id_fields:
+            external_id = getattr(self, field, None)
+            if external_id is not None:
+                break
+        else:
+            raise TypeError('No suitable ID found for GUID creation')
+        return model._guid_fmt % {
+                'domain': site.domain,
+                'date': self.created.strftime('%Y-%m-%d'),
+                'app': model._meta.app_label,
+                'model': model._meta.object_name.lower(),
+                'id': external_id,
+                'timestamp': self.created.strftime('%Y%m%d%H%M%S')}
 
 
 class Source(Model):

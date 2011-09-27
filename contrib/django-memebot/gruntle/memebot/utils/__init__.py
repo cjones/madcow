@@ -188,5 +188,14 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
     return LogWrapper()
 
 
+def first(*args):
+    """Like any() and all() ... except it's first(). Returns None if nothing is True"""
+    if len(args) == 1 and isinstance(args[0], (tuple, list)):
+        args = args[0]
+    for arg in args:
+        if arg:
+            return arg
+
+
 # default trapper that swallows errors
 trapped = TrapErrors(reraise=False)
