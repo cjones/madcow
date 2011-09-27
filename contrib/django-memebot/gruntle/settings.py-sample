@@ -58,6 +58,7 @@ SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see P
 SCANNERS = (
         'gruntle.memebot.scanner.youtube',
         'gruntle.memebot.scanner.image',
+        'gruntle.memebot.scanner.html',
         'gruntle.memebot.scanner.default',
         )
 
