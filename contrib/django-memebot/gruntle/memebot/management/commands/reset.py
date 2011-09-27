@@ -2,7 +2,7 @@
 
 from django.core.management import BaseCommand, CommandError
 from django.db import connection, transaction
-from gruntle.memebot.models import Link
+from gruntle.memebot.models import Link, SerializedData
 
 class Command(BaseCommand):
 
@@ -39,4 +39,9 @@ class Command(BaseCommand):
         cursor.execute('UPDATE %s SET %s;' % (Link._meta.db_table, ', '.join(sql)), tuple(params))
         transaction.commit_unless_managed()
 
-        print 'Update successful'
+        sdata = SerializedData.objects.all()
+        if sdata.count():
+            print 'Deleting %d serialized data items' % sdata.count()
+            sdata.delete()
+
+        print 'Reset complete'
