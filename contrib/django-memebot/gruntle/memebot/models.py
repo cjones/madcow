@@ -13,7 +13,7 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 from django.db import models
 
-from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager
+from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
 from gruntle.memebot.exceptions import OldMeme
 
 class Model(models.Model):
@@ -289,6 +289,19 @@ class Note(Model):
     class Meta:
 
         unique_together = 'user', 'link', 'value'
+
+
+class SerializedData(Model):
+
+    """Arbitrary data storage for one-off key/values"""
+
+    name = models.CharField(null=False, blank=False, max_length=64, unique=True)
+    description = models.TextField(null=True, blank=True, default=None)
+    value = PickleField(null=True, blank=True, default=None)
+    data = KeyValueManager(key_field='name', val_field='value')
+
+    def __unicode__(self):
+        return u'%s=%r' % (self.name, self.value)
 
 
 class AliasManager(models.Manager):

@@ -5,6 +5,7 @@ import datetime
 from django.conf import settings
 
 from gruntle.memebot.rss.PyRSS2Gen import RSSItem, RSS2, Image
+from gruntle.memebot.decorators import logged, locked
 from gruntle.memebot.utils import first, local_to_gmt
 
 class LinkItem(RSSItem):
@@ -43,3 +44,10 @@ class LinkFeed(RSS2):
                 lastBuildDate=now,
                 image=image,
                 items=[LinkItem(link) for link in links])
+
+
+@logged('build-rss', append=True)
+@locked('build-rss', 0)
+def rebuild_rss(log):
+    """Rebuild cached RSS file"""
+    log.info('Rebuilding RSS feed ...')

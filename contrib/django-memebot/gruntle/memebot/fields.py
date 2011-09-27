@@ -18,10 +18,10 @@ except ImportError:
 
 from django.db import models
 from django.conf import settings
-
 from gruntle.memebot.utils import text
 
-__all__ = ['SerializedDataField', 'PickleField', 'AttributeManager']
+__all__ = ['SerializedDataField', 'PickleField', 'AttributeDataWrapper',
+           'AttributeManager', 'KeyValueDataWrapper', 'KeyValueManager']
 
 class SerializedDataField(models.Field):
 
@@ -252,3 +252,70 @@ class AttributeManager(object):
     def __get__(self, object, model):
         """Descriptor access: return wrapper around the object to manage its data store"""
         return AttributeDataWrapper(object, self.storage_field, self.default_value, self.writeback)
+
+
+class KeyValueDataWrapper(object):
+
+    """Wraps a model and manages its key/value pairing with explicit writeback"""
+
+    __slots__ = '_model', '_key', '_val', '_default', '_writeback', '_dirty'
+
+    def __init__(self, model, key, val, default, writeback):
+        self._model = model
+        self._key = key
+        self._val = val
+        self._default = default
+        self._writeback = writeback
+        self._dirty = set()
+
+    def _save(self):
+        dirty, self._dirty = self._dirty, set()
+        for object in dirty:
+            object.save()
+
+    def __getattribute__(self, key):
+        try:
+            return super(KeyValueDataWrapper, self).__getattribute__(key)
+        except AttributeError:
+            try:
+                return getattr(self._model.objects.get(**{self._key: key}), self._val, self._default)
+            except self._model.DoesNotExist:
+                return self._default
+
+    def __setattr__(self, key, val):
+        if key in type(self).__slots__:
+            super(KeyValueDataWrapper, self).__setattr__(key, val)
+        else:
+            object = self._model.objects.get_or_create(**{self._key: key})[0]
+            setattr(object, self._val, val)
+            if self._writeback:
+                object.save()
+            else:
+                self._dirty.add(object)
+
+
+class KeyValueManager(object):
+
+    """Descriptor access: Return model wrapper to manage model's key/value pairing"""
+
+    DEFAULT_KEY_FIELD = 'name'
+    DEFAULT_VAL_FIELD = 'value'
+    DEFAULT_DEFAULT_VALUE = None
+    DEFAULT_WRITEBACK = True
+
+    def __init__(self, key_field=None, val_field=None, default_value=None, writeback=None):
+        if key_field is None:
+            key_field = self.DEFAULT_KEY_FIELD
+        if val_field is None:
+            val_field = self.DEFAULT_VAL_FIELD
+        if default_value is None:
+            default_value = self.DEFAULT_DEFAULT_VALUE
+        if writeback is None:
+            writeback = self.DEFAULT_WRITEBACK
+        self.key_field = key_field
+        self.val_field = val_field
+        self.default_value = default_value
+        self.writeback = writeback
+
+    def __get__(self, object, model):
+        return KeyValueDataWrapper(model, self.key_field, self.val_field, self.default_value, self.writeback)
