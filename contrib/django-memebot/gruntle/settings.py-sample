@@ -54,6 +54,7 @@ SCANNER_MAX_ERRORS = 10                 # number of errors before giving up on t
 SCANNER_IMAGE_TYPE = 'png'              # format to use when saving image locally
 SCANNER_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (will rescale)
 SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
+SCANNER_YOUTUBE_EXTRA_ATTR = True       # scrape more data from the page or just embed the video?
 
 SCANNERS = (
         'gruntle.memebot.scanner.youtube',
@@ -61,6 +62,11 @@ SCANNERS = (
         'gruntle.memebot.scanner.html',
         'gruntle.memebot.scanner.default',
         )
+
+# rss config
+RSS_TITLE = u'Madcow Global RSS Feed (Beta)'
+RSS_DESCRIPTION = u'Temporary feed to test rendering and feed generation, etc.'
+RSS_ENCODING = u'UTF-8'
 
 # logging config
 LOG_LEVEL = 'INFO'
