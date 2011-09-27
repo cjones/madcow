@@ -2,7 +2,8 @@
 import functools
 import traceback
 import sys
-from gruntle.memebot.utils import get_logger, text
+
+from gruntle.memebot.utils import get_logger, text, locking
 
 def logged(*logger_args, **default_logger_kwargs):
 
@@ -26,6 +27,19 @@ def logged(*logger_args, **default_logger_kwargs):
                 for line in traceback.format_exception(exc_type, exc_value, exc_traceback):
                     logger.error(text.chomp(line))
                 raise exc_type, exc_value, exc_traceback
+
+        return wrapper_func
+    return decorator
+
+
+def locked(*lock_args, **lock_kwargs):
+
+    def decorator(wrapped_func):
+
+        @functools.wraps(wrapped_func)
+        def wrapper_func(*args, **kwargs):
+            with locking.Lock(*lock_args, **lock_kwargs):
+                return wrapped_func(*args, **kwargs)
 
         return wrapper_func
     return decorator

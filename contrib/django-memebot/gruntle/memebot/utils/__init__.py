@@ -49,11 +49,13 @@ class TrapErrors(object):
 
     DO_NOT_TRAP = SystemExit, KeyboardInterrupt, EOFError
 
-    def __init__(self, reraise=True, notrap=None):
+    def __init__(self, reraise=True, ignore=None):
         self.reraise = reraise
-        self.notrap = list(self.DO_NOT_TRAP)
-        if notrap is not None:
-            self.notrap.extend(notrap)
+        self.ignore = list(self.DO_NOT_TRAP)
+        if ignore is not None:
+            if isinstance(ignore, Exception):
+                ignore = [ignore]
+            self.ignore.extend(ignore)
 
     def __enter__(self):
         """Enter context"""
@@ -61,7 +63,7 @@ class TrapErrors(object):
 
     def __exit__(self, exc_type=None, exc_value=None, exc_traceback=None):
         """Exit context: Determine how to handle exception state"""
-        if exc_value is not None and exc_type not in self.notrap:
+        if exc_value is not None and exc_type not in self.ignore:
             if self.reraise:
                 raise TrapError(exc_type, exc_value, exc_traceback)
             return True
@@ -179,7 +181,7 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
                 else:
                     return wrapped_func
 
-        def get_named_child(self, name):
+        def get_named_logger(self, name):
             """Return named interface to this logger"""
             return type(self)(name)
 

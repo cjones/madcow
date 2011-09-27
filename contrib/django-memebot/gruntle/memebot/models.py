@@ -192,6 +192,7 @@ class Link(Model):
     title = models.TextField(null=True, blank=True, default=None)
     published = models.DateTimeField(null=True, blank=True, default=None)
     publish_id = models.IntegerField(null=True, blank=True, default=None, unique=True)
+    scanner = models.TextField(null=True, blank=True, default=None)
 
     class Meta:
 
