@@ -1,10 +1,12 @@
 """Tools to mimic browser capabilities for scraping tasks"""
 
+import htmlentitydefs
 import collections
 import cookielib
 import urllib2
 import urllib
 import gzip
+import re
 
 try:
     import cStringIO as stringio
@@ -28,6 +30,8 @@ except ImportError:
 
 from gruntle.memebot.utils import TrapError, TrapErrors, text
 
+__all__ = ['Browser', 'decode_entities', 'render_node']
+
 # some user agents to choose from, for convenience
 PRESET_USER_AGENTS = {'ie6': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
                       'ie7': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
@@ -46,6 +50,13 @@ PRESET_USER_AGENTS = {'ie6': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
                       'wget': 'Wget/1.12 (linux-gnu)',
                       'urllib': 'Python-urllib/1.17',
                       'urllib2': 'Python-urllib/2.7'}
+
+# some gloriously naive regular expressions for stripping html, quick & dirty
+html_tag_re = re.compile(r'<.*?>', re.DOTALL)  # <-- horrible
+whitespace_re = re.compile(r'\s+')  # for packing whitespace
+entity_dec_re = re.compile(r'(&#(\d+);)')  # &#32;
+entity_hex_re = re.compile(r'^(&#x([0-9a-fA-F]+);)')  # &#x3D;
+entity_name_re = re.compile(r'(&(%s);)' % '|'.join(map(re.escape, htmlentitydefs.name2codepoint)))  # &amp;
 
 class Response(collections.namedtuple('Response', 'code msg url real_url data_type main_type sub_type data complete')):
 
@@ -156,3 +167,20 @@ class Browser(object):
         return Response(code=response.code, msg=response.msg, url=url, real_url=response.url, data_type=data_type,
                         main_type=response.headers.maintype, sub_type=response.headers.subtype, data=data,
                         complete=((max_read == -1) or (read < max_read)))
+
+
+def decode_entities(html):
+    """Convert HTML entity-encoded characters back to bytes"""
+    for a in ((x, chr(int(v))) for x, v in entity_dec_re.findall(html)):
+        html = html.replace(*a)
+    for a in ((x, chr(htmlentitydefs.name2codepoint[name])) for x, name in entity_name_re.findall(html)):
+        html = html.replace(*a)
+    for a in ((x, unichr(int(v, 16))) for x, v in entity_hex_re.findall(html)):
+        html = html.replace(*a)
+    return html
+
+
+def render_node(node):
+    """Try to turn a soup node into something resembling plain text"""
+    html = text.encode(node if isinstance(node, (str, unicode)) else node.renderContents())
+    return text.decode(decode_entities(whitespace_re.sub(' ', html_tag_re.sub(' ', html).strip())))

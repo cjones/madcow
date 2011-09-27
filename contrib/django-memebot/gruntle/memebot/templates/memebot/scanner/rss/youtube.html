@@ -1,4 +1,46 @@
 {% extends "memebot/scanner/rss/base.html" %}
 {% block content %}
-<div class="youtube-embed"><iframe width="560" height="315" src="http://www.youtube-nocookie.com/embed/{{ link.attr.video_id }}?rel=0" frameborder="0" allowfullscreen></iframe></div>
+    <div class="youtube-embed">
+        <iframe width="560"
+                height="315"
+                src="http://www.youtube-nocookie.com/embed/{{ link.attr.video_id }}?rel=0"
+                frameborder="0"
+                allowfullscreen>
+        </iframe>
+    </div>
+    <div class="extra-youtube-info">
+        {% if link.attr.uploader %}
+            <dt>{{ link.attr.uploader }}</dt>
+            <dd></dd>
+        {% endif %}
+
+        {% if link.attr.category %}
+            <dt>Category</dt>
+            <dd>{{ link.attr.category }}</dd>
+        {% endif %}
+
+        {% if link.attr.views %}
+            <dt>Views</dt>
+            <dd>{{ link.attr.views }}</dd>
+        {% endif %}
+
+        {% if link.attr.extras %}
+            <dt>Extras</dt>
+            {% for extra in link.attr.extras %}
+                <dd>{{ extra }}</dd>
+            {% endfor %}
+        {% endif %}
+
+        {% if link.attr.tags %}
+            <dt>Tags</dt>
+            {% for tag in link.attr.tags %}
+                <dd>{{ tag }}</dd>
+            {% endfor %}
+        {% endif %}
+
+        {% if link.attr.summary %}
+        <br />
+        <div class="youtube-summary">{{ link.attr.summary }}</div>
+        {% endif %}
+    </div>
 {% endblock %}
