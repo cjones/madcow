@@ -1,10 +1,13 @@
+"""MemeBot exceptions"""
 
-class URLBotError(StandardError):
+class MemebotError(StandardError):
 
-    pass
+    """Base error class for memebot"""
 
 
-class OldMeme(URLBotError):
+class OldMeme(MemebotError):
+
+    """Raised when a URL is reposted public"""
 
     def __init__(self, link):
         self.link = link

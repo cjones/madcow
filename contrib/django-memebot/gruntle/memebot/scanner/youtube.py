@@ -4,6 +4,8 @@ from gruntle.memebot.scanner import Scanner, ScanResult
 
 class YouTubeScanner(Scanner):
 
+    rss_template = 'memebot/scanner/rss/youtube.html'
+
     url_match = {'netloc_regex': r'^(?:www\.)?youtube\.com$',
                  'netloc_ignorecase': True,
                  'path': '/watch',

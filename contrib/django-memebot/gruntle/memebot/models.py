@@ -201,7 +201,21 @@ class Link(Model):
     def __unicode__(self):
         return self.url
 
+    def get_scanner(self):
+        """Returns the real scanner object responsible for this links rendering"""
+        if self.scanner:
+            try:
+                return __import__(self.scanner, globals(), locals(), ['scanner']).scanner
+            except (ImportError, AttributeError):
+                pass
+
+    @property
+    def rss_template(self):
+        """The scanner-defined template used to render this link in RSS"""
+        return self.get_scanner().rss_template
+
     def publish(self, commit=True):
+        """Publish this link"""
         dirty = False
         if self.state != 'published':
             self.state = 'published'

@@ -107,6 +107,8 @@ class Scanner(object):
 
     """Base scanner implements url and query context parsing/matching"""
 
+    rss_template = None
+
     def __init__(self):
         url_match = getattr(self, 'url_match', {})
         self.patterns = dict((field, self.get_regex(url_match, field)) for field in urlparse.ParseResult._fields)
@@ -214,7 +216,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
     browser = Browser(user_agent=user_agent, timeout=timeout)
 
     # fetch new links to scan
-    links = Link.objects.filter(state='new', url__endswith='.jpg').order_by('created')
+    links = Link.objects.filter(state='new').order_by('created')
     if max_links:
         links = links[:max_links]
     num_links = links.count()
@@ -224,7 +226,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
 
     for i, link in enumerate(links):
         log = logger.get_named_logger('%d/%d' % (i + 1, num_links))
-        log.info('Scanning: %s', link.url)
+        log.info('Scanning: [%d] %s', link.id, link.url)
         try:
             with TrapErrors():
 
@@ -277,8 +279,8 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
                 else:
                     log.error('Discarding %r, error was fatal', link)
 
-        # save changes to this link
+        # save changes to this link.. maybe
         if dry_run:
-            log.info('DRY RUN, not saving to database')
+            log.warn('DRY RUN, not saving to database')
         else:
             link.save()

@@ -5,11 +5,13 @@ from django.conf import settings
 admin.autodiscover()
 
 urlpatterns = patterns('gruntle.memebot.views',
-        url(r'^$', 'index', name='memebot-index'),
-        url(r'^scores/$', 'scores', name='memebot-scores'),
-        url(r'^profile/$', 'profile', name='memebot-profile'),
-        url(r'^browse/$', 'browse', name='memebot-browse'),
-        url(r'^content/(?P<publish_id>\d+)/$', 'content', name='memebot-content'),
+        url(r'^$', 'index', name='index'),
+        url(r'^scores/$', 'scores', name='scores'),
+        url(r'^profile/$', 'profile', name='profile'),
+        url(r'^browse/$', 'browse', name='browse'),
+
+        url(r'^content/(?P<publish_id>\d+)/$', 'content', name='content'),
+        url(r'^view/(?P<publish_id>\d+)/rss/$', 'view_rss', name='view-rss'),
         )
 
 urlpatterns += patterns('',
@@ -19,7 +21,7 @@ urlpatterns += patterns('',
 
 urlpatterns += patterns('django.contrib.auth.views',
         url('^login/$', 'login', name='auth-login'),
-        url('^logout/$', 'logout_then_login', name='auth-logout'),
+        url('^logout/$', 'logout_then_login', name='logout'),
         )
 
 if settings.DEV_SERVER:

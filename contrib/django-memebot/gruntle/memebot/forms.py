@@ -1,7 +1,11 @@
+"""Memebot forms"""
+
 from django import forms
 from django.contrib.auth.models import User
 
 class ManageProfileForm(forms.ModelForm):
+
+    """Form for updating your user profile"""
 
     password_opts = {'min_length': 3, 'max_length': 128, 'widget': forms.PasswordInput, 'required': False}
 
@@ -14,6 +18,7 @@ class ManageProfileForm(forms.ModelForm):
         fields = 'email', 'first_name', 'last_name'
 
     def clean_password2(self):
+        """Verify password matches"""
         if self.cleaned_data['password1'] != self.cleaned_data['password2']:
             raise forms.ValidationError("Doesn't match password")
         return self.cleaned_data['password2']
