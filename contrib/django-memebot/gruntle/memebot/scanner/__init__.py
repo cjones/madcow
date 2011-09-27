@@ -91,7 +91,7 @@ class NoMatch(ScannerError):
                                        pattern, ', '.join(flags)))
 
 
-class ScanResult(collections.namedtuple('ScanResult', 'response override_url title content_type content')):
+class ScanResult(collections.namedtuple('ScanResult', 'response override_url title content_type content attr')):
 
     """Returned from a scanner on succesful match, contains values with which to update Link"""
 
@@ -253,7 +253,13 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
                 link.scanner = scanner_name
                 link.publish(commit=False)
 
+                # since this writes back immediately, hold until we know if this is a dry run
+                link._attr = result.attr
+
         except TrapError, exc:
+
+            # to match _attr temp storage above
+            link._attr = None
 
             # store stack trace in content field for the record
             link.content_type = 'text/plain'
@@ -284,3 +290,6 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
             log.warn('DRY RUN, not saving to database')
         else:
             link.save()
+            if link._attr is not None:
+                for key, val in link._attr.iteritems():
+                    link.attr[key] = val

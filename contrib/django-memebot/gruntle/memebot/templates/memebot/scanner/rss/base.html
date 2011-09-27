@@ -1,3 +1,4 @@
 <div class="rss-item" id="link-{{ link.publish_id }}">
+ <h3><a href="{{ link.resolved_url }}">{% if link.title %}{{ link.title }}{% else %}{{ link.resolved_url }}{% endif %}</a></h3>
  {% block content %}{% endblock %}
 </div>

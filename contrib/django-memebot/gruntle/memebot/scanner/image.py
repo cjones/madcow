@@ -73,7 +73,8 @@ class ImageScanner(Scanner):
                           override_url=None,
                           title=None,
                           content_type=self.content_type,
-                          content=fileobj.getvalue())
+                          content=fileobj.getvalue(),
+                          attr=None)
 
 
 scanner = ImageScanner()

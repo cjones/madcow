@@ -1,6 +1,6 @@
 """Provides embedded youtube video for youtube links"""
 
-from gruntle.memebot.scanner import Scanner, ScanResult
+from gruntle.memebot.scanner import Scanner, ScanResult, InvalidContent
 
 class YouTubeScanner(Scanner):
 
@@ -10,12 +10,17 @@ class YouTubeScanner(Scanner):
                  'netloc_ignorecase': True,
                  'path': '/watch',
                  'queries': (
-                     {'key': 'w', 'val_regex': '^(.+)$'},
+                     {'key': 'v', 'val_regex': '^(.+)$'},
                      ),
                  }
 
     def handle(self, response, log, video_id):
-        return ScanResult(response, None, 'A Youtube Video!', 'text/html', '<h3>YOUTUBE LOL!</h3>')
+        return ScanResult(response=response,
+                          override_url=None,
+                          title='Fake Title',
+                          content_type=None,
+                          content=None,
+                          attr={'video_id': video_id})
 
 
 scanner = YouTubeScanner()

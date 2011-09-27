@@ -7,7 +7,12 @@ class DefaultScanner(Scanner):
     rss_template = 'memebot/scanner/rss/default.html'
 
     def handle(self, response, log):
-        return ScanResult(response, None, None, None, None)
+        return ScanResult(response=response,
+                          override_url=None,
+                          title=None,
+                          content_type=None,
+                          content=None,
+                          attr=None)
 
 
 scanner = DefaultScanner()

@@ -24,7 +24,8 @@ class HTMLScanner(Scanner):
                           override_url=None,
                           title=title,
                           content_type=None,
-                          content=None)
+                          content=None,
+                          attr=None)
 
 
 scanner = HTMLScanner()

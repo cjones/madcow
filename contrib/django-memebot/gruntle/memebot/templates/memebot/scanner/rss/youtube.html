@@ -1,4 +1,4 @@
 {% extends "memebot/scanner/rss/base.html" %}
 {% block content %}
-<a href="{{ link.resolved_url }}">{{ link.resolved_url }}</a>
+<div class="youtube-embed"><iframe width="560" height="315" src="http://www.youtube-nocookie.com/embed/{{ link.attr.video_id }}?rel=0" frameborder="0" allowfullscreen></iframe></div>
 {% endblock %}

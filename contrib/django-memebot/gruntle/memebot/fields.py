@@ -221,6 +221,10 @@ class AttributeDataWrapper(object):
             else:
                 self._dirty = True
 
+    # map index to attribute access for convenience
+    __getitem__ = __getattribute__
+    __setitem__ = __setattr__
+
 
 class AttributeManager(object):
 
