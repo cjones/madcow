@@ -293,6 +293,9 @@ class KeyValueDataWrapper(object):
             else:
                 self._dirty.add(object)
 
+    __getitem__ = __getattribute__
+    __setitem__ = __setattr__
+
 
 class KeyValueManager(object):
 

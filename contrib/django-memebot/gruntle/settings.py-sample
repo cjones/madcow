@@ -63,18 +63,9 @@ SCANNERS = (
         'gruntle.memebot.scanner.default',
         )
 
-# rss config
-RSS_TITLE = u'Madcow Global RSS Feed (Beta)'
-RSS_DESCRIPTION = u'Temporary feed to test rendering and feed generation, etc.'
-RSS_ENCODING = u'UTF-8'
-RSS_COPYRIGHT = u'Copyright (c) 2011 Chris Jones <cjones@gmail.com>'
-RSS_IMAGE = None  # image_url, title, link
-RSS_MAX_LINKS = None  # max links to *process* at once, not allowed on the page. None=no limit
-RSS_NUM_LINKS = 100  # number of links in the feed at any given time
-
 # feeds to generate
 FEEDS = (
-        'gruntle.memebot.rss.default',
+        'gruntle.memebot.rss.hugs',
         )
 
 # logging config

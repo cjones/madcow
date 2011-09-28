@@ -34,8 +34,8 @@ class Scanner(object):
 
     def __init__(self):
         url_match = getattr(self, 'url_match', None)
-        if url_math is None:
-            url_math = {]
+        if url_match is None:
+            url_match = {}
         self.patterns = dict((field, self.get_regex(url_match, field)) for field in urlparse.ParseResult._fields)
         self.query_patterns = [tuple(self.get_regex(query, key) for key in ('key', 'val'))
                                for query in url_match.get('queries', [])]

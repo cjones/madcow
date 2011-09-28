@@ -13,7 +13,7 @@ class MemeBot(WSGIHandler):
     """WSGI application for memebot"""
 
     def __init__(self, *args, **kwargs):
-        settings_filename = kwargs.pop('settings_filename')
+        settings_filename = kwargs.pop('settings_filename', 'settings.py')
 
         # walk down, looking for settings file along the way
         project_dir = os.path.realpath(__file__)
@@ -34,7 +34,7 @@ class MemeBot(WSGIHandler):
         # configure application
         sys.dont_write_bytecode = True
         os.environ['DJANGO_SETTINGS_MODULE'] = '%s.%s' % (project_name, os.path.splitext(settings_filename)[0])
-        super(Application, self).__init__(*args, **kwargs)
+        super(MemeBot, self).__init__(*args, **kwargs)
 
 
 application = MemeBot()
