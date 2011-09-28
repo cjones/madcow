@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import sys
-import os
+"""Standadlone script template: Auto-configures for environment"""
 
+# BEGIN django environment auto-configure
 def setup_environ():
     """Initialize django environment from anywhere in project tree"""
+    import sys, os
     from django.core.management import setup_environ
     path = os.path.abspath(__file__)
     while path and path != os.sep:
@@ -16,14 +17,15 @@ def setup_environ():
     sys.path.insert(0, path)
     sys.dont_write_bytecode = True
     setup_environ(__import__('settings'))
-
 setup_environ()
+del setup_environ
+# END django environment auto-configure
 
 #from django.db.models import Q
 #from gruntle.memebot.models import *
 #from django.conf import settings
 
-def main(argv=None):
+def main():
     return 0
 
 if __name__ == '__main__':

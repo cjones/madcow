@@ -1,11 +1,16 @@
+"""Some management signal handlers"""
+
 from django.contrib.sites import models as sites_app
 from django.db.models import signals
 from django.conf import settings
 
-DEFAULT_DOMAIN = 'gruntle.org'
+from gruntle.memebot.utils import get_domain
+
+DEFAULT_DOMAIN = get_domain()
 DEFAULT_NAME = 'MemeBot'
 
 def set_site(created_models, interactive, **kwargs):
+    """Prompt user to set SITE specific properties"""
     if sites_app.Site in created_models:
         domain = DEFAULT_DOMAIN
         name = DEFAULT_NAME

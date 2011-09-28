@@ -3,7 +3,8 @@
 import codecs
 import sys
 
-from gruntle.memebot.utils import zdict, trapped, TrapError, TrapErrors
+from gruntle.memebot.utils import zdict
+from gruntle.memebot.exceptions import *
 
 __all__ = ['get_encoding', 'set_encoding', 'encode', 'decode', 'sencode', 'sdecode', 'cast', 'chomp', 'format']
 

@@ -1,7 +1,8 @@
 """Extracts summary data from HTML pages if possible"""
 
-from gruntle.memebot.scanner import Scanner, InvalidContent, ScanResult
-from gruntle.memebot.utils import trapped, text
+from gruntle.memebot.scanner import Scanner, ScanResult
+from gruntle.memebot.exceptions import InvalidContent, trapped
+from gruntle.memebot.utils import text
 
 class HTMLScanner(Scanner):
 

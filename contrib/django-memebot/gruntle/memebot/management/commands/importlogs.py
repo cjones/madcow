@@ -73,4 +73,3 @@ class Command(BaseCommand):
                                 print text.encode(text.format('OLD: [%s] <%s:%s> {%s} %s',
                                                               posted.strftime('%Y-%m-%d %H:%M:%S'),
                                                               post.nick, channel, exc.link.user.username, url))
-

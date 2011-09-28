@@ -11,7 +11,8 @@ except ImportError:
     Image = None
 
 from django.conf import settings
-from gruntle.memebot.scanner import Scanner, ScanResult, InvalidContent, ConfigError
+from gruntle.memebot.scanner import Scanner, ScanResult
+from gruntle.memebot.exceptions import InvalidContent, ConfigError
 
 class ImageScanner(Scanner):
 

@@ -1,14 +1,13 @@
 """PyRSS2Gen - A Python library for generating RSS 2.0 feeds."""
 
+import datetime
+
 __name__ = "PyRSS2Gen"
 __version__ = (1, 0, 0)
 __author__ = "Andrew Dalke <dalke@dalkescientific.com>"
 
 _generator_name = __name__ + "-" + ".".join(map(str, __version__))
 
-import datetime
-
-# Could make this the base class; will need to add 'publish'
 class WriteXmlMixin(object):
     def write_xml(self, outfile, encoding = "iso-8859-1"):
         from xml.sax import saxutils
@@ -27,52 +26,11 @@ class WriteXmlMixin(object):
         return f.getvalue()
 
 
-def _element(handler, name, obj, d = {}):
-    if isinstance(obj, basestring) or obj is None:
-        # special-case handling to make the API easier
-        # to use for the common case.
-        handler.startElement(name, d)
-        if obj is not None:
-            handler.characters(obj)
-        handler.endElement(name)
-    else:
-        # It better know how to emit the correct XML.
-        obj.publish(handler)
-
-def _opt_element(handler, name, obj):
-    if obj is None:
-        return
-    _element(handler, name, obj)
-
-
-def _format_date(dt):
-    """convert a datetime into an RFC 822 formatted date
-
-    Input date must be in GMT.
-    """
-    # Looks like:
-    #   Sat, 07 Sep 2002 00:00:01 GMT
-    # Can't use strftime because that's locale dependent
-    #
-    # Isn't there a standard way to do this for Python?  The
-    # rfc822 and email.Utils modules assume a timestamp.  The
-    # following is based on the rfc822 module.
-    return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (
-            ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dt.weekday()],
-            dt.day,
-            ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.month-1],
-            dt.year, dt.hour, dt.minute, dt.second)
-
-        
-##
-# A couple simple wrapper objects for the fields which
-# take a simple value other than a string.
 class IntElement(object):
     """implements the 'publish' API for integers
 
     Takes the tag name and the integer value to publish.
-    
+
     (Could be used for anything which uses str() to be published
     to text for XML.)
     """
@@ -84,6 +42,7 @@ class IntElement(object):
         handler.startElement(self.name, self.element_attrs)
         handler.characters(str(self.val))
         handler.endElement(self.name)
+
 
 class DateElement(object):
     """implements the 'publish' API for a datetime.datetime
@@ -97,7 +56,7 @@ class DateElement(object):
         self.dt = dt
     def publish(self, handler):
         _element(handler, self.name, _format_date(self.dt))
-####
+
 
 class Category(object):
     """Publish a category element"""
@@ -109,6 +68,7 @@ class Category(object):
         if self.domain is not None:
             d["domain"] = self.domain
         _element(handler, "category", self.category, d)
+
 
 class Cloud(object):
     """Publish a cloud"""
@@ -127,6 +87,7 @@ class Cloud(object):
             "registerProcedure": self.registerProcedure,
             "protocol": self.protocol})
 
+
 class Image(object):
     """Publish a channel Image"""
     element_attrs = {}
@@ -138,7 +99,7 @@ class Image(object):
         self.width = width
         self.height = height
         self.description = description
-        
+
     def publish(self, handler):
         handler.startElement("image", self.element_attrs)
 
@@ -150,7 +111,7 @@ class Image(object):
         if isinstance(width, int):
             width = IntElement("width", width)
         _opt_element(handler, "width", width)
-        
+
         height = self.height
         if isinstance(height, int):
             height = IntElement("height", height)
@@ -159,6 +120,7 @@ class Image(object):
         _opt_element(handler, "description", self.description)
 
         handler.endElement("image")
+
 
 class Guid(object):
     """Publish a guid
@@ -176,6 +138,7 @@ class Guid(object):
         else:
             d["isPermaLink"] = "false"
         _element(handler, "guid", self.guid, d)
+
 
 class TextInput(object):
     """Publish a textInput
@@ -196,7 +159,7 @@ class TextInput(object):
         _element(handler, "name", self.name)
         _element(handler, "link", self.link)
         handler.endElement("textInput")
-        
+
 
 class Enclosure(object):
     """Publish an enclosure"""
@@ -211,6 +174,7 @@ class Enclosure(object):
                   "type": self.type,
                   })
 
+
 class Source(object):
     """Publish the item's original source, used by aggregators"""
     def __init__(self, name, url):
@@ -218,6 +182,7 @@ class Source(object):
         self.url = url
     def publish(self, handler):
         _element(handler, "source", self.name, {"url": self.url})
+
 
 class SkipHours(object):
     """Publish the skipHours
@@ -234,6 +199,7 @@ class SkipHours(object):
                 _element(handler, "hour", str(hour))
             handler.endElement("skipHours")
 
+
 class SkipDays(object):
     """Publish the skipDays
 
@@ -249,13 +215,14 @@ class SkipDays(object):
                 _element(handler, "day", day)
             handler.endElement("skipDays")
 
+
 class RSS2(WriteXmlMixin):
     """The main RSS class.
 
     Stores the channel attributes, with the "category" elements under
     ".categories" and the RSS items under ".items".
     """
-    
+
     rss_attrs = {"version": "2.0"}
     element_attrs = {}
     def __init__(self,
@@ -269,7 +236,7 @@ class RSS2(WriteXmlMixin):
                  webMaster = None,
                  pubDate = None,  # a datetime, *in* *GMT*
                  lastBuildDate = None, # a datetime
-                 
+
                  categories = None, # list of strings or Category
                  generator = _generator_name,
                  docs = "http://blogs.law.harvard.edu/tech/rss",
@@ -294,7 +261,7 @@ class RSS2(WriteXmlMixin):
         self.webMaster = webMaster
         self.pubDate = pubDate
         self.lastBuildDate = lastBuildDate
-        
+
         if categories is None:
             categories = []
         self.categories = categories
@@ -320,7 +287,7 @@ class RSS2(WriteXmlMixin):
         _element(handler, "description", self.description)
 
         self.publish_extensions(handler)
-        
+
         _opt_element(handler, "language", self.language)
         _opt_element(handler, "copyright", self.copyright)
         _opt_element(handler, "managingEditor", self.managingEditor)
@@ -374,8 +341,7 @@ class RSS2(WriteXmlMixin):
         # output after the three required fields.
         pass
 
-    
-    
+
 class RSSItem(WriteXmlMixin):
     """Publish an RSS Item"""
     element_attrs = {}
@@ -391,7 +357,7 @@ class RSSItem(WriteXmlMixin):
                  pubDate = None, # a datetime
                  source = None,  # a Source
                  ):
-        
+
         if title is None and description is None:
             raise TypeError(
                 "must define at least one of 'title' or 'description'")
@@ -421,7 +387,7 @@ class RSSItem(WriteXmlMixin):
             if isinstance(category, basestring):
                 category = Category(category)
             category.publish(handler)
-        
+
         _opt_element(handler, "comments", self.comments)
         if self.enclosure is not None:
             self.enclosure.publish(handler)
@@ -434,10 +400,49 @@ class RSSItem(WriteXmlMixin):
 
         if self.source is not None:
             self.source.publish(handler)
-        
+
         handler.endElement("item")
 
     def publish_extensions(self, handler):
         # Derived classes can hook into this to insert
         # output after the title and link elements
         pass
+
+
+def _element(handler, name, obj, d = {}):
+    if isinstance(obj, basestring) or obj is None:
+        # special-case handling to make the API easier
+        # to use for the common case.
+        handler.startElement(name, d)
+        if obj is not None:
+            handler.characters(obj)
+        handler.endElement(name)
+    else:
+        # It better know how to emit the correct XML.
+        obj.publish(handler)
+
+
+def _opt_element(handler, name, obj):
+    if obj is None:
+        return
+    _element(handler, name, obj)
+
+
+def _format_date(dt):
+    """convert a datetime into an RFC 822 formatted date
+
+    Input date must be in GMT.
+    """
+    # Looks like:
+    #   Sat, 07 Sep 2002 00:00:01 GMT
+    # Can't use strftime because that's locale dependent
+    #
+    # Isn't there a standard way to do this for Python?  The
+    # rfc822 and email.Utils modules assume a timestamp.  The
+    # following is based on the rfc822 module.
+    return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (
+            ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dt.weekday()],
+            dt.day,
+            ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][dt.month-1],
+            dt.year, dt.hour, dt.minute, dt.second)

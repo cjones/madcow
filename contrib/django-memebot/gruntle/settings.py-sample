@@ -1,9 +1,8 @@
 """Settings for gruntle memebot project"""
 
 import os
-import re
 
-# True = always, False = never, None = dev server only
+# Set to None to only enable when manage.py is run
 DEBUG = None
 
 # list of (name, email) who will receive admin email
@@ -56,6 +55,7 @@ SCANNER_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (wil
 SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
 SCANNER_YOUTUBE_EXTRA_ATTR = True       # scrape more data from the page or just embed the video?
 
+# scanners to use attempting to parse link contents
 SCANNERS = (
         'gruntle.memebot.scanner.youtube',
         'gruntle.memebot.scanner.image',
@@ -71,6 +71,11 @@ RSS_COPYRIGHT = u'Copyright (c) 2011 Chris Jones <cjones@gmail.com>'
 RSS_IMAGE = None  # image_url, title, link
 RSS_MAX_LINKS = None  # max links to *process* at once, not allowed on the page. None=no limit
 RSS_NUM_LINKS = 100  # number of links in the feed at any given time
+
+# feeds to generate
+FEEDS = (
+        'gruntle.memebot.rss.default',
+        )
 
 # logging config
 LOG_LEVEL = 'INFO'

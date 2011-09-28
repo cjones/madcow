@@ -2,16 +2,15 @@
 
 from optparse import make_option
 import sys
-
 from django.core.management.base import NoArgsCommand, CommandError
 from django.conf import settings
-
-from gruntle.memebot.utils.locking import LockError
+from gruntle.memebot.exceptions import LockError
 from gruntle.memebot import rss
 
 class Command(NoArgsCommand):
 
     help = __doc__
+
     option_list = (make_option('-q', dest='log_stream', default=sys.stderr, action='store_const', const=None,
                                help="don't log messages to console"),
                    make_option('-m', dest='max_links', default=settings.RSS_MAX_LINKS, type='int',

@@ -1,10 +1,11 @@
-"""Decorator magic"""
+"""Decorator magic.. abstract some ugly, repetitive stuff out"""
 
 import functools
 import traceback
 import sys
 
 from gruntle.memebot.utils import get_logger, text, locking
+from gruntle.memebot.exceptions import *
 
 def logged(*logger_args, **default_logger_kwargs):
 
@@ -19,27 +20,25 @@ def logged(*logger_args, **default_logger_kwargs):
         @functools.wraps(wrapped_func)
         def wrapper_func(*args, **kwargs):
             try:
-                # hijack log_stream kwarg and use that to update our defaults
-                logger_kwargs = dict(default_logger_kwargs)
-                logger_kwargs.setdefault('stream', kwargs.pop('log_stream', None))
+                with TrapErrors():
+                    # hijack log_stream kwarg and use that to update our defaults
+                    logger_kwargs = dict(default_logger_kwargs)
+                    logger_kwargs.setdefault('stream', kwargs.pop('log_stream', None))
 
-                # inject logger into first argument
-                logger = get_logger(*logger_args, **logger_kwargs)
-                new_args = [logger]
-                new_args.extend(args)
-                args = tuple(new_args)
+                    # inject logger into first argument
+                    logger = get_logger(*logger_args, **logger_kwargs)
+                    new_args = [logger]
+                    new_args.extend(args)
+                    args = tuple(new_args)
 
-                # call decorated function
-                return wrapped_func(*args, **kwargs)
-            except (SystemExit, KeyboardInterrupt, EOFError):
-                raise
-            except:
-                # catch non-system exceptions that get raised, log the stack trace, and reraise
-                exc_type, exc_value, exc_traceback = sys.exc_info()
+                    # call decorated function
+                    return wrapped_func(*args, **kwargs)
+
+            except TrapError, exc:
                 logger.error('Unhandled exception in %s', wrapped_func.func_name)
-                for line in traceback.format_exception(exc_type, exc_value, exc_traceback):
+                for line in traceback.format_exception(*exc.args):
                     logger.error(text.chomp(line))
-                raise exc_type, exc_value, exc_traceback
+                reraise(*exc.args)
 
         return wrapper_func
     return decorator

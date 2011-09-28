@@ -1,3 +1,5 @@
+"""MemeBot URL config"""
+
 from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
@@ -9,9 +11,9 @@ urlpatterns = patterns('gruntle.memebot.views',
         url(r'^scores/$', 'scores', name='scores'),
         url(r'^profile/$', 'profile', name='profile'),
         url(r'^browse/$', 'browse', name='browse'),
-
         url(r'^content/(?P<publish_id>\d+)/$', 'content', name='content'),
         url(r'^view/(?P<publish_id>\d+)/rss/$', 'view_rss', name='view-rss'),
+        url(r'^rss/$', 'rss_index', name='rss-index'),
         )
 
 urlpatterns += patterns('',

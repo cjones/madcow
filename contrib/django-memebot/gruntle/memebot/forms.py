@@ -24,6 +24,7 @@ class ManageProfileForm(forms.ModelForm):
         return self.cleaned_data['password2']
 
     def save(self, *args, **kwargs):
+        """Save user instance, updated with cleaned_data"""
         commit = kwargs.pop('commit', True)
         kwargs['commit'] = False
         user = super(ManageProfileForm, self).save(*args, **kwargs)

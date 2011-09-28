@@ -3,19 +3,17 @@
 import tempfile
 import time
 import os
-from django.conf import settings
-from gruntle.memebot.utils import text, trapped
 
-__all__ = ['LockError', 'Lock']
+from django.conf import settings
+
+from gruntle.memebot.utils import text
+from gruntle.memebot.exceptions import *
+
+__all__ = ['Lock']
 
 DEFAULT_TIMEOUT = None
 DEFAULT_INTERVAL = 1
 DEFAULT_LOCK_PERMS = 0644
-
-class LockError(StandardError):
-
-    """Raised when locking mechanism encounters a problem"""
-
 
 class Lock(object):
 

@@ -65,3 +65,9 @@ def view_rss(request, publish_id):
     """View rendered link item as RSS"""
     link = get_object_or_404(Link, publish_id=int(publish_id), state='published')
     return direct_to_template(request, link.rss_template, {'link': link})
+
+
+@login_required
+def rss_index(request):
+    """Index of available RSS feeds"""
+    return HttpResponse("OK")

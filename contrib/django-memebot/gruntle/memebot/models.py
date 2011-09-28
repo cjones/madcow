@@ -8,8 +8,8 @@ import re
 import os
 
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import models
 
@@ -20,13 +20,13 @@ class Model(models.Model):
 
     """Abstract: Base model"""
 
-    # for generating GUIDs
-    _guid_fmt = 'tag:%(domain)s,%(date)s:/%(app)s/%(model)s/%(id)d/%(timestamp)s'
-    _guid_id_fields = 'publish_id', 'external_id', 'id'
-
     # all models inherit these timestamps
     created = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     modified = models.DateTimeField(null=False, blank=False, auto_now=True)
+
+    # for generating GUIDs
+    _guid_fmt = 'tag:%(domain)s,%(date)s:/%(app)s/%(model)s/%(id)d/%(timestamp)s'
+    _guid_id_fields = 'publish_id', 'external_id', 'id'
 
     class Meta:
 
@@ -77,14 +77,6 @@ class LinkManager(models.Manager):
     """Custom object manager for Link model"""
 
     fragment_re = re.compile(r'^(.*)#([^;/?:@=&]*)$')
-
-    def get_available(self):
-        """Returns QuerySet of links available universally, ordered by creation date"""
-        return self.exclude(state__in=('failed', 'hidden')).order_by('-created')
-
-    def get_published(self):
-        """Returns QuerySet of published links, ordered by publish date"""
-        return self.filter(state='published').order_by('-published')
 
     @property
     def last_publish_id(self):
@@ -208,7 +200,7 @@ class Link(Model):
     normalized = models.TextField(null=False, blank=False)
     reposts = models.IntegerField(null=False, blank=False, default=0)
 
-    # content-discovery related fields
+    # fields populated by the scanner
     state = models.CharField(null=False, blank=False, max_length=16, choices=LINK_STATES, default='new')
     error_count = models.IntegerField(null=False, blank=False, default=0)
     resolved_url = models.TextField(null=True, blank=True, default=None)
@@ -289,6 +281,9 @@ class Note(Model):
     class Meta:
 
         unique_together = 'user', 'link', 'value'
+
+    def __unicode__(self):
+        return u'Note posted by %s to %s' % (self.user.username, self.link.url)
 
 
 class SerializedData(Model):

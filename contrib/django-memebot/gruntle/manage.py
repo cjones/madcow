@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+"""Run project manager tool in local environment"""
+
 import sys
 import os
 
@@ -10,6 +12,7 @@ from django.core.management import execute_manager, setup_environ
 import settings
 
 def main():
+    """Command-line interface"""
     if len(sys.argv) == 2 and sys.argv[1] == 'runserver':
         sys.argv.append(settings.DEV_SERVER_ADDR)
     execute_manager(settings)

@@ -1,4 +1,4 @@
-"""Root URL config"""
+"""Site URL config"""
 
 from django.conf.urls.defaults import *
 from django.conf import settings

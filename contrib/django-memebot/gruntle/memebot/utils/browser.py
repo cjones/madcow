@@ -28,7 +28,8 @@ try:
 except ImportError:
     Image = None
 
-from gruntle.memebot.utils import TrapError, TrapErrors, text
+from gruntle.memebot.exceptions import *
+from gruntle.memebot.utils import text
 
 __all__ = ['Browser', 'decode_entities', 'render_node']
 

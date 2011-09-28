@@ -6,18 +6,23 @@ import datetime
 import binascii
 import tempfile
 import logging
+import socket
 import errno
 import time
 import sys
 import os
+import re
 
 class DisableAutoTimestamps(object):
+
+    """Context manager: Disables auto_now and auto_now_add on DateTimeFields for the models specified"""
 
     def __init__(self, *models):
         self.models = models
         self.old_values = None
 
     def __enter__(self):
+        """Auto-detect fields, store original value, and disable"""
         self.old_values = {}
         for model in self.models:
             for field in model._meta.fields:
@@ -29,6 +34,7 @@ class DisableAutoTimestamps(object):
         return self
 
     def __exit__(self, *exc_info):
+        """Restore original value"""
         for key, values in self.old_values.iteritems():
             model, field_name = key
             auto_now_add, auto_now = values
@@ -39,54 +45,29 @@ class DisableAutoTimestamps(object):
         self.old_values = None
 
 
-class TrapError(StandardError):
-
-    """Raised if TrapError encounters an exception other than those we wish to not catch"""
-
-
-class TrapErrors(object):
-
-    """Context manager to catch all exceptions it is safe to fully trap"""
-
-    DO_NOT_TRAP = SystemExit, KeyboardInterrupt, EOFError
-
-    def __init__(self, reraise=True, ignore=None):
-        self.reraise = reraise
-        self.ignore = list(self.DO_NOT_TRAP)
-        if ignore is not None:
-            if isinstance(ignore, Exception):
-                ignore = [ignore]
-            self.ignore.extend(ignore)
-
-    def __enter__(self):
-        """Enter context"""
-        return self
-
-    def __exit__(self, exc_type=None, exc_value=None, exc_traceback=None):
-        """Exit context: Determine how to handle exception state"""
-        if exc_value is not None and exc_type not in self.ignore:
-            if self.reraise:
-                raise TrapError(exc_type, exc_value, exc_traceback)
-            return True
-
-
 class zdict(dict):
 
     """Dictionary object with default value of 0"""
 
     __slots__ = ()
-
-    def __missing__(self, key):
-        """Returns 0 instead of raising KeyError"""
-        return 0
+    __missing__ = lambda *_: 0
 
 
-def ipython(depth=0):
-    """Embed IPython in running program"""
-    from IPython.Shell import IPShellEmbed
-    frame = sys._getframe(depth + 1)
-    shell = IPShellEmbed(banner='Interactive mode, ^D to resume.', exit_msg='Resuming ...')
-    shell(local_ns=frame.f_locals, global_ns=frame.f_globals)
+def ipython():
+    """
+    Embed IPython in running program. This does a few non-standard things:
+
+    1. Executes in caller frame's context, rather than inside this function.
+    2. Prevents re-entry to help avoid difficult-to-break loops.
+    3. Resets sys.argv to avoid certain errors, then restores when done.
+    """
+    from IPython.Shell import IPShellEmbed as s
+    if not getattr(s, 'x', 0):
+        a, sys.argv, f, s.x = sys.argv, [sys.argv[0]], sys._getframe(1), 1
+        try:
+            s()('', f.f_locals, f.f_globals)
+        finally:
+            sys.argv = a
 
 
 def plural(count, name, s='s'):
@@ -97,6 +78,9 @@ def plural(count, name, s='s'):
 def get_logger(name, level=None, stream=None, append=False, dir=None,
                max_files=None, perms=None, date_format=None, record_format=None):
 
+    """Get a named logger configured to use the site log directory"""
+
+    from gruntle.memebot.exceptions import trapped
     from gruntle.memebot.utils import text
     from django.conf import settings
 
@@ -205,5 +189,6 @@ def local_to_gmt(dt=None):
     return datetime.datetime.fromtimestamp(time.mktime(time.gmtime(time.mktime(dt.timetuple()))))
 
 
-# default trapper that swallows errors
-trapped = TrapErrors(reraise=False)
+def get_domain():
+    """Determine the domain portion of our name"""
+    return re.sub('^' + re.escape('.'.join(socket.gethostname().split('.') + [''])), '', socket.getfqdn())
