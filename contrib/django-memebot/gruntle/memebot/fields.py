@@ -134,39 +134,23 @@ class PickleField(models.Field):
 
     __metaclass__ = models.SubfieldBase
 
-    DEFAULT_HEADER = 'PickleField:'
-    DEFAULT_ENCODING = 'utf-8'
-
-    def __init__(self, *args, **kwargs):
-        header = kwargs.pop('header', None)
-        encoding = kwargs.pop('encoding', None)
-        if header is None:
-            header = self.DEFAULT_HEADER
-        if encoding is None:
-            encoding = self.DEFAULT_ENCODING
-        self.header = header
-        self.encoding = encoding
-        super(PickleField, self).__init__(*args, **kwargs)
-
-    @property
-    def header_offset(self):
-        """Byte offset to end of header"""
-        return len(self.header)
+    _header = 'PickleField:'
+    _offset = len(_header)
 
     def to_python(self, value):
         """Convert serialized data into python object"""
-        if isinstance(value, (str, unicode)) and value.startswith(self.header):
+        if isinstance(value, (str, unicode)) and value.startswith(self._header):
             if isinstance(value, unicode):
-                value = text.encode(value, self.encoding)
-            value = pickle.loads(value[self.header_offset:])
+                value = value.encode('iso8859-1')
+            value = pickle.loads(value[self._offset:])
         return value
 
     def get_db_prep_value(self, value):
         """Serialize data before storing to database"""
         if value is not None:
             value = pickle.dumps(value)
-            value = text.decode(value, self.encoding)
-            value = self.header + value
+            value = value.decode('iso8859-1')
+            value = self._header + value
         return value
 
     def value_to_string(self, obj):
