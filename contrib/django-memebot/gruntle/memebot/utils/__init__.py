@@ -7,6 +7,7 @@ import binascii
 import tempfile
 import logging
 import socket
+import shutil
 import errno
 import time
 import sys
@@ -51,6 +52,74 @@ class zdict(dict):
 
     __slots__ = ()
     __missing__ = lambda *_: 0
+
+
+class AtomicWrite(object):
+
+    """Context Manager: Safely opens existing files for atomic writing"""
+
+    def __init__(self, file, backup=False, perms=None):
+        self.file = os.path.realpath(file)
+        self.backup = backup
+        self.perms = perms
+        self.reset()
+
+    def reset(self):
+        """Null out cached attributes of open files"""
+        self.temp_file = None
+        self.fd = None
+        self.fp = None
+
+    def __enter__(self):
+        """Enter context: Create temporary file for writing, copying stat() of original"""
+        from gruntle.memebot.exceptions import TrapErrors, TrapError, trapped, reraise
+
+        # make sure the directory exists
+        dirname, basename = os.path.split(self.file)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+        # construct temporary file in the same directory as the original
+        name, ext = os.path.splitext(basename)
+        self.fd, self.temp_file = tempfile.mkstemp(suffix=ext, prefix='.%s-' % name, dir=dirname)
+
+        try:
+            with TrapErrors():
+                exists = os.path.exists(self.file)
+                if self.perms is not None:
+                    os.chmod(self.file if exists else self.temp_file, self.perms)
+                if exists:
+                    shutil.copystat(self.file, self.temp_file)
+                    if self.backup:
+                        backup_file = self.file + '.bak'
+                        if os.path.exists(backup_file):
+                            os.remove(backup_file)
+                        shutil.copy2(self.file, backup_file)
+                self.fp = os.fdopen(self.fd, 'w')
+        except TrapError, exc:
+            with trapped:
+                os.close(self.fd)
+            if os.path.exists(self.temp_file):
+                with trapped:
+                    os.remove(self.temp_file)
+            self.reset()
+            reraise(*exc.args)
+
+        return self.fp
+
+    def __exit__(self, *exc_info):
+        """Exist context: Move file into place with atomic os.rename() if no errors. Clean up cruft"""
+        from gruntle.memebot.exceptions import trapped
+        if exc_info[1] is None:
+            os.rename(self.temp_file, self.file)
+        with trapped:
+            self.fp.close()
+        with trapped:
+            os.close(self.fd)
+        if os.path.exists(self.temp_file):
+            with trapped:
+                os.remove(self.temp_file)
+        self.reset()
 
 
 def ipython():

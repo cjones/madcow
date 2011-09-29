@@ -1,6 +1,7 @@
 """RSS generation"""
 
 import datetime
+import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -9,7 +10,7 @@ from django.contrib.sites.models import Site
 from gruntle.memebot.rss.generator import RSSItem, RSS2, Image
 from gruntle.memebot.models import SerializedData, Link
 from gruntle.memebot.decorators import logged, locked
-from gruntle.memebot.utils import first, local_to_gmt, plural
+from gruntle.memebot.utils import AtomicWrite, first, local_to_gmt, plural, text
 
 DEFAULT_MAX_LINKS = 100
 
@@ -64,11 +65,13 @@ class Feed(object):
     encoding = u'UTF-8'
     copyright = u'Copyright (c) %d %s %s' % (datetime.date.today().year, current_site.domain, current_site.name)
 
-    def generate(self, published_links, max_links=None, log=None, name=None):
+    def generate(self, published_links, max_links=None, log=None, name=None, feed_dir=None):
         if max_links is None:
             max_links = self.max_links
             if max_links is None:
                 max_links = DEFAULT_MAX_LINKS
+        if feed_dir is None:
+            feed_dir = settings.FEED_DIR
 
         links = self.filter(published_links)[:max_links]
         if not links.count():
@@ -89,8 +92,17 @@ class Feed(object):
 
         log.info('Generating RSS ...')
         link_feed = LinkFeed(links, self)
-        xml = link_feed.to_xml()
-        log.info('Finished: %s, type=%s', plural(len(xml), 'byte'), type(xml).__name__)
+
+        # XXX something is up with encoding.. seems to be a lot of that? think text.py has a flaw or 3
+        orig_xml = link_feed.to_xml()
+
+        xml = text.encode(orig_xml)
+        xml_file = os.path.join(feed_dir, name.replace('.', '-') + '.rss')
+
+        with AtomicWrite(xml_file, backup=True, perms=0644) as fp:
+            fp.write(orig_xml)
+
+        log.info('Wrote %d bytes to feed: %r', len(xml), xml_file)
 
     def filter(self, published_links):
         raise NotImplementedError
