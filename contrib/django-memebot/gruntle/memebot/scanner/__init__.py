@@ -188,7 +188,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
 
             # store stack trace in content field for the record
             link.content_type = 'text/plain'
-            link.content = '\n'.join(traceback.format_exception(*exc.args))
+            link.content = ''.join(traceback.format_exception(*exc.args))
 
             # look for any specific exceptions we are interested in,
             # otherwise dump generic stacktrace/error
