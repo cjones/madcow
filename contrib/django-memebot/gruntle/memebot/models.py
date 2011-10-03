@@ -10,6 +10,7 @@ import os
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
+from django.template import Context, loader
 from django.conf import settings
 from django.db import models
 
@@ -253,6 +254,10 @@ class Link(Model):
 
     rss_url = property(get_rss_url)
 
+    @property
+    def external_url(self):
+        return urlparse.urljoin(settings.FEED_BASE_URL, self.absolute_url)
+
     def publish(self, commit=True):
         """Publish this link"""
         dirty = False
@@ -269,6 +274,12 @@ class Link(Model):
             self.save()
             dirty = False
         return dirty
+
+    def render(self):
+        if self.state == 'published':
+            return loader.get_template(self.rss_template).render(Context({'link': self}))
+
+    rendered = property(render)
 
 
 class Note(Model):

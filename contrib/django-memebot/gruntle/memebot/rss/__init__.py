@@ -25,7 +25,7 @@ class LinkItem(RSS2Item):
         super(LinkItem, self).__init__(
                 first(link.resolved_url, link.url),
                 title=link.title,
-                description='<b>Coming Soon</b>',
+                description=link.rendered,
                 author=link.user.username,
                 guid=link.guid,
                 publish_date=local_to_gmt(link.published))

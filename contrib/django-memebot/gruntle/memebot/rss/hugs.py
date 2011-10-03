@@ -1,10 +1,10 @@
-"""#hugs MemeBot RSS Feed: All verifiable links, full rendering"""
+"""#hugs MemeBot feed: all valid links"""
 
 from gruntle.memebot.rss import Feed
 
 class AllHugsLinksFeed(Feed):
 
-    title = 'All #hugs Links RSS Feed'
+    title = '#hugs links'
     description = __doc__
     max_links = 100
 
