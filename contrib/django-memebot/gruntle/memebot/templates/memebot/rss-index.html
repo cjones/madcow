@@ -4,7 +4,7 @@
 <h3>RSS Feeds</h3>
 <ul>
  {% for name, path, feed in feeds %}
- <li><a href="{% url view-rss name %}">{{ name }}</a> - {{ feed.title }} - {{ feed.description }}</li>
+ <li><a href="{% url view-rss name %}">{{ name }}</a> - {{ feed.description }}</li>
  {% endfor %}
 </ul>
 {% endblock %}

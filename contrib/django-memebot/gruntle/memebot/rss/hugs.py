@@ -1,4 +1,4 @@
-"""#hugs MemeBot feed: all valid links"""
+"""All links posted to #hugs"""
 
 from gruntle.memebot.rss import Feed
 

@@ -1,4 +1,4 @@
-"""#hugs MemeBot feed: All image links (cached locally & resized)"""
+"""All images posted to #hugs (resized and cached locally)"""
 
 from gruntle.memebot.rss import Feed
 from gruntle.memebot.rss.hugs import AllHugsLinksFeed
