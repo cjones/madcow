@@ -213,8 +213,8 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
         @property
         def prefix(self):
             if self.name:
-                return text.encode(text.format('[%s] ', self.name))
-            return ''
+                return text.decode(text.format('[%s] ', self.name))
+            return u''
 
         def __getattribute__(self, key):
             try:
@@ -226,10 +226,11 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
                     @functools.wraps(wrapped_func)
                     def wrapper_func(*args, **kwargs):
                         exc_info = kwargs.pop('exc_info', None)
-                        wrapped_func(self.prefix + text.encode(text.format(*args, **kwargs)))
+                        output = self.prefix + text.decode(text.format(*args, **kwargs))
+                        wrapped_func(output)
                         if exc_info is not None:
                             for line in traceback.format_exception(*exc_info):
-                                wrapped_func(self.prefix + text.chomp(text.encode(line)))
+                                wrapped_func(self.prefix + text.chomp(text.decode(line)))
 
                     return wrapper_func
                 else:
