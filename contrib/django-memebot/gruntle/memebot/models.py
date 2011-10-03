@@ -15,6 +15,7 @@ from django.db import models
 
 from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
 from gruntle.memebot.exceptions import OldMeme
+from gruntle.memebot.utils import blacklist
 
 class Model(models.Model):
 
@@ -93,6 +94,9 @@ class LinkManager(models.Manager):
         if a normalized version of this URL has been posted previously,
         otherwise returns the new Link.
         """
+        # try this first
+        blacklist.check(url)
+
         username = username.lower()
         user = Alias.objects.get_user(username)
         if user is None:

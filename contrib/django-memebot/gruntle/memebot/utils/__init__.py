@@ -122,6 +122,26 @@ class AtomicWrite(object):
         self.reset()
 
 
+class Serializable(object):
+
+    def __key__(self):
+        return make_unique_key(self.__dict__)
+
+    def __hash__(self):
+        return hash(self.__key__())
+
+    def __eq__(self, other):
+        if not isinstance(other, Serializable):
+            return NotImplemented
+        return hash(self) == hash(other)
+
+    def __ne__(self, other):
+        equals = self.__eq__(other)
+        if equals is NotImplemented:
+            return equals
+        return not equals
+
+
 def ipython():
     """
     Embed IPython in running program. This does a few non-standard things:
@@ -262,3 +282,37 @@ def local_to_gmt(dt=None):
 def get_domain():
     """Determine the domain portion of our name"""
     return re.sub('^' + re.escape('.'.join(socket.gethostname().split('.') + [''])), '', socket.getfqdn())
+
+
+def make_unique_key(object):
+    """Try to hash any object, coercing type as necessary"""
+    try:
+        return hash(object)
+    except TypeError:
+        name = type(object).__name__
+        if isinstance(object, dict):
+            object = sorted(object.iteritems(), key=lambda item: item[0])
+        elif isinstance(object, set):
+            object = sorted(object)
+        return hash((name, tuple(make_unique_key(item) for item in object)))
+
+
+def flatten(*args, **kwargs):
+    """Flattens arbitrary arguments to a single sequence"""
+    return _flatten((args, kwargs))
+
+
+def _flatten(items):
+    flat = []
+    for item in items:
+        if isinstance(item, dict):
+            item = sorted(item.iteritems(), key=lambda item: item[0])
+        elif isinstance(item, set):
+            item = sorted(item)
+        if isinstance(item, (tuple, list)):
+            flat.extend(_flatten(item))
+        else:
+            flat.append(item)
+    return flat
+
+

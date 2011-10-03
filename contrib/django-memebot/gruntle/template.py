@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-"""Standadlone script template: Auto-configures for environment"""
-
 # BEGIN django environment auto-configure
 def setup_environ():
     """Initialize django environment from anywhere in project tree"""
@@ -21,9 +19,11 @@ setup_environ()
 del setup_environ
 # END django environment auto-configure
 
+"""Documentation stub"""
+
 #from django.db.models import Q
-#from gruntle.memebot.models import *
 #from django.conf import settings
+#from gruntle.memebot.models import *
 
 def main():
     return 0

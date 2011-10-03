@@ -4,8 +4,15 @@ import functools
 import traceback
 import sys
 
-from gruntle.memebot.utils import get_logger, text, locking
+from django.core.cache import cache
+
+from gruntle.memebot.utils import get_logger, text, locking, make_unique_key
 from gruntle.memebot.exceptions import *
+
+class NoResult(object):
+
+    """Represents function that returned None rather than empty cache item"""
+
 
 def logged(*logger_args, **default_logger_kwargs):
 
@@ -56,4 +63,37 @@ def locked(*lock_args, **lock_kwargs):
                 return wrapped_func(*args, **kwargs)
 
         return wrapper_func
+    return decorator
+
+
+def memoize(*args, **kwargs):
+
+    """This decorator wraps a function and caches results based on arguments passed in"""
+
+    _key_fmt = kwargs.pop('key_fmt', None)
+    cache_none = kwargs.pop('cache_none', True)
+
+    def decorator(wrapped_func):
+        if _key_fmt is None:
+            key_fmt = 'memoize:%s:%%d' % wrapped_func.func_name
+        else:
+            key_fmt = _key_fmt
+
+        @functools.wraps(wrapped_func)
+        def wrapper_func(*args, **kwargs):
+            key = key_fmt % make_unique_key((args, kwargs))
+            val = cache.get(key)
+            if val is None:
+                val = wrapped_func(*args, **kwargs)
+                if cache_none and val is None:
+                    val = NoResult
+                cache.set(key, val)
+            if cache_none and val is NoResult:
+                val = None
+            return val
+
+        return wrapper_func
+
+    if len(args) == 1 and not kwargs and callable(args[0]):
+        return decorator(args[0])
     return decorator

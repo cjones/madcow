@@ -10,6 +10,21 @@ class MemebotError(StandardError):
     """Base error class for memebot"""
 
 
+class BlackListError(MemebotError):
+
+    """Raised if a URL or host is blacklisted"""
+
+    def __init__(self, blacklist, url=None):
+        self.blacklist = blacklist
+        self.url = url
+
+    def __str__(self):
+        from gruntle.memebot.utils.text import encode, decode, format
+        return encode(format('%s%s matched blacklist rule %r for host %r',
+                             self.blacklist.host, ('' if (self.url is None) else (u' (%s)' % decode(self.url))),
+                             self.blacklist.rule, self.blacklist.match))
+
+
 class OldMeme(MemebotError):
 
     """Raised when a URL is reposted public"""
@@ -41,7 +56,7 @@ class BadResponse(ScannerError):
 
     def __str__(self):
         from gruntle.memebot.utils.text import encode, format
-        return encode(format('%s rsponded with status: %d %s', self.link.url, self.response.code, self.response.msg))
+        return encode(format('%s responded with status: %d %s', self.link.url, self.response.code, self.response.msg))
 
 
 class ConfigError(ScannerError):

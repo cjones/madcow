@@ -16,6 +16,9 @@ TIME_ZONE = 'America/Los_Angeles'
 # this is used for some hashing algorithms, should be 50 characters
 SECRET_KEY = ''
 
+# IP/port of memcached backend
+CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=0'
+
 # where memebot keeps all its stuff
 DATABASES = {
         'default': {
@@ -36,6 +39,14 @@ MEMEBOT_POINTS_NEW = 1          # points to award when a new link is posted
 MEMEBOT_POINTS_OLD = -2         # points to penalize when reposting old urls
 MEMEBOT_POINTS_REPOSTS = 2      # points to award user when someone reposts their url
 
+# skip urls whose address match any of these patterns
+MEMEBOT_BLACKLIST = (
+        'localhost',
+        '127.0.0.1',
+        'secret.com',
+        '*.fbi.gov',
+        )
+
 # when someone posts a link, whether to add them to database
 AUTO_USER_ADD = True
 ANONYMOUS_USER_EMAIL = 'nobody@localhost'
@@ -49,7 +60,7 @@ SCANNER_TIMEOUT = 10                    # timeout before giving up on the reques
 SCANNER_USER_AGENT = 'firefox'          # browser to masquerade as (see utils/browser.py for more)
 SCANNER_MAX_LINKS = 1024                # how many links to process in one run
 SCANNER_MAX_READ = 1048576  # 1M        # files larger than this will not be read entirely
-SCANNER_MAX_ERRORS = 10                 # number of errors before giving up on the url
+SCANNER_MAX_ERRORS = 3                  # number of errors before giving up on the url
 SCANNER_IMAGE_TYPE = 'png'              # format to use when saving image locally
 SCANNER_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (will rescale)
 SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
@@ -80,6 +91,7 @@ PROJECT_DIR = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = os.path.join(PROJECT_DIR, 'data')
 LOG_DIR = os.path.join(DATA_DIR, 'log')
 LOCK_DIR = os.path.join(DATA_DIR, 'lock')
+FEED_DIR = os.path.join(DATA_DIR, 'feed')
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'memebot', 'media')
 
 # url locations (relative to SITE_PATH). automatically expanded (see configure_urls below)
