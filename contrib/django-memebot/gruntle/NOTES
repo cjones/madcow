@@ -2,11 +2,10 @@ current pending links: 153
 
 Scanner problems:
 
-1. unicode urls blow up.. guess the path needs to be urlencoded utf-8... 3peen.us
-2. localhost needs to be forbidden.. nasty security risk there :O
-3. some images don't parse well.. especially it.bo.lt & upload.wikimedia.org.. why not?
-4. internal server error on imgur means 404
-5. an error_count of 10 is too high.. 3 would probably be Ok
+1. localhost needs to be forbidden.. nasty security risk there :O .. maybe a blacklist?
+2. some images don't parse well.. especially it.bo.lt & upload.wikimedia.org.. why not?
+3. internal server error on imgur means 404
+4. an error_count of 10 is too high.. 3 would probably be Ok
 
 
 RSS problems:
