@@ -33,6 +33,8 @@ from gruntle.memebot.utils import text
 
 __all__ = ['Browser', 'decode_entities', 'render_node']
 
+DEFAULT_MAX_REDIRECTS = 10
+
 # some user agents to choose from, for convenience
 PRESET_USER_AGENTS = {'ie6': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
                       'ie7': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
@@ -58,6 +60,7 @@ whitespace_re = re.compile(r'\s+')  # for packing whitespace
 entity_dec_re = re.compile(r'(&#(\d+);)')  # &#32;
 entity_hex_re = re.compile(r'^(&#x([0-9a-fA-F]+);)')  # &#x3D;
 entity_name_re = re.compile(r'(&(%s);)' % '|'.join(map(re.escape, htmlentitydefs.name2codepoint)))  # &amp;
+meta_refresh_re = re.compile(r'^refresh$', re.IGNORECASE)
 
 class Response(collections.namedtuple('Response', 'code msg url real_url data_type main_type sub_type data complete')):
 
@@ -73,18 +76,33 @@ class Response(collections.namedtuple('Response', 'code msg url real_url data_ty
     def content_type(self):
         return '%s/%s' % (self.main_type, self.sub_type)
 
+    @property
+    def meta_redirect(self):
+        if self.data_type == 'soup':
+            meta = self.data.head.find('meta', {'http-equiv': meta_refresh_re})
+            if meta is not None:
+                try:
+                    for param in meta['content'].split(';'):
+                        if param.startswith(u'url='):
+                            return param[4:]
+                except KeyError:
+                    pass
+
+
 
 class Browser(object):
 
     """Represents a configured browser"""
 
     def __init__(self, handlers=None, headers=None, user_agent='urllib2', support_cookies=True,
-                 support_gzip=True, add_accept_headers=True, keepalive=True, timeout=None):
+                 support_gzip=True, add_accept_headers=True, keepalive=True, timeout=None, max_redirects=None):
 
         if handlers is None:
             handlers = []
         if headers is None:
             headers = []
+        if max_redirects is None:
+            max_redirects = DEFAULT_MAX_REDIRECTS
 
         # add cookie processor to handlers if we want cookie support
         if support_cookies:
@@ -111,6 +129,7 @@ class Browser(object):
             headers.append(('Connection', 'keep-alive'))
 
         # build the opener
+        self.max_redirects = max_redirects
         self.timeout = timeout
         self.opener = urllib2.build_opener(*handlers)
         self.opener.addheaders = self.headers = headers
@@ -121,9 +140,25 @@ class Browser(object):
             self.xml_parser = etree.XMLParser(encoding=text.get_encoding(), ns_clean=True,
                                               recover=True, remove_blank_text=True, strip_cdata=False)
 
-    def open(self, url, data=None, referer=None, max_read=None):
+    def open(self, url, data=None, referer=None, max_read=None, follow_meta_redirect=False):
         """Opens the requested URL"""
-        request = urllib2.Request(url, data)
+        followed = set()
+        orig_url = url
+        while True:
+            response = self._open(url, data, referer, max_read)
+            if not follow_meta_redirect:
+                break
+            redirect = response.meta_redirect
+            if redirect is None or redirect in followed:
+                break
+            followed.add(redirect)
+            if len(followed) > self.max_redirects:
+                break
+            url = redirect
+        return response
+
+    def _open(self, url, data=None, referer=None, max_read=None):
+        request = urllib2.Request(text.encode(url), data)
         if referer is not None:
             request.add_header('Referer', referer)
         try:
