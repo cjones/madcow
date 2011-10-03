@@ -146,7 +146,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
         links = links[:max_links]
     num_links = links.count()
     if not num_links:
-        log.info('No new links to scan')
+        logger.info('No new links to scan')
         return
 
     for i, link in enumerate(links):
@@ -156,7 +156,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
             with TrapErrors():
 
                 # fetch url we are processing
-                response = browser.open(link.url, max_read=max_read)
+                response = browser.open(link.url, max_read=max_read, follow_meta_redirect=True)
                 if not response.is_valid:
                     raise BadResponse(link, response)
 
