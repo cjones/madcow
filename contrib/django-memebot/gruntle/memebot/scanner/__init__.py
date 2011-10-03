@@ -10,6 +10,7 @@ from django.conf import settings
 
 from gruntle.memebot.decorators import logged, locked
 from gruntle.memebot.utils.browser import Browser
+from gruntle.memebot.utils import text
 from gruntle.memebot.models import Link
 from gruntle.memebot.exceptions import *
 
@@ -23,6 +24,13 @@ class ScanResult(collections.namedtuple('ScanResult', 'response override_url tit
         if self.override_url:
             return self.override_url
         return self.response.real_url
+
+    def __str__(self):
+        return text.encode(', '.join(text.format('%s=%r', key, getattr(self, key, None))
+                                     for key in self._fields if key != 'content'))
+
+    def __repr__(self):
+        return text.format('<%s: %s>', type(self).__name__, self.__str__())
 
 
 class Scanner(object):
@@ -169,6 +177,8 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
                         pass
                 else:
                     raise ConfigError('No appropriate handler')
+
+                log.info('MATCH on %s: %r', scanner_name, result)
 
                 # store rendered results from scanners to link and publish (deferred)
                 link.resolved_url = result.resolved_url

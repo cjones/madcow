@@ -79,15 +79,17 @@ class Response(collections.namedtuple('Response', 'code msg url real_url data_ty
     @property
     def meta_redirect(self):
         if self.data_type == 'soup':
-            meta = self.data.head.find('meta', {'http-equiv': meta_refresh_re})
-            if meta is not None:
-                try:
-                    for param in meta['content'].split(';'):
-                        if param.startswith(u'url='):
-                            return param[4:]
-                except KeyError:
-                    pass
+            with trapped:
+                for param in self.data.head.find('meta', {'http-equiv': meta_refresh_re})['content'].split(';'):
+                    if param.startswith(u'url='):
+                        return param[4:]
 
+    def __str__(self):
+        return text.encode(', '.join(text.format('%s=%r', key, getattr(self, key, None))
+                                     for key in self._fields if key != 'data'))
+
+    def __repr__(self):
+        return text.format('<%s: %s>', type(self).__name__, self.__str__())
 
 
 class Browser(object):
@@ -169,11 +171,20 @@ class Browser(object):
             max_read = -1
         data = response.read(max_read)
         read = len(data)
+
+        length = response.headers.get('content-length')
+        if length is not None:
+            length = int(length)
+            complete = read >= int(length)
+        else:
+            complete = (max_read == -1) or (read < max_read)
+
         if response.headers.get('content-encoding') == 'gzip':
             data = gzip.GzipFile(fileobj=stringio.StringIO(data), mode='r').read()
         if response.headers.maintype == 'text':
             data = text.decode(data, response.headers.getparam('charset'))
             data_type = 'text'
+
         if response.headers.subtype == 'html' and BeautifulSoup is not None:
             try:
                 with TrapErrors():
@@ -196,13 +207,14 @@ class Browser(object):
                 with TrapErrors():
                     fileobj = stringio.StringIO(data)
                     data = Image.open(fileobj)
+                    data.load()
                     data_type = 'image'
             except TrapError:
                 data_type = 'broken_image'
 
         return Response(code=response.code, msg=response.msg, url=url, real_url=response.url, data_type=data_type,
                         main_type=response.headers.maintype, sub_type=response.headers.subtype, data=data,
-                        complete=((max_read == -1) or (read < max_read)))
+                        complete=complete)
 
 
 def decode_entities(html):

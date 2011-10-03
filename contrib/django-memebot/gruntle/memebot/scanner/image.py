@@ -52,8 +52,18 @@ class ImageScanner(Scanner):
     def handle(self, response, log):
         if Image is None:
             raise InvalidContent(response, 'PIL is not installed, cannot process')
-        if response.data_type != 'image':
+        if response.data_type not in ('image', 'broken_image'):
             raise InvalidContent(response, 'Not an image')
+
+        if not response.complete:
+            error = 'Image not completely loaded'
+        elif response.data_type == 'broken_image':
+            error = 'Image is broken'
+        else:
+            error = None
+        if error is not None:
+            log.warn(error)
+            raise InvalidContent(response, error)
 
         image = response.data
         log.info('Detected %s image (%d x %d)', image.format, *image.size)
