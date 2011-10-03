@@ -1,5 +1,6 @@
 """RSS generation"""
 
+from urlparse import urljoin
 import datetime
 import os
 
@@ -7,7 +8,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 
-from gruntle.memebot.rss.generator import RSSItem, RSS2, Image
+from gruntle.memebot.rss.generator import RSS2, RSS2Item
 from gruntle.memebot.models import SerializedData, Link
 from gruntle.memebot.decorators import logged, locked
 from gruntle.memebot.utils import AtomicWrite, first, local_to_gmt, plural, text
@@ -16,17 +17,18 @@ DEFAULT_MAX_LINKS = 100
 
 current_site = Site.objects.get_current()
 
-class LinkItem(RSSItem):
+class LinkItem(RSS2Item):
 
     """A single Link feed item"""
 
     def __init__(self, link):
-        # TODO i think description should get set to the rendered page? somehow..
         super(LinkItem, self).__init__(
-                title=first(link.title, link.resolved_url, link.url, 'n/a'),
-                link=first(link.resolved_url, link.url),
+                first(link.resolved_url, link.url),
+                title=link.title,
+                description='<b>Coming Soon</b>',
+                author=link.user.username,
                 guid=link.guid,
-                pubDate=local_to_gmt(link.created))
+                publish_date=local_to_gmt(link.published))
 
 
 class LinkFeed(RSS2):
@@ -35,35 +37,34 @@ class LinkFeed(RSS2):
 
     def __init__(self, links, feed):
         now = local_to_gmt(datetime.datetime.now())
-
-        if feed.image is None:
-            image = None
-        else:
-            image_url, image_title, image_link = feed.iamge
-            image = Image(url=image_url, title=image_title, link=image_link)
-
         super(LinkFeed, self).__init__(
+                urljoin(feed.base_url, reverse('index')),
                 title=feed.title,
-                link=reverse('index'),
                 description=feed.description,
-                language=settings.LANGUAGE_CODE,
+                language=feed.language,
                 copyright=feed.copyright,
-                pubDate=now,
-                lastBuildDate=now,
-                image=image,
-                items=[LinkItem(link) for link in links])
+                webmaster=feed.webmaster,
+                ttl=feed.ttl,
+                image=feed.image,
+                publish_date=now,
+                build_date=now)
+
+        for link in links:
+            self.append(LinkItem(link))
 
 
 class Feed(object):
 
     """Base Feed class"""
 
+    base_url = settings.FEED_BASE_URL
     title = None
     description = None
-    max_links = None
-    image = None
-    encoding = u'UTF-8'
-    copyright = u'Copyright (c) %d %s %s' % (datetime.date.today().year, current_site.domain, current_site.name)
+    language = settings.LANGUAGE_CODE
+    copyright = settings.FEED_COPYRIGHT
+    webmaster = settings.FEED_WEBMASTER
+    ttl = settings.FEED_TTL
+    image = settings.FEED_IMAGE_URL
 
     def generate(self, published_links, max_links=None, log=None, name=None, feed_dir=None):
         if max_links is None:
@@ -93,14 +94,11 @@ class Feed(object):
         log.info('Generating RSS ...')
         link_feed = LinkFeed(links, self)
 
-        # XXX something is up with encoding.. seems to be a lot of that? think text.py has a flaw or 3
-        orig_xml = link_feed.to_xml()
-
-        xml = text.encode(orig_xml)
+        xml = link_feed.tostring()
         xml_file = os.path.join(feed_dir, name.replace('.', '-') + '.rss')
 
         with AtomicWrite(xml_file, backup=True, perms=0644) as fp:
-            fp.write(orig_xml)
+            fp.write(xml)
 
         log.info('Wrote %d bytes to feed: %r', len(xml), xml_file)
 
