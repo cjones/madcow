@@ -37,7 +37,7 @@ class BadResponse(ScannerError):
     @property
     def fatal(self):
         """True if this error should signal the doom of this link despite its error count"""
-        return self.response.code >= 400 and self.response.code <= 499 and self.rsponse.code != 408
+        return self.response.code >= 400 and self.response.code <= 499 and self.response.code != 408
 
     def __str__(self):
         from gruntle.memebot.utils.text import encode, format
