@@ -1,23 +1,7 @@
-current pending links: 153
-
-Scanner problems:
-
-1. some images don't parse well.. especially it.bo.lt & upload.wikimedia.org.. why not?
-2. internal server error on imgur means 404
-
-
-RSS problems:
-
-1. still need to render the pages, not just let it use the link
-2. does greader not honor pubDate, or are we doing something wrong?
-3. total unicode clusterfuck. not sure if that's my fault. double-check text.py 
-4. PyRSS2Gen.py is sort of ghetto.. maybe we should crib its formatting stuff but use lxml
-
-General TODO:
-
 1. General site styling
-2. API key access to keep feeds locked down?
-3. An RSS index
-4. Fancier browse UI (pagination, filtering)
-5. A few more feed types
-6. How to extract article summaries reasonably?
+2. API key access to keep feeds locked down.. maybe?
+3. Fancier browse UI (pagination, filtering)
+4. How to extract article summaries reasonably?
+5. Run updater periodically
+6. publish_date can probably be set to created as long as created >= the last publish_date...
+7. why are google reader dates not honoring pubDate? very obnoxious..

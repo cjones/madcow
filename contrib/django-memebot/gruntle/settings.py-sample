@@ -74,10 +74,16 @@ SCANNERS = (
         'gruntle.memebot.scanner.default',
         )
 
+FEED_COPYRIGHT = u'Copyright \u00a9 2011, Your Awesome Company'
+FEED_WEBMASTER = 'Your Name <your@email>'
+FEED_TTL = 15
+FEED_IMAGE_URL = None
+FEED_BASE_URL = 'http://foo.com/'
+FEED_MAX_LINKS = 100
 # feeds to generate
-FEEDS = (
-        'gruntle.memebot.rss.hugs',
-        )
+FEEDS = ('gruntle.memebot.rss.hugs',
+         'gruntle.memebot.rss.images',
+         )
 
 # logging config
 LOG_LEVEL = 'INFO'
