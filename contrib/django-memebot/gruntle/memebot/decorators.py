@@ -97,3 +97,21 @@ def memoize(*args, **kwargs):
     if len(args) == 1 and not kwargs and callable(args[0]):
         return decorator(args[0])
     return decorator
+
+
+def login_or_apikey_required(*args, **kwargs):
+
+    """TBD: Like login required, but allow API access as well"""
+
+    def decorator(wrapped_func):
+
+        @functools.wraps(wrapped_func)
+        def wrapper_func(request, *args, **kwargs):
+            return wrapped_func(request, *args, **kwargs)
+
+        return wrapper_func
+
+    if len(args) == 1 and not kwargs and callable(args[0]):
+        return decorator(args[0])
+    return decorator
+

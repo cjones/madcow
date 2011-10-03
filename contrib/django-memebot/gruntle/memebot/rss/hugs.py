@@ -4,7 +4,7 @@ from gruntle.memebot.rss import Feed
 
 class AllHugsLinksFeed(Feed):
 
-    title = '#hugs links'
+    title = 'all #hugs links'
     description = __doc__
     max_links = 100
 

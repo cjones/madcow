@@ -11,8 +11,9 @@ urlpatterns = patterns('gruntle.memebot.views',
         url(r'^scores/$', 'scores', name='scores'),
         url(r'^profile/$', 'profile', name='profile'),
         url(r'^browse/$', 'browse', name='browse'),
-        url(r'^content/(?P<publish_id>\d+)/$', 'content', name='content'),
-        url(r'^view/(?P<publish_id>\d+)/rss/$', 'view_rss', name='view-rss'),
+        url(r'^link/(?P<publish_id>\d+)/content/$', 'view_content', name='view-content'),
+        url(r'^link/(?P<publish_id>\d+)/$', 'view_link', name='view-link'),
+        url(r'^rss/(?P<name>[a-zA-Z0-9_]+)/$', 'view_rss', name='view-rss'),
         url(r'^rss/$', 'rss_index', name='rss-index'),
         )
 

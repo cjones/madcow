@@ -38,7 +38,7 @@ class LinkFeed(RSS2):
     def __init__(self, links, feed):
         now = local_to_gmt(datetime.datetime.now())
         super(LinkFeed, self).__init__(
-                urljoin(feed.base_url, reverse('index')),
+                urljoin(feed.base_url, reverse('rss-index')),
                 title=feed.title,
                 description=feed.description,
                 language=feed.language,
@@ -65,16 +65,18 @@ class Feed(object):
     webmaster = settings.FEED_WEBMASTER
     ttl = settings.FEED_TTL
     image = settings.FEED_IMAGE_URL
+    max_links = settings.FEED_MAX_LINKS
+    feed_dir = settings.FEED_DIR
 
     def generate(self, published_links, max_links=None, log=None, name=None, feed_dir=None):
         if max_links is None:
             max_links = self.max_links
-            if max_links is None:
-                max_links = DEFAULT_MAX_LINKS
         if feed_dir is None:
-            feed_dir = settings.FEED_DIR
+            feed_dir = self.feed_dir
 
-        links = self.filter(published_links)[:max_links]
+        links = self.filter(published_links)
+        if max_links:
+            links = links[:max_links]
         if not links.count():
             log.warn('No links left to publish after filtering')
             return
@@ -95,7 +97,7 @@ class Feed(object):
         link_feed = LinkFeed(links, self)
 
         xml = link_feed.tostring()
-        xml_file = os.path.join(feed_dir, name.replace('.', '-') + '.rss')
+        xml_file = os.path.join(feed_dir, name + '.rss')
 
         with AtomicWrite(xml_file, backup=True, perms=0644) as fp:
             fp.write(xml)
@@ -106,18 +108,26 @@ class Feed(object):
         raise NotImplementedError
 
 
-def get_feeds(names):
+def get_feeds(paths=None):
     """Import configured feeds"""
+    if paths is None:
+        paths = settings.FEEDS
     func_name = 'feed'
     global_context = globals()
     local_context = locals()
     feeds = []
-    for name in names:
-        mod = __import__(name, global_context, local_context, [func_name])
+    for path in paths:
+        mod = __import__(path, global_context, local_context, [func_name])
         feed = getattr(mod, func_name, None)
         if feed is not None:
-            feeds.append((name, feed))
+            feeds.append((path.split('.')[-1], path, feed))
     return feeds
+
+
+def get_feed_names(paths=None):
+    if paths is None:
+        paths = settings.FEEDS
+    return [name for name, path, feed in get_feeds(paths)]
 
 
 @logged('build-rss', append=True)
@@ -136,7 +146,7 @@ def rebuild_rss(logger, max_links=None):
                 plural(new_links.count(), 'new link'),
                 plural(invalid_links.count(), 'invalid link'))
 
-    for feed_name, feed in feeds:
+    for feed_name, feed_path, feed in feeds:
         log = logger.get_named_logger(feed_name)
         log.info('Rebuilding: %s', first(feed.title, feed.description, feed_name))
         feed.generate(published_links, max_links=max_links, log=log, name=feed_name)

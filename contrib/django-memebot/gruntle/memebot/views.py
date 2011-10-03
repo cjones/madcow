@@ -1,13 +1,17 @@
 """Memebot views"""
 
+import os
+
 from django.views.generic.simple import direct_to_template
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import Http404, HttpResponse
 
+from gruntle.memebot.decorators import login_or_apikey_required
 from gruntle.memebot.models import UserProfile, Link
 from gruntle.memebot.forms import ManageProfileForm
+from gruntle.memebot.rss import get_feed_names, get_feeds
 
 @login_required
 def index(request):
@@ -53,21 +57,42 @@ def browse(request):
     return direct_to_template(request, 'memebot/browse.html', {'links': links})
 
 
-@login_required
-def content(request, publish_id):
+###############################################
+### NEED API KEY OR LOGIN FOR THE RSS STUFF ###
+###############################################
+
+
+def _get_link(publish_id, **kwargs):
+    """Helper function to get published links or raise 404"""
+    return get_object_or_404(Link, publish_id=int(publish_id), state='published', **kwargs)
+
+
+@login_or_apikey_required
+def view_content(request, publish_id):
     """View generic published content that is cached locally"""
-    link = get_object_or_404(Link, publish_id=int(publish_id), content__isnull=False, state='published')
+    link = _get_link(publish_id, content__isnull=False)
     return HttpResponse(link.content, link.content_type)
 
 
-@login_required
-def view_rss(request, publish_id):
-    """View rendered link item as RSS"""
-    link = get_object_or_404(Link, publish_id=int(publish_id), state='published')
-    return direct_to_template(request, link.rss_template, {'link': link})
+@login_or_apikey_required
+def view_link(request, publish_id):
+    """Info about a link, TBD"""
+    return direct_to_template(request, 'memebot/view-link.html', {'link': _get_link(publish_id)})
 
 
-@login_required
+@login_or_apikey_required
+def view_rss(request, name):
+    """View RSS feed"""
+    if name not in get_feed_names():
+        raise Http404
+    feed_file = os.path.join(settings.FEED_DIR, name + '.rss')
+    if not os.path.exists(feed_file):
+        raise Http404
+    with open(feed_file, 'r') as fp:
+        return HttpResponse(fp.read(), 'text/xml')
+
+
+@login_or_apikey_required
 def rss_index(request):
     """Index of available RSS feeds"""
-    return HttpResponse("OK")
+    return direct_to_template(request, 'memebot/rss-index.html', {'feeds': get_feeds()})

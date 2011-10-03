@@ -242,21 +242,11 @@ class Link(Model):
     def get_absolute_url(self):
         """URL to this links cached content"""
         if self.state == 'published' and self.content is not None:
-            return ('content', [self.publish_id])
-
-    absolute_url = property(get_absolute_url)
-
-    @models.permalink
-    def get_rss_url(self):
-        """URL to this links RSS item"""
-        if self.state == 'published':
-            return ('view-rss', [self.publish_id])
-
-    rss_url = property(get_rss_url)
+            return ('view-content', [self.publish_id])
 
     @property
     def external_url(self):
-        return urlparse.urljoin(settings.FEED_BASE_URL, self.absolute_url)
+        return urlparse.urljoin(settings.FEED_BASE_URL, self.get_absolute_url())
 
     def publish(self, commit=True):
         """Publish this link"""
