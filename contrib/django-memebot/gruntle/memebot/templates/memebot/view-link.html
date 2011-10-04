@@ -1,39 +1,90 @@
 {% extends "base.html" %}
 {% block title %}link {{ link.publish_id }}{% endblock %}
 {% block content %}
+
+<h2>Link Statistics</h2>
+
 <div id="link-detail">
- <dt>ID</dt>
- <dd>{{ link.publish_id }}</dd>
+ <span class="p20 first">
+  <dt>ID</dt>
+  <dd>{{ link.publish_id }}</dd>
+ </span>
+
+ <span class="p20">
  <dt>User</dt>
  <dd>{{ link.user.username }}</dd>
- <dt>Source</dt>
- <dd>{{ link.source.get_type_display }} {{ link.source.name }}</dd>
+ </span>
+
+ <span class="p20">
+  <dt>Source</dt>
+  <dd>{{ link.source.name }} ({{ link.source.get_type_display }})</dd>
+ </span>
+
+ <span class="p20">
+  <dt>Repost Count</dt>
+  <dd>{{ link.reposts }}</dd>
+ </span>
+
+ <span class="p20">
+  <dt>Scanner</dt>
+  <dd>{{ link.scanner }}</dd>
+ </span>
+
+ <br /><br /><hr /><br /><br />
+
+ <span class="p60 first">
+  <dt>Original URL</dt>
+  <dd>{{ link.url }}</dd>
+ </span>
+
+ <span class="p20">&nbsp;</span>
+
+ <span class="p15">
+  <dt>Created</dt>
+  <dd>{{ link.created|date:"Y-m-d H:i:s" }}</dd>
+ </span>
+
+ <span class="p60 first">
+  <dt>Normalized URL</dt>
+  <dd>{{ link.normalized }}</dd>
+ </span>
+
+ <span class="p20">&nbsp;</span>
+
+ <span class="p15">
+  <dt>Modified</dt>
+  <dd>{{ link.modified|date:"Y-m-d H:i:s" }}</dd>
+ </span>
+
+ <span class="p60 first">
+  <dt>Resolved URL</dt>
+  <dd>{{ link.resolved_url }}</dd>
+ </span>
+
+ <span class="p20">&nbsp;</span>
+
+ <span class="p15">
+  <dt>Published</dt>
+  <dd>{{ link.published|date:"Y-m-d H:i:s" }}</dd>
+ </span>
+
+ {% comment %}
  <hr />
- <dt>Original URL</dt>
- <dd>{{ link.url }}</dd>
- <dt>Normalized URL</dt>
- <dd>{{ link.normalized }}</dd>
- <dt>Repost Count</dt>
- <dd>{{ link.reposts }}</dd>
  <hr />
- <dt>Resolved URL</dt>
- <dd>{{ link.resolved_url }}</dd>
  <dt>Content Type</dt>
  <dd>{{ link.content_type }}</dd>
  <dt>Content</dt>
  <dd>{% if link.content %}<a href="{% url memebot-view-link-content link.publish_id %}">link</a>{% else %}n/a{% endif %}</dd>
  <dt>Title</dt>
  <dd>{{ link.title }}</dd>
- <dt>Published</dt>
- <dd>{{ link.published|date:"Y-m-d H:i:s" }}</dd>
- <dt>Scanner</dt>
- <dd>{{ link.scanner }}</dd>
  <dt>Attributes</dt>
  <dd>{{ link.attr_storage }}</dd>
  <hr />
- <dt>Created</dt>
- <dd>{{ link.created|date:"Y-m-d H:i:s" }}</dd>
- <dt>Modified</dt>
- <dd>{{ link.modified|date:"Y-m-d H:i:s" }}</dd>
+ <span class="p20">
+  <dt>Type</dt>
+  <dd>{{ link.content_type }}</dd>
+ </span>
+
+ {% endcomment %}
 </div>
 {% endblock %}

@@ -2,26 +2,68 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>{% block title %}{% endblock %} - memebot</title>
-  <!--
-  <link type="text/css" href="{{ MEDIA_URL }}css/redmond/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.6.2.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.16.custom.min.js"></script>
-  -->
-  {% block head %}{% endblock %}
+  <title>{% block title %}{{ site_domain }}{% endblock %} - {{ site_name }}</title>
+
+  <!-- Load jquery stylesheets and then ours here -->
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/external/jquery.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/external/menu.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+
+  <!-- Over-ride styles with custom themes if specified -->
+  {% ifnotequal site_style "main" %}
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/{{ site_style }}.css" />
+  {% endifnotequal %}
+
+  <!-- Template-defined styles -->
+  {% block styles %}{% endblock %}
+
+  <!-- Load up jquery.min etc. -->
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery-ui.min.js"></script>
+  {% comment %}
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery.metadata.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery.hoverIntent.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/mbMenu.js"></script>
+  {% endcomment %}
+
+  <!-- Template loads more external js here -->
+  {% block scripts %}{% endblock %}
+
+  <!-- Initialization functions, if any, optionally extended by template -->
+  <script type="text/javascript">
+   {% block initscript %}{% endblock %}
+  </script>
+
+  <!-- Last chance to stuff junk in the header -->
+  {% block extraheaders %}{% endblock %}
  </head>
  <body>
   <div id="main">
-   {% if messages %}
-   <div id="messages">
-    <ul>
-     {% for message in messages %}
-     <li>{{ message }}</li>
-     {% endfor %}
-    </ul>
+
+   <!-- Site banner -->
+   <div id="banner">
+    {% include "base/banner.html" %}
    </div>
-   {% endif %}
-   <div id="content">{% block content %}{% endblock %}</div>
+
+   <div id="menu">
+    {% include "base/menu.html" %}
+   </div>
+
+   <!-- User messaging system -->
+   <div id="messages">
+    {% include "base/messages.html" %}
+   </div>
+
+   <!-- jQuery hidden UI helpers -->
+   <div id="helpers">
+    {% block helpers %}{% endblock %}
+   </div>
+
+   <!-- Main page content -->
+   <div id="content">
+    {% block content %}{% endblock %}
+   </div>
+
   </div>
  </body>
 </html>
