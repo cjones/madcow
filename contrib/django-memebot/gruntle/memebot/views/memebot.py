@@ -6,11 +6,13 @@ from django.views.generic.simple import direct_to_template
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
 
 from gruntle.memebot.decorators import login_or_apikey_required
 from gruntle.memebot.models import UserProfile, Link
 from gruntle.memebot.rss import get_feed_names, get_feeds
+from gruntle.memebot.forms import CheckLinkForm
 
 @login_required
 def view_index(request):
@@ -26,7 +28,7 @@ def view_scores(request):
 
 
 @login_required
-def view_links(request):
+def browse_links(request):
     """Browse all links"""
     try:
         page = int(request.GET.get('page'))
@@ -46,6 +48,19 @@ def view_links(request):
 def _get_link(publish_id, **kwargs):
     """Helper function to get published links or raise 404"""
     return get_object_or_404(Link, publish_id=int(publish_id), state='published', **kwargs)
+
+
+@login_required
+def check_link(request):
+    """Page to allow user to enter a URL to check its status"""
+    if request.method == 'POST':
+        form = CheckLinkForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect(reverse('memebot-view-link', args=[form.cleaned_data['link'].publish_id]))
+
+    else:
+        form = CheckLinkForm()
+    return direct_to_template(request, 'memebot/check-link.html', {'form': form})
 
 
 @login_or_apikey_required

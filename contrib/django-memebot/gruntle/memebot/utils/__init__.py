@@ -316,3 +316,10 @@ def _flatten(items):
     return flat
 
 
+def get_rfc3339_timestamp(dt=None):
+    """Generate RFC3339 timestamp with locale's timezone, suitable for Atom feed"""
+    if dt is None:
+        dt = datetime.datetime.now()
+    t = dt.isoformat()
+    x, s = ('+', -time.timezone) if time.timezone < 0 else ('-', time.timezone)
+    return t + x + '%02d:%02d' % divmod(s / 60, 60)

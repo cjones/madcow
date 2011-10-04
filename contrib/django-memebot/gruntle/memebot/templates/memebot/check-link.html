@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Check URL{% endblock %}
+{% block content %}
+<h3>Check URL</h3>
+<div id="check-link-form">
+ <form action="" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">check</button>
+ </form>
+</div>
+{% endblock %}

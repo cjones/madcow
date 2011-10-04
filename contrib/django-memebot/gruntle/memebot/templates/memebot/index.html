@@ -3,9 +3,11 @@
 {% block content %}
 <div id="home">
  <ul id="links">
-  <li><a href="{% url memebot-view-rss-index %}">view rss feeds</a></li>
-  <li><a href="{% url memebot-view-links %}">browse links</a></li>
+  <li><a href="{% url memebot-view-rss-index %}">rss feeds</a></li>
+  <li><a href="{% url memebot-browse-links %}">browse links</a></li>
   <li><a href="{% url memebot-view-scores %}">view scoreboard</a></li>
+  <li><a href="{% url memebot-check-link %}">check link</a></li>
+  <li><a href="http://code.google.com/p/madcow/">download madcow</a></li>
   <br />
   <li><a href="{% url accounts-edit-profile %}">edit profile</a></li>
   <li><a href="{% url accounts-logout %}">logout</a></li>

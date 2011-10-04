@@ -2,6 +2,8 @@
 
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
+from gruntle.memebot.models import Link
 
 class EditProfileForm(forms.ModelForm):
 
@@ -33,3 +35,28 @@ class EditProfileForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class CheckLinkForm(forms.Form):
+
+    url = forms.URLField(label='URL', min_length=11, max_length=128, required=True,
+                         widget=forms.TextInput(attrs={'size': 128}))
+
+    def clean_url(self):
+        errors = []
+        url = self.cleaned_data.get('url', None)
+        self.cleaned_data['link'] = None
+        if url is None:
+            errors.append('You must enter the URL to check')
+        else:
+            normalized = Link.objects.normalize_url(url)
+            links = Link.objects.filter(state='published')
+            links = links.filter(Q(url=url) | Q(resolved_url=url) | Q(normalized=normalized)).distinct()
+            links = links.order_by('published')
+            if links.count():
+                self.cleaned_data['link'] = links[0]
+            else:
+                errors.append('No results found for that URL')
+        if errors:
+            raise forms.ValidationError(errors)
+        return self.cleaned_data['url']
