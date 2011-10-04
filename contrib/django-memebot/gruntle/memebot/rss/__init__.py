@@ -81,7 +81,8 @@ class Feed(object):
             log.warn('No links left to publish after filtering')
             return
 
-        last_publish_id = SerializedData.data[name]
+        last_publish_key = name + '_last_published'
+        last_publish_id = SerializedData.data[last_publish_key]
         if last_publish_id is None:
             last_publish_id = 0
         log.info('Last publish ID: %d', last_publish_id)
@@ -103,6 +104,8 @@ class Feed(object):
             fp.write(xml)
 
         log.info('Wrote %d bytes to feed: %r', len(xml), xml_file)
+        SerializedData.data[last_publish_key] = latest_link.publish_id
+        log.info('Updated %s to: %r', last_publish_key, SerializedData.data[last_publish_key])
 
     def filter(self, published_links):
         raise NotImplementedError

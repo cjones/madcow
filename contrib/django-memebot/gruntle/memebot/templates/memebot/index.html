@@ -3,8 +3,9 @@
 {% block content %}
 <div id="home">
  <ul id="links">
-  <li><a href="{% url browse %}">browse</a></li>
-  <li><a href="{% url scores %}">scores</a></li>
+  <li><a href="{% url rss-index %}">rss feeds</a></li>
+  <li><a href="{% url browse %}">browse urls</a></li>
+  <li><a href="{% url scores %}">memebot scores</a></li>
   <li><a href="{% url profile %}">edit profile</a></li>
   <li><a href="{% url logout %}">logout</a></li>
  </ul>
