@@ -6,7 +6,6 @@ class AllHugsLinksFeed(Feed):
 
     title = 'all #hugs links'
     description = __doc__
-    max_links = 100
 
     def filter(self, published_links):
         """Filter published links to the ones we care about"""

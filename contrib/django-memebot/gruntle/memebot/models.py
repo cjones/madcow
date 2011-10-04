@@ -80,12 +80,20 @@ class LinkManager(models.Manager):
 
     fragment_re = re.compile(r'^(.*)#([^;/?:@=&]*)$')
 
-    @property
-    def last_publish_id(self):
+    def get_last_published(self):
+        published = self.filter(published__isnull=False).only('published').order_by('-published')
+        if published.count():
+            return published[0].published
+
+    last_published = property(get_last_published)
+
+    def get_last_publish_id(self):
         published = self.filter(publish_id__isnull=False).only('publish_id').order_by('-publish_id')
         if published.count():
             return published[0].publish_id
         return 0
+
+    last_publish_id = property(get_last_publish_id)
 
     def add_link(self, url, username, source_name, source_type, **kwargs):
         """
@@ -248,14 +256,17 @@ class Link(Model):
     def external_url(self):
         return urlparse.urljoin(settings.FEED_BASE_URL, self.get_absolute_url())
 
-    def publish(self, commit=True):
+    def publish(self, date=None, commit=True):
         """Publish this link"""
         dirty = False
         if self.state != 'published':
             self.state = 'published'
             dirty = True
         if self.published is None:
-            self.published = datetime.datetime.now()
+            if date is None:
+                last = Link.objects.get_last_published()
+                date = self.created if (last is None or self.created >= last) else last
+            self.published = date
             dirty = True
         if self.publish_id is None:
             self.publish_id = Link.objects.last_publish_id + 1
