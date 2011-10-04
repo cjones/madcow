@@ -9,7 +9,7 @@ from gruntle.memebot.exceptions import *
 __all__ = ['get_encoding', 'set_encoding', 'encode', 'decode', 'sencode', 'sdecode', 'cast', 'chomp', 'format']
 
 # defaults
-DEFAULT_AUTO_ENCODINGS = 'ascii', 'utf-8', 'utf-16', 'latin1'
+DEFAULT_AUTO_ENCODINGS = 'ascii', 'utf-8', 'latin1'
 DEFAULT_FAILBACK_ENCODING = 'ascii'
 DEFAULT_CHOMP_CHARS = '\r', '\n'
 DEFAULT_CAST_TYPES = int, float
