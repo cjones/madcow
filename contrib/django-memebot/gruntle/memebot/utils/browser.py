@@ -56,6 +56,8 @@ PRESET_USER_AGENTS = {'ie6': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
 
 # some gloriously naive regular expressions for stripping html, quick & dirty
 html_tag_re = re.compile(r'<.*?>', re.DOTALL)  # <-- horrible
+lang_tag_re = re.compile(r'<(script|style)[^>]*>.*?</\1>', re.IGNORECASE | re.DOTALL)
+comment_re = re.compile(r'<!--.*?-->', re.DOTALL)
 whitespace_re = re.compile(r'\s+')  # for packing whitespace
 entity_dec_re = re.compile(r'(&#(\d+);)')  # &#32;
 entity_hex_re = re.compile(r'^(&#x([0-9a-fA-F]+);)')  # &#x3D;
@@ -219,9 +221,9 @@ class Browser(object):
 
 def decode_entities(html):
     """Convert HTML entity-encoded characters back to bytes"""
-    for a in ((x, chr(int(v))) for x, v in entity_dec_re.findall(html)):
+    for a in ((x, unichr(int(v))) for x, v in entity_dec_re.findall(html)):
         html = html.replace(*a)
-    for a in ((x, chr(htmlentitydefs.name2codepoint[name])) for x, name in entity_name_re.findall(html)):
+    for a in ((x, unichr(htmlentitydefs.name2codepoint[name])) for x, name in entity_name_re.findall(html)):
         html = html.replace(*a)
     for a in ((x, unichr(int(v, 16))) for x, v in entity_hex_re.findall(html)):
         html = html.replace(*a)
@@ -230,5 +232,31 @@ def decode_entities(html):
 
 def render_node(node):
     """Try to turn a soup node into something resembling plain text"""
-    html = text.encode(node if isinstance(node, (str, unicode)) else node.renderContents())
-    return text.decode(decode_entities(whitespace_re.sub(' ', html_tag_re.sub(' ', html).strip())))
+    if isinstance(node, (str, unicode)):
+        html = node
+    else:
+        html = node.renderContents()
+    html = text.decode(html)
+    html = html_tag_re.sub(u' ', html)
+    html = decode_entities(html)
+    html = html.replace(u'\u00a0', ' ')
+    html = whitespace_re.sub(u' ', html)
+    html = html.strip()
+    return html
+
+
+def prettify_node(node):
+    """Try to turn a soup node into something resembling readable html"""
+    if isinstance(node, (str, unicode)):
+        html = node
+    else:
+        html = node.prettify()
+    html = text.decode(html)
+    html = lang_tag_re.sub(u' ', html)
+    html = comment_re.sub(u' ', html)
+    html = html.strip()
+    lines = html.splitlines()
+    lines = (line.rstrip() for line in lines)
+    lines = (line for line in lines if line)
+    html = u'\n'.join(lines) + u'\n'
+    return text.encode(html)
