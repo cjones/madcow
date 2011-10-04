@@ -250,15 +250,13 @@ class Link(Model):
     def get_absolute_url(self):
         """URL to this links cached content"""
         if self.state == 'published' and self.content is not None:
-            return ('view-content', [self.publish_id])
+            return ('memebot-view-link-content', [self.publish_id])
+
+    absolute_url = property(get_absolute_url)
 
     @property
     def external_url(self):
-        # XXX workaround for now...
-        rel = self.get_absolute_url()
-        if not rel.startswith(settings.SITE_PATH):
-            rel = urlparse.urljoin(settings.SITE_PATH, rel[1:])
-        return urlparse.urljoin(settings.FEED_BASE_URL, rel)
+        return urlparse.urljoin(settings.BASE_SITE_URL, self.absolute_url)
 
     def publish(self, date=None, commit=True):
         """Publish this link"""

@@ -6,16 +6,11 @@ import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.contrib.sites.models import Site
 
 from gruntle.memebot.rss.generator import RSS2, RSS2Item
 from gruntle.memebot.models import SerializedData, Link
 from gruntle.memebot.decorators import logged, locked
 from gruntle.memebot.utils import AtomicWrite, first, local_to_gmt, plural, text
-
-DEFAULT_MAX_LINKS = 100
-
-current_site = Site.objects.get_current()
 
 class LinkItem(RSS2Item):
 
@@ -37,15 +32,8 @@ class LinkFeed(RSS2):
 
     def __init__(self, links, feed):
         now = local_to_gmt(datetime.datetime.now())
-
-        # XXX workaround for now...
-        rel = reverse('rss-index')
-        if not rel.startswith(settings.SITE_PATH):
-            rel = urljoin(settings.SITE_PATH, rel[1:])
-        url = urljoin(feed.base_url, rel)
-
         super(LinkFeed, self).__init__(
-                url,
+                urljoin(feed.base_site_url, reverse('memebot-view-rss-index')),
                 title=feed.title,
                 description=feed.description,
                 language=feed.language,
@@ -64,7 +52,7 @@ class Feed(object):
 
     """Base Feed class"""
 
-    base_url = settings.FEED_BASE_URL
+    base_site_url = settings.BASE_SITE_URL
     title = None
     description = None
     language = settings.LANGUAGE_CODE

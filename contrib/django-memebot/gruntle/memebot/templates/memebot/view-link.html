@@ -21,7 +21,7 @@
  <dt>Content Type</dt>
  <dd>{{ link.content_type }}</dd>
  <dt>Content</dt>
- <dd>{% if link.content %}<a href="{% url view-content link.publish_id %}">link</a>{% else %}n/a{% endif %}</dd>
+ <dd>{% if link.content %}<a href="{% url memebot-view-link-content link.publish_id %}">link</a>{% else %}n/a{% endif %}</dd>
  <dt>Title</dt>
  <dd>{{ link.title }}</dd>
  <dt>Published</dt>

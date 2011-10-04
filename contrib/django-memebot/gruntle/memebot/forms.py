@@ -3,7 +3,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
-class ManageProfileForm(forms.ModelForm):
+class EditProfileForm(forms.ModelForm):
 
     """Form for updating your user profile"""
 
@@ -27,7 +27,7 @@ class ManageProfileForm(forms.ModelForm):
         """Save user instance, updated with cleaned_data"""
         commit = kwargs.pop('commit', True)
         kwargs['commit'] = False
-        user = super(ManageProfileForm, self).save(*args, **kwargs)
+        user = super(EditProfileForm, self).save(*args, **kwargs)
         if self.cleaned_data['password2']:
             user.set_password(self.cleaned_data['password2'])
         if commit:

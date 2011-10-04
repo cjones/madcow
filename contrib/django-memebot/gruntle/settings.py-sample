@@ -19,6 +19,9 @@ SECRET_KEY = ''
 # IP/port of memcached backend
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=0'
 
+# root of site, for RSS feeds that need absolute URLs.
+BASE_SITE_URL = 'https://your.rad.site.com/'
+
 # where memebot keeps all its stuff
 DATABASES = {
         'default': {
@@ -30,9 +33,6 @@ DATABASES = {
             'PORT': '',
             },
         }
-
-# root of application (same as WSGIScriptAlias)
-SITE_PATH = '/'
 
 # memebot points scoring formula
 MEMEBOT_POINTS_NEW = 1          # points to award when a new link is posted
@@ -75,10 +75,9 @@ SCANNERS = (
         )
 
 FEED_COPYRIGHT = u'Copyright \u00a9 2011, Your Awesome Company'
-FEED_WEBMASTER = 'Your Name <your@email>'
+FEED_WEBMASTER = '%s <%s>' % ADMINS[0]
 FEED_TTL = 15
 FEED_IMAGE_URL = None
-FEED_BASE_URL = 'http://foo.com/'
 FEED_MAX_LINKS = 25
 
 # feeds to generate
@@ -101,13 +100,12 @@ LOCK_DIR = os.path.join(DATA_DIR, 'lock')
 FEED_DIR = os.path.join(DATA_DIR, 'feed')
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'memebot', 'media')
 
-# url locations (relative to SITE_PATH). automatically expanded (see configure_urls below)
-URL_PATHS = {'LOGIN_REDIRECT_URL': '/',
-             'LOGIN_URL': '/login/',
-             'LOGOUT_URL': '/logout/',
-             'MEDIA_URL': '/media/'}
-
-URL_PATHS['ADMIN_MEDIA_PREFIX'] = os.path.join(URL_PATHS['MEDIA_URL'], 'admin')
+# url locations
+LOGIN_REDIRECT_URL = '/memebot/'
+LOGIN_URL = '/accounts/login/'
+LOGOUT_URL = '/accounts/logout/'
+MEDIA_URL = '/media/'
+ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 # misc site settings
 SITE_ID = 1
@@ -146,24 +144,3 @@ INSTALLED_APPS = ('django.contrib.auth',
                   'django.contrib.admin',
                   'django.contrib.admindocs',
                   'gruntle.memebot')
-
-
-def configure_urls():
-    """Automatically generate some settings and url regex from URL_PATHS and SITE_PATH"""
-
-    def normalize(path, root='/'):
-        if path:
-            path = os.path.normpath(path)
-        while path.startswith('/'):
-            path = path[1:]
-        rel = os.path.join(path, '')
-        return os.path.join(root, rel), ('^' if rel else '') + rel
-
-    context = globals()
-    site_root, site_pattern = normalize(SITE_PATH)
-    context['SITE_PATTERN'] = site_pattern if DEV_SERVER else ''
-    for key, path in URL_PATHS.iteritems():
-        context[key], context[key + '_PATTERN'] = normalize(path, root=site_root)
-    context['MEDIA_URL_PATTERN'] += r'(?P<path>.*)'
-
-configure_urls()

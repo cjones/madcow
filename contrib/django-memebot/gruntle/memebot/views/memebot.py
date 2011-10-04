@@ -10,37 +10,23 @@ from django.http import Http404, HttpResponse
 
 from gruntle.memebot.decorators import login_or_apikey_required
 from gruntle.memebot.models import UserProfile, Link
-from gruntle.memebot.forms import ManageProfileForm
 from gruntle.memebot.rss import get_feed_names, get_feeds
 
 @login_required
-def index(request):
+def view_index(request):
     """Site index"""
     return direct_to_template(request, 'memebot/index.html', {})
 
 
 @login_required
-def scores(request):
+def view_scores(request):
     """View scoreboard"""
     profiles = UserProfile.objects.get_by_score()
     return direct_to_template(request, 'memebot/scores.html', {'profiles': profiles})
 
 
 @login_required
-def profile(request):
-    """Update user profile"""
-    if request.method == 'POST':
-        form = ManageProfileForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            request.user.message_set.create(message='Your profile has been updated')
-    else:
-        form = ManageProfileForm(instance=request.user)
-    return direct_to_template(request, 'memebot/profile.html', {'form': form})
-
-
-@login_required
-def browse(request):
+def view_links(request):
     """Browse all links"""
     try:
         page = int(request.GET.get('page'))
@@ -57,27 +43,28 @@ def browse(request):
     return direct_to_template(request, 'memebot/browse.html', {'links': links})
 
 
-###############################################
-### NEED API KEY OR LOGIN FOR THE RSS STUFF ###
-###############################################
-
-
 def _get_link(publish_id, **kwargs):
     """Helper function to get published links or raise 404"""
     return get_object_or_404(Link, publish_id=int(publish_id), state='published', **kwargs)
 
 
 @login_or_apikey_required
-def view_content(request, publish_id):
+def view_link(request, publish_id):
+    """Info about a link, TBD"""
+    return direct_to_template(request, 'memebot/view-link.html', {'link': _get_link(publish_id)})
+
+
+@login_or_apikey_required
+def view_link_content(request, publish_id):
     """View generic published content that is cached locally"""
     link = _get_link(publish_id, content__isnull=False)
     return HttpResponse(link.content, link.content_type)
 
 
 @login_or_apikey_required
-def view_link(request, publish_id):
-    """Info about a link, TBD"""
-    return direct_to_template(request, 'memebot/view-link.html', {'link': _get_link(publish_id)})
+def view_rss_index(request):
+    """Index of available RSS feeds"""
+    return direct_to_template(request, 'memebot/rss-index.html', {'feeds': get_feeds()})
 
 
 @login_or_apikey_required
@@ -90,9 +77,3 @@ def view_rss(request, name):
         raise Http404
     with open(feed_file, 'r') as fp:
         return HttpResponse(fp.read(), 'text/xml')
-
-
-@login_or_apikey_required
-def rss_index(request):
-    """Index of available RSS feeds"""
-    return direct_to_template(request, 'memebot/rss-index.html', {'feeds': get_feeds()})
