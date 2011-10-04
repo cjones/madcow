@@ -68,7 +68,7 @@ class Feed(object):
     max_links = settings.FEED_MAX_LINKS
     feed_dir = settings.FEED_DIR
 
-    def generate(self, published_links, max_links=None, log=None, name=None, feed_dir=None):
+    def generate(self, published_links, max_links=None, log=None, name=None, feed_dir=None, force=False):
         if max_links is None:
             max_links = self.max_links
         if feed_dir is None:
@@ -91,8 +91,11 @@ class Feed(object):
         log.info('Latest publish ID: %d', latest_link.publish_id)
 
         if last_publish_id >= latest_link.publish_id:
-            log.warn('No new links posted, not rebuilding')
-            return
+            if force:
+                log.warn('No new links posted, but forcing regeneration anyway')
+            else:
+                log.info('No new links posted')
+                return
 
         log.info('Generating RSS ...')
         link_feed = LinkFeed(links, self)
@@ -135,7 +138,7 @@ def get_feed_names(paths=None):
 
 @logged('build-rss', append=True)
 @locked('build-rss', 0)
-def rebuild_rss(logger, max_links=None):
+def rebuild_rss(logger, max_links=None, force=False):
     """Rebuild all RSS feeds"""
     feeds = get_feeds(settings.FEEDS)
     logger.info('Rebuilding %s', plural(len(feeds), 'RSS feed'))
@@ -152,4 +155,4 @@ def rebuild_rss(logger, max_links=None):
     for feed_name, feed_path, feed in feeds:
         log = logger.get_named_logger(feed_name)
         log.info('Rebuilding: %s', first(feed.title, feed.description, feed_name))
-        feed.generate(published_links, max_links=max_links, log=log, name=feed_name)
+        feed.generate(published_links, max_links=max_links, log=log, name=feed_name, force=force)

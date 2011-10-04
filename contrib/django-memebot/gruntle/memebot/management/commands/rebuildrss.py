@@ -14,11 +14,12 @@ class Command(NoArgsCommand):
     option_list = (make_option('-q', dest='log_stream', default=sys.stderr, action='store_const', const=None,
                                help="don't log messages to console"),
                    make_option('-m', dest='max_links', type='int', help='max links in the feeds (default: per-feed)'),
+                   make_option('-f', dest='force', default=False, action='store_true', help='force rss generation'),
                    ) + NoArgsCommand.option_list
 
-    def handle_noargs(self, log_stream=None, max_links=None, **kwargs):
+    def handle_noargs(self, log_stream=None, max_links=None, force=False, **kwargs):
         try:
-            rss.rebuild_rss(log_stream=log_stream, max_links=max_links)
+            rss.rebuild_rss(log_stream=log_stream, max_links=max_links, force=force)
         except LockError, exc:
             raise CommandError(exc)
         except KeyboardInterrupt:
