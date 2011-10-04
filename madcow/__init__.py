@@ -46,7 +46,7 @@ from madcow.util.textenc import encode, decode, set_preferred_encoding, get_enco
 VERSION = 2, 2, 0
 
 __version__ = '.'.join(str(_) for _ in VERSION)
-__author__ = 'Chris Jones <cjones@gruntle.org>'
+__author__ = 'Chris Jones <cjones@gmail.com>'
 __url__ = 'http://code.google.com/p/madcow/'
 
 delim_re = re.compile(r'\s*[,;]\s*')
