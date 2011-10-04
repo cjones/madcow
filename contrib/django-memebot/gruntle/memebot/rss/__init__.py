@@ -37,8 +37,15 @@ class LinkFeed(RSS2):
 
     def __init__(self, links, feed):
         now = local_to_gmt(datetime.datetime.now())
+
+        # XXX workaround for now...
+        rel = reverse('rss-index')
+        if not rel.startswith(settings.SITE_PATH):
+            rel = urljoin(settings.SITE_PATH, rel[1:])
+        url = urljoin(feed.base_url, rel)
+
         super(LinkFeed, self).__init__(
-                urljoin(feed.base_url, reverse('rss-index')),
+                url,
                 title=feed.title,
                 description=feed.description,
                 language=feed.language,

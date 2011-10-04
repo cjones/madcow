@@ -254,7 +254,11 @@ class Link(Model):
 
     @property
     def external_url(self):
-        return urlparse.urljoin(settings.FEED_BASE_URL, self.get_absolute_url())
+        # XXX workaround for now...
+        rel = self.get_absolute_url()
+        if not rel.startswith(settings.SITE_PATH):
+            rel = urlparse.urljoin(settings.SITE_PATH, rel[1:])
+        return urlparse.urljoin(settings.FEED_BASE_URL, rel)
 
     def publish(self, date=None, commit=True):
         """Publish this link"""
