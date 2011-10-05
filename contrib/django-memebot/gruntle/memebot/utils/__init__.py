@@ -6,6 +6,7 @@ import datetime
 import binascii
 import tempfile
 import logging
+import decimal
 import socket
 import shutil
 import errno
@@ -323,3 +324,61 @@ def get_rfc3339_timestamp(dt=None):
     t = dt.isoformat()
     x, s = ('+', -time.timezone) if time.timezone < 0 else ('-', time.timezone)
     return t + x + '%02d:%02d' % divmod(s / 60, 60)
+
+
+def human_readable_duration(duration, precision=None):
+    """
+    Return human readable version of supplied duration. It may be a
+    number type, indicating seconds elapsed, a timedelta object
+    interpreted the same, or a date or datetime object, which will
+    return the duration between then and now.
+
+    Stting precision allows you to truncate how many units it will use
+    to express the duration. For example, when using precision=2,  "40
+    years, 9 months, 32 days, 7 hours, 16 minutes, and 44 seconds" would
+    instead read "40 years and 9 months".
+    """
+    if isinstance(duration, datetime.date):
+        now = datetime.datetime.now()
+        if type(duration) is datetime.date:
+            now = now.date()
+        duration -= now
+    if isinstance(duration, datetime.timedelta):
+        duration = duration.total_seconds()
+    duration = int(round(duration, 0))
+    if duration < 0:
+        duration *= -1
+
+    parts = []
+    for size, unit in ((60, 'second'),
+                       (60, 'minute'),
+                       (24, 'hour'),
+                       (7, 'day'),
+                       (4, 'week'),
+                       (12, 'month'),
+                       (None, 'year')):
+
+        if size is None:
+            parts.append((duration, unit))
+        else:
+            duration, r = divmod(duration, size)
+            if r:
+                parts.append((r, unit))
+            if not duration:
+                break
+
+    if parts:
+        parts = [plural(*part) for part in reversed(parts)]
+        if precision is not None:
+            parts = parts[:precision]
+        hold = parts.pop()
+        result = [', '.join(parts)]
+        if len(parts) > 1:
+            result.append(',')
+        if parts:
+            result.append(' and ')
+        result.append(hold)
+        result = ''.join(result)
+    else:
+        result = 'less than 1 second'
+    return result
