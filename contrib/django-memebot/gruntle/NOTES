@@ -1,5 +1,4 @@
-1. API key access to keep feeds locked down.. maybe?
+1. API key access to keep feeds locked down
 2. Run updater periodically
-3. How to extract article summaries reasonably?
-4. General site styling
-5. Fancier browse UI (pagination, filtering)
+3. General site styling
+4. Fancier browse UI (pagination, filtering)
