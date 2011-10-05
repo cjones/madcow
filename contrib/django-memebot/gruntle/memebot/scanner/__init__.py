@@ -14,6 +14,8 @@ from gruntle.memebot.utils import text
 from gruntle.memebot.models import Link
 from gruntle.memebot.exceptions import *
 
+DEFAULT_NUM_WORKERS = 4
+
 class ScanResult(collections.namedtuple('ScanResult', 'response override_url title content_type content attr')):
 
     """Returned from a scanner on succesful match, contains values with which to update Link"""
@@ -127,7 +129,8 @@ def get_scanners(names):
 
 @logged('scanner', append=True)
 @locked('scanner', 0)
-def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, max_read=None, max_errors=None):
+def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, max_read=None,
+        max_errors=None, fork=False, num_workers=None, use_multiprocessing=True):
     """Run pending links through scanner API, updating with rendered content and discarding invalid links"""
 
     # defaults from settings
@@ -141,6 +144,72 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
         max_read = settings.SCANNER_MAX_READ
     if max_errors is None:
         max_errors = settings.SCANNER_MAX_ERRORS
+
+    # abstract threading vs. multiprocessing
+    if fork:
+        from django.db import connection
+        from django.core.cache import cache
+
+        def close_shared_handlers():
+            connection.close()
+            cache.close()
+
+        if use_multiprocessing:
+            import multiprocessing as mp
+
+            lock = mp.RLock()
+            Queue = mp.Queue
+
+            def run(func, *args, **kwargs):
+                proc = mp.Process(target=func, args=args, kwargs=kwargs)
+                with lock:
+                    close_shared_handlers()
+                    proc.start()
+                return proc
+
+            def join():
+                status = 0
+                while True:
+                    procs = mp.active_children()
+                    if not procs:
+                        break
+                    for proc in procs:
+                        proc.join()
+                        status |= proc.exitcode
+                return status
+
+
+        else:
+            import threading
+            from Queue import Queue
+
+            lock = threading.RLock()
+            mp = None
+
+            def run(func, *args, **kwargs):
+                thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+                with lock:
+                    close_shared_handlers()
+                    thread.start()
+                return thread
+
+            def join():
+                while True:
+                    threads = threading.enumerate()
+                    if len(threads) == 1:
+                        break
+                    for thread in threads:
+                        if thread.name != 'MainThread':
+                            thread.join(1)
+                return 0
+
+        if num_workers is None:
+            if mp is None:
+                num_workers = DEFAULT_NUM_WORKERS
+            else:
+                num_workers = mp.cpu_count()
+        if num_workers == 1:
+            fork = False
 
     # initialize scanners and browser
     scanners = get_scanners(settings.SCANNERS)
@@ -157,7 +226,9 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
         logger.info('No new links to scan')
         return
 
-    for i, link in enumerate(links):
+    def process_link(job):
+        """Handler for a single link"""
+        i, link = job
         log = logger.get_named_logger('%d/%d' % (i + 1, num_links))
         log.info('Scanning: [%d] %s', link.id, link.url)
         try:
@@ -228,3 +299,28 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
             if link._attr is not None:
                 for key, val in link._attr.iteritems():
                     link.attr[key] = val
+
+    if fork:
+        queue = Queue()
+
+        def worker():
+            while True:
+                link = queue.get()
+                if link is None:
+                    break
+                process_link(link)
+
+        for _ in xrange(num_workers):
+            run(worker)
+        process = queue.put
+    else:
+        process = process_link
+
+    for job in enumerate(links):
+        process(job)
+    if fork:
+        for _ in xrange(num_workers):
+            queue.put(None)
+        status = join()
+        if status != 0:
+            raise ValueError('workers did not exit clean: %d' % status)

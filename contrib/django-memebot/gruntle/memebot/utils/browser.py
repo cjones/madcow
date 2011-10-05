@@ -148,8 +148,19 @@ class Browser(object):
         """Opens the requested URL"""
         followed = set()
         orig_url = url
+        response = None
         while True:
-            response = self._open(url, data, referer, max_read)
+            try:
+                with TrapErrors():
+                    response = self._open(url, data, referer, max_read)
+            except TrapError, exc:
+                # exception on first attempt, just raise it, we got nothing useful
+                if response is None:
+                    reraise(*exc.args)
+                # otherwise, this was probably an error from meta redirect, we can keep the earlier response
+                #import traceback
+                #traceback.print_exception(*exc.args)
+                break
             if not follow_meta_redirect:
                 break
             redirect = response.meta_redirect
