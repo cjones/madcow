@@ -53,14 +53,10 @@ class HTMLScanner(Scanner):
         # the ones that define the structure of the document, which is what we
         # are most interested in. well, its structure relative to whatever text nodes
         # are left over.
-        try:
-            html = text.decode(browser.prettify_node(soup.body))
-            for orig, name in tag_re.findall(html):
-                if name not in ('div', 'p'):
-                    html = html.replace(orig, u' ')
-        except:
-            from gruntle.memebot.utils import ipython
-            ipython()
+        html = text.decode(browser.prettify_node(soup.body))
+        for orig, name in tag_re.findall(html):
+            if name not in ('div', 'p'):
+                html = html.replace(orig, u' ')
 
         # put it back into soup form and perform the main logic thingy here. the idea
         # is to walk each remaining node in the branch and look at the text contents of
