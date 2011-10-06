@@ -25,36 +25,37 @@ class LinkItem(Item):
                                        published=link.published)
 
 
-class LinkRSS(RSS):
+class RSSFeed(RSS):
 
     """A feed generator for Link objects"""
 
-    def __init__(self, links, feed=None, name=None):
-        now = datetime.datetime.now()
-        super(LinkRSS, self).__init__(urljoin(feed.base_url, reverse('memebot-view-index')),
+    def __init__(self, feed):
+        super(RSSFeed, self).__init__(feed.reverse('memebot-view-index'),
                                       title=feed.title,
                                       desc=feed.description,
                                       language=feed.language,
                                       copyright=feed.copyright,
-                                      self_link=urljoin(feed.base_url, reverse('memebot-view-rss', args=[name])),
+                                      rss_url=feed.reverse('memebot-view-rss', feed.name),
                                       webmaster=feed.webmaster,
-                                      published=now,
-                                      build_date=now,
                                       ttl=feed.ttl,
                                       image=feed.image,
-                                      stylesheets=feed.stylesheets)
+                                      stylesheets=feed.stylesheets,
+                                      add_atom=True,
+                                      add_dc=True)
 
-        for link in links:
+        for link in feed.links:
             self.append(LinkItem(link))
 
 
 class Feed(object):
 
-    """Base Feed class"""
+    """Base Feed"""
 
+    # you must set these on the subclass
     title = None
     description = None
 
+    # the rest of these attributes can be overridden, these are just defaults
     base_url = settings.FEED_BASE_URL
     language = settings.LANGUAGE_CODE
     copyright = settings.FEED_COPYRIGHT
@@ -63,6 +64,7 @@ class Feed(object):
     max_links = settings.FEED_MAX_LINKS
     feed_dir = settings.FEED_DIR
     stylesheet = settings.FEED_STYLESHEET
+    keep_xml_backup = settings.FEED_KEEP_XML_BACKUP
 
     image_url = settings.FEED_IMAGE_URL
     image_title = settings.FEED_IMAGE_TITLE
@@ -70,8 +72,17 @@ class Feed(object):
     image_width = settings.FEED_IMAGE_WIDTH
     image_height = settings.FEED_IMAGE_HEIGHT
 
+    def __init__(self):
+        self.name = os.path.splitext(os.path.basename(__file__))[0]
+
+    @property
+    def xml_file(self):
+        """Location of file output"""
+        return os.path.join(self.feed_dir, self.name + '.xml')
+
     @property
     def image(self):
+        """An Image object if an image_url is defined for this feed"""
         if self.image_url is not None:
             return Image(url=self.image_url,
                          title=self.image_title,
@@ -81,23 +92,24 @@ class Feed(object):
 
     @property
     def stylesheets(self):
+        """A list of StyleSheet objects if a stylesheet is defined for this feed"""
         if self.stylesheet is not None:
             return [StyleSheet(type='text/css', media='screen', href=self.stylesheet)]
 
-    def generate(self, published_links, max_links=None, log=None, name=None, feed_dir=None, force=False):
-        if max_links is None:
-            max_links = self.max_links
-        if feed_dir is None:
-            feed_dir = self.feed_dir
+    def reverse(self, view, *args, **kwargs):
+        """Reverse look up a URL, fully qualified by base_url"""
+        return urljoin(self.base_url, reverse(view, args=args, kwargs=kwargs)),
 
+    def generate(self, published_links, log, force=False, **kwargs):
+        """Generate the feed"""
         links = self.filter(published_links)
-        if max_links:
-            links = links[:max_links]
+        if self.max_links:
+            links = links[:self.max_links]
         if not links.count():
             log.warn('No links left to publish after filtering')
             return
 
-        last_publish_key = name + '_last_published'
+        last_publish_key = self.name + '_last_published'
         last_publish_id = SerializedData.data[last_publish_key]
         if last_publish_id is None:
             last_publish_id = 0
@@ -106,68 +118,37 @@ class Feed(object):
         latest_link = links[0]
         log.info('Latest publish ID: %d', latest_link.publish_id)
 
-        if last_publish_id >= latest_link.publish_id:
-            if force:
-                log.warn('No new links posted, but forcing regeneration anyway')
-            else:
-                log.info('No new links posted')
-                return
-
-        log.info('Generating RSS ...')
-        rss = LinkRSS(links, feed=self, name=name)
-        xml = rss.tostring()
-        xml_file = os.path.join(feed_dir, name + '.rss')
-
-        with AtomicWrite(xml_file, backup=True, perms=0644) as fp:
-            fp.write(xml)
-
-        log.info('Wrote %d bytes to feed: %r', len(xml), xml_file)
-        SerializedData.data[last_publish_key] = latest_link.publish_id
-        log.info('Updated %s to: %r', last_publish_key, SerializedData.data[last_publish_key])
+        if force or last_publish_id < latest_link.publish_id:
+            xml = RSSFeed(feed, links).tostring(**kwargs)
+            with AtomicWrite(self.xml_file, backup=self.keep_xml_backup, perms=0644) as fp:
+                fp.write(xml)
+            log.info('Wrote %d bytes to feed: %r', len(xml), self.xml_file)
+            SerializedData.data[last_publish_key] = latest_link.publish_id
 
     def filter(self, published_links):
-        raise NotImplementedError
+        """Override by subclasses to control what links get exported to the feed"""
+        return published_links
 
 
-def get_feeds(paths=None):
+def get_feeds():
     """Import configured feeds"""
-    if paths is None:
-        paths = settings.FEEDS
-    func_name = 'feed'
-    global_context = globals()
-    local_context = locals()
-    feeds = []
-    for path in paths:
-        mod = __import__(path, global_context, local_context, [func_name])
-        feed = getattr(mod, func_name, None)
-        if feed is not None:
-            feeds.append((path.split('.')[-1], path, feed))
-    return feeds
+    return [__import__(path, globals(), locals(), []).feed for path in settings.FEEDS]
 
 
-def get_feed_names(paths=None):
-    if paths is None:
-        paths = settings.FEEDS
-    return [name for name, path, feed in get_feeds(paths)]
+def get_feed_names():
+    """Get just the name of the feeds"""
+    return [feed.name for feed in get_feeds]
 
 
-@logged('build-rss', append=True)
-@locked('build-rss', 0)
-def rebuild_rss(logger, max_links=None, force=False):
+@logged('rss', append=True)
+@locked('rss', 0)
+def run(logger, force=False):
     """Rebuild all RSS feeds"""
     feeds = get_feeds(settings.FEEDS)
     logger.info('Rebuilding %s', plural(len(feeds), 'RSS feed'))
+    links = Link.objects.filter(state='published').order_by('-published')
+    for feed in feeds:
+        log = logger.get_named_logger(feed.name)
+        log.info('Rebuilding: %s', first(feed.title, feed.description, feed.name))
 
-    published_links = Link.objects.filter(state='published').order_by('-published')
-    new_links = Link.objects.filter(state='new')
-    invalid_links = Link.objects.filter(state='invalid')
-
-    logger.info('%s, %s, %s',
-                plural(published_links.count(), 'published link'),
-                plural(new_links.count(), 'new link'),
-                plural(invalid_links.count(), 'invalid link'))
-
-    for feed_name, feed_path, feed in feeds:
-        log = logger.get_named_logger(feed_name)
-        log.info('Rebuilding: %s', first(feed.title, feed.description, feed_name))
-        feed.generate(published_links, max_links=max_links, log=log, name=feed_name, force=force)
+        feed.generate(published_links, log=log, force=force)

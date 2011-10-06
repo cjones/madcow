@@ -91,8 +91,8 @@ def view_rss(request, name):
     """View RSS feed"""
     if name not in get_feed_names():
         raise Http404
-    feed_file = os.path.join(settings.FEED_DIR, name + '.rss')
+    feed_file = os.path.join(settings.FEED_DIR, name + '.xml')
     if not os.path.exists(feed_file):
         raise Http404
     with open(feed_file, 'r') as fp:
-        return HttpResponse(fp.read(), 'text/xml')
+        return HttpResponse(fp.read(), 'application/rss+xml')
