@@ -19,9 +19,6 @@ SECRET_KEY = ''
 # IP/port of memcached backend
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=0'
 
-# root of site, for RSS feeds that need absolute URLs.
-BASE_SITE_URL = 'https://gruntle.org/'
-
 # style to use for this site
 STYLE_NAME = 'main'
 
@@ -78,6 +75,9 @@ SCANNERS = (
         'gruntle.memebot.scanner.html',
         'gruntle.memebot.scanner.default',
         )
+
+# root of site, for RSS feeds that need absolute URLs.
+FEED_BASE_URL = 'http://gruntle.org/'
 
 # default feed settings
 FEED_COPYRIGHT = u'Copyright \u00a9 2011, Madcow Industries'
