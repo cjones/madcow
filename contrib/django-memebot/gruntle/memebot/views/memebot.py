@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 
 from gruntle.memebot.decorators import login_or_apikey_required
 from gruntle.memebot.models import UserProfile, Link
-from gruntle.memebot.rss import get_feed_names, get_feeds
+from gruntle.memebot.feeds import get_feed_names, get_feeds
 from gruntle.memebot.forms import CheckLinkForm
 from gruntle.memebot.utils import text
 

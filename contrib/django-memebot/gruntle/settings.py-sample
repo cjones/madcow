@@ -80,13 +80,14 @@ SCANNERS = (
 FEED_BASE_URL = 'http://gruntle.org/'
 
 # default feed settings
-FEED_COPYRIGHT = u'Copyright \u00a9 2011, Madcow Industries'
-FEED_WEBMASTER = '%s <%s>' % ADMINS[0]
+FEED_COPYRIGHT = u'Copyright \u00a9 2011 Madcow Industries'
+FEED_WEBMASTER = '%s (%s)' % (ADMINS[0][1], ADMINS[0][0])
 FEED_TTL = 60
 FEED_MAX_LINKS = 25
 FEED_SUMMARY_SIZE = 512
 FEED_SUMMARY_CONT = '...'
 FEED_STYLESHEET = 'http://gruntle.org/media/css/rss.css'
+FEED_KEEP_XML_BACKUP = False
 
 # default feed image
 FEED_IMAGE_URL = 'http://gruntle.org/media/img/cow_icon_01.png'
@@ -96,8 +97,8 @@ FEED_IMAGE_TITLE = None
 FEED_IMAGE_LINK = None
 
 # feeds to generate
-FEEDS = ('gruntle.memebot.rss.hugs',
-         'gruntle.memebot.rss.images',
+FEEDS = ('gruntle.memebot.feeds.hugs',
+         'gruntle.memebot.feeds.images',
          )
 
 # logging config
@@ -110,9 +111,9 @@ LOG_PERMS = 0644
 # file locations
 PROJECT_DIR = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = os.path.join(PROJECT_DIR, 'data')
-LOG_DIR = os.path.join(DATA_DIR, 'log')
-LOCK_DIR = os.path.join(DATA_DIR, 'lock')
-FEED_DIR = os.path.join(DATA_DIR, 'feed')
+LOG_DIR = os.path.join(DATA_DIR, 'logs')
+LOCK_DIR = os.path.join(DATA_DIR, 'locks')
+FEED_DIR = os.path.join(DATA_DIR, 'feeds')
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'memebot', 'media')
 
 # url locations
