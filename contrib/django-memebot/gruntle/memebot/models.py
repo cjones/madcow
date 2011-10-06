@@ -15,8 +15,10 @@ from django.conf import settings
 from django.db import models
 
 from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
+from gruntle.memebot.utils import blacklist, first
 from gruntle.memebot.exceptions import OldMeme
-from gruntle.memebot.utils import blacklist
+
+current_site = Site.objects.get_current()
 
 class Model(models.Model):
 
@@ -26,10 +28,6 @@ class Model(models.Model):
     created = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     modified = models.DateTimeField(null=False, blank=False, auto_now=True)
 
-    # for generating GUIDs
-    _guid_fmt = 'tag:%(domain)s,%(date)s:/%(app)s/%(model)s/%(id)d/%(timestamp)s'
-    _guid_id_fields = 'publish_id', 'external_id', 'id'
-
     class Meta:
 
         abstract = True
@@ -37,21 +35,11 @@ class Model(models.Model):
     @property
     def guid(self):
         """Global unique identifier for this object"""
-        site = Site.objects.get_current()
-        model = type(self)
-        for field in model._guid_id_fields:
-            external_id = getattr(self, field, None)
-            if external_id is not None:
-                break
-        else:
-            raise TypeError('No suitable ID found for GUID creation')
-        return model._guid_fmt % {
-                'domain': site.domain,
-                'date': self.created.strftime('%Y-%m-%d'),
-                'app': model._meta.app_label,
-                'model': model._meta.object_name.lower(),
-                'id': external_id,
-                'timestamp': self.created.strftime('%Y%m%d%H%M%S')}
+        id = first([getattr(self, key, None) for key in ('publish_id', 'external_id', 'id')])
+        date = first([getattr(self, key, None) for key in ('published', 'activation_date', 'created', 'modified')])
+        meta = type(self)._meta
+        return 'tag:%s,%s:/%s/%s/%d/%s' % (current_site.domain, date.strftime('%Y-%m-%d'), meta.app_label,
+                                           meta.object_name.lower(), id, date.strftime('%Y%m%d%H%M%S'))
 
 
 class Source(Model):

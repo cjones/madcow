@@ -7,6 +7,7 @@ import binascii
 import tempfile
 import logging
 import decimal
+import rfc822
 import socket
 import shutil
 import errno
@@ -273,13 +274,6 @@ def first(*args):
             return arg
 
 
-def local_to_gmt(dt=None):
-    """Convert a datetime object in localtime to gmt time.. stupidest shit ever"""
-    if dt is None:
-        dt = datetime.datetime.now()
-    return datetime.datetime.fromtimestamp(time.mktime(time.gmtime(time.mktime(dt.timetuple()))))
-
-
 def get_domain():
     """Determine the domain portion of our name"""
     return re.sub('^' + re.escape('.'.join(socket.gethostname().split('.') + [''])), '', socket.getfqdn())
@@ -304,6 +298,7 @@ def flatten(*args, **kwargs):
 
 
 def _flatten(items):
+    """Internal to flatten()"""
     flat = []
     for item in items:
         if isinstance(item, dict):
@@ -317,13 +312,25 @@ def _flatten(items):
     return flat
 
 
-def get_rfc3339_timestamp(dt=None):
-    """Generate RFC3339 timestamp with locale's timezone, suitable for Atom feed"""
+def iso8061time(dt=None, utc=False):
+    """Format local datetime as W3CDTF/iso8061/rfc3339 (2011-10-05T15:04:33+07:00 or 2011-10-05T22:04:33Z)"""
     if dt is None:
         dt = datetime.datetime.now()
-    t = dt.isoformat()
-    x, s = ('+', -time.timezone) if time.timezone < 0 else ('-', time.timezone)
-    return t + x + '%02d:%02d' % divmod(s / 60, 60)
+    u = datetime.datetime.utcfromtimestamp(time.mktime(dt.timetuple()))
+    if utc:
+        dt, z = u, 'Z'
+    else:
+        o = (u - dt.replace(microsecond=0)).total_seconds()
+        s, f = ('-', -1) if (o < 0) else ('+', 1)
+        z = s + '%02d:%02d' % divmod(o * f / 60, 60)
+    return dt.isoformat().split('.', 1)[0] + z
+
+
+def rfc822time(dt=None):
+    """Format local datetime as rfc822 (Wed, 05 Oct 2011 22:04:33 GMT)"""
+    if dt is None:
+        dt = datetime.datetime.now()
+    return rfc822.formatdate(time.mktime(dt.timetuple()))
 
 
 def human_readable_duration(duration, precision=None):

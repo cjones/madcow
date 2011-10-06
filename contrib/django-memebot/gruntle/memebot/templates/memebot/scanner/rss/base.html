@@ -1,3 +1,8 @@
+{% spaceless %}
 <div class="rss-item" id="link-{{ link.publish_id }}">
- {% block content %}{% endblock %}
+ <h3>
+  <a href="{{ link.resolved_url }}">{% if link.title %}{{ link.title }}{% else %}{{ link.resolved_url }}{% endif %}</a>
+ </h3>
+ <div id="content">{% block content %}{% endblock %}</div>
 </div>
+{% endspaceless %}

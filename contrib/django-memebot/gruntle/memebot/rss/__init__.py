@@ -7,42 +7,41 @@ import os
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from gruntle.memebot.rss.generator import RSS2, RSS2Item
+from gruntle.memebot.rss.generator import RSS, Item, Image, StyleSheet
 from gruntle.memebot.models import SerializedData, Link
 from gruntle.memebot.decorators import logged, locked
-from gruntle.memebot.utils import AtomicWrite, first, local_to_gmt, plural, text
+from gruntle.memebot.utils import AtomicWrite, first, plural, text
 
-class LinkItem(RSS2Item):
+class LinkItem(Item):
 
     """A single Link feed item"""
 
     def __init__(self, link):
-        super(LinkItem, self).__init__(
-                first(link.resolved_url, link.url),
-                title=link.title,
-                description=link.rendered,
-                author=link.user.username,
-                guid=link.guid,
-                publish_date=local_to_gmt(link.published))
+        super(LinkItem, self).__init__(first(link.resolved_url, link.url),
+                                       title=link.title,
+                                       desc=link.rendered,
+                                       author=link.user.username,
+                                       guid=link.guid,
+                                       published=link.published)
 
 
-class LinkFeed(RSS2):
+class LinkRSS(RSS):
 
     """A feed generator for Link objects"""
 
-    def __init__(self, links, feed):
-        now = local_to_gmt(datetime.datetime.now())
-        super(LinkFeed, self).__init__(
-                urljoin(feed.base_site_url, reverse('memebot-view-rss-index')),
-                title=feed.title,
-                description=feed.description,
-                language=feed.language,
-                copyright=feed.copyright,
-                webmaster=feed.webmaster,
-                ttl=feed.ttl,
-                image=feed.image,
-                publish_date=now,
-                build_date=now)
+    def __init__(self, links, feed=None, name=None):
+        now = datetime.datetime.now()
+        super(LinkRSS, self).__init__(urljoin(feed.base_site_url, reverse('memebot-view-rss', args=[name])),
+                                      title=feed.title,
+                                      desc=feed.description,
+                                      language=feed.language,
+                                      copyright=feed.copyright,
+                                      webmaster=feed.webmaster,
+                                      published=now,
+                                      build_date=now,
+                                      ttl=feed.ttl,
+                                      image=feed.image,
+                                      stylesheets=feed.stylesheets)
 
         for link in links:
             self.append(LinkItem(link))
@@ -52,16 +51,37 @@ class Feed(object):
 
     """Base Feed class"""
 
-    base_site_url = settings.BASE_SITE_URL
     title = None
     description = None
+
+    base_site_url = settings.BASE_SITE_URL
     language = settings.LANGUAGE_CODE
     copyright = settings.FEED_COPYRIGHT
     webmaster = settings.FEED_WEBMASTER
     ttl = settings.FEED_TTL
-    image = settings.FEED_IMAGE_URL
     max_links = settings.FEED_MAX_LINKS
     feed_dir = settings.FEED_DIR
+    stylesheet = settings.FEED_STYLESHEET
+
+    image_url = settings.FEED_IMAGE_URL
+    image_title = settings.FEED_IMAGE_TITLE
+    image_link = settings.FEED_IMAGE_LINK
+    image_width = settings.FEED_IMAGE_WIDTH
+    image_height = settings.FEED_IMAGE_HEIGHT
+
+    @property
+    def image(self):
+        if self.image_url is not None:
+            return Image(url=self.image_url,
+                         title=self.image_title,
+                         link=self.image_link,
+                         width=self.image_width,
+                         height=self.image_height)
+
+    @property
+    def stylesheets(self):
+        if self.stylesheet is not None:
+            return [StyleSheet(type='text/css', media='screen', href=self.stylesheet)]
 
     def generate(self, published_links, max_links=None, log=None, name=None, feed_dir=None, force=False):
         if max_links is None:
@@ -93,9 +113,8 @@ class Feed(object):
                 return
 
         log.info('Generating RSS ...')
-        link_feed = LinkFeed(links, self)
-
-        xml = link_feed.tostring()
+        rss = LinkRSS(links, feed=self, name=name)
+        xml = rss.tostring()
         xml_file = os.path.join(feed_dir, name + '.rss')
 
         with AtomicWrite(xml_file, backup=True, perms=0644) as fp:

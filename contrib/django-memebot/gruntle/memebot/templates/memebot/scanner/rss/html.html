@@ -1,4 +1,10 @@
 {% extends "memebot/scanner/rss/base.html" %}
+{% spaceless %}
 {% block content %}
-<p class="summary">Summary for HTML coming later</p>
+{% if link.content %}
+{% ifequal link.content_type "text/plain" %}
+<p class="summary">{{ link.content }}</p>
+{% endifequal %}
+{% endif %}
 {% endblock %}
+{% endspaceless %}

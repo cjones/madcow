@@ -3,7 +3,7 @@
 import os
 
 # Set to None to only enable when manage.py is run
-DEBUG = None
+DEBUG = False
 
 # list of (name, email) who will receive admin email
 ADMINS = (
@@ -20,7 +20,7 @@ SECRET_KEY = ''
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=0'
 
 # root of site, for RSS feeds that need absolute URLs.
-BASE_SITE_URL = 'https://your.rad.site.com/'
+BASE_SITE_URL = 'https://gruntle.org/'
 
 # style to use for this site
 STYLE_NAME = 'main'
@@ -46,8 +46,10 @@ MEMEBOT_POINTS_REPOSTS = 2      # points to award user when someone reposts thei
 MEMEBOT_BLACKLIST = (
         'localhost',
         '127.0.0.1',
-        'secret.com',
-        '*.fbi.gov',
+        'gruntle.org',
+        '*.gruntle.org',
+        'ef.net',
+        '*.ef.net',
         )
 
 # when someone posts a link, whether to add them to database
@@ -69,7 +71,7 @@ SCANNER_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (wil
 SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
 SCANNER_YOUTUBE_EXTRA_ATTR = True       # scrape more data from the page or just embed the video?
 
-# scanners to use attempting to parse link contents
+# these processors are run in order, attempting to parse the link contents
 SCANNERS = (
         'gruntle.memebot.scanner.youtube',
         'gruntle.memebot.scanner.image',
@@ -77,12 +79,20 @@ SCANNERS = (
         'gruntle.memebot.scanner.default',
         )
 
-FEED_COPYRIGHT = u'Copyright \u00a9 2011, Your Awesome Company'
+# default feed settings
+FEED_COPYRIGHT = u'Copyright \u00a9 2011, Madcow Industries'
 FEED_WEBMASTER = '%s <%s>' % ADMINS[0]
-FEED_TTL = 15
-FEED_IMAGE_URL = None
+FEED_TTL = 60
 FEED_MAX_LINKS = 25
 FEED_SUMMARY_SIZE = 512
+FEED_STYLESHEET = 'http://gruntle.org/media/css/rss.css'
+
+# default feed image
+FEED_IMAGE_URL = 'http://gruntle.org/media/img/cow_icon_01.png'
+FEED_IMAGE_WIDTH = 144
+FEED_IMAGE_HEIGHT = 108
+FEED_IMAGE_TITLE = None
+FEED_IMAGE_LINK = None
 
 # feeds to generate
 FEEDS = ('gruntle.memebot.rss.hugs',

@@ -1,7 +1,8 @@
-"""Generate RSS2"""
+"""RSS 2.0 generator that uses lxml"""
 
-from urlparse import urlparse
+from contextlib import contextmanager
 from datetime import datetime
+import re
 
 try:
     import cStringIO as stringio
@@ -9,260 +10,221 @@ except ImportError:
     import StringIO as stringio
 
 from lxml import etree
-from gruntle.memebot.utils.text import encode, decode, sdecode, cast
-from gruntle.memebot.utils import blacklist, local_to_gmt
+
+from gruntle.memebot.utils import text, rfc822time, iso8061time
 
 __version__ = '0.1'
 
-DEFAULT_ENCODING = 'utf-8'
-DEFAULT_XML_DECLARATION = True
-DEFAULT_PRETTY_PRINT = True
-DEFAULT_LANGUAGE = 'en-us'  # http://cyber.law.harvard.edu/rss/languages.html
-DEFAULT_DOCS = 'http://cyber.law.harvard.edu/rss/rss.html'
-DEFAULT_GENERATOR = 'memebot v' + __version__
+class DOMBuilder(object):
 
-NOT_IMPLEMENTED = 'cloud', 'rating', 'text_input', 'skip_hours', 'skip_days'
-ITEM_NOT_IMPLEMENTED = 'enclosure', 'source'
-VALID_SCHEMES = 'http', 'https'
+    """Helper to build XML tree more declaratively than etree normally allows for"""
 
-class XMLBuilder(object):
+    attrib_text_re = re.compile(r'<\s*(.+?)(?:\s+(.+?))?\s*/\s*>', re.DOTALL)
 
     def __init__(self, *args, **kwargs):
+        self.add_empty_tags = kwargs.pop('add_empty_tags', False)
+        kwargs.setdefault('resolve_ns', False)
         self.stack = [self.make_element(*args, **kwargs)]
 
     @property
     def root(self):
+        """Root element"""
         if self.stack:
             return self.stack[0]
 
     @property
+    def tree(self):
+        """Root tree"""
+        return self.root.getroottree()
+
+    @property
     def current(self):
+        """Currently active node"""
         if self.stack:
             return self.stack[-1]
 
-    def add(self, *args, **kwargs):
-        element = self.make_element(*args, **kwargs)
-        self.current.append(element)
-        return element
-
+    @contextmanager
     def node(self, *args, **kwargs):
-        iter = kwargs.pop('iter', None)
+        """Descend a level while in context"""
+        try:
+            element = self.make_element(*args, **kwargs)
+            self.current.append(element)
+            self.stack.append(element)
+            yield element
+        finally:
+            self.stack.pop()
 
-        class NodeContext(object):
+    def add(self, *args, **kwargs):
+        """Created element and add to current node"""
+        element = self.make_element(*args, **kwargs)
+        if self.add_empty_tags or element.text or element.attrib:
+            self.current.append(element)
+            return element
 
-            def __enter__(node):
-                element = self.add(*args, **kwargs)
-                self.stack.append(element)
-                return element
+    def add_pi(self, name, **attrib):
+        """Add a ProcessingInstruction"""
+        text = self.attrib_text_re.search(etree.tostring(self.make_element('Fake', **attrib), encoding=unicode))
+        if text is not None:
+            text = text.group(2)
+        self.root.addprevious(etree.PI(name, text))
 
-            def __exit__(node, *exc_info):
-                self.stack.pop()
-
-            def __iter__(node):
-                for item in iter:
-                    yield item
-
-        return NodeContext()
-
-    def make_element(self, name, text=None, **attrib):
-        attrib = ((encode(key), sdecode(val)) for key, val in attrib.iteritems())
-        attrib = dict((key, val) for key, val in attrib if val is not None)
-        element = etree.Element(name, attrib)
-        element.text = sdecode(text)
+    def make_element(self, name, val=None, **attrib):
+        """Created an element from params"""
+        val = text.sdecode(val)
+        if attrib.pop('cdata', False) and val:
+            val = etree.CDATA(val)
+        nsmap = attrib.pop('nsmap', None)
+        resolve_ns = attrib.pop('resolve_ns', True)
+        attrib = dict(i for i in (map(text.sdecode, i) for i in attrib.iteritems()) if None not in i)
+        if resolve_ns:
+            ns, _, tag = name.rpartition(':')
+            ns = self.root.nsmap.get(ns)
+            if ns:
+                tag = '{%s}%s' % (ns, tag)
+        else:
+            tag = name
+        element = etree.Element(tag, attrib, nsmap)
+        element.text = val
         return element
 
-    @property
-    def tree(self):
-        return etree.ElementTree(self.root)
 
+class RSS(list):
 
-class RSS2(list):
+    """Represents an RSS feed"""
 
-    weekdays = 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
-    months = 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-
-    def __init__(self, link, title=None, description=None, language=None, copyright=None,
-                 managing_editor=None, webmaster=None, publish_date=None, build_date=None,
-                 categories=None, generator=None, docs=None, cloud=None, ttl=None, image=None,
-                 rating=None, text_input=None, skip_hours=None, skip_days=None, items=None):
-        if link is None:
-            raise TypeError('link cannot be empty')
-        url = urlparse(link)
-        if url.scheme not in VALID_SCHEMES:
-            raise ValueError('unsupported scheme: %r' % url.scheme)
-        host = decode(blacklist.normalize(url.netloc))
-        domain = '.'.join(host.split('.')[-2:])
-        if title is None:
-            title = link
-        if description is None:
-            description = title
-        if language is None:
-            language = DEFAULT_LANGUAGE
-        if webmaster is None:
-            webmaster = 'webmaster@' + domain
-        now_gmt = local_to_gmt(datetime.now())
-        if publish_date is None:
-            publish_date = now_gmt
-        if build_date is None:
-            build_date = now_gmt
-        if generator is None:
-            generator = DEFAULT_GENERATOR
-        if docs is None:
-            docs = DEFAULT_DOCS
-        if ttl is not None:
-            ttl = cast(ttl)
-            if not isinstance(ttl, (int, long)):
-                raise TypeError('ttl must be an integer')
-        if image is not None:
-            if not isinstance(image, Image):
-                image = Image(**image)
-        context = locals()
-        for key in NOT_IMPLEMENTED:
-            if context[key] is not None:
-                raise NotImplementedError('%s is not implemented' % key)
-
+    def __init__(self, link, title=None, desc=None, language=None, copyright=None,
+                 managing_editor=None, webmaster=None, published=None, build_date=None,
+                 categories=None, generator=None, docs=None, ttl=None, image=None, stylesheets=None):
         self.link = link
-        self.title = title
-        self.description = description
-        self.language = language
+        self.title = title or self.link
+        self.desc = desc or self.title
+        self.language = language or 'en-us'
         self.copyright = copyright
         self.managing_editor = managing_editor
         self.webmaster = webmaster
-        self.publish_date = publish_date
-        self.build_date = build_date
+        self.published = published or datetime.now()
+        self.build_date = build_date or self.published
         self.categories = categories
-        self.generator = generator
-        self.docs = docs
+        self.generator = generator or 'MemeBot RSS Generator v%s' % (__version__,)
+        self.docs = docs or 'http://cyber.law.harvard.edu/rss/rss.html'
         self.ttl = ttl
         self.image = image
+        self.stylesheets = stylesheets
 
     def add_item(self, *args, **kwargs):
-        self.append(RSS2Item(*args, **kwargs))
+        """Add a new item to the channel"""
+        self.append(Item(*args, **kwargs))
 
     @property
     def tree(self):
-        xml = XMLBuilder('rss', version='2.0')
-        with xml.node('channel'):
-            xml.add('link', self.link)
-            xml.add('title', self.title)
-            xml.add('description', self.description)
-            xml.add('language', self.language)
-            xml.add('copyright', self.copyright)
-            xml.add('managingEditor', self.managing_editor)
-            xml.add('webMaster', self.webmaster)
-            xml.add('pubData', self.format_date(self.publish_date))
-            xml.add('lastBuildDate', self.format_date(self.build_date))
-            for category, domain in self.parse_categories(self.categories):
-                xml.add('category', category, domain=domain)
-            xml.add('generator', self.generator)
-            xml.add('docs', self.docs)
-            xml.add('ttl', self.ttl)
+        """Rendered ElementTree of the RSS"""
+        dom = DOMBuilder('rss', version='2.0', nsmap={'dc': 'http://purl.org/dc/elements/1.1/',
+                                                      'atom10': 'http://www.w3.org/2005/Atom',
+                                                      'gruntle': 'http://gruntle.org/xmlns/gruntle/1.0/'})
 
-            with xml.node('image'):
-                if self.image is not None:
-                    xml.add('url', self.image.url)
-                    xml.add('title', self.image.title or self.title)
-                    xml.add('link', self.image.link or self.link)
-                    xml.add('width', self.image.width)
-                    xml.add('height', self.image.height)
+        with dom.node('channel'):
+            dom.add('link', self.link)
+            dom.add('title', self.title)
+            dom.add('description', self.desc)
+            dom.add('language', self.language)
+            dom.add('copyright', self.copyright)
+            dom.add('managingEditor', self.managing_editor)
+            dom.add('webMaster', self.webmaster)
+            dom.add('pubDate', rfc822time(self.published))
+            dom.add('lastBuildDate', rfc822time(self.build_date))
+            dom.add('generator', self.generator)
+            dom.add('docs', self.docs)
+            dom.add('ttl', self.ttl)
+
+            for category, domain in self.parse_categories(self.categories):
+                dom.add('category', category, domain=domain)
+
+            if self.image is not None:
+                with dom.node('image'):
+                    dom.add('url', self.image.url)
+                    dom.add('title', self.image.title or self.title)
+                    dom.add('link', self.image.link or self.link)
+                    dom.add('width', self.image.width)
+                    dom.add('height', self.image.height)
+
+            dom.add('atom10:link', rel='self', type='application/rss+xml', href=self.link)
 
             for item in self:
-                with xml.node('item'):
-                    xml.add('link', item.link)
-                    xml.add('title', item.title)
-                    xml.add('description', item.description)
-                    xml.add('author', item.author)
+                published = item.published or self.published
+                with dom.node('item'):
+                    dom.add('link', item.link)
+                    dom.add('title', item.title)
+                    dom.add('description', item.desc)
+                    dom.add('author', item.author)
+                    dom.add('comments', item.comments)
+                    dom.add('guid', item.guid, isPermaLink='false')
+                    dom.add('pubDate', rfc822time(published))
+
                     for category, domain in self.parse_categories(item.categories):
-                        xml.add('category', category, domain=domain)
-                    xml.add('comments', item.comments)
-                    xml.add('guid', item.guid)
-                    publish_date = self.publish_date if item.publish_date is None else item.publish_date
-                    xml.add('pubDate', self.format_date(publish_date))
-                    #xml.add('enclosure', item.enclosure)
-                    #xml.add('source', item.source)
+                        dom.add('category', category, domain=domain)
 
-        return xml.tree
+                    # Dublin Core extensions
+                    dom.add('dc:title', item.title)
+                    dom.add('dc:creator', item.author)
+                    dom.add('dc:contributor', item.author)
+                    dom.add('dc:publisher', item.author)
+                    dom.add('dc:format', item.content_type)
+                    dom.add('dc:identifier', item.guid)
+                    dom.add('dc:language', self.language)
+                    dom.add('dc:rights', self.copyright)
+                    dom.add('dc:date', iso8061time(published))
 
-    @classmethod
-    def format_date(cls, dt):
-        if dt is not None:
-            return '%s, %02d %s %04d %02d:%02d:%02d GMT' % (
-                    cls.weekdays[dt.weekday()], dt.day, cls.months[dt.month - 1],
-                    dt.year, dt.hour, dt.minute, dt.second)
+        if self.stylesheets is not None:
+            for stylesheet in self.stylesheets:
+                dom.add_pi('xml-stylesheet', **stylesheet.attrib)
+
+        return dom.tree
 
     @staticmethod
     def parse_categories(categories):
+        """Parse categories and yield category, domain tuples"""
         if categories is not None:
             for category in categories:
-                if category is None or isinstance(category, (str, unicode)):
+                if isinstance(category, (str, unicode)):
                     domain = None
-                elif isinstance(category, (tuple, list)):
-                    nfields = len(category)
-                    if nfields == 1:
-                        category, domain = category[0], None
-                    elif nfields == 2:
-                        category, domain = category
-                    else:
-                        raise ValueError('invalid category fields')
                 else:
-                    raise TypeError('invalid category')
+                    category, domain = category
                 yield category, domain
 
     def write(self, *args, **kwargs):
-        kwargs.setdefault('encoding', DEFAULT_ENCODING)
-        kwargs.setdefault('xml_declaration', DEFAULT_XML_DECLARATION)
-        kwargs.setdefault('pretty_print', DEFAULT_PRETTY_PRINT)
+        """Write rendered RSS element tree"""
+        kwargs.setdefault('xml_declaration', True)
+        kwargs.setdefault('pretty_print', False)
+        kwargs.setdefault('encoding', 'utf-8')
         self.tree.write(*args, **kwargs)
 
     def tostring(self, *args, **kwargs):
+        """Return RSS element tree as string"""
         fp = stringio.StringIO()
         self.write(fp, *args, **kwargs)
         return fp.getvalue()
 
 
-class RSS2Item(object):
+class Item(object):
 
-    def __init__(self,
-                 link,
-                 title=None,
-                 description=None,
-                 author=None,
-                 categories=None,
-                 comments=None,
-                 enclosure=None,
-                 guid=None,
-                 publish_date=None,
-                 source=None):
+    """Represents a single RSS item"""
 
-        if link is None:
-            raise TypeError('link cannot be empty')
-        url = urlparse(link)
-        if url.scheme not in VALID_SCHEMES:
-            raise ValueError('unsupported scheme: %r' % url.scheme)
-        if title is None:
-            title = link
-        if description is None:
-            description = title
-        if guid is None:
-            guid = link
-        context = locals()
-        for key in ITEM_NOT_IMPLEMENTED:
-            if context[key] is not None:
-                raise NotImplementedError('%s is not implemented' % key)
-
+    def __init__(self, link, title=None, desc=None, author=None, content_type=None,
+                 categories=None, comments=None, guid=None, published=None):
         self.link = link
-        self.title = title
-        self.description = description
+        self.title = title or self.link
+        self.desc = desc or self.title
         self.author = author
+        self.content_type = content_type or 'text/html'
         self.categories = categories
         self.comments = comments
-        self.guid = guid
-        self.publish_date = publish_date
-        #self.enclosure = enclosure
-        #self.source = source
+        self.guid = guid or self.link
+        self.published = published
 
 
 class Image(object):
+
+    """Represents an RSS Image"""
 
     def __init__(self, url, title=None, link=None, width=None, height=None):
         self.url = url
@@ -270,3 +232,11 @@ class Image(object):
         self.link = link
         self.width = width
         self.height = height
+
+
+class StyleSheet(object):
+
+    """Container for stylesheet PI attributes"""
+
+    def __init__(self, **attrib):
+        self.attrib = attrib

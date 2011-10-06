@@ -1,0 +1,209 @@
+@namespace gruntle url(http://gruntle.org/xmlns/gruntle/1.0/);
+
+rss {
+    display: block;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 80%;
+    margin: 25px 15px 25px 15px;
+}
+
+rss channel * {
+    display: none;
+}
+
+rss channel title {
+    display: block;
+    font-size: 2.0em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+rss channel link {
+    display: block;
+    margin-bottom: 25px;
+}
+
+rss channel item {
+    display: block;
+}
+
+rss channel item title {
+    display: block;
+    font-family: Helvetica, Geneva, Verdana, Arial, sans-serif;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+rss channel item description {
+    display: block;
+    margin-bottom: 25px;
+}
+
+rss channel item description * {
+    display: inline;
+}
+
+rss channel item link {
+    display: none;
+}
+
+RDF {
+    display: block;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 80%;
+    margin: 25px 15px 25px 15px;
+}
+
+RDF * {
+    display: none;
+}
+
+RDF channel {
+    display: block;
+}
+
+RDF channel * {
+    display: none;
+}
+
+RDF channel title {
+    display: block;
+    font-size: 2.0em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+RDF channel link {
+    display: block;
+    margin-bottom: 25px;
+}
+
+RDF item {
+    display: block;
+}
+
+RDF item title {
+    display: block;
+    font-family: Helvetica, Geneva, Verdana, Arial, sans-serif;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+RDF item description {
+    display: block;
+    margin-bottom: 25px;
+}
+
+RDF item description * {
+    display: inline;
+}
+
+RDF item link {
+    display: none;
+}
+
+rdf\:RDF {
+    display: block;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 80%;
+    margin: 25px 15px 25px 15px;
+}
+
+rdf\:RDF * {
+    display: none;
+}
+
+rdf\:RDF channel {
+    display: block;
+}
+
+rdf\:RDF channel * {
+    display: none;
+}
+
+rdf\:RDF channel title {
+    display: block;
+    font-size: 2.0em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+rdf\:RDF channel link {
+    display: block;
+    margin-bottom: 25px;
+}
+
+rdf\:RDF item {
+    display: block;
+}
+
+rdf\:RDF item title {
+    display: block;
+    font-family: Helvetica, Geneva, Verdana, Arial, sans-serif;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+rdf\:RDF item description {
+    display: block;
+    margin-bottom: 25px;
+}
+
+rdf\:RDF item description * {
+    display: inline;
+}
+
+rdf\:RDF item link {
+    display: none;
+}
+
+feed {
+    display: block;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 80%;
+    margin: 25px 15px 25px 15px;
+}
+
+feed * {
+    display: none;
+}
+
+feed title {
+    display: block;
+    font-size: 2.0em;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+feed entry {
+    display: block;
+}
+
+feed entry title {
+    display: block;
+    font-family: Helvetica, Geneva, Verdana, Arial, sans-serif;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+feed entry summary {
+    display: block;
+    margin-bottom: 25px;
+}
+
+feed entry summary * {
+    display: inline;
+}
+
+feed entry content {
+    display: block;
+    margin-bottom: 25px;
+}
+
+feed entry content * {
+    display: inline;
+}
