@@ -85,6 +85,7 @@ FEED_WEBMASTER = '%s <%s>' % ADMINS[0]
 FEED_TTL = 60
 FEED_MAX_LINKS = 25
 FEED_SUMMARY_SIZE = 512
+FEED_SUMMARY_CONT = '...'
 FEED_STYLESHEET = 'http://gruntle.org/media/css/rss.css'
 
 # default feed image

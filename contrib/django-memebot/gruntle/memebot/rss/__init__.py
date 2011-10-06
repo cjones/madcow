@@ -17,8 +17,8 @@ class LinkItem(Item):
     """A single Link feed item"""
 
     def __init__(self, link):
-        super(LinkItem, self).__init__(first(link.resolved_url, link.url),
-                                       title=link.title,
+        super(LinkItem, self).__init__(link.best_url,
+                                       title=link.get_title_display(),
                                        desc=link.rendered,
                                        author=link.user.username,
                                        guid=link.guid,

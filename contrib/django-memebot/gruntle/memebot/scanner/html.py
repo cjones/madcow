@@ -15,10 +15,14 @@ class HTMLScanner(Scanner):
 
     def __init__(self, *args, **kwargs):
         summary_size = kwargs.pop('summary_size', None)
+        summary_cont = kwargs.pop('summary_cont', None)
         super(HTMLScanner, self).__init__(*args, **kwargs)
         if summary_size is None:
             summary_size = settings.FEED_SUMMARY_SIZE
+        if summary_cont is None:
+            summary_cont = settings.FEED_SUMMARY_CONT
         self.summary_size = summary_size
+        self.summary_cont = summary_cont
 
     def handle(self, response, log):
         if response.data_type != 'soup':
@@ -81,10 +85,9 @@ class HTMLScanner(Scanner):
         # the front of it.
         if blocks:
             article = browser.render_node(max(blocks)[1])
-            summary = article[:self.summary_size]
-            words = summary.split()
+            words = article[:self.summary_size].split()
             if len(article) > self.summary_size:
-                words[-1] = u'[more]'
+                words[-1] = self.summary_cont
             return u' '.join(words)
 
 

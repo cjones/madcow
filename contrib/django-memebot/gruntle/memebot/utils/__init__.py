@@ -2,6 +2,7 @@
 
 import functools
 import traceback
+import urlparse
 import datetime
 import binascii
 import tempfile
@@ -277,6 +278,13 @@ def first(*args):
 def get_domain():
     """Determine the domain portion of our name"""
     return re.sub('^' + re.escape('.'.join(socket.gethostname().split('.') + [''])), '', socket.getfqdn())
+
+
+def get_domain_from_url(url):
+    """Return normalized domain portion of the URL"""
+    from gruntle.memebot.utils import text
+    items = text.decode(urlparse.urlparse(url).netloc).lower().rsplit(u':', 1)[0].split(u'.')[-2:]
+    return text.encode(u'.'.join(item for item in (item.strip() for item in items) if item))
 
 
 def make_unique_key(object):

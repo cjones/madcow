@@ -229,6 +229,19 @@ class Link(Model):
             except (ImportError, AttributeError):
                 pass
 
+    def get_best_url(self):
+        """The URL you should actually use, prefers final redirection page, if it exists"""
+        return first(self.resolved_url, self.url)
+
+    best_url = property(get_best_url)
+
+    def get_title_display(self):
+        """Rendered title"""
+        url = self.get_best_url()
+        if self.title is None:
+            return url
+        return u'[%s] %s' % (get_domain_from_url(url), self.title)
+
     @property
     def rss_template(self):
         """The scanner-defined template used to render this link in RSS"""
