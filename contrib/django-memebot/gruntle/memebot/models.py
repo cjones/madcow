@@ -184,6 +184,7 @@ class Link(Model):
 
     # state of current link life-cycle
     LINK_STATES = [('new', 'New'),
+                   ('disabled', 'Disabled'),
                    ('invalid', 'Invalid'),
                    ('published', 'Published')]
 

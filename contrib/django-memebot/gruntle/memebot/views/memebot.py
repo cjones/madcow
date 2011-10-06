@@ -13,6 +13,7 @@ from gruntle.memebot.decorators import login_or_apikey_required
 from gruntle.memebot.models import UserProfile, Link
 from gruntle.memebot.rss import get_feed_names, get_feeds
 from gruntle.memebot.forms import CheckLinkForm
+from gruntle.memebot.utils import text
 
 @login_required
 def view_index(request):
@@ -41,7 +42,10 @@ def browse_links(request):
 
     start = (page - 1) * per_page
     end = start + per_page
-    links = Link.objects.all().order_by('-created')[start:end]
+    links = Link.objects.all()
+    if not text.boolean(request.GET.get('disabled')):
+        links = links.exclude(state='disabled')
+    links = links.order_by('-created')[start:end]
     return direct_to_template(request, 'memebot/browse.html', {'links': links})
 
 
