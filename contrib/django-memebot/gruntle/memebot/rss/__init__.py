@@ -31,11 +31,12 @@ class LinkRSS(RSS):
 
     def __init__(self, links, feed=None, name=None):
         now = datetime.datetime.now()
-        super(LinkRSS, self).__init__(urljoin(feed.base_site_url, reverse('memebot-view-index')),
+        super(LinkRSS, self).__init__(urljoin(feed.base_url, reverse('memebot-view-index')),
                                       title=feed.title,
                                       desc=feed.description,
                                       language=feed.language,
                                       copyright=feed.copyright,
+                                      self_link=urljoin(feed.base_url, reverse('memebot-view-rss', args=[name])),
                                       webmaster=feed.webmaster,
                                       published=now,
                                       build_date=now,
@@ -54,7 +55,7 @@ class Feed(object):
     title = None
     description = None
 
-    base_site_url = settings.BASE_SITE_URL
+    base_url = settings.FEED_BASE_URL
     language = settings.LANGUAGE_CODE
     copyright = settings.FEED_COPYRIGHT
     webmaster = settings.FEED_WEBMASTER

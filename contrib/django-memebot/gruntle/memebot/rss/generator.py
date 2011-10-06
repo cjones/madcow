@@ -92,7 +92,7 @@ class RSS(list):
 
     """Represents an RSS feed"""
 
-    def __init__(self, link, title=None, desc=None, language=None, copyright=None,
+    def __init__(self, link, title=None, desc=None, language=None, copyright=None, self_link=None,
                  managing_editor=None, webmaster=None, published=None, build_date=None,
                  categories=None, generator=None, docs=None, ttl=None, image=None, stylesheets=None):
         self.link = link
@@ -100,6 +100,7 @@ class RSS(list):
         self.desc = desc or self.title
         self.language = language or 'en-us'
         self.copyright = copyright
+        self.self_link = self_link
         self.managing_editor = managing_editor
         self.webmaster = webmaster
         self.published = published or datetime.now()
@@ -119,7 +120,7 @@ class RSS(list):
     def tree(self):
         """Rendered ElementTree of the RSS"""
         dom = DOMBuilder('rss', version='2.0', nsmap={'dc': 'http://purl.org/dc/elements/1.1/',
-                                                      'atom10': 'http://www.w3.org/2005/Atom',
+                                                      'atom': 'http://www.w3.org/2005/Atom',
                                                       'gruntle': 'http://gruntle.org/xmlns/gruntle/1.0/'})
 
         with dom.node('channel'):
@@ -147,7 +148,8 @@ class RSS(list):
                     dom.add('width', self.image.width)
                     dom.add('height', self.image.height)
 
-            dom.add('atom10:link', rel='self', type='application/rss+xml', href=self.link)
+            if self.self_link:
+                dom.add('atom:link', rel='self', type='application/rss+xml', href=self.self_link)
 
             for item in self:
                 published = item.published or self.published
@@ -162,6 +164,9 @@ class RSS(list):
 
                     for category, domain in self.parse_categories(item.categories):
                         dom.add('category', category, domain=domain)
+
+                    # Atom extensions
+                    dom.add('atom:content', item.desc, type='html')
 
                     # Dublin Core extensions
                     dom.add('dc:title', item.title)

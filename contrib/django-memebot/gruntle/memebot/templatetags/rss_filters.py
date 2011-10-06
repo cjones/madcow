@@ -24,3 +24,28 @@ def summarize(value, size=None, cont=None):
             words[-1] = cont
         value = mark_safe(u' '.join(words))
     return value
+
+
+@register.tag(name='rss_url')
+def rss_url(*args, **kwargs):
+    from django.template.defaulttags import url as reverse_url, URLNode as BaseURLNode
+    from urlparse import urljoin
+
+    node = reverse_url(*args, **kwargs)
+
+    class URLNode(BaseURLNode):
+
+        def __init__(self):
+            pass
+
+        def __getattribute__(self, key):
+            try:
+                return super(URLNode, self).__getattribute__(key)
+            except AttributeError:
+                return getattr(node, key)
+
+        def render(self, *args, **kwargs):
+            url = node.render(*args, **kwargs)
+            return urljoin(settings.FEED_BASE_URL, url)
+
+    return URLNode()
