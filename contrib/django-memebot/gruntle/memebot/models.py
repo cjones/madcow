@@ -15,7 +15,7 @@ from django.conf import settings
 from django.db import models
 
 from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
-from gruntle.memebot.utils import blacklist, first
+from gruntle.memebot.utils import blacklist, first, get_domain_from_url
 from gruntle.memebot.exceptions import OldMeme
 
 current_site = Site.objects.get_current()

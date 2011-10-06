@@ -194,7 +194,7 @@ class RSS(list):
     def write(self, *args, **kwargs):
         """Write rendered RSS element tree"""
         kwargs.setdefault('xml_declaration', True)
-        kwargs.setdefault('pretty_print', False)
+        kwargs.setdefault('pretty_print', True)
         kwargs.setdefault('encoding', 'utf-8')
         self.tree.write(*args, **kwargs)
 
