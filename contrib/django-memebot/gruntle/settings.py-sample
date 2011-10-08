@@ -57,6 +57,9 @@ UNKNOWN_USERNAME = 'unknown'  # if posted from an invalid nick, we can save as t
 # link browser config
 BROWSE_LINKS_PER_PAGE = 100
 
+# how often auto-updater will run
+UPDATER_INTERVAL = 5 * 60  # every 5 minutes
+
 # scanner config
 SCANNER_TIMEOUT = 20                    # timeout before giving up on the request
 SCANNER_USER_AGENT = 'firefox'          # browser to masquerade as (see utils/browser.py for more)
@@ -78,6 +81,7 @@ SCANNERS = (
 
 # root of site, for RSS feeds that need absolute URLs.
 FEED_BASE_URL = 'http://gruntle.org/'
+FEED_ENCODING = 'UTF-8'
 
 # default feed settings
 FEED_COPYRIGHT = u'Copyright \u00a9 2011 Madcow Industries'
@@ -86,8 +90,8 @@ FEED_TTL = 60
 FEED_MAX_LINKS = 25
 FEED_SUMMARY_SIZE = 512
 FEED_SUMMARY_CONT = '...'
-FEED_STYLESHEET = 'http://gruntle.org/media/css/rss.css'
-FEED_KEEP_XML_BACKUP = False
+FEED_STYLESHEET = None
+FEED_KEEP_XML_BACKUP = True
 
 # default feed image
 FEED_IMAGE_URL = 'http://gruntle.org/media/img/cow_icon_01.png'
