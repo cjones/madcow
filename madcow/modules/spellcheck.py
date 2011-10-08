@@ -3,7 +3,7 @@
 from urlparse import urljoin
 import re
 from madcow.util import Module, strip_html
-from madcow.util.textenc import *
+from madcow.util.text import *
 from madcow.util.http import getsoup
 
 class Main(Module):

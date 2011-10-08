@@ -41,7 +41,7 @@ from madcow.util import gateway, get_logger, http, Request
 from madcow.conf import settings
 from madcow.util.color import ColorLib
 from madcow.util.auth import AuthLib
-from madcow.util.textenc import encode, decode, set_preferred_encoding, get_encoding
+from madcow.util.text import encode, decode, set_encoding, get_encoding
 
 VERSION = 2, 2, 0
 
@@ -82,7 +82,7 @@ class Madcow(object):
         self.ignore_list = [nick.lower() for nick in settings.IGNORE_NICKS]
 
         # set encoding
-        set_preferred_encoding(settings.ENCODING)
+        set_encoding(settings.ENCODING)
         self.log.info('Preferred encoding set to %s', get_encoding())
 
         # create admin instance

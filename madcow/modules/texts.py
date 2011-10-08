@@ -5,7 +5,7 @@ import re
 from BeautifulSoup import BeautifulSoup
 from madcow.util.http import getsoup
 from madcow.util import strip_html, Module
-from madcow.util.textenc import *
+from madcow.util.text import *
 import re
 
 url = 'http://www.textsfromlastnight.com/random/'

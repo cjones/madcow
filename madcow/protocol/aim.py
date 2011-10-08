@@ -20,7 +20,7 @@
 from twisted.internet import protocol, reactor
 from twisted.words.protocols import oscar
 from madcow.util import strip_html, get_logger
-from madcow.util.textenc import *
+from madcow.util.text import *
 from madcow import Madcow, Request
 from time import sleep
 import textwrap

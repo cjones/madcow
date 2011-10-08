@@ -5,7 +5,7 @@ import feedparser
 from madcow.util import Module, strip_html
 from madcow.util.http import geturl
 from madcow.util.color import ColorLib
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 FORMAT = u'Terror: %s, DoomsDay: %s, BodyCount: %s'
 

@@ -9,7 +9,7 @@ from IPython import ipapi
 from IPython import ultraTB
 from IPython.iplib import InteractiveShell
 
-from madcow.util.textenc import encode, decode, get_encoding
+from madcow.util.text import encode, decode, get_encoding
 
 COLOR_SCHEME = 'ansi'
 

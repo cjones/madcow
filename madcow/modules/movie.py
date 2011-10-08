@@ -5,7 +5,7 @@ from urlparse import urljoin
 import re
 from BeautifulSoup import BeautifulSoup
 from madcow.util import Module, strip_html
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 class Main(Module):
 

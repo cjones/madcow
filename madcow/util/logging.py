@@ -7,7 +7,7 @@ import codecs
 import sys
 import os
 
-from textenc import encode, decode, get_encoding
+from text import encode, decode, get_encoding
 
 DEBUG, INFO, WARN, ERROR = xrange(4)
 LEVELS = ['DEBUG', 'INFO', 'WARN', 'ERROR']

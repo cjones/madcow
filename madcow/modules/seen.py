@@ -4,7 +4,7 @@ import re
 import time
 import os
 from madcow.util import Module
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 try:
     import dbm

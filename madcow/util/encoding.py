@@ -5,7 +5,7 @@ import re
 import codecs
 import chardet
 
-from textenc import encode, decode, get_encoding
+from text import encode, decode, get_encoding
 
 DEFAULT = u'ascii'
 meta_re = re.compile(r'<meta\s+(.*?)\s*>', re.I | re.DOTALL)

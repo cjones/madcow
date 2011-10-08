@@ -7,6 +7,7 @@ from urllib import quote
 import re
 from madcow.util.http import getsoup
 from madcow.util import strip_html, Module
+from madcow.util.text import *
 
 class Main(Module):
 

@@ -27,7 +27,7 @@ from urlparse import urljoin
 import errno
 from madcow.util import Request, get_logger
 from madcow.conf import settings
-from madcow.util.textenc import encode, decode, get_encoding
+from madcow.util.text import encode, decode, get_encoding
 
 class InvalidPayload(Exception):
 

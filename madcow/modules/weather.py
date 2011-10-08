@@ -3,7 +3,7 @@
 import re
 from madcow.util import strip_html, Module, encoding
 from madcow.util.http import geturl
-from madcow.util.textenc import *
+from madcow.util.text import *
 from urlparse import urljoin
 from BeautifulSoup import BeautifulSoup
 import feedparser

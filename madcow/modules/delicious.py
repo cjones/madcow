@@ -7,7 +7,7 @@ from urllib2 import HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler
 from urlparse import urljoin
 from madcow.util import Module, strip_html
 from madcow.util.http import geturl, UA as useragent
-from madcow.util.textenc import *
+from madcow.util.text import *
 import re
 from madcow.conf import settings
 import oauth2 as oauth

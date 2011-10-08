@@ -25,7 +25,7 @@ from hashlib import sha1
 from base64 import b64encode, b64decode
 import os
 
-from textenc import encode, decode
+from text import encode, decode
 
 __version__ = '0.2'
 __author__ = 'cj_ <cjones@gruntle.org>'

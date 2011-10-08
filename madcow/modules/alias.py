@@ -5,7 +5,7 @@
 import re
 import os
 from madcow.util import Module
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 class AliasError(Exception):
 

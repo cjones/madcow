@@ -2,7 +2,7 @@
 
 import re
 from madcow.util import Module
-from madcow.util.textenc import *
+from madcow.util.text import *
 import os
 
 try:

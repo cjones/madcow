@@ -6,7 +6,7 @@ from re import I
 import os
 import random
 from madcow.util import encoding
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 try:
     import dbm

@@ -30,7 +30,7 @@ import re
 import sys
 import os
 from madcow.conf import settings
-from textenc import encode, decode, get_encoding
+from text import encode, decode, get_encoding
 
 DEFAULT_UNIQUE_TIMESTAMP_FORMAT = '%Y%m%d'
 DEFAULT_UNIQUE_MAX_FILES = 1000

@@ -7,7 +7,7 @@ import re
 from madcow.util import Module, strip_html
 from madcow.util.http import getsoup
 from madcow.util.color import ColorLib
-from madcow.util.textenc import *
+from madcow.util.text import *
 from learn import Main as Learn
 
 class Main(Module):

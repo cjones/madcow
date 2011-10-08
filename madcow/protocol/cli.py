@@ -21,7 +21,7 @@ import re
 from madcow.util.shell import Shell
 from madcow import Madcow
 from madcow.util import Request
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 COLOR_SCHEME = 'ansi'
 

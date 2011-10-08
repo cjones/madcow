@@ -4,7 +4,7 @@ from madcow import Madcow, Request
 import random
 from time import sleep, time as unix_time
 from madcow.conf import settings
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 COLOR_SCHEME = 'mirc'
 

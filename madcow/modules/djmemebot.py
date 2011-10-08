@@ -28,7 +28,7 @@ from gruntle.memebot.exceptions import OldMeme
 from gruntle.memebot.models import Link, UserProfile
 
 from madcow.util import Module
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 class Main(Module):
 

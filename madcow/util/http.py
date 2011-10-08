@@ -33,7 +33,7 @@ except ImportError:
     from StringIO import StringIO
 
 from BeautifulSoup import BeautifulSoup
-from textenc import encode, decode, get_encoding
+from text import encode, decode, get_encoding
 
 AGENT = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 VERSION = sys.version_info[0] * 10 + sys.version_info[1]

@@ -24,7 +24,7 @@ import re
 from BeautifulSoup import BeautifulSoup
 from madcow.util import strip_html, superscript
 from madcow.util.http import UserAgent
-from madcow.util.textenc import encode, decode
+from madcow.util.text import encode, decode
 
 __version__ = '0.3'
 __author__ = 'cj_ <cjones@gruntle.org>'

@@ -7,7 +7,7 @@ from random import choice
 import re
 from madcow.util.http import getsoup
 from madcow.util import Module, strip_html, superscript
-from madcow.util.textenc import *
+from madcow.util.text import *
 
 class Main(Module):
 
