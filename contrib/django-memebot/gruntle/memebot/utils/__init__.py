@@ -263,6 +263,9 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
             """Return named interface to this logger"""
             return type(self)(name)
 
+        def __repr__(self):
+            return '<Logger: %s%s>' % (name, ' (%s)' % self.name if self.name else '')
+
     return LogWrapper()
 
 
