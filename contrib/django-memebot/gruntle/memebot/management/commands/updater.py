@@ -27,6 +27,8 @@ class Command(NoArgsCommand):
         try:
             with TrapErrors():
                 self.run(interval, log_stream=sys.stdout)
+        except KeyboardInterrupt:
+            raise CommandError('Interrupted')
         except TrapError, exc:
             raise CommandError(exc.args[1])
 
