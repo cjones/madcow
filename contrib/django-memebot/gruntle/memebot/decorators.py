@@ -22,23 +22,21 @@ def logged(*logger_args, **default_logger_kwargs):
     stream on the fly with log_stream kwargument to the wrapped function.
     """
 
+    method = default_logger_kwargs.pop('method', False)
+
     def decorator(wrapped_func):
 
         @functools.wraps(wrapped_func)
         def wrapper_func(*args, **kwargs):
+            logger_kwargs = dict(default_logger_kwargs)
+            logger_kwargs.setdefault('stream', kwargs.pop('log_stream', None))
+            logger = get_logger(*logger_args, **logger_kwargs)
             try:
                 with TrapErrors():
-                    # hijack log_stream kwarg and use that to update our defaults
-                    logger_kwargs = dict(default_logger_kwargs)
-                    logger_kwargs.setdefault('stream', kwargs.pop('log_stream', None))
-
-                    # inject logger into first argument
-                    logger = get_logger(*logger_args, **logger_kwargs)
-                    new_args = [logger]
-                    new_args.extend(args)
-                    args = tuple(new_args)
-
-                    # call decorated function
+                    if method:
+                        args[0].log = logger
+                    else:
+                        args = (logger,) + args
                     return wrapped_func(*args, **kwargs)
 
             except TrapError, exc:
