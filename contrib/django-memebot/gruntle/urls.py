@@ -2,6 +2,7 @@
 
 from django.conf.urls.defaults import *
 from django.contrib import admin
+from django.conf import settings
 
 admin.autodiscover()
 
@@ -10,14 +11,12 @@ urlpatterns = patterns('',
         url(r'^accounts/', include('gruntle.memebot.urls.accounts')),
         url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
         url(r'^admin/', include(admin.site.urls)),
-
         url(r'^$', 'gruntle.memebot.views.view_index', name='root-view-index'),
         )
 
-'''
-XXX dunno about this shit
-from django.conf import settings
 if settings.DEV_SERVER:
-    urlpatterns += patterns('django.views.static',
-            (settings.MEDIA_URL_PATTERN, 'serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}))
-'''
+    import re
+    urlpatterns += patterns('django.views',
+            url(r'^%s(?P<path>.*)' % re.escape(settings.MEDIA_URL[1:]), 'static.serve',
+                {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+            )
