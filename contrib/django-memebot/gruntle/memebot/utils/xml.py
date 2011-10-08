@@ -10,6 +10,7 @@ except ImportError:
 
 from lxml import etree
 from gruntle.memebot.utils import text
+from gruntle.memebot.utils.tzdatetime import tzdatetime
 
 DEFAULT_XML_DECLARATION = True
 DEFAULT_PRETTY_PRINT = True
@@ -67,6 +68,13 @@ class TreeBuilder(object):
         if text is not None:
             text = text.group(2)
         self.root.addprevious(etree.PI(name, text))
+
+    def add_time(self, name, dt=None, **kwargs):
+        """Add a datetime object serialized as UNIX epochal time"""
+        val = tzdatetime.new(dt)
+        kwargs.setdefault('type', 'time')
+        kwargs.setdefault('format', 'unix')
+        return self.add(name, val.unixtime, **kwargs)
 
     def make_element(self, name, val=None, **attrib):
         """Created an element from params"""

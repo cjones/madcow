@@ -1,7 +1,7 @@
 """RSS 2.0 feed generator"""
 
-from datetime import datetime
-from gruntle.memebot.utils import xml, rfc822time, iso8061time
+from gruntle.memebot.utils import xml
+from gruntle.memebot.utils.tzdatetime import tzdatetime
 
 __version__ = '0.1'
 
@@ -28,8 +28,8 @@ class RSS(list):
         self.rss_url = rss_url
         self.editor = editor
         self.webmaster = webmaster
-        self.published = published or datetime.now()
-        self.build_date = build_date or self.published
+        self.published = tzdatetime.new(published)
+        self.build_date = self.published if build_date is None else tzdatetime.new(build_date)
         self.categories = categories or []
         self.generator = generator or DEFAULT_GENERATOR
         self.docs = docs or DEFAULT_DOCS
@@ -42,7 +42,8 @@ class RSS(list):
     @property
     def nsmap(self):
         """Namespace map for this feed"""
-        nsmap = {None: NAMESPACE_RSS2}
+        #nsmap = {None: NAMESPACE_RSS2}
+        nsmap = {}
         if self.add_atom:
             nsmap['atom'] = NAMESPACE_ATOM
         if self.add_dc:
@@ -62,8 +63,8 @@ class RSS(list):
             rss.add('copyright', self.copyright)
             rss.add('managingEditor', self.editor)
             rss.add('webMaster', self.webmaster)
-            rss.add('pubDate', rfc822time(self.published))
-            rss.add('lastBuildDate', rfc822time(self.build_date))
+            rss.add('pubDate', self.published.rfc822format())
+            rss.add('lastBuildDate', self.build_date.rfc822format())
             rss.add('generator', self.generator)
             rss.add('docs', self.docs)
             rss.add('ttl', self.ttl)
@@ -83,7 +84,7 @@ class RSS(list):
                 rss.add('atom:link', rel='self', type='application/rss+xml', href=self.rss_url)
 
             for item in self:
-                published = item.published or self.published
+                published = self.published if item.published is None else tzdatetime.new(item.published)
                 with rss.child('item'):
                     rss.add('link', item.link)
                     rss.add('title', item.title)
@@ -91,21 +92,21 @@ class RSS(list):
                     rss.add('author', item.author)
                     rss.add('comments', item.comments)
                     rss.add('guid', item.guid, isPermaLink='false')
-                    rss.add('pubDate', rfc822time(published))
+                    rss.add('pubDate', published.rfc822format())
 
                     for category in item.categories:
                         rss.add('category', category.name, domain=category.domain)
 
                     if self.add_dc:
-                        rss.add('dc:title', item.title)
+                        #rss.add('dc:title', item.title)
+                        #rss.add('dc:contributor', item.author)
+                        #rss.add('dc:publisher', item.author)
+                        #rss.add('dc:language', self.language)
+                        #rss.add('dc:rights', self.copyright)
                         rss.add('dc:creator', item.author)
-                        rss.add('dc:contributor', item.author)
-                        rss.add('dc:publisher', item.author)
+                        rss.add('dc:date', published.isoformat())
                         rss.add('dc:format', item.content_type)
                         rss.add('dc:identifier', item.guid)
-                        rss.add('dc:language', self.language)
-                        rss.add('dc:rights', self.copyright)
-                        rss.add('dc:date', iso8061time(published))
 
         for stylesheet in self.stylesheets:
             rss.add_pi('xml-stylesheet', **stylesheet.__dict__)

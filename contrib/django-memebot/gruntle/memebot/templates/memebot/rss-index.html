@@ -4,8 +4,8 @@
 {% block content %}
 <h3>RSS Feeds</h3>
 <ul>
- {% for name, path, feed in feeds %}
- <li><a href="{% rss_url memebot-view-rss name %}">{{ name }}</a> - {{ feed.description }}</li>
+ {% for name, desc in feeds %}
+ <li><a href="{% rss_url memebot-view-rss name %}">{{ name }}</a> - {{ desc }}</li>
  {% endfor %}
 </ul>
 {% endblock %}

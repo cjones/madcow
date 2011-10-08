@@ -83,7 +83,8 @@ def view_link_content(request, publish_id):
 @login_or_apikey_required
 def view_rss_index(request):
     """Index of available RSS feeds"""
-    return direct_to_template(request, 'memebot/rss-index.html', {'feeds': get_feeds()})
+    feeds = [(name, feed.description) for name, feed in get_feeds()]
+    return direct_to_template(request, 'memebot/rss-index.html', {'feeds': feeds})
 
 
 @login_or_apikey_required
@@ -95,4 +96,4 @@ def view_rss(request, name):
     if not os.path.exists(feed_file):
         raise Http404
     with open(feed_file, 'r') as fp:
-        return HttpResponse(fp.read(), 'application/rss+xml')
+        return HttpResponse(fp.read(), 'text/xml; charset=' + settings.FEED_ENCODING)

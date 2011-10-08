@@ -174,4 +174,4 @@ def run(logger, force=False):
     published_links = Link.objects.filter(state='published').order_by('-published')
     for name, cls in feeds:
         feed = cls(name, published_links, logger)
-        feed.generate(force=force)
+        feed.generate(encoding=settings.FEED_ENCODING, force=force)

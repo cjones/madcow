@@ -16,6 +16,7 @@ from django.db import models
 
 from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
 from gruntle.memebot.utils import blacklist, first, get_domain_from_url
+from gruntle.memebot.utils.tzdatetime import tzdatetime
 from gruntle.memebot.exceptions import OldMeme
 
 current_site = Site.objects.get_current()
@@ -37,9 +38,10 @@ class Model(models.Model):
         """Global unique identifier for this object"""
         id = first([getattr(self, key, None) for key in ('publish_id', 'external_id', 'id')])
         date = first([getattr(self, key, None) for key in ('published', 'activation_date', 'created', 'modified')])
+        date = tzdatetime.new(date).utc
         meta = type(self)._meta
-        return 'tag:%s,%s:/%s/%s/%d/%s' % (current_site.domain, date.strftime('%Y-%m-%d'), meta.app_label,
-                                           meta.object_name.lower(), id, date.strftime('%Y%m%d%H%M%S'))
+        return 'tag:%s,%s:/%s/%s/%d/%d' % (current_site.domain, date.strftime('%Y-%m-%d'), meta.app_label,
+                                           meta.object_name.lower(), id, date.unixtime)
 
 
 class Source(Model):
