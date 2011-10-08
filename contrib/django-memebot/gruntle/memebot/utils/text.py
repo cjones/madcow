@@ -6,13 +6,15 @@ import sys
 from gruntle.memebot.utils import zdict
 from gruntle.memebot.exceptions import *
 
-__all__ = ['get_encoding', 'set_encoding', 'encode', 'decode', 'sencode', 'sdecode', 'cast', 'chomp', 'format']
+__all__ = ['get_encoding', 'set_encoding', 'encode', 'decode',
+           'sencode', 'sdecode', 'cast', 'boolean', 'chomp', 'format']
 
 # defaults
 DEFAULT_AUTO_ENCODINGS = 'ascii', 'utf-8', 'latin1'
 DEFAULT_FAILBACK_ENCODING = 'ascii'
 DEFAULT_CHOMP_CHARS = '\r', '\n'
 DEFAULT_CAST_TYPES = int, float
+DEFAULT_TRUTH_STRINGS = 'y', 'yes', 'on', 't', 'true', 'enabled'
 
 class EncodingHandler(object):
 
@@ -23,7 +25,8 @@ class EncodingHandler(object):
                        auto_encodings=None,
                        failback_encoding=None,
                        chomp_chars=None,
-                       cast_types=None):
+                       cast_types=None,
+                       truth_strings=None):
 
         """
         Construct new handler instance:
@@ -34,6 +37,7 @@ class EncodingHandler(object):
         default_encoding        - (str) Failback encoding for extreme failure coditions
         chomp_chars             - (seq) Characters to remove from end of line when using chomp()
         cast_types              - (seq) Sequence of type objects to use when attempting coersion
+        truth_strings           - (seq) Sequence of strings that mean "yes"
         """
 
         # get defaults if none provided
@@ -45,6 +49,8 @@ class EncodingHandler(object):
             chomp_chars = DEFAULT_CHOMP_CHARS
         if cast_types is None:
             cast_types = DEFAULT_CAST_TYPES
+        if truth_strings is None:
+            truth_strings = DEFAULT_TRUTH_STRINGS
 
         # store attributes
         self.preferred_encoding = preferred_encoding
@@ -53,6 +59,7 @@ class EncodingHandler(object):
         self.failback_encoding = failback_encoding
         self.chomp_chars = chomp_chars
         self.cast_types = cast_types
+        self.truth_strings = truth_strings
 
         # initialize cache
         self._system_encoding = None
@@ -172,6 +179,16 @@ class EncodingHandler(object):
                 with trapped:
                     return cast_type(val)
         return self.sdecode(val, encoding)
+
+    def boolean(self, val, encoding=None):
+        """Smartly cast val into boolean"""
+        if isinstance(val, (str, unicode)):
+            val = self.cast(val, encoding)
+        if isinstance(val, (int, long, float)):
+            return val > 0
+        if isinstance(val, unicode):
+            return val.lower() in self.truth_strings
+        return bool(val)
 
     def format(self, format, *args, **kwargs):
         """Encoding-aware string formatting"""

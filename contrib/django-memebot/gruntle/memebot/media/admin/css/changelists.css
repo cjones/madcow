@@ -23,7 +23,7 @@
     background: white url(../img/admin/changelist-bg.gif) top right repeat-y !important;
 }
 
-.change-list .filtered table, .change-list .filtered .paginator, .filtered #toolbar, .filtered div.xfull {
+.change-list .filtered .results, .change-list .filtered .paginator, .filtered #toolbar, .filtered div.xfull {
     margin-right: 160px !important;
     width: auto !important;
 }
@@ -60,14 +60,17 @@
     text-align: center;
 }
 
-#changelist table tbody td {
+#changelist table tbody td, #changelist table tbody th {
     border-left: 1px solid #ddd;
 }
 
-#changelist table tbody td:first-child {
+#changelist table tbody td:first-child, #changelist table tbody th:first-child {
     border-left: 0;
     border-right: 1px solid #ddd;
-    text-align: center;
+}
+
+#changelist table tbody td.action-checkbox {
+    text-align:center;
 }
 
 #changelist table tfoot {

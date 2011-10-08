@@ -15,8 +15,11 @@ from django.conf import settings
 from django.db import models
 
 from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
+from gruntle.memebot.utils import blacklist, first, get_domain_from_url
+from gruntle.memebot.utils.tzdatetime import tzdatetime
 from gruntle.memebot.exceptions import OldMeme
-from gruntle.memebot.utils import blacklist
+
+current_site = Site.objects.get_current()
 
 class Model(models.Model):
 
@@ -26,10 +29,6 @@ class Model(models.Model):
     created = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     modified = models.DateTimeField(null=False, blank=False, auto_now=True)
 
-    # for generating GUIDs
-    _guid_fmt = 'tag:%(domain)s,%(date)s:/%(app)s/%(model)s/%(id)d/%(timestamp)s'
-    _guid_id_fields = 'publish_id', 'external_id', 'id'
-
     class Meta:
 
         abstract = True
@@ -37,21 +36,12 @@ class Model(models.Model):
     @property
     def guid(self):
         """Global unique identifier for this object"""
-        site = Site.objects.get_current()
-        model = type(self)
-        for field in model._guid_id_fields:
-            external_id = getattr(self, field, None)
-            if external_id is not None:
-                break
-        else:
-            raise TypeError('No suitable ID found for GUID creation')
-        return model._guid_fmt % {
-                'domain': site.domain,
-                'date': self.created.strftime('%Y-%m-%d'),
-                'app': model._meta.app_label,
-                'model': model._meta.object_name.lower(),
-                'id': external_id,
-                'timestamp': self.created.strftime('%Y%m%d%H%M%S')}
+        id = first([getattr(self, key, None) for key in ('publish_id', 'external_id', 'id')])
+        date = first([getattr(self, key, None) for key in ('published', 'activation_date', 'created', 'modified')])
+        date = tzdatetime.new(date).utc
+        meta = type(self)._meta
+        return 'tag:%s,%s:/%s/%s/%d/%d' % (current_site.domain, date.strftime('%Y-%m-%d'), meta.app_label,
+                                           meta.object_name.lower(), id, date.unixtime)
 
 
 class Source(Model):
@@ -196,6 +186,7 @@ class Link(Model):
 
     # state of current link life-cycle
     LINK_STATES = [('new', 'New'),
+                   ('disabled', 'Disabled'),
                    ('invalid', 'Invalid'),
                    ('published', 'Published')]
 
@@ -241,6 +232,19 @@ class Link(Model):
             except (ImportError, AttributeError):
                 pass
 
+    def get_best_url(self):
+        """The URL you should actually use, prefers final redirection page, if it exists"""
+        return first(self.resolved_url, self.url)
+
+    best_url = property(get_best_url)
+
+    def get_title_display(self):
+        """Rendered title"""
+        url = self.get_best_url()
+        if self.title is None:
+            return url
+        return u'[%s] %s' % (get_domain_from_url(url), self.title)
+
     @property
     def rss_template(self):
         """The scanner-defined template used to render this link in RSS"""
@@ -250,15 +254,13 @@ class Link(Model):
     def get_absolute_url(self):
         """URL to this links cached content"""
         if self.state == 'published' and self.content is not None:
-            return ('view-content', [self.publish_id])
+            return ('memebot-view-link-content', [self.publish_id])
+
+    absolute_url = property(get_absolute_url)
 
     @property
     def external_url(self):
-        # XXX workaround for now...
-        rel = self.get_absolute_url()
-        if not rel.startswith(settings.SITE_PATH):
-            rel = urlparse.urljoin(settings.SITE_PATH, rel[1:])
-        return urlparse.urljoin(settings.FEED_BASE_URL, rel)
+        return urlparse.urljoin(settings.FEED_BASE_URL, self.absolute_url)
 
     def publish(self, date=None, commit=True):
         """Publish this link"""

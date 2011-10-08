@@ -1,0 +1,111 @@
+body {
+    font-size: 12px;
+    font-family: "Licida Grande", Verdana, Arial, sans-serif;
+    /*margin: 0px;
+    padding: 0px;*/
+}
+
+dt {
+    font-weight: bold;
+    /*color: #88aacc;*/
+    /*font-size: 10px;*/
+}
+
+dd {
+    margin-bottom: 8px;
+    margin-left: 0px;
+}
+
+a {
+    text-decoration: none;
+    /* color: #225599; */
+}
+
+a:visited {
+    text-decoration: none;
+    /* color: #225599; */
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:active {
+    /* color: #3090b0; */
+}
+
+span.p5   { width:   5%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p15  { width:  14%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p20  { width:  19%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p25  { width:  24%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p30  { width:  32%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p40  { width:  40%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p50  { width:  49%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p60  { width:  60%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p75  { width:  74%; float: left; margin-right: 10px; word-wrap: break-word; }
+span.p100 { width: 100%; float: left; margin-right: 10px; word-wrap: break-word; }
+
+span.first { clear: left; }
+span.clear { display: block; clear: both; width: 0px; height: 0px; }
+
+/*** Some styles yoinked right from SigDB.. gotta pick through them and see what'll be worth using
+
+.errormessage { color: #ff8800; }
+
+h1 { color: #666666; padding-left: 20px; }
+h2 { color: #666666; margin-top: 5px; margin-bottom: 5px; }
+
+span.title { color: #666; font-weight: bold; text-align: center; }
+
+
+button .ui-icon, .ui-button .ui-icon { float: left; }
+
+button, button:visited, a.button, a.button:visited {
+    border: none;
+    background: #506080 url(/media/images/alert-overlay.png) repeat-x;
+    display: inline-block;
+    padding: 0px 10px 0px;
+    color: #fff;
+    text-decoration: none;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    position: relative;
+    cursor: pointer;
+    margin: 2px 1px 2px 1px;
+    vertical-align: middle;
+}
+
+button:hover, a.button:hover { background: #7080a0 url(/media/images/alert-overlay.png) repeat-x; color: #fff; }
+button:active, a.button:active {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    background: #304060 url(/media/images/alert-overlay.png) repeat-x;
+}
+button.small, button.small:visited, a.button.small { font-size: 11px; padding: 0px 5px 0px; line-height: 20px;}
+button, button:visited, button.medium, button.medium:visited, a.button, a.button.medium {
+    font-size: 13px; font-weight: bold; line-height: 25px; text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+}
+button.large, button.large:visited a.button.large { font-size: 14px; padding: 8px 14px 9px; }
+
+button.green, button.green:visited { background-color: #91bd09; }
+button.green:hover { background-color: #749a02; }
+
+button.orange, button.orange:visited { background-color: #ff8800;}
+
+button[type="cancel"] { opacity: .7; filter:Alpha(Opacity=70); font-weight: normal; }
+
+button span {margin-top: 4px;}
+button.small span {margin: 3px 0px 3px 0px;}
+
+@-moz-document url-prefix() {
+    button { padding: 5px 10px 4px; line-height: 100%; }
+    button span {margin: 0px;}
+    button.small { padding: 2px 2px 2px;}
+    button.small span {margin: 0px;}
+}
+
+***/

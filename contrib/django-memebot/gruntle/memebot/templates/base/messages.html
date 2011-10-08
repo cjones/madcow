@@ -1,0 +1,8 @@
+{# this is automatically populated by context processors #}
+{% if messages %}
+<ul>
+ {% for message in messages %}
+ <li>{{ message }}</li>
+ {% endfor %}
+</ul>
+{% endif %}

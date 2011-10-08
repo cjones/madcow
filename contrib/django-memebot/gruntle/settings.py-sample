@@ -3,7 +3,7 @@
 import os
 
 # Set to None to only enable when manage.py is run
-DEBUG = None
+DEBUG = False
 
 # list of (name, email) who will receive admin email
 ADMINS = (
@@ -19,6 +19,9 @@ SECRET_KEY = ''
 # IP/port of memcached backend
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=0'
 
+# style to use for this site
+STYLE_NAME = 'main'
+
 # where memebot keeps all its stuff
 DATABASES = {
         'default': {
@@ -31,9 +34,6 @@ DATABASES = {
             },
         }
 
-# root of application (same as WSGIScriptAlias)
-SITE_PATH = '/'
-
 # memebot points scoring formula
 MEMEBOT_POINTS_NEW = 1          # points to award when a new link is posted
 MEMEBOT_POINTS_OLD = -2         # points to penalize when reposting old urls
@@ -43,8 +43,10 @@ MEMEBOT_POINTS_REPOSTS = 2      # points to award user when someone reposts thei
 MEMEBOT_BLACKLIST = (
         'localhost',
         '127.0.0.1',
-        'secret.com',
-        '*.fbi.gov',
+        'gruntle.org',
+        '*.gruntle.org',
+        'ef.net',
+        '*.ef.net',
         )
 
 # when someone posts a link, whether to add them to database
@@ -55,18 +57,21 @@ UNKNOWN_USERNAME = 'unknown'  # if posted from an invalid nick, we can save as t
 # link browser config
 BROWSE_LINKS_PER_PAGE = 100
 
+# how often auto-updater will run
+UPDATER_INTERVAL = 5 * 60  # every 5 minutes
+
 # scanner config
-SCANNER_TIMEOUT = 10                    # timeout before giving up on the request
+SCANNER_TIMEOUT = 20                    # timeout before giving up on the request
 SCANNER_USER_AGENT = 'firefox'          # browser to masquerade as (see utils/browser.py for more)
-SCANNER_MAX_LINKS = 1024                # how many links to process in one run
-SCANNER_MAX_READ = 1048576  # 1M        # files larger than this will not be read entirely
-SCANNER_MAX_ERRORS = 3                  # number of errors before giving up on the url
+SCANNER_MAX_LINKS = 9999                # how many links to process in one run
+SCANNER_MAX_READ = 2097152  # 2M        # files larger than this will not be read entirely
+SCANNER_MAX_ERRORS = 5                  # number of errors before giving up on the url
 SCANNER_IMAGE_TYPE = 'png'              # format to use when saving image locally
 SCANNER_IMAGE_MAX_SIZE = 640, 480       # max width/height of cached images (will rescale)
 SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see PIL.Image.resize)
 SCANNER_YOUTUBE_EXTRA_ATTR = True       # scrape more data from the page or just embed the video?
 
-# scanners to use attempting to parse link contents
+# these processors are run in order, attempting to parse the link contents
 SCANNERS = (
         'gruntle.memebot.scanner.youtube',
         'gruntle.memebot.scanner.image',
@@ -74,16 +79,30 @@ SCANNERS = (
         'gruntle.memebot.scanner.default',
         )
 
-FEED_COPYRIGHT = u'Copyright \u00a9 2011, Your Awesome Company'
-FEED_WEBMASTER = 'Your Name <your@email>'
-FEED_TTL = 15
-FEED_IMAGE_URL = None
-FEED_BASE_URL = 'http://foo.com/'
+# root of site, for RSS feeds that need absolute URLs.
+FEED_BASE_URL = 'http://gruntle.org/'
+FEED_ENCODING = 'UTF-8'
+
+# default feed settings
+FEED_COPYRIGHT = u'Copyright \u00a9 2011 Madcow Industries'
+FEED_WEBMASTER = '%s (%s)' % (ADMINS[0][1], ADMINS[0][0])
+FEED_TTL = 60
 FEED_MAX_LINKS = 25
+FEED_SUMMARY_SIZE = 512
+FEED_SUMMARY_CONT = '...'
+FEED_STYLESHEET = None
+FEED_KEEP_XML_BACKUP = True
+
+# default feed image
+FEED_IMAGE_URL = 'http://gruntle.org/media/img/cow_icon_01.png'
+FEED_IMAGE_WIDTH = 144
+FEED_IMAGE_HEIGHT = 108
+FEED_IMAGE_TITLE = None
+FEED_IMAGE_LINK = None
 
 # feeds to generate
-FEEDS = ('gruntle.memebot.rss.hugs',
-         'gruntle.memebot.rss.images',
+FEEDS = ('gruntle.memebot.feeds.hugs',
+         'gruntle.memebot.feeds.images',
          )
 
 # logging config
@@ -96,18 +115,17 @@ LOG_PERMS = 0644
 # file locations
 PROJECT_DIR = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = os.path.join(PROJECT_DIR, 'data')
-LOG_DIR = os.path.join(DATA_DIR, 'log')
-LOCK_DIR = os.path.join(DATA_DIR, 'lock')
-FEED_DIR = os.path.join(DATA_DIR, 'feed')
+LOG_DIR = os.path.join(DATA_DIR, 'logs')
+LOCK_DIR = os.path.join(DATA_DIR, 'locks')
+FEED_DIR = os.path.join(DATA_DIR, 'feeds')
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'memebot', 'media')
 
-# url locations (relative to SITE_PATH). automatically expanded (see configure_urls below)
-URL_PATHS = {'LOGIN_REDIRECT_URL': '/',
-             'LOGIN_URL': '/login/',
-             'LOGOUT_URL': '/logout/',
-             'MEDIA_URL': '/media/'}
-
-URL_PATHS['ADMIN_MEDIA_PREFIX'] = os.path.join(URL_PATHS['MEDIA_URL'], 'admin')
+# url locations
+LOGIN_REDIRECT_URL = '/memebot/'
+LOGIN_URL = '/accounts/login/'
+LOGOUT_URL = '/accounts/logout/'
+MEDIA_URL = '/media/'
+ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 # misc site settings
 SITE_ID = 1
@@ -147,23 +165,10 @@ INSTALLED_APPS = ('django.contrib.auth',
                   'django.contrib.admindocs',
                   'gruntle.memebot')
 
-
-def configure_urls():
-    """Automatically generate some settings and url regex from URL_PATHS and SITE_PATH"""
-
-    def normalize(path, root='/'):
-        if path:
-            path = os.path.normpath(path)
-        while path.startswith('/'):
-            path = path[1:]
-        rel = os.path.join(path, '')
-        return os.path.join(root, rel), ('^' if rel else '') + rel
-
-    context = globals()
-    site_root, site_pattern = normalize(SITE_PATH)
-    context['SITE_PATTERN'] = site_pattern if DEV_SERVER else ''
-    for key, path in URL_PATHS.iteritems():
-        context[key], context[key + '_PATTERN'] = normalize(path, root=site_root)
-    context['MEDIA_URL_PATTERN'] += r'(?P<path>.*)'
-
-configure_urls()
+TEMPLATE_CONTEXT_PROCESSORS = ('django.contrib.auth.context_processors.auth',
+                               'django.core.context_processors.debug',
+                               'django.core.context_processors.i18n',
+                               'django.core.context_processors.media',
+                               'django.core.context_processors.static',
+                               'django.contrib.messages.context_processors.messages',
+                               'gruntle.memebot.context_processors.site')

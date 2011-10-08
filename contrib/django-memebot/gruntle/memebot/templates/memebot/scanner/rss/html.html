@@ -1,4 +1,4 @@
 {% extends "memebot/scanner/rss/base.html" %}
-{% block content %}
-<p class="summary">Summary for HTML coming later</p>
-{% endblock %}
+{% spaceless %}
+{% block content %}{{ link.content }}{% endblock %}
+{% endspaceless %}

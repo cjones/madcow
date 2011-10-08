@@ -1,1 +1,7 @@
-An internal server error has occured.
+{% extends "base.html" %}
+{% block title %}Internal Server Error{% endblock %}
+{% block content %}
+<div class="errormessage">
+ <p>Sorry, something seems to have broken. Click something different, maybe.</p>
+</div>
+{% endblock %}

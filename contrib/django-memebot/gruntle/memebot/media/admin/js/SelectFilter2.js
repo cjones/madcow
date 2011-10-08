@@ -24,10 +24,17 @@ var SelectFilter = {
         from_box.id += '_from'; // change its ID
         from_box.className = 'filtered';
 
-        // Remove <p class="info">, because it just gets in the way.
         var ps = from_box.parentNode.getElementsByTagName('p');
         for (var i=0; i<ps.length; i++) {
-            from_box.parentNode.removeChild(ps[i]);
+            if (ps[i].className.indexOf("info") != -1) {
+                // Remove <p class="info">, because it just gets in the way.
+                from_box.parentNode.removeChild(ps[i]);
+            } else if (ps[i].className.indexOf("help") != -1) {
+                // Move help text up to the top so it isn't below the select
+                // boxes or wrapped off on the side to the right of the add
+                // button:
+                from_box.parentNode.insertBefore(ps[i], from_box.parentNode.firstChild);
+            }
         }
 
         // <div class="selector"> or <div class="selector stacked">
@@ -40,8 +47,14 @@ var SelectFilter = {
         quickElement('h2', selector_available, interpolate(gettext('Available %s'), [field_name]));
         var filter_p = quickElement('p', selector_available, '');
         filter_p.className = 'selector-filter';
-        quickElement('img', filter_p, '', 'src', admin_media_prefix + 'img/admin/selector-search.gif');
+
+        var search_filter_label = quickElement('label', filter_p, '', 'for', field_id + "_input", 'style', 'width:16px;padding:2px');
+
+        var search_selector_img = quickElement('img', search_filter_label, '', 'src', admin_media_prefix + 'img/admin/selector-search.gif');
+        search_selector_img.alt = gettext("Filter");
+
         filter_p.appendChild(document.createTextNode(' '));
+
         var filter_input = quickElement('input', filter_p, '', 'type', 'text');
         filter_input.id = field_id + '_input';
         selector_available.appendChild(from_box);
