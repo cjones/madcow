@@ -8,6 +8,7 @@ import sys
 from django.core.management.base import NoArgsCommand, CommandError
 from django.conf import settings
 
+from gruntle.memebot.utils import human_readable_duration
 from gruntle.memebot.exceptions import TrapError, TrapErrors
 from gruntle.memebot.decorators import locked, logged
 from gruntle.memebot import scanner, feeds
@@ -32,18 +33,18 @@ class Command(NoArgsCommand):
     @logged('updater', append=True, method=True)
     @locked('updater', 0)
     def run(self, interval):
-        self.log.info('Running...')
+        self.log.info('Starting updater service')
         last_update = 0
         while True:
             now = time.time()
-            elapsed = now - last_update
-            need = interval - elapsed
-            if need > 0:
-                time.sleep(need)
+            sleep = interval + last_update - now
+            if sleep > 0:
+                self.log.info('Sleeping for %s', human_readable_duration(sleep))
+                time.sleep(sleep)
             try:
                 with TrapErrors():
-                    scanner.run(log_stream=sys.stdout)
-                    feeds.run(log_stream=sys.stdout, force=False)
+                    scanner.run(logger=self.log)
+                    feeds.run(logger=self.log, force=False)
             except TrapError, exc:
                 self.log.error('Processing Error', exc_info=exc.args)
             last_update = now

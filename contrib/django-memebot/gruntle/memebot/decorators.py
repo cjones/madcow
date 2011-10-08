@@ -28,9 +28,12 @@ def logged(*logger_args, **default_logger_kwargs):
 
         @functools.wraps(wrapped_func)
         def wrapper_func(*args, **kwargs):
-            logger_kwargs = dict(default_logger_kwargs)
-            logger_kwargs.setdefault('stream', kwargs.pop('log_stream', None))
-            logger = get_logger(*logger_args, **logger_kwargs)
+            logger = kwargs.pop('logger', None)
+            if logger is None:
+                logger_kwargs = dict(default_logger_kwargs)
+                logger_kwargs.setdefault('stream', kwargs.pop('log_stream', None))
+                logger = get_logger(*logger_args, **logger_kwargs)
+
             try:
                 with TrapErrors():
                     if method:
