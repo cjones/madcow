@@ -24,7 +24,7 @@ class HTMLScanner(Scanner):
         self.summary_size = summary_size
         self.summary_cont = summary_cont
 
-    def handle(self, response, log):
+    def handle(self, response, log, browser):
         if response.data_type != 'soup':
             raise InvalidContent(response, 'Not an HTML file')
         soup = response.data

@@ -49,7 +49,7 @@ class ImageScanner(Scanner):
     def content_type(self):
         return 'image/' + self.image_type
 
-    def handle(self, response, log):
+    def handle(self, response, log, browser):
         if Image is None:
             raise InvalidContent(response, 'PIL is not installed, cannot process')
         if response.data_type not in ('image', 'broken_image'):

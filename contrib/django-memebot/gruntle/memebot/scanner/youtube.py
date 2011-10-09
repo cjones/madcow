@@ -24,7 +24,7 @@ class YouTubeScanner(Scanner):
             extra_attr = settings.SCANNER_YOUTUBE_EXTRA_ATTR
         self.extra_attr = extra_attr
 
-    def handle(self, response, log, video_id):
+    def handle(self, response, log, browser, video_id):
         attr = {'video_id': video_id}
 
         title = None

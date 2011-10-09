@@ -67,7 +67,7 @@ class Scanner(object):
             flags |= re.IGNORECASE
         return re.compile(pattern, flags)
 
-    def scan(self, response, log):
+    def scan(self, response, log, browser):
         """
         Takes a response object and checks if there the context matches.
 
@@ -107,7 +107,7 @@ class Scanner(object):
                 else:
                     raise NoMatch(response.url, 'query', uri.query, *patterns)
 
-        return self.handle(response, log, *results)
+        return self.handle(response, log, browser, *results)
 
     def handle(self):
         raise NotImplementedError
@@ -242,7 +242,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
                 # run through each configured scanner until something matches
                 for scanner_name, scanner in scanners:
                     try:
-                        result = scanner.scan(response, log)
+                        result = scanner.scan(response, log, browser)
                         break
                     except (NoMatch, InvalidContent):
                         pass
