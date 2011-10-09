@@ -67,27 +67,29 @@ def check_link(request):
     return direct_to_template(request, 'memebot/check-link.html', {'form': form})
 
 
-@login_or_apikey_required
+@login_required
 def view_link(request, publish_id):
     """Info about a link, TBD"""
     return direct_to_template(request, 'memebot/view-link.html', {'link': _get_link(publish_id)})
 
 
-@login_or_apikey_required
+##############
+### PUBLIC ###
+##############
+
+
 def view_link_content(request, publish_id):
     """View generic published content that is cached locally"""
     link = _get_link(publish_id, content__isnull=False)
     return HttpResponse(link.content, link.content_type)
 
 
-@login_or_apikey_required
 def view_rss_index(request):
     """Index of available RSS feeds"""
     feeds = [(name, feed.description) for name, feed in get_feeds()]
     return direct_to_template(request, 'memebot/rss-index.html', {'feeds': feeds})
 
 
-@login_or_apikey_required
 def view_rss(request, name):
     """View RSS feed"""
     if name not in get_feed_names():
