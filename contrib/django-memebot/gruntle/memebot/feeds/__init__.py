@@ -29,7 +29,7 @@ class RSSFeed(rss.RSS):
     """A feed generator for Link objects"""
 
     def __init__(self, feed):
-        super(RSSFeed, self).__init__(feed.reverse('memebot-view-index'),
+        super(RSSFeed, self).__init__(feed.reverse('memebot-view-rss-index'),
                                       title=feed.title,
                                       desc=feed.description,
                                       language=feed.language,
