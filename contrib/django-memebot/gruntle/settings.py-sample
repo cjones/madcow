@@ -72,12 +72,12 @@ SCANNER_IMAGE_RESIZE_ALG = 'ANTIALIAS'  # algorithm to use when rescaling (see P
 SCANNER_YOUTUBE_EXTRA_ATTR = True       # scrape more data from the page or just embed the video?
 
 # these processors are run in order, attempting to parse the link contents
-SCANNERS = (
-        'gruntle.memebot.scanner.youtube',
-        'gruntle.memebot.scanner.image',
-        'gruntle.memebot.scanner.html',
-        'gruntle.memebot.scanner.default',
-        )
+SCANNERS = ('gruntle.memebot.scanner.youtube',
+            'gruntle.memebot.scanner.image',
+            'gruntle.memebot.scanner.imgur',
+            'gruntle.memebot.scanner.bolt',
+            'gruntle.memebot.scanner.html',
+            'gruntle.memebot.scanner.default')
 
 # root of site, for RSS feeds that need absolute URLs.
 FEED_BASE_URL = 'http://gruntle.org/'
@@ -90,8 +90,12 @@ FEED_TTL = 60
 FEED_MAX_LINKS = 25
 FEED_SUMMARY_SIZE = 512
 FEED_SUMMARY_CONT = '...'
-FEED_STYLESHEET = None
 FEED_KEEP_XML_BACKUP = True
+
+# for converting to html in the browser.. fancy.. see feedburner for example.
+#FEED_STYLESHEETS = ({'type': 'text/xsl', 'media': 'screen', 'href': '/media/xml/rss.xsl'},
+#                    {'type': 'text/css', 'media': 'screen', 'href': 'http://gruntle.org/media/css/rss.css'})
+FEED_STYLESHEETS = None
 
 # default feed image
 FEED_IMAGE_URL = 'http://gruntle.org/media/img/cow_icon_01.png'

@@ -38,7 +38,7 @@ class RSSFeed(rss.RSS):
                                       webmaster=feed.webmaster,
                                       ttl=feed.ttl,
                                       image=feed.image,
-                                      stylesheets=feed.stylesheets,
+                                      stylesheets=feed.get_stylesheets(),
                                       add_atom=True,
                                       add_dc=True)
 
@@ -62,7 +62,7 @@ class BaseFeed(object):
     ttl = settings.FEED_TTL
     max_links = settings.FEED_MAX_LINKS
     feed_dir = settings.FEED_DIR
-    stylesheet = settings.FEED_STYLESHEET
+    stylesheets = settings.FEED_STYLESHEETS
     keep_xml_backup = settings.FEED_KEEP_XML_BACKUP
 
     image_url = settings.FEED_IMAGE_URL
@@ -76,6 +76,10 @@ class BaseFeed(object):
         self.published_links = published_links
         self.log = logger.get_named_logger(name)
         self._links = None
+
+    def get_stylesheets(self):
+        if self.stylesheets is not None:
+            return [rss.StyleSheet(**kwargs) for kwargs in self.stylesheets]
 
     @property
     def xml_file(self):
@@ -91,12 +95,6 @@ class BaseFeed(object):
                              link=self.image_link,
                              width=self.image_width,
                              height=self.image_height)
-
-    @property
-    def stylesheets(self):
-        """A list of StyleSheet objects if a stylesheet is defined for this feed"""
-        if self.stylesheet is not None:
-            return [rss.StyleSheet(type='text/css', media='screen', href=self.stylesheet)]
 
     @property
     def links(self):
