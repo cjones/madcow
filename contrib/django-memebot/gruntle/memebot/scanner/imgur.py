@@ -17,7 +17,7 @@ class IMGurScanner(ImageScanner):
 
         title = None
         with trapped:
-            title = decode_entities(text.decode(soup.head.title.string).strip())
+            title = decode_entities(text.decode(soup.head.title.string).strip()) .replace(' - Imgur', '')
 
         with trapped:
             url = soup.head.find('link', rel='image_src')['href']
