@@ -215,7 +215,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
     scanners = get_scanners(settings.SCANNERS)
     if not scanners:
         raise ConfigError('No scanners configured!')
-    browser = Browser(user_agent=user_agent, timeout=timeout)
+    browser = Browser(user_agent=user_agent, timeout=timeout, max_read=max_read)
 
     # fetch new links to scan
     links = Link.objects.filter(state='new').order_by('created')
@@ -235,7 +235,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
             with TrapErrors():
 
                 # fetch url we are processing
-                response = browser.open(link.url, max_read=max_read, follow_meta_redirect=True)
+                response = browser.open(link.url, follow_meta_redirect=True)
                 if not response.is_valid:
                     raise BadResponse(link, response)
 

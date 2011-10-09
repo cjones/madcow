@@ -60,12 +60,12 @@ class Command(BaseCommand):
 
         do_ipython = kwargs.pop('do_ipython', False)
 
-        browser = Browser(user_agent=user_agent, timeout=timeout)
+        browser = Browser(user_agent=user_agent, timeout=timeout, max_read=max_read)
         log = get_logger('scantest', append=True, stream=sys.stdout)
         for url in urls:
             try:
                 with TrapErrors():
-                    response = browser.open(url, max_read=max_read, follow_meta_redirect=True)
+                    response = browser.open(url, follow_meta_redirect=True)
                     if not response.is_valid:
                         raise ValueError('Response invalid')
 

@@ -98,8 +98,17 @@ class Browser(object):
 
     """Represents a configured browser"""
 
-    def __init__(self, handlers=None, headers=None, user_agent='urllib2', support_cookies=True,
-                 support_gzip=True, add_accept_headers=True, keepalive=True, timeout=None, max_redirects=None):
+    def __init__(self,
+                 handlers=None,
+                 headers=None,
+                 user_agent='urllib2',
+                 support_cookies=True,
+                 support_gzip=True,
+                 add_accept_headers=True,
+                 keepalive=True,
+                 timeout=None,
+                 max_redirects=None,
+                 max_read=None):
 
         if handlers is None:
             handlers = []
@@ -107,6 +116,8 @@ class Browser(object):
             headers = []
         if max_redirects is None:
             max_redirects = DEFAULT_MAX_REDIRECTS
+        if max_read is None:
+            max_read = -1
 
         # add cookie processor to handlers if we want cookie support
         if support_cookies:
@@ -134,6 +145,7 @@ class Browser(object):
 
         # build the opener
         self.max_redirects = max_redirects
+        self.max_read = max_read
         self.timeout = timeout
         self.opener = urllib2.build_opener(*handlers)
         self.opener.addheaders = self.headers = headers
@@ -144,7 +156,7 @@ class Browser(object):
             self.xml_parser = etree.XMLParser(encoding=text.get_encoding(), ns_clean=True,
                                               recover=True, remove_blank_text=True, strip_cdata=False)
 
-    def open(self, url, data=None, referer=None, max_read=None, follow_meta_redirect=False):
+    def open(self, url, data=None, referer=None, follow_meta_redirect=False):
         """Opens the requested URL"""
         followed = set()
         orig_url = url
@@ -152,7 +164,7 @@ class Browser(object):
         while True:
             try:
                 with TrapErrors():
-                    response = self._open(url, data, referer, max_read)
+                    response = self._open(url, data, referer)
             except TrapError, exc:
                 # exception on first attempt, just raise it, we got nothing useful
                 if response is None:
@@ -172,7 +184,7 @@ class Browser(object):
             url = redirect
         return response
 
-    def _open(self, url, data=None, referer=None, max_read=None):
+    def _open(self, url, data=None, referer=None):
         request = urllib2.Request(text.encode(url), data)
         if referer is not None:
             request.add_header('Referer', referer)
@@ -180,9 +192,7 @@ class Browser(object):
             response = self.opener.open(request, timeout=self.timeout)
         except urllib2.HTTPError, exc:
             response = exc
-        if max_read is None:
-            max_read = -1
-        data = response.read(max_read)
+        data = response.read(self.max_read)
         read = len(data)
 
         length = response.headers.get('content-length')
@@ -190,7 +200,7 @@ class Browser(object):
             length = int(length)
             complete = read >= int(length)
         else:
-            complete = (max_read == -1) or (read < max_read)
+            complete = (self.max_read == -1) or (read < self.max_read)
 
         content_encoding = response.headers.get('content-encoding')
         if content_encoding == 'gzip':
