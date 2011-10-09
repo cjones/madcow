@@ -1,22 +1,17 @@
-"""Cut past bo.lt stuff"""
+"""Extract image from gallery view of imgur links, but grab the title on the way"""
 
-from django.conf import settings
-from gruntle.memebot.scanner import Scanner, ScanResult, image
-from gruntle.memebot.exceptions import InvalidContent, trapped
-from gruntle.memebot.utils.browser import render_node
+from gruntle.memebot.scanner.image import ImageScanner
+from gruntle.memebot.exceptions import trapped
 
-class BoltScanner(Scanner):
+class BoltScanner(ImageScanner):
 
-    rss_template = None
-
-    url_match = {'netloc_regex': r'^reddit.bo.lt$',
-                 'netloc_ignorecase': True,
-                 }
+    url_match = {'netloc_regex': r'^reddit.bo.lt$', 'netloc_ignorecase': True}
 
     def handle(self, response, log, browser):
         with trapped:
             url = response.data.body.find('img', style="max-width: 100%")['src']
-            return image.scanner.handle(browser.open(url), log, browser)
+            response = browser.open(url, follow_meta_redirect=True)
+            return super(BoltScanner, self).handle(response, log, browser)
         raise InvalidContent(response, 'could not parse image from bolt page')
 
 
