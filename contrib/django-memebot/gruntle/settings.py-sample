@@ -93,9 +93,13 @@ FEED_SUMMARY_CONT = '...'
 FEED_KEEP_XML_BACKUP = True
 
 # for converting to html in the browser.. fancy.. see feedburner for example.
-#FEED_STYLESHEETS = ({'type': 'text/xsl', 'media': 'screen', 'href': '/media/xml/rss.xsl'},
-#                    {'type': 'text/css', 'media': 'screen', 'href': 'http://gruntle.org/media/css/rss.css'})
+#FEED_STYLESHEETS = ({'type': 'text/xsl', 'media': 'screen', 'href': 'http://shell:8000/media/xml/rss.xsl'},
+#                    {'type': 'text/css', 'media': 'screen', 'href': 'http://shell:8000/media/css/rss.css'})
 FEED_STYLESHEETS = None
+
+# a dictionary of prefix:url's for additional namespaces.. mostly need for using xslt and xml-stylesheets
+FEED_EXTRA_NAMESPACES = None
+
 
 # default feed image
 FEED_IMAGE_URL = 'http://gruntle.org/media/img/cow_icon_01.png'

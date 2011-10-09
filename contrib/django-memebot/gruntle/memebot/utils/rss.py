@@ -19,7 +19,8 @@ class RSS(list):
 
     def __init__(self, link, title=None, desc=None, language=None, copyright=None, rss_url=None,
                  editor=None, webmaster=None, published=None, build_date=None, categories=None,
-                 generator=None, docs=None, ttl=None, image=None, stylesheets=None, add_atom=False, add_dc=False):
+                 generator=None, docs=None, ttl=None, image=None, stylesheets=None, add_atom=False,
+                 add_dc=False, extra_namespaces=None):
         self.link = link
         self.title = title or self.link
         self.desc = desc or self.title
@@ -38,6 +39,7 @@ class RSS(list):
         self.stylesheets = stylesheets or []
         self.add_atom = add_atom
         self.add_dc = add_dc
+        self.extra_namespaces = extra_namespaces
 
     @property
     def nsmap(self):
@@ -48,6 +50,8 @@ class RSS(list):
             nsmap['atom'] = NAMESPACE_ATOM
         if self.add_dc:
             nsmap['dc'] = NAMESPACE_DC
+        if self.extra_namespaces is not None:
+            nsmap.update(self.extra_namespaces)
         return nsmap
 
     @property
@@ -98,12 +102,10 @@ class RSS(list):
                         rss.add('category', category.name, domain=category.domain)
 
                     if self.add_dc:
-                        #rss.add('dc:title', item.title)
-                        #rss.add('dc:contributor', item.author)
-                        #rss.add('dc:publisher', item.author)
-                        #rss.add('dc:language', self.language)
-                        #rss.add('dc:rights', self.copyright)
+                        rss.add('dc:title', item.title)
                         rss.add('dc:creator', item.author)
+                        rss.add('dc:language', self.language)
+                        rss.add('dc:rights', self.copyright)
                         rss.add('dc:date', published.isoformat())
                         rss.add('dc:format', item.content_type)
                         rss.add('dc:identifier', item.guid)
