@@ -40,7 +40,8 @@ class RSSFeed(rss.RSS):
                                       image=feed.image,
                                       stylesheets=feed.get_stylesheets(),
                                       add_atom=True,
-                                      add_dc=True)
+                                      add_dc=True,
+                                      extra_namespaces=feed.extra_namespaces)
 
         for link in feed.links:
             self.append(LinkItem(link))
@@ -63,6 +64,7 @@ class BaseFeed(object):
     max_links = settings.FEED_MAX_LINKS
     feed_dir = settings.FEED_DIR
     stylesheets = settings.FEED_STYLESHEETS
+    extra_namespaces = settings.FEED_EXTRA_NAMESPACES
     keep_xml_backup = settings.FEED_KEEP_XML_BACKUP
 
     image_url = settings.FEED_IMAGE_URL
