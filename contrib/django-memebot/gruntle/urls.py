@@ -11,7 +11,6 @@ urlpatterns = patterns('',
         url(r'^accounts/', include('gruntle.memebot.urls.accounts')),
         url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
         url(r'^admin/', include(admin.site.urls)),
-        url(r'^$', 'gruntle.memebot.views.view_index', name='root-view-index'),
         )
 
 if settings.DEV_SERVER:
@@ -20,3 +19,9 @@ if settings.DEV_SERVER:
             url(r'^%s(?P<path>.*)' % re.escape(settings.MEDIA_URL[1:]), 'static.serve',
                 {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
             )
+
+
+# check here before 404'ing
+urlpatterns += patterns('',
+        url(r'', include('gruntle.memebot.urls.root')),
+        )
