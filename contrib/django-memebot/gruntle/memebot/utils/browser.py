@@ -29,7 +29,7 @@ except ImportError:
     Image = None
 
 from gruntle.memebot.exceptions import *
-from gruntle.memebot.utils import text
+from gruntle.memebot.utils import text, inflate
 
 __all__ = ['Browser', 'decode_entities', 'render_node']
 
@@ -192,8 +192,11 @@ class Browser(object):
         else:
             complete = (max_read == -1) or (read < max_read)
 
-        if response.headers.get('content-encoding') == 'gzip':
+        content_encoding = response.headers.get('content-encoding')
+        if content_encoding == 'gzip':
             data = gzip.GzipFile(fileobj=stringio.StringIO(data), mode='r').read()
+        elif content_encoding == 'deflate':
+            data = inflate(data)
 
         raw = data
 

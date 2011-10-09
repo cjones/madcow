@@ -12,6 +12,7 @@ import rfc822
 import socket
 import shutil
 import errno
+import zlib
 import time
 import sys
 import os
@@ -400,3 +401,12 @@ def human_readable_duration(duration, precision=None):
     else:
         result = 'less than 1 second'
     return result
+
+
+def inflate(deflated):
+    """Inflates raw deflate stream"""
+    handler = zlib.decompressobj(-zlib.MAX_WBITS)
+    inflated = handler.decompress(deflated)
+    inflated += handler.flush()
+    return inflated
+

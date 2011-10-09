@@ -37,6 +37,9 @@ class HTMLScanner(Scanner):
             summary = self.summarize_soup(soup)
             content_type = 'text/plain'
 
+        if title is None and summary is None and content_type is None:
+            raise InvalidContent("couldn't get anything useful out of that..")
+
         return ScanResult(response=response,
                           override_url=None,
                           title=title,
