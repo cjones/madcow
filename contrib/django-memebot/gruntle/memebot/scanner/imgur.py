@@ -2,9 +2,9 @@
 
 from gruntle.memebot.utils.browser import decode_entities
 from gruntle.memebot.scanner.image import ImageScanner
+from gruntle.memebot.utils.browser import render_node
 from gruntle.memebot.exceptions import trapped
 from gruntle.memebot.scanner import ScanResult
-from gruntle.memebot.utils import text
 
 class IMGurScanner(ImageScanner):
 
@@ -17,11 +17,11 @@ class IMGurScanner(ImageScanner):
 
         title = None
         with trapped:
-            title = decode_entities(text.decode(soup.head.title.string).strip()) .replace(' - Imgur', '')
+            title = render_node(soup.head.title).replace(' - Imgur', '')
 
         with trapped:
             url = soup.head.find('link', rel='image_src')['href']
-            response = browser.open(url)  # move max_read/etc. to __init__ so it doesn't get bypassed like this
+            response = browser.open(url, follow_meta_redirect=True)
             result = super(IMGurScanner, self).handle(response, log, browser)
             return ScanResult(response=result.response,
                               override_url=result.override_url,
