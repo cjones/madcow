@@ -1,3 +1,36 @@
+#banner {
+    background-color: #a6c9e2;
+    height: 40px;
+    width: 100%;
+    margin: 0px;
+    color: white;
+}
+
+#site_title {
+    margin-left: 15px;
+    color: white;
+    font-size: 32px;
+    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: #225599;
+}
+
+a:visited {
+    text-decoration: none;
+    color: #225599;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:active {
+    color: #3090b0;
+}
+
 body {
     font-size: 12px;
     font-family: "Licida Grande", Verdana, Arial, sans-serif;
@@ -14,24 +47,6 @@ dt {
 dd {
     margin-bottom: 8px;
     margin-left: 0px;
-}
-
-a {
-    text-decoration: none;
-    /* color: #225599; */
-}
-
-a:visited {
-    text-decoration: none;
-    /* color: #225599; */
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-a:active {
-    /* color: #3090b0; */
 }
 
 span.p5   { width:   5%; float: left; margin-right: 10px; word-wrap: break-word; }

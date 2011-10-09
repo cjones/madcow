@@ -1,6 +1,41 @@
 {% extends "base.html" %}
+
 {% block title %}home{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+ $(document).ready(function() {
+  $("#logout-dialog").dialog({
+   modal: true,
+   autoOpen: false,
+   width: 200,
+   height: "auto",
+   buttons: [
+   {'text': 'logout',
+    'click': function() {
+    $(this).dialog("close");
+    window.location = "{% url accounts-logout %}";
+   }},
+   {'text': 'cancel',
+    'click': function() {
+    $(this).dialog("close");
+   }}
+   ],
+  });
+ });
+
+function confirm_logout() {
+ $("#logout-dialog").dialog("open");
+}
+</script>
+{% endblock %}
+
+{% block helpers %}
+<div id="logout-dialog">Are you sure?</div>
+{% endblock %}
+
 {% block content %}
+
 <div id="home">
  <ul id="links">
   <li><a href="{% url memebot-view-rss-index %}">rss feeds</a></li>
@@ -10,7 +45,8 @@
   <li><a href="http://code.google.com/p/madcow/">download madcow</a></li>
   <br />
   <li><a href="{% url accounts-edit-profile %}">edit profile</a></li>
-  <li><a href="{% url accounts-logout %}">logout</a></li>
+  <li><a onclick="confirm_logout();">logout</a></lm>
  </ul>
 </div>
+
 {% endblock %}

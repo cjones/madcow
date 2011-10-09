@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% load rss_filters %}
 {% block title %}available rss feeds{% endblock %}
+
+{% comment %}
+{% block breadcrumbs %}
+<a href="{% url memebot-view-index %}">home</a> &rsaquo; rss
+{% endblock %}
+{% endcomment %}
+
 {% block content %}
 <h3>RSS Feeds</h3>
 <ul>

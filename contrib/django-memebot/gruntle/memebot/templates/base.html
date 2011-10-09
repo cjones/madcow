@@ -3,67 +3,26 @@
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>{% block title %}{{ site_domain }}{% endblock %} - {{ site_name }}</title>
-
-  <!-- Load jquery stylesheets and then ours here -->
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/external/jquery.css" />
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/external/menu.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}external/css/redmond/jquery-ui.css" />
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
-
-  <!-- Over-ride styles with custom themes if specified -->
   {% ifnotequal site_style "main" %}
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/{{ site_style }}.css" />
   {% endifnotequal %}
-
-  <!-- Template-defined styles -->
   {% block styles %}{% endblock %}
-
-  <!-- Load up jquery.min etc. -->
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery-ui.min.js"></script>
-  {% comment %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery.metadata.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/jquery.hoverIntent.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/external/mbMenu.js"></script>
-  {% endcomment %}
-
-  <!-- Template loads more external js here -->
+  <script type="text/javascript" src="{{ MEDIA_URL }}external/js/jquery.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}external/js/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}external/js/jquery.metadata.js"></script>
   {% block scripts %}{% endblock %}
-
-  <!-- Initialization functions, if any, optionally extended by template -->
-  <script type="text/javascript">
-   {% block initscript %}{% endblock %}
-  </script>
-
-  <!-- Last chance to stuff junk in the header -->
-  {% block extraheaders %}{% endblock %}
+  {% block headers %}{% endblock %}
  </head>
  <body>
   <div id="main">
-
-   <!-- Site banner -->
-   <div id="banner">
-    {% include "base/banner.html" %}
-   </div>
-
-   <div id="menu">
-    {% include "base/menu.html" %}
-   </div>
-
-   <!-- User messaging system -->
-   <div id="messages">
-    {% include "base/messages.html" %}
-   </div>
-
-   <!-- jQuery hidden UI helpers -->
-   <div id="helpers">
-    {% block helpers %}{% endblock %}
-   </div>
-
-   <!-- Main page content -->
-   <div id="content">
-    {% block content %}{% endblock %}
-   </div>
-
+   <div id="banner">{% include "base/banner.html" %}</div>
+   <div id="menu">{% include "base/menu.html" %}</div>
+   <div id="breadcrumbs">{% block breadcrumbs %}{% endblock %}</div>
+   <div id="messages">{% include "base/messages.html" %}</div>
+   <div id="helpers">{% block helpers %}{% endblock %}</div>
+   <div id="content">{% block content %}{% endblock %}</div>
   </div>
  </body>
 </html>
