@@ -1,8 +1,8 @@
 """Extract image from gallery view of imgur links, but grab the title on the way"""
 
+from gruntle.memebot.utils.browser import render_node, strip_site_name
 from gruntle.memebot.utils.browser import decode_entities
 from gruntle.memebot.scanner.image import ImageScanner
-from gruntle.memebot.utils.browser import render_node
 from gruntle.memebot.exceptions import trapped
 from gruntle.memebot.scanner import ScanResult
 
@@ -17,7 +17,7 @@ class IMGurScanner(ImageScanner):
 
         title = None
         with trapped:
-            title = render_node(soup.head.title).replace(' - Imgur', '')
+            title = strip_site_name(render_node(soup.head.title), response.url)
 
         with trapped:
             url = soup.head.find('link', rel='image_src')['href']

@@ -3,7 +3,7 @@
 from django.conf import settings
 from gruntle.memebot.scanner import Scanner, ScanResult
 from gruntle.memebot.exceptions import InvalidContent, trapped
-from gruntle.memebot.utils.browser import render_node
+from gruntle.memebot.utils.browser import render_node, strip_site_name
 
 class YouTubeScanner(Scanner):
 
@@ -31,7 +31,7 @@ class YouTubeScanner(Scanner):
         if response.data_type == 'soup':
             soup = response.data
             with trapped:
-                title = render_node(soup.head.title).replace(' - YouTube', '')
+                title = strip_site_name(render_node(soup.head.title), response.url)
             if self.extra_attr:
                 desc = soup.find('div', id='watch-description-clip')
 

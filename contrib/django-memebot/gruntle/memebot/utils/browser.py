@@ -3,6 +3,7 @@
 import htmlentitydefs
 import collections
 import cookielib
+import urlparse
 import urllib2
 import urllib
 import gzip
@@ -63,6 +64,7 @@ entity_dec_re = re.compile(r'(&#(\d+);)')  # &#32;
 entity_hex_re = re.compile(r'^(&#x([0-9a-fA-F]+);)')  # &#x3D;
 entity_name_re = re.compile(r'(&(%s);)' % '|'.join(map(re.escape, htmlentitydefs.name2codepoint)))  # &amp;
 meta_refresh_re = re.compile(r'^refresh$', re.IGNORECASE)
+site_names_re = re.compile(r'(?:^|\.)(([^.]+)\.[^.]+)$')
 
 class Response(collections.namedtuple('Response', 'code msg url real_url data_type main_type sub_type data complete raw')):
 
@@ -287,3 +289,13 @@ def prettify_node(node):
     lines = (line for line in lines if line)
     html = u'\n'.join(lines) + u'\n'
     return text.encode(html)
+
+
+def strip_site_name(title, url):
+    """Try to strip site names from html titles"""
+    try:
+        host = urlparse.urlparse(url).netloc.lower()
+        pattern = '\s*[|-]\s*(?:%s)\s*$' % '|'.join(re.escape(name) for name in site_names_re.search(host).groups())
+        return re.sub(pattern, '', title, flags=re.IGNORECASE)
+    except StandardError:
+        return title
