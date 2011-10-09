@@ -31,7 +31,7 @@ class YouTubeScanner(Scanner):
         if response.data_type == 'soup':
             soup = response.data
             with trapped:
-                title = render_node(soup.head.title)
+                title = render_node(soup.head.title).replace(' - YouTube', '')
             if self.extra_attr:
                 desc = soup.find('div', id='watch-description-clip')
 

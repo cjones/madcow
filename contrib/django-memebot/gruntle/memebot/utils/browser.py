@@ -64,7 +64,7 @@ entity_hex_re = re.compile(r'^(&#x([0-9a-fA-F]+);)')  # &#x3D;
 entity_name_re = re.compile(r'(&(%s);)' % '|'.join(map(re.escape, htmlentitydefs.name2codepoint)))  # &amp;
 meta_refresh_re = re.compile(r'^refresh$', re.IGNORECASE)
 
-class Response(collections.namedtuple('Response', 'code msg url real_url data_type main_type sub_type data complete')):
+class Response(collections.namedtuple('Response', 'code msg url real_url data_type main_type sub_type data complete raw')):
 
     @property
     def is_valid(self):
@@ -88,7 +88,7 @@ class Response(collections.namedtuple('Response', 'code msg url real_url data_ty
 
     def __str__(self):
         return text.encode(', '.join(text.format('%s=%r', key, getattr(self, key, None))
-                                     for key in self._fields if key != 'data'))
+                                     for key in self._fields if key not in ('data', 'raw')))
 
     def __repr__(self):
         return text.format('<%s: %s>', type(self).__name__, self.__str__())
@@ -194,6 +194,9 @@ class Browser(object):
 
         if response.headers.get('content-encoding') == 'gzip':
             data = gzip.GzipFile(fileobj=stringio.StringIO(data), mode='r').read()
+
+        raw = data
+
         if response.headers.maintype == 'text':
             data = text.decode(data, response.headers.getparam('charset'))
             data_type = 'text'
@@ -227,7 +230,7 @@ class Browser(object):
 
         return Response(code=response.code, msg=response.msg, url=url, real_url=response.url, data_type=data_type,
                         main_type=response.headers.maintype, sub_type=response.headers.subtype, data=data,
-                        complete=complete)
+                        complete=complete, raw=raw)
 
 
 def decode_entities(html):

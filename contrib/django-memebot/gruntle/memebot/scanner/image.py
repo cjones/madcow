@@ -75,16 +75,27 @@ class ImageScanner(Scanner):
             new_size = tuple(int(size * ratio) for size in image.size)
             log.info('Rescaling to: %d x %d', *new_size)
             image = image.resize(new_size, self.image_resize_alg)
+            resized = True
+        else:
+            resized = False
 
-        # save as specified file via string buffer
-        fileobj = stringio.StringIO()
-        image.save(fileobj, self.image_format)
+
+        if image.format == 'GIF' and not resized:
+            # preserve for animated gifery
+            content = response.raw
+            content_type = 'image/gif'
+        else:
+            # save as specified file via string buffer
+            fileobj = stringio.StringIO()
+            image.save(fileobj, self.image_format)
+            content = fileobj.getvalue()
+            content_type = self.content_type
 
         return ScanResult(response=response,
                           override_url=None,
                           title=None,
-                          content_type=self.content_type,
-                          content=fileobj.getvalue(),
+                          content_type=content_type,
+                          content=content,
                           attr=None)
 
 

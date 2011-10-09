@@ -6,8 +6,8 @@
 {% if link.attr.uploader %}<p>{{ link.attr.uploader }}</p>{% endif %}
 {% if link.attr.summary %}<p>{{ link.attr.summary|summarize }}</p>{% endif %}
 <ul>
-{% if link.attr.category %}<li><b>Category:</b> {{ link.attr.category }}</li>{% endif %}
-{% if link.attr.views %}<li><b>Views:</b> {{ link.attr.views }}</li>{% endif %}
+{% if link.attr.category %}<li>Category: {{ link.attr.category }}</li>{% endif %}
+{% if link.attr.views %}<li>Views: {{ link.attr.views }}</li>{% endif %}
 {% for extra in link.attr.extras %}<li>{{ extra }}</li>{% endfor %}
 </ul>
 {% endblock %}
