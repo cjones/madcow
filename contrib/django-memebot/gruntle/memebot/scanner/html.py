@@ -5,6 +5,7 @@ from BeautifulSoup import BeautifulSoup, NavigableString
 from gruntle.memebot.scanner import Scanner, ScanResult
 from gruntle.memebot.exceptions import InvalidContent, trapped
 from gruntle.memebot.utils import text, browser
+from gruntle.memebot.utils.browser import render_node
 from django.conf import settings
 
 tag_re = re.compile(r'(</?(\w+)[^>]*>)')
@@ -31,7 +32,7 @@ class HTMLScanner(Scanner):
         title = summary = content_type = None
 
         with trapped:
-            title = text.decode(soup.head.title.string).strip()
+            title = render_node(soup.head.title)
 
         with trapped:
             summary = self.summarize_soup(soup)
