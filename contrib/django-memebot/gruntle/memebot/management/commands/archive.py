@@ -46,7 +46,7 @@ class Command(NoArgsCommand):
         keep_count, keep = max([(q.count(), q) for q in (links.order_by('-created')[:keep_links],
                                links.filter(created__range=(now - timedelta(days=keep_days), now)))])
         cutoff = keep.aggregate(Min('created'))['created__min']
-        archive = links.filter(created__lt=cutoff)[:20]
+        archive = links.filter(created__lt=cutoff)
         archive_count = archive.count()
 
         # show some stats and get caller verification
