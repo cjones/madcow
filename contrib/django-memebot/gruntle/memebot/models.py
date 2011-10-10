@@ -188,6 +188,7 @@ class Link(Model):
     LINK_STATES = [('new', 'New'),
                    ('disabled', 'Disabled'),
                    ('invalid', 'Invalid'),
+                   ('archived', 'Archived'),
                    ('published', 'Published')]
 
     # custom object manager
