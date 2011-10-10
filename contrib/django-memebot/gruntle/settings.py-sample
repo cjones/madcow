@@ -111,6 +111,7 @@ FEED_IMAGE_LINK = None
 # feeds to generate
 FEEDS = ('gruntle.memebot.feeds.hugs',
          'gruntle.memebot.feeds.images',
+         'gruntle.memebot.feeds.text',
          )
 
 # logging config
