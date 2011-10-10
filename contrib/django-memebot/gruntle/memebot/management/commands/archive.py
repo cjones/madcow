@@ -2,8 +2,11 @@
 
 from datetime import datetime, timedelta
 from optparse import make_option
+import tarfile
+import shutil
 import errno
 import time
+import bz2
 import sys
 import os
 
@@ -43,7 +46,7 @@ class Command(NoArgsCommand):
         keep_count, keep = max([(q.count(), q) for q in (links.order_by('-created')[:keep_links],
                                links.filter(created__range=(now - timedelta(days=keep_days), now)))])
         cutoff = keep.aggregate(Min('created'))['created__min']
-        archive = links.filter(created__lt=cutoff)
+        archive = links.filter(created__lt=cutoff)[:20]
         archive_count = archive.count()
 
         # show some stats and get caller verification
@@ -94,6 +97,30 @@ class Command(NoArgsCommand):
                         setattr(link, field, None)
                     link.save()
                     update('Cleaning Content', i)
+
+                # compress archive dir
+                tar_file = archive_dir + '.tar'
+                if os.path.exists(tar_file):
+                    os.remove(tar_file)
+
+                print '\nCreating %s ...' % os.path.basename(tar_file)
+                with tarfile.open(tar_file, 'w') as tar:
+                    for basedir, subdirs, filenames in os.walk(archive_dir):
+                        for filename in filenames:
+                            file = os.path.join(basedir, filename)
+                            arcname = os.path.relpath(file, settings.ARCHIVE_DIR)
+                            tar.add(file, arcname)
+
+                shutil.rmtree(archive_dir)
+                bz2_file = tar_file + '.bz2'
+
+                print 'Creating %s ...' % os.path.basename(bz2_file)
+                with bz2.BZ2File(bz2_file, 'w', 0, 9) as out_fp:
+                    with open(tar_file, 'rb') as in_fp:
+                        shutil.copyfileobj(in_fp, out_fp)
+
+                os.remove(tar_file)
+                print 'Archive is: ' + os.path.relpath(bz2_file, os.curdir)
 
             finally:
                 print '\nFinished in ' + human_readable_duration(time.time() - start)
