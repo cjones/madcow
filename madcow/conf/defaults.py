@@ -207,4 +207,4 @@ UPDATER_FREQ = 86400
 UPDATER_ANNOUNCE_CHANNELS = 'ALL'  # or list of channels
 
 # for django memebot integration
-DJMEMEBOT_PROJECT_ROOT = None
+DJMEMEBOT_SETTINGS_FILE = '/path/to/memebot/settings.py'
