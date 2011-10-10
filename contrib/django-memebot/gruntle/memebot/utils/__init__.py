@@ -410,3 +410,54 @@ def inflate(deflated):
     inflated += handler.flush()
     return inflated
 
+
+def get_yesno(prompt=None, timeout=None, default=None, beep=True):
+    """Get yes or no from the user (POSIX ONLY)"""
+    import select
+    import errno
+    import tty
+
+    stdin = sys.stdin.fileno()
+    attr = tty.tcgetattr(stdin)
+    try:
+        tty.setcbreak(stdin)
+        if prompt:
+            sys.stdout.write(prompt)
+            sys.stdout.flush()
+            result = None
+            while result is None:
+                try:
+                    if stdin in select.select([stdin], [], [], timeout)[0]:
+                        read = os.read(stdin, 4096)
+                        if not read:
+                            raise IOError(errno.EIO, os.strerror(errno.EIO))
+                        if len(read) == 1:
+                            read = read.lower()
+                            if read == 'y':
+                                result = True
+                            elif read == 'n':
+                                result = False
+                            elif read in ('\r', '\n') and default is not None:
+                                result = default
+                            elif beep:
+                                sys.stdout.write('\x07')
+                                sys.stdout.flush()
+
+                    else:
+                        result = default
+                        break
+
+                except (IOError, OSError, select.error), exc:
+                    if not exc.args or exc.args[0] not in (errno.EINTR, errno.EAGAIN):
+                        raise
+
+            if result is True:
+                print 'Yes'
+            elif result is False:
+                print 'No'
+            else:
+                print
+            return result
+
+    finally:
+        tty.tcsetattr(stdin, tty.TCSADRAIN, attr)
