@@ -4,7 +4,7 @@ from gruntle.memebot.feeds import hugs
 
 class Feed(hugs.Feed):
 
-    title = 'All #hugs Image URLs'
+    title = '#hugs images'
     description = __doc__
 
     def filter(self, published_links):

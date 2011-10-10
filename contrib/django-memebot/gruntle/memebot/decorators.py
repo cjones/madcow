@@ -115,4 +115,3 @@ def login_or_apikey_required(*args, **kwargs):
     if len(args) == 1 and not kwargs and callable(args[0]):
         return decorator(args[0])
     return decorator
-
