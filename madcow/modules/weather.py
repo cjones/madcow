@@ -1,6 +1,6 @@
 """Get weather report"""
 
-from madcow.util import Module, encoding
+from madcow.util import Module, encoding, strip_html
 from madcow.util.http import geturl
 from madcow.util.text import *
 from urlparse import urljoin
@@ -58,9 +58,9 @@ class Weather(object):
     def forecast(self, location):
         '''get weather forecast'''
         try:
-            page = geturl(url=self.forecast_url, opts={u'query':location})
+            page = geturl(url=self.forecast_url, opts={u'query':location}).encode('utf-8')
             xml = ElementTree.fromstring(page)
-            text = xml.find('.//fcttext').text
+            text = strip_html(xml.find('.//fcttext').text)
         except Exception, e:
             self.log.warn(u'error in module %s' % self.__module__)
             self.log.exception(e)
@@ -71,7 +71,7 @@ class Weather(object):
     def official_station(self, location):
         '''gets weather data from an official station (typically an airport)'''
         try:
-            page = geturl(url=self.station_url, opts={u'query':location})
+            page = geturl(url=self.station_url, opts={u'query':location}).encode('utf-8')
             xml = ElementTree.fromstring(page)
 
             loc = xml.find('display_location/full').text
@@ -96,15 +96,12 @@ class Weather(object):
                 pws_id = location
             else:
                 page = geturl(url=self.locate_url, opts={u'query':location},
-                              referer=self.base_url)
-                
-                page = page.encode('ascii', 'replace') # ElementTree no likey unicode
-                                
+                              referer=self.base_url).encode('utf-8')
+                                                
                 xml = ElementTree.fromstring(page)
                 pws_id = xml.find('.//pws/station[1]/id').text
             
-            page = geturl(url=self.pws_url, opts={u'ID':pws_id})
-            page = page.encode('ascii', 'replace') # ElementTree no likey unicode
+            page = geturl(url=self.pws_url, opts={u'ID':pws_id}).encode('utf-8')
 
             xml = ElementTree.fromstring(page)
 
