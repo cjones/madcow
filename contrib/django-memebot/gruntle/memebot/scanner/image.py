@@ -12,11 +12,12 @@ except ImportError:
 
 from django.conf import settings
 from gruntle.memebot.scanner import Scanner, ScanResult
-from gruntle.memebot.exceptions import InvalidContent, ConfigError
+from gruntle.memebot.exceptions import InvalidContent, ConfigError, trapped
 
 class ImageScanner(Scanner):
 
-    rss_template = 'memebot/scanner/rss/image.html'
+    rss_templates = {None: 'memebot/scanner/rss/image.html',
+                     'text': 'memebot/scanner/rss/image-text.html'}
 
     def __init__(self, *args, **kwargs):
         image_max_size = kwargs.pop('image_max_size', None)
@@ -66,7 +67,26 @@ class ImageScanner(Scanner):
             raise InvalidContent(response, error)
 
         image = response.data
-        log.info('Detected %s image (%d x %d)', image.format, *image.size)
+
+        # extract some image data
+        attr = {'width': image.size[0],
+                'height': image.size[1],
+                'format': image.format,
+                'size': len(response.raw),
+                'mode': image.mode,
+                }
+
+        with trapped:
+            info = dict(image.info)
+            if 'exif' in info:
+                attr['exif'] = dict(image._getexif())
+                del info['exif']
+            if 'icc_profile' in info:
+                del info['icc_profile']
+            if info:
+                attr['info'] = info
+
+        log.info('Image detected, parameters: %r', attr)
 
         # resize images before caching
         ratios = set(float(msize) / size for size, msize in zip(image.size, self.image_max_size) if size > msize)
@@ -78,6 +98,8 @@ class ImageScanner(Scanner):
             resized = True
         else:
             resized = False
+
+        attr['resized'] = resized
 
 
         if image.format == 'GIF' and not resized:
@@ -91,12 +113,13 @@ class ImageScanner(Scanner):
             content = fileobj.getvalue()
             content_type = self.content_type
 
+
         return ScanResult(response=response,
                           override_url=None,
                           title=None,
                           content_type=content_type,
                           content=content,
-                          attr=None)
+                          attr=attr)
 
 
 scanner = ImageScanner()

@@ -15,10 +15,10 @@ class LinkItem(rss.Item):
 
     """A single Link feed item"""
 
-    def __init__(self, link):
+    def __init__(self, link, feed):
         super(LinkItem, self).__init__(link.best_url,
                                        title=link.get_title_display(),
-                                       desc=link.rendered,
+                                       desc=link.render(feed.format),
                                        author=link.user.username,
                                        guid=link.guid,
                                        published=link.published)
@@ -44,7 +44,7 @@ class RSSFeed(rss.RSS):
                                       extra_namespaces=feed.extra_namespaces)
 
         for link in feed.links:
-            self.append(LinkItem(link))
+            self.append(LinkItem(link, feed))
 
 
 class BaseFeed(object):
@@ -54,6 +54,7 @@ class BaseFeed(object):
     # you must set these on the subclass
     title = None
     description = None
+    format = None
 
     # the rest of these attributes can be overridden, these are just defaults
     base_url = settings.FEED_BASE_URL

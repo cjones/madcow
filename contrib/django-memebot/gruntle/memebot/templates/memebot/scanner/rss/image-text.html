@@ -1,0 +1,12 @@
+{% extends "memebot/scanner/rss/base.html" %}
+{% load rss_filters %}
+{% spaceless %}
+{% block content %}
+<a href="{{ link.resolved_url }}">
+    Image: [{{ link.attr.size|readable_size }}] {{ link.attr.width }}x{{ link.attr.height }} {{ link.attr.format }}</a>
+{% if link.attr.info %}
+<hr />
+<p>{{ link.attr.info|pretty_repr }}</p>
+{% endif %}
+{% endblock %}
+{% endspaceless %}

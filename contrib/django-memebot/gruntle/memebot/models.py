@@ -246,9 +246,11 @@ class Link(Model):
         return u'[%s] %s' % (get_domain_from_url(url), self.title)
 
     @property
-    def rss_template(self):
+    def rss_templates(self):
         """The scanner-defined template used to render this link in RSS"""
-        return self.get_scanner().rss_template
+        scanner = self.get_scanner()
+        if scanner is not None:
+            return scanner.rss_templates
 
     @models.permalink
     def get_absolute_url(self):
@@ -282,9 +284,13 @@ class Link(Model):
             dirty = False
         return dirty
 
-    def render(self):
+    def render(self, format=None):
         if self.state == 'published':
-            return loader.get_template(self.rss_template).render(Context({'link': self}))
+            if self.rss_templates is not None:
+                template = self.rss_templates.get(format)
+                if template is None:
+                    template = self.rss_templates[None]
+                return loader.get_template(template).render(Context({'link': self}))
 
     rendered = property(render)
 

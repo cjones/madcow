@@ -39,7 +39,7 @@ class Scanner(object):
 
     """Base scanner implements url and query context parsing/matching"""
 
-    rss_template = None
+    rss_templates = None
     url_match = None
 
     def __init__(self):

@@ -7,7 +7,8 @@ from gruntle.memebot.utils.browser import render_node, strip_site_name
 
 class YouTubeScanner(Scanner):
 
-    rss_template = 'memebot/scanner/rss/youtube.html'
+    rss_templates = {None: 'memebot/scanner/rss/youtube.html',
+                     'text': 'memebot/scanner/rss/youtube-text.html'}
 
     url_match = {'netloc_regex': r'^(?:www\.)?youtube\.com$',
                  'netloc_ignorecase': True,

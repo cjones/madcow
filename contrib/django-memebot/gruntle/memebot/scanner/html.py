@@ -12,7 +12,7 @@ tag_re = re.compile(r'(</?(\w+)[^>]*>)')
 
 class HTMLScanner(Scanner):
 
-    rss_template = 'memebot/scanner/rss/html.html'
+    rss_templates = {None: 'memebot/scanner/rss/html.html'}
 
     def __init__(self, *args, **kwargs):
         summary_size = kwargs.pop('summary_size', None)

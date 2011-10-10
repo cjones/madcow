@@ -4,7 +4,7 @@ from gruntle.memebot.scanner import Scanner, ScanResult
 
 class DefaultScanner(Scanner):
 
-    rss_template = 'memebot/scanner/rss/default.html'
+    rss_templates = {None: 'memebot/scanner/rss/default.html'}
 
     def handle(self, response, log, browser):
         return ScanResult(response=response,
