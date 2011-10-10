@@ -127,6 +127,7 @@ DATA_DIR = os.path.join(PROJECT_DIR, 'data')
 LOG_DIR = os.path.join(DATA_DIR, 'logs')
 LOCK_DIR = os.path.join(DATA_DIR, 'locks')
 FEED_DIR = os.path.join(DATA_DIR, 'feeds')
+ARCHIVE_DIR = os.path.join(DATA_DIR, 'archives')
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'memebot', 'media')
 
 # url locations
