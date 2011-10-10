@@ -1,126 +1,145 @@
 """Get weather report"""
 
-import re
-from madcow.util import strip_html, Module, encoding
+from madcow.util import Module, encoding
 from madcow.util.http import geturl
 from madcow.util.text import *
 from urlparse import urljoin
-from BeautifulSoup import BeautifulSoup
-import feedparser
 from learn import Main as Learn
 from madcow.util.color import ColorLib
+from xml.etree import ElementTree
+import re
 
 USAGE = u'set location <nick> <location>'
 
 class Weather(object):
 
-    baseurl = u'http://www.wunderground.com/'
-    search = urljoin(baseurl, u'/cgi-bin/findweather/getForecast')
-    _rss_link = {u'type': u'application/rss+xml'}
-    _tempF = re.compile(u'(-?[0-9.]+)\s*\xb0\s*F', re.I)
-    _bar = re.compile(r'\s*\|\s*')
-    _keyval = re.compile(r'^\s*(.*?)\s*:\s*(.*?)\s*$')
+    base_url = u'http://api.wunderground.com/'
+    locate_url = urljoin(base_url, u'auto/wui/geo/GeoLookupXML/index.xml')
+    station_url = urljoin(base_url, u'auto/wui/geo/WXCurrentObXML/index.xml')
+    pws_url = urljoin(base_url, u'weatherstation/WXCurrentObXML.asp')
+    forecast_url = urljoin(base_url, u'auto/wui/geo/ForecastXML/index.xml')
 
-    def __init__(self, colorlib):
+    def __init__(self, colorlib, logger):
         self.colorlib = colorlib
+        self.log = logger
+
+    def _color_temp(self, temp, tempstr):
+        '''colorize the temperature string (tempstr) based on the temperature in farenheit (temp)'''
+        blink = False
+        if temp < 0:
+            color = u'magenta'
+        elif temp >=0 and temp < 40:
+            color = u'blue'
+        elif temp >= 40 and temp < 60:
+            color = u'cyan'
+        elif temp >= 60 and temp < 80:
+            color = u'green'
+        elif temp >= 80 and temp < 90:
+            color = u'yellow'
+        elif temp >= 90 and temp < 100:
+            color = u'red'
+        elif temp >= 100:
+            color = u'red'
+            blink = True
+        s = self.colorlib.get_color(color, text=tempstr)
+
+        # XXX this seems ill-conceived
+        if blink:
+            s = u'\x1b[5m' + s + u'\x1b[0m'
+        
+        return s
+    
+    def _format_weather(self, data):
+        data['tempstr'] = self._color_temp(data['temp'], data['tempstr'])
+
+        return ('%(loc)s - %(time)s: Conditions: %(conditions)s | Temperature: %(tempstr)s ' + \
+                '| Humidity: %(humidity)s | Wind: %(wind)s') % data
 
     def forecast(self, location):
-        page = geturl(url=self.search, opts={u'query': location},
-                      referer=self.baseurl)
-        soup = BeautifulSoup(page)
-
-        # disambiguation page
-        if u'Search Results' in unicode(soup):
-            table = soup.find(u'table', attrs={u'class': u'dataTable'})
-            tbody = soup.find(u'tbody')
-            results = [row.findAll(u'td')[0].find(u'a')
-                       for row in tbody.findAll(u'tr')]
-            results = [(normalize(unicode(result.contents[0])),
-                        urljoin(Weather.baseurl, unicode(result[u'href'])))
-                       for result in results]
-
-            match = None
-            for result in results:
-                if result[0] == normalize(location):
-                    match = result[1]
-                    break
-            if match is None:
-                match = results[0][1]
-            page = geturl(url=match, referer=self.search)
-            soup = BeautifulSoup(page)
-
-        title = soup.find(u'h1').string.strip()
-        rss_url = soup.find(u'link', attrs=self._rss_link)[u'href']
-        rss = feedparser.parse(rss_url)
-        conditions = rss.entries[0].description
-
-        # XXX ok, here's the deal. this page has raw utf-8 bytes encoded
-        # as html entities, and in some cases latin1.  this demonstrates a
-        # total misunderstanding of how unicode works on the part of the
-        # authors, so we need to jump through some hoops to make it work
-        conditions = conditions.encode(u'raw-unicode-escape')
-        conditions = strip_html(conditions)
-        conditions = encoding.convert(conditions)
-        fields = self._bar.split(conditions)
-        data = {}
-        for field in fields:
-            try:
-                key, val = self._keyval.search(field).groups()
-                data[key] = val
-            except:
-                pass
-
+        '''get weather forecast'''
         try:
-            temp = float(self._tempF.search(data[u'Temperature']).group(1))
-            blink = False
-            if temp < 0:
-                color = u'magenta'
-            elif temp >=0 and temp < 40:
-                color = u'blue'
-            elif temp >= 40 and temp < 60:
-                color = u'cyan'
-            elif temp >= 60 and temp < 80:
-                color = u'green'
-            elif temp >= 80 and temp < 90:
-                color = u'yellow'
-            elif temp >= 90 and temp < 100:
-                color = u'red'
-            elif temp >= 100:
-                color = u'red'
-                blink = True
-            data[u'Temperature'] = self.colorlib.get_color(color,
-                    text=data[u'Temperature'])
+            page = geturl(url=self.forecast_url, opts={u'query':location})
+            xml = ElementTree.fromstring(page)
+            text = xml.find('.//fcttext').text
+        except Exception, e:
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(e)
+            return "error looking up forecast for location: %s" % location
 
-            # XXX this seems ill-conceived
-            if blink:
-                data[u'Temperature'] = u'\x1b[5m' + data[u'Temperature'] + \
-                        u'\x1b[0m'
+        return text
 
-        except Exception, error:
-            self.log.exception(error)
+    def official_station(self, location):
+        '''gets weather data from an official station (typically an airport)'''
+        try:
+            page = geturl(url=self.station_url, opts={u'query':location})
+            xml = ElementTree.fromstring(page)
 
-        output = []
-        for key, val in data.items():
-            line = u'%s: %s' % (key, val)
-            output.append(line)
-        output = u' | '.join(output)
-        return u'%s: %s' % (title, output)
+            loc = xml.find('display_location/full').text
+            time = xml.find('local_time').text
+            conditions = xml.find('weather').text
+            temp = float(xml.find('temp_f').text)
+            tempstr = xml.find('temperature_string').text
+            humidity = xml.find('relative_humidity').text
+            wind = xml.find('wind_string').text
+
+            return self._format_weather(locals())
+        except Exception, e:
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(e)
+            return "error looking up conditions for location: %s" % location
+
+
+    def personal_station(self, location):
+        '''gets weather data from a personal weather station'''
+        try:
+            if re.match('[A-Z]{8}\d+', location): # already a PWSid
+                pws_id = location
+            else:
+                page = geturl(url=self.locate_url, opts={u'query':location},
+                              referer=self.base_url)
+                
+                page = page.encode('ascii', 'replace') # ElementTree no likey unicode
+                                
+                xml = ElementTree.fromstring(page)
+                pws_id = xml.find('.//pws/station[1]/id').text
+            
+            page = geturl(url=self.pws_url, opts={u'ID':pws_id})
+            page = page.encode('ascii', 'replace') # ElementTree no likey unicode
+
+            xml = ElementTree.fromstring(page)
+
+            loc = xml.find('location/full').text
+            time = xml.find('observation_time_rfc822').text
+            conditions = 'N/A'
+            temp = float(xml.find('temp_f').text)
+            tempstr = xml.find('temperature_string').text
+            humidity = xml.find('relative_humidity').text + '%'
+            wind = xml.find('wind_string').text
+
+            return self._format_weather(locals())
+        except Exception, e:
+            self.log.warn(u'error in module %s' % self.__module__)
+            self.log.exception(e)
+            return "error looking up conditions for location: %s" % location
+
 
 
 class Main(Module):
 
-    pattern = re.compile(u'^\s*(?:fc|forecast|weather)(?:\s+(.*)$)?')
+    pattern = re.compile(u'^\s*(fc|forecast|weather|ws|pws)(?:\s+(.*)$)?')
     require_addressing = True
-    help = u'fc [location] - look up weather forecast'
+    help = u'fc|forecast, ws|weather, pws [zipcode|city,state|city,country|pws] - look up weather forecast/conditions'
     error = u"Couldn't find that place, maybe a bomb dropped on it"
 
     def init(self):
         colorlib = self.madcow.colorlib
-        self.weather = Weather(colorlib)
+        self.weather = Weather(colorlib, self.log)
         self.learn = Learn(madcow=self.madcow)
 
     def response(self, nick, args, kwargs):
-        query = args[0]
+        cmd = args[0]
+        query = args[1]
+
         if not query:
             location = self.learn.lookup('location', nick)
         elif query.startswith('@'):
@@ -128,7 +147,12 @@ class Main(Module):
         else:
             location = query
         if location:
-            message = self.weather.forecast(location)
+            if cmd in ('fc', 'forecast'):
+                message = self.weather.forecast(location)
+            elif cmd in ('weather', 'ws'):
+                message = self.weather.official_station(location)
+            elif cmd == 'pws':
+                message = self.weather.personal_station(location)
         else:
             message = u"I couldn't look that up"
         return u'%s: %s' % (nick, message)
@@ -138,12 +162,3 @@ whitespace = re.compile(r'\s+')
 year = re.compile(r'\(\d{4}\)\s*$')
 badchars = re.compile(r'[^a-z0-9 ]', re.I)
 
-def normalize(name):
-    """Normalize city name for easy comparison"""
-    name = strip_html(name)
-    name = year.sub(u'', name)
-    name = badchars.sub(u' ', name)
-    name = name.lower()
-    name = name.strip()
-    name = whitespace.sub(u' ', name)
-    return name
