@@ -14,6 +14,7 @@ class Command(NoArgsCommand):
         new_links = pending_links.filter(error_count=0)
         deferred_links = pending_links.exclude(error_count=0)
         disabled_links = links.filter(state='disabled').order_by('-modified')
+        archived_links = links.filter(state='archived').order_by('-modified')
         published_links = links.filter(state='published').order_by('-published')
         invalid_links = links.filter(state='invalid').order_by('-modified')
 
@@ -22,6 +23,7 @@ class Command(NoArgsCommand):
         new_link_count = new_links.count()
         deferred_link_count = deferred_links.count()
         disabled_link_count = disabled_links.count()
+        archived_link_count = archived_links.count()
         published_link_count = published_links.count()
         invalid_link_count = invalid_links.count()
 
@@ -32,6 +34,7 @@ class Command(NoArgsCommand):
         print '        New: %d' % new_link_count
         print '        Deferred: %d' % deferred_link_count
         print '    Disabled: %d' % disabled_link_count
+        print '    Archived: %d' % archived_link_count
         print '    Published: %d' % published_link_count
         print '    Invalid: %d' % invalid_link_count
         print
