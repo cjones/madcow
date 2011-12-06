@@ -154,10 +154,10 @@ class Madcow(object):
 
     def signal_handler(self, sig, *args):
         """Handles signals"""
-        if sig == SIGTERM:
+        if sig == signal.SIGTERM:
             self.log.warn(u'got SIGTERM, signaling shutting down')
             self.running = False
-        elif sig == SIGHUP:
+        elif sig == signal.SIGHUP:
             self.reload_modules()
 
     def reload_modules(self):
