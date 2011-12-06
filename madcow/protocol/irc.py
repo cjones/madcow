@@ -89,7 +89,8 @@ class IRCProtocol(Madcow):
         old = self.botname()
         new = old + '_'
         self.log.warn('%s in use, trying %s', old, new)
-        server.nick(new)
+        #server.nick(new)
+        # this event is not being fired correctly on inspircd 2, disable for now
 
     def run(self):
         self.connect()
