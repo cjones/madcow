@@ -122,7 +122,7 @@ class Google(object):
         try:
             doc = self.ua.open(self.search, {'q': 'time in %s' % query})
             soup = BeautifulSoup(doc)
-            table = soup.find('table', 'obcontainer')
+            table = soup.find('div', 'obcontainer')
             time = table.find('td', style='font-size:medium')
             return strip_html(self.decode(time).strip())
         except:
