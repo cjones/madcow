@@ -9,7 +9,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
         url(r'^memebot/', include('gruntle.memebot.urls.memebot')),
         url(r'^accounts/', include('gruntle.memebot.urls.accounts')),
-        url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+        #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
         url(r'^admin/', include(admin.site.urls)),
         )
 

@@ -301,8 +301,8 @@ class Note(Model):
     """A note associated with a link"""
 
     # relationships
-    user = models.ForeignKey(User, null=True, blank=True, related_name='notes')
-    link = models.ForeignKey(Link, null=True, blank=True, related_name='notes')
+    user = models.ForeignKey(User, null=False, blank=False, related_name='notes')
+    link = models.ForeignKey(Link, null=False, blank=False, related_name='notes')
 
     # fields
     value = models.TextField(null=False, blank=False)

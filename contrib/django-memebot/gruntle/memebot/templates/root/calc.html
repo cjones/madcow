@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Minecraft Time Calc{% endblock %}
+{% block content %}
+<h3>Minecraft Time Calc</h3>
+<div id="minecraft-calc-form">
+ <form action="" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">convert</button>
+ </form>
+ {% if seconds != None %}
+ <p>time = {{ seconds }}</p>
+ {% endif %}
+</div>
+{% endblock %}

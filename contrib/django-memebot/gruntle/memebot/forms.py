@@ -60,3 +60,10 @@ class CheckLinkForm(forms.Form):
         if errors:
             raise forms.ValidationError(errors)
         return self.cleaned_data['url']
+
+
+class AMPMTimeForm(forms.Form):
+
+    hour = forms.IntegerField(min_value=1, max_value=12)
+    minute = forms.IntegerField(min_value=0, max_value=59)
+    phase = forms.ChoiceField(choices=[('am', 'AM'), ('pm', 'PM')])
