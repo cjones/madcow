@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -19,9 +20,9 @@
 #define COOKIE "MegaHALv8"
 #define TIMEOUT 1
 #define DEFAULT "."
-#define BYTE1 unsigned char
-#define BYTE2 unsigned short
-#define BYTE4 unsigned long
+#define BYTE1 uint8_t  //unsigned char
+#define BYTE2 uint16_t  //unsigned short
+#define BYTE4 uint32_t   //unsigned long
 #ifdef __mac_os
 #define bool Boolean
 #endif
