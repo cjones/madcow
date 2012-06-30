@@ -17,7 +17,7 @@ class Main(Module):
 
     """Translation service using Google Translate"""
 
-    pattern = re.compile(r'^\s*(tr(?:ans(?:late)?)?(.+?)|list\s+lang(s|uages))\s*$', re.I)
+    pattern = re.compile(r'^\s*(translate\s+(.+?)|list\s+lang(s|uages)?)\s*$', re.I)
     help = '\n'.join([
         'translate: <text> - auto-detect language and convert to english',
         'translate: from <lang> to <lang> [to <lang> ...]: text - specify translation',
