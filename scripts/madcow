@@ -25,6 +25,8 @@ def main(argv=None):
         return 0
     except (SystemExit, KeyboardInterrupt):
         raise
+    except madcow.MadcowError, exc:
+        print >> sys.stderr, exc
     except:
         traceback.print_exc()
         return 1
