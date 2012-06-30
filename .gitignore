@@ -1,5 +1,11 @@
+# artifacts
 *.pyo
 *.pyc
 *.so
+# dev stuff
 /test.py
 /build
+# data files when running in-place
+settings.py
+db
+log
