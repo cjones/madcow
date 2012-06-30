@@ -30,6 +30,12 @@ class Main(Module):
             self.learn = None
 
     def response(self, nick, args, kwargs):
+        try:
+            return self._response(nick, args, kwargs)
+        except StandardError, exc:
+            return u'%s: No results for that query' % nick
+
+    def _response(self, nick, args, kwargs):
         # sanity check args and pick default search location
         desc, loc = args
         if desc.startswith('@') and not loc:
