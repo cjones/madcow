@@ -3,9 +3,11 @@
 *.pyc
 *.so
 # dev stuff
+/build/
+/dist/
 /test.py
-/build
+/MANIFEST
 # data files when running in-place
-settings.py
-db
-log
+/settings.py
+/db/
+/log/
