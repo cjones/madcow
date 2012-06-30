@@ -24,7 +24,7 @@ class Main(Module):
         'list languages - list all available languages',
         ])
     default_lang = 'english'
-    url = 'http://ajax.googleapis.com/ajax/services/language/translate'
+    #url = 'http://ajax.googleapis.com/ajax/services/language/translate'
 
     langs = {'auto': '',
              'afrikaans': 'af',
@@ -171,11 +171,30 @@ class Main(Module):
 
     def translate(self, text, src, dst):
         """Perform the translation"""
-        opts = {'langpair': '%s|%s' % (self.langs[src], self.langs[dst]), 'v': '1.0', 'q': text}
-        res = simplejson.loads(geturl(self.url, opts))['responseData']
-        text = strip_html(res['translatedText'])
+        opts = {'client': 't',
+                'text': text,
+                'hl': 'en',
+                'sl': self.langs[src],
+                'tl': self.langs[dst],
+                'ie': 'UTF-8',
+                'oe': 'UTF-8',
+                'multires': '0',
+                'prev': 'btn',
+                'ssel': '4',
+                'tsel': '4',
+                'sc': '1'}
+        url = 'http://translate.google.com/translate_a/t'
+        res = geturl(url, opts)
+        while u',,' in res:
+            res = res.replace(u',,', u',"",')
+        res = simplejson.loads(res)
         try:
-            text = u'[detected %s] %s' % (self.lookup[res['detectedSourceLanguage']].capitalize(), text)
-        except KeyError:
-            pass
-        return text
+            det = self.lookup[res[2]].capitalize()
+        except StandardError:
+            det = None
+        while isinstance(res, list) and res:
+            res = res[0]
+        if src == 'auto' and det:
+            res = u'[detected %s] %s' % (det, res)
+        if res:
+            return res
