@@ -43,7 +43,7 @@ from madcow.util.color import ColorLib
 from madcow.util.auth import AuthLib
 from madcow.util.text import encode, decode, set_encoding, get_encoding
 
-VERSION = 2, 2, 1
+VERSION = 2, 2, 2
 
 __version__ = '.'.join(str(_) for _ in VERSION)
 __author__ = 'Chris Jones <cjones@gmail.com>'
