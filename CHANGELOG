@@ -1,3 +1,18 @@
+2.2.2: Fri Jun 29 21:56:52 PDT 2012
+    * fix buffer overflow in megahal when built on 64bit architecture
+    * add django memebot app
+    * migrate source to git
+    * use bs4 (BeautifulSoup v4) for modules now
+    * various fixes for unicode support
+    * fix fmylife module
+    * fix movie module
+    * fix spellcheck claiming everything is correct
+    * fixed broken translate module
+    * weather module rewritten with 3 commands: fc (forecast), ws (noaa data), pws (personal weather station)
+    * woot module cutting off first part of entry fixed
+    * friendlier error in yelp module
+    * fix imports for pysilc
+
 2.0.5: Tue Jul  5 16:00:20 PDT 2011
     * friendy (ish) error messages for some modules where lookup fails
     * cleanup steam output
