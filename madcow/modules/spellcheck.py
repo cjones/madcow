@@ -15,11 +15,11 @@ class Main(Module):
     error = 'I had trouble with that'
 
     def response(self, nick, args, kwargs):
-        opts = {'hl': 'en', 'aq': 'f', 'safe': 'off', 'q': args[0]}
+        opts = {'hl': 'en', 'safe': 'off', 'q': args[0]}
         soup = getsoup(self.google_search, opts, referer=self.google_url)
-        a = soup.body.find('a', 'spell')
-        if a:
-            res = strip_html(decode(a.renderContents(), 'utf-8'))
+        correct = soup.body.find('a', href=re.compile(r'^/search.*spell=1'))
+        if correct:
+            res = strip_html(decode(correct.renderContents(), 'utf-8'))
         else:
-            res = u'spelled correctly'
+            res = u'spelled correctly. probably.'
         return u'%s: %s' % (nick, res)
