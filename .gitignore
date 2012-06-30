@@ -1,0 +1,5 @@
+*.pyo
+*.pyc
+*.so
+/test.py
+/build
