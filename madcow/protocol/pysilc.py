@@ -28,7 +28,7 @@ import silc
 import time
 from madcow.conf import settings
 from madcow import Madcow, Request
-from encoding import detect
+from madcow.util.text import decode
 
 COLOR_SCHEME = 'mirc'
 
@@ -91,7 +91,7 @@ class SilcPlugin(Madcow, silc.SilcClient):
             req.sendto = channel
             req.channel = channel.channel_name
 
-        req.message = decode(req.message, detect(req.message))
+        req.message = decode(req.message)
         req.message = self.colorlib.strip_color(req.message)
         self.check_addressing(req)
 
