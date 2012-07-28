@@ -92,6 +92,8 @@ class TreeBuilder(object):
         else:
             tag = name
         element = etree.Element(tag, attrib, nsmap)
+        if isinstance(val, unicode):
+            val = val.replace(u'\x03', u'')  # XXX
         element.text = val
         return element
 
