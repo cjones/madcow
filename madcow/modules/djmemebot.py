@@ -35,7 +35,8 @@ class Memebot(object):
             insults = DEFAULT_INSULTS
         self.insults = insults
         self.log = logger
-        settings_file = os.path.realpath(settings_file)
+        #settings_file = os.path.realpath(settings_file)
+        settings_file = os.path.abspath(settings_file)
         project_dir, settings_filename = os.path.split(settings_file)
         settings_name = os.path.splitext(settings_filename)[0]
         install_dir, project_name = os.path.split(project_dir)
