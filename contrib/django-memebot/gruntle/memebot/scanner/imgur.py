@@ -3,7 +3,7 @@
 from gruntle.memebot.utils.browser import render_node, strip_site_name
 from gruntle.memebot.utils.browser import decode_entities
 from gruntle.memebot.scanner.image import ImageScanner
-from gruntle.memebot.exceptions import trapped
+from gruntle.memebot.exceptions import InvalidContent, trapped
 from gruntle.memebot.scanner import ScanResult
 
 class IMGurScanner(ImageScanner):
