@@ -23,12 +23,18 @@ from htmlentitydefs import name2codepoint
 from time import time as unix_time
 from HTMLParser import HTMLParser
 from datetime import datetime
-import tempfile
+
 import logging as log
+import collections
+import traceback
+import threading
+import tempfile
+import numbers
 import errno
 import re
 import sys
 import os
+
 from madcow.conf import settings
 from text import encode, decode, get_encoding
 
@@ -254,3 +260,54 @@ def get_unique_dir(dir=None, prefix=None, suffix=None, timestamp_format=None, ma
 def get_unique_file(dir=None, prefix=None, suffix=None, timestamp_format=None, max_files=None, delim=None, perms=0644):
     create_func = lambda path: os.open(path, tempfile._text_openflags, perms)
     return unique_opener(create_func, dir, prefix, suffix, timestamp_format, max_files, delim)
+
+
+def igetkey(items):
+    val = items[0]
+    if isinstance(val, basestring):
+        val = val.lower()
+    return val
+
+
+class strlist(list):
+
+    __slots__ = ()
+
+    def add(self, item):
+        super(StringBuilder, self).append(item)
+        return self
+
+    def to_string(self):
+        return ''.join(_imap(encode, self))
+
+    def __str__(self):
+        return self.to_string()
+
+
+def ipython(frame_or_depth=1, runs=1, argv=None, _frame_type=type(sys._getframe()), _lock=threading.RLock(), **kwargs):
+    """Embed an IPython shell in-line for debugging"""
+    try:
+        with _lock:
+            from IPython.Shell import IPShellEmbed
+            if IPShellEmbed.__dict__.setdefault('runs', 0) < runs:
+                IPShellEmbed.runs += 1
+                if isinstance(frame_or_depth, numbers.Integral):
+                    frame = sys._getframe(frame_or_depth)
+                elif isinstance(frame_or_depth, _frame_type):
+                    frame = frame_or_depth
+                else:
+                    raise TypeError('arg 1 must be frame or depth, not ' + type(frame_or_depth).__name__)
+                if argv is None:
+                    argv = ['ipython']
+                old_argv, sys.argv[:] = sys.argv[:], argv[:]
+                try:
+                    IPShellEmbed(user_ns=kwargs)(
+                            header='locals: ' + ' '.join(sorted(frame.f_locals)) if frame.f_locals else '',
+                            local_ns=frame.f_locals, global_ns=frame.f_globals)
+                finally:
+                    sys.argv[:] = old_argv[:]
+    except (SystemExit, KeyboardInterrupt, EOFError):
+        raise
+    except:
+        exc_info = sys.exc_info()
+        traceback.print_exception(*exc_info)

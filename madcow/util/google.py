@@ -22,12 +22,11 @@ import urllib2
 import re
 
 from BeautifulSoup import BeautifulSoup
-from madcow.util import strip_html, superscript
+from madcow.util import strip_html, superscript, ipython
 from madcow.util.http import UserAgent
 from madcow.util.text import encode, decode
 
-__version__ = '0.3'
-__author__ = 'cj_ <cjones@gruntle.org>'
+AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_1) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.215 Safari/535.1"
 
 class NonRedirectResponse(Exception):
 
@@ -73,7 +72,7 @@ class Google(object):
     whitespace_re = re.compile(r'\s{2,}')
 
     def __init__(self):
-        self.ua = UserAgent(handlers=[NoRedirects, NoErrors], agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_1) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.215 Safari/535.1")
+        self.ua = UserAgent(handlers=[NoRedirects, NoErrors], agent=AGENT)
 
     def lucky(self, query):
         """Return I'm Feeling Lucky URL for given query"""
@@ -94,19 +93,21 @@ class Google(object):
         opts[u'q'] = query
         doc = self.ua.open(self.search, opts=opts)
         soup = BeautifulSoup(doc)
-        response = soup.find('img', src=self.calc_re).parent.findNext('h2').renderContents()
-        response = ' '.join(response.splitlines())
-        response = decode(response, 'utf-8')
-
-        # turn super scripts into utf8
-        parts = []
-        for part in self.sup_re.split(response):
-            if self.sup_re.match(part):
-                part = superscript(part)
-            parts.append(part)
-        response = u''.join(parts)
-        response = self.white_re.sub(' ', strip_html(response).strip())
-        return response
+        values = []
+        conv_left = soup.find('input', id='ucw_lhs_d')
+        conv_right = soup.find('input', id='ucw_rhs_d')
+        if not (conv_left is None or conv_right is None):
+            left_value = conv_left['value'].strip()
+            left_unit = conv_left.findNext('option').renderContents().strip()
+            right_value = conv_right['value'].strip()
+            right_unit = conv_right.findNext('option').renderContents().strip()
+            values.append('(%s) %s = (%s) %s' % (left_unit, left_value, right_unit, right_value))
+        calculation = soup.find('span', 'cwcot')
+        if calculation is not None:
+            values.append(calculation.renderContents())
+        result = u', '.join(filter(None, (decode(strip_html(value)).strip() for value in values)))
+        if result:
+            return result
 
     def sunrise_sunset(self, query, location):
         """Ask google for the sunrise or sunset from location"""

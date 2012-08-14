@@ -43,7 +43,7 @@ class UserAgent(object):
 
     """Closely mimic a browser"""
 
-    def __init__(self, handlers=None, cookies=True, agent=AGENT):
+    def __init__(self, handlers=None, cookies=True, agent=AGENT, debug=False):
         if handlers is None:
             handlers = []
         if cookies:
@@ -51,6 +51,7 @@ class UserAgent(object):
         self.opener = urllib2.build_opener(*handlers)
         if agent:
             self.opener.addheaders = [(u'User-Agent', agent)]
+        self.debug = debug
 
     def open(self, url, opts=None, data=None, referer=None, size=-1,
              add_headers=None):
@@ -66,7 +67,8 @@ class UserAgent(object):
                 query.append(url[4])
             url[4] = u'&'.join(query)
         realurl = urlparse.urlunparse(url)
-        #print 'url = %r' % realurl
+        if self.debug:
+            print 'url = %r' % realurl
         request = urllib2.Request(realurl, data)
         if referer:
             request.add_header(u'Referer', referer)
