@@ -47,9 +47,51 @@ def TLV(type,value):
     head=struct.pack(header,type,len(value))
     return head+str(value)
 
+### BEGIN SAFETY PATCH
+
+from collections import MutableMapping
+import traceback
+import sys
+
+class SlightlySaferTLV(MutableMapping):
+
+    def __new__(cls, *args, **kwargs):
+        self = super(SlightlySaferTLV, cls).__new__(cls)
+        self._wrapped_dict = dict(*args, **kwargs)
+        return self
+
+    def magic():
+        l = sys._getframe(1).f_locals
+        map((lambda x: l.__setitem__(x, lambda s, *a, **k: getattr(s._wrapped_dict, x)(*a, **k))),
+                MutableMapping.__abstractmethods__.union(['__repr__', '__str__']))
+        del l['magic']
+
+    magic()  # i wrote it this way to fit in with the rest of this mess
+
+    def __getitem__(self, key):
+        try:
+            return self._wrapped_dict[key]
+        except KeyError:
+            exc_info = sys.exc_info()
+            if key == 12:
+                return 'NO CHAT REASON PROVIDED'
+            else:
+                traceback.print_stack()
+                print >> sys.stderr, 'ERROR: Missing TLV %r' % (key,)
+                return ''
+
+    def has_key(self, key):
+        try:
+            self[key]
+            return True
+        except KeyError:
+            return False
+
+
 def readTLVs(data,count=None):
     header="!HH"
-    dict={}
+    dict = SlightlySaferTLV()
+    #dict={}
     while data and len(dict)!=count:
         head=struct.unpack(header,data[:4])
         dict[head[0]]=data[4:4+head[1]]
@@ -57,6 +99,8 @@ def readTLVs(data,count=None):
     if not count:
         return dict
     return dict,data
+
+### END SAFETY PATCH
 
 def encryptPasswordMD5(password,key):
     m=md5()
