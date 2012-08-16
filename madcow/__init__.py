@@ -43,11 +43,11 @@ from madcow.util.color import ColorLib
 from madcow.util.auth import AuthLib
 from madcow.util.text import encode, decode, set_encoding, get_encoding
 
-VERSION = 2, 2, 2
+VERSION = 2, 2, 3
 
 __version__ = '.'.join(str(_) for _ in VERSION)
 __author__ = 'Chris Jones <cjones@gmail.com>'
-__url__ = 'http://code.google.com/p/madcow/'
+__url__ = 'https://github.com/cjones/madcow'
 
 delim_re = re.compile(r'\s*[,;]\s*')
 help_re = re.compile(r'^help(?:\s+(\w+))?$')

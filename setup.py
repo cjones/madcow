@@ -47,8 +47,8 @@ def main():
 
     setup(name='madcow',
           author='Chris Jones',
-          author_email='cjones@gruntle.org',
-          url='http://code.google.com/p/madcow/',
+          author_email='cjones@gmail.com',
+          url='https://github.com/cjones/madcow',
           description='Madcow infobot',
           license='GPL',
           version=__version__,
