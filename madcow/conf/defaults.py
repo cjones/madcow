@@ -95,10 +95,10 @@ MODULES = ['alias',               # allow users to make command aliases
            ]
 
 # these are modules that run on their own periodically if enabled. settings are below
-TASKS = ['updater',             # check for updates to madcow
-         'ircops',             # automatically provide ops in irc
-         #'tweets',            # gateway for tweet timeline
-         ]
+TASKS = [
+        #'ircops',             # automatically provide ops in irc
+        #'tweets',            # gateway for tweet timeline
+        ]
 
 PRIVATE_MODULES = ['lyrics']  # list of modules (from MODULES above) that only respond in private message
 
@@ -201,10 +201,6 @@ TWITTER_CHANNELS = 'ALL'  # or list of channels
 HTTP_TIMEOUT = 10
 HTTP_AGENT = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 HTTP_COOKIES = True
-
-# check for madcow updates once a day and announce new versions in channel
-UPDATER_FREQ = 86400
-UPDATER_ANNOUNCE_CHANNELS = 'ALL'  # or list of channels
 
 # for django memebot integration
 DJMEMEBOT_SETTINGS_FILE = '/path/to/memebot/settings.py'

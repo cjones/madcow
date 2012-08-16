@@ -169,12 +169,10 @@ def migrate(fromdir, todir):
     settings.HTTP_COOKIES = config.get('http', 'cookies') == 'yes'
     settings.HTTP_TIMEOUT = config.getint('http', 'timeout')
     settings.PIDFILE = config.get('main', 'pidfile')
-    settings.UPDATER_FREQ = config.getint('updater', 'updatefreq')
     channels = set()
     channels.update(config.get('irc', 'channels').split(','))
     channels.update(config.get('silcplugin', 'channels').split(','))
     channels.add(config.get('gateway', 'channel'))
-    channels.add(config.get('updater', 'channel'))
     channels.add(config.get('twitter', 'channel'))
     channels = [channel for channel in channels if channel]
 
@@ -185,9 +183,6 @@ def migrate(fromdir, todir):
     settings.SILC_CHANNELS = channels
     settings.TWITTER_CHANNELS = 'ALL'
     settings.GATEWAY_CHANNELS = 'ALL'
-    settings.UPDATER_ANNOUNCE_CHANNELS = 'ALL'
-    if config.get('updater', 'enabled') == 'yes':
-        settings.TASKS.append('updater')
     settings.LOG_PUBLIC = config.get('main', 'logpublic') == 'yes'
     settings.IGNORE_NICKS = config.get('main', 'ignoreList').split(',')
     settings.LOGGING_LEVEL = config.get('main', 'loglevel')
