@@ -9,9 +9,6 @@ import os
 
 if sys.hexversion < 0x02060000:
     raise ImportError('madcow requires at least version 2.6 of Python')
-sys.dont_write_bytecode = True
-
-from madcow import __version__
 
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
@@ -28,10 +25,40 @@ def fullsplit(path, result=None):
     return fullsplit(head, [tail] + result)
 
 
+# just for fun, don't actually use this
+def __supermagic_getversion(f):
+    b = compile(open(f).read(), f, 'exec')
+    d, c = __import__('dis'), b.co_code
+    n, i, e, s = len(c), 0, 0, []
+    while i < n:
+        o, i = ord(c[i]), i + 1
+        if o >= d.HAVE_ARGUMENT:
+            a, e, i = ord(c[i]) + ord(c[i + 1]) * 256 + e, 0, i + 2
+            if o == d.EXTENDED_ARG:
+                e = a * 65536L
+            if o in d.hasconst:
+                s.append(b.co_consts[a])
+            elif o in d.hasname:
+                if b.co_names[a] == 'VERSION':
+                    return '.'.join(map(str, s))
+                s = []
+
+
+def get_version(path):
+    dwb, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+    try:
+        g = {'__file__': ''}
+        exec compile(open(path, 'rb').read(), '', 'exec') in g
+        return g.get('__version__', 'unknown')
+    finally:
+        sys.dont_write_bytecode = dwb
+
+
 def main():
     root_dir = os.path.dirname(__file__)
     if root_dir != '':
         os.chdir(root_dir)
+    version = get_version('madcow/__init__.py')
     packages = []
     data_files = []
     for basedir, subdirs, filenames in os.walk('madcow'):
@@ -51,7 +78,7 @@ def main():
           url='https://github.com/cjones/madcow',
           description='Madcow infobot',
           license='GPL',
-          version=__version__,
+          version=version,
           packages=packages,
           data_files=data_files,
           scripts=['scripts/madcow'],
