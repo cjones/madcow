@@ -72,7 +72,7 @@ class Google(object):
     whitespace_re = re.compile(r'\s{2,}')
 
     def __init__(self):
-        self.ua = UserAgent(handlers=[NoRedirects, NoErrors], agent=AGENT)
+        self.ua = UserAgent(handlers=[NoRedirects, NoErrors], agent=AGENT, debug=False)
 
     def lucky(self, query):
         """Return I'm Feeling Lucky URL for given query"""
@@ -105,6 +105,11 @@ class Google(object):
         calculation = soup.find('span', 'cwcot')
         if calculation is not None:
             values.append(calculation.renderContents())
+        try:
+            values.append(soup.find('h3', 'r').b.renderContents())
+        except StandardError:
+            pass
+        #ipython()
         result = u', '.join(filter(None, (decode(strip_html(value)).strip() for value in values)))
         if result:
             return result
