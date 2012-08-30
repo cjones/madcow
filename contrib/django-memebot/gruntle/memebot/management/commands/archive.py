@@ -41,18 +41,18 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, keep_days=KEEP_DAYS, keep_links=KEEP_LINKS, **kwargs):
 
-        # issue two queries: items to keep by <n> days or <n> links, choose the larger one & calculate what's left
-        now, links = datetime.now(), Link.objects.filter(state='published')
-        keep_count, keep = max([(q.count(), q) for q in (links.order_by('-created')[:keep_links],
-                               links.filter(created__range=(now - timedelta(days=keep_days), now)))])
-        cutoff = keep.aggregate(Min('created'))['created__min']
-        archive = links.filter(created__lt=cutoff)
+        now = datetime.now()
+        cutoff = now - timedelta(days=keep_days)
+
+        published_links = Link.objects.filter(state='published').order_by('-created')
+        keep1 = published_links[:keep_links]
+        keep2 = published_links.filter(created__gte=cutoff)
+        keep_ids = {link.id for qs in [keep1, keep2] for link in qs}
+        archive = published_links.exclude(id__in=keep_ids)
         archive_count = archive.count()
 
-        # show some stats and get caller verification
-        print 'Oldest created item to keep: ' + cutoff.ctime()
-        print 'Number of published items to retain: %d' % keep_count
-        print 'Number of items to archive: %d' % archive_count
+        print 'Number of published items to retain: %d' % len(keep_ids)
+        print 'Number of published items to archive: %d' % archive_count
 
         # get some verification first, this is destructive as hell.
         if archive_count and get_yesno('\nContinue (y/N)? ', default=False):
