@@ -24,7 +24,7 @@ except ImportError:
 # constants
 MAX_UNIQUE_DIRS = 1000
 KEEP_DAYS = 14
-KEEP_LINKS = 100
+KEEP_LINKS = 512
 
 # fields to dump from archived Links
 FIELDS = 'resolved_url', 'content_type', 'content', 'title', 'published', 'publish_id', 'scanner', 'attr_storage'
