@@ -10,42 +10,29 @@ from madcow.util.text import *
 class Main(Module):
 
     pattern = re.compile(r'^\s*sing\s+(.+?)\s*$', re.I)
-    help = 'sing <song/artist>'
-    baseurl = u'http://lyrics.wikia.com/'
-    searchurl = urljoin(baseurl, u'/Special:Search')
-    _br = r'\s*<br\s*/?\s*>\s*'
-    _line_break = re.compile(_br, re.I)
-    _verse_break = re.compile(_br * 2, re.I)
+    help = 'sing <song/artist/lyric>'
     error = "Couldn't find them, they must suck"
 
     def init(self):
         self.google = Google()
 
-    def normalize(self, lyrics):
-        verses = self._verse_break.split(lyrics)
-        verses = [self._line_break.sub(' / ', verse) for verse in verses]
-        verses = [strip_html(verse) for verse in verses]
-        return '\n'.join(verses).strip()
-
     def response(self, nick, args, kwargs):
         try:
-            url = self.google.lucky(u'site:lyrics.wikia.com ' + args[0])
+            url = self.google.lucky(u'site:songmeanings.net ' + args[0])
         except NonRedirectResponse:
-            opts = {'search': args[0], 'ns0': 1}
-            soup = getsoup(self.searchurl, referer=self.baseurl, opts=opts)
-            url = urljoin(self.baseurl, soup.li.a['href'])
-        soup = getsoup(url, referer=self.baseurl)
-        title = self.render(soup.title).split(' - LyricWiki')[0]
-        title = title.replace(':', ' - ')
-        title = title.replace('_', ' ')
-        lyrics = soup.find('div', 'lyricbox')
-        for spam in lyrics('div', 'rtMatcher'):
-            spam.extract()
-        lyrics = self.render(lyrics)
-        lyrics = self.normalize(lyrics)
-        if not lyrics or lyrics == 'None':
-            raise ValueError('no results')
-        return u'%s:\n%s' % (title, lyrics)
+            self.log.warn('no url for query {0!r} found from google lucky'.format(args[0]))
+            return u'{nick}: {error}'.format(error=self.error, **kwargs)
 
-    def render(self, node):
-        return decode(node.renderContents(), 'utf-8')
+        try:
+            soup = getsoup(url)
+            text = soup.find('div', id='textblock')
+        except StandardError:
+            self.log.warn('unable to find textblock from url {0!r} (query: {1!r})'.format(url, args[0]))
+            return u'{nick}: {error}'.format(error=self.error, **kwargs)
+
+        try:
+            lyrics = decode(text.renderContents(), 'utf-8')
+            return u'\n'.join(filter(None, [line.strip() for line in strip_html(lyrics).splitlines()]))
+        except StandardError:
+            self.log.exception('error parsing lyrics for query: {0!r}'.format(args[0]))
+            return u'{nick}: {error}'.format(error=self.error, **kwargs)
