@@ -29,7 +29,7 @@ class Weather(object):
         if temp < 0:
             color = u'magenta'
         elif temp >=0 and temp < 40:
-            color = u'blue'
+            color = u'bright blue'
         elif temp >= 40 and temp < 60:
             color = u'cyan'
         elif temp >= 60 and temp < 80:
