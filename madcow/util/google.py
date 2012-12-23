@@ -125,14 +125,10 @@ class Google(object):
 
     def clock(self, query):
         """Use google to look up time in a given location"""
-        try:
-            doc = self.ua.open(self.search, {'q': 'time in %s' % query})
-            soup = BeautifulSoup(doc)
-            table = soup.find('div', 'obcontainer')
-            time = table.find('td', style='font-size:medium')
-            return strip_html(self.decode(time).strip())
-        except:
-            raise
+        doc = self.ua.open(self.search, {'q': 'time in %s' % query})
+        soup = BeautifulSoup(doc)
+        table = soup.find('li', attrs={'class': re.compile('obcontainer')})
+        return re.sub(r'\s{2,}', ' ', strip_html(self.decode(table).strip())).strip()
 
     @staticmethod
     def decode(node):
