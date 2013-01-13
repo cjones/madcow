@@ -59,6 +59,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'wikimedia',           # look up summaries from various wikis
            'wikiquotes',          # look up quotes from wikiquotes
            'yelp',                # get restaraunt rating/address
+           'youtube',             # scrape youtube titles
            #
            # the following modules are either silly, or potentially annoying/offensive.
            # they are disabled by default so you can make the decision about how
