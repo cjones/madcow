@@ -2,7 +2,7 @@
 
 from madcow.util.http import getsoup
 from madcow.util.text import decode
-from madcow.util import Module
+from madcow.util import Module, strip_html
 from urlparse import urlparse
 
 import cgi
@@ -33,7 +33,7 @@ class Main(Module):
                     os.path.split(os.path.normpath(uri.path))[-1] == 'watch' and
                     'v' in cgi.parse_qs(uri.query)):
                 soup = getsoup(url)
-                title = decode(soup.title.renderContents()).replace(u' - YouTube', u'').strip()
+                title = strip_html(decode(soup.title.renderContents())).replace(u' - YouTube', u'').strip()
                 if title:
                     response = u'{}: {}'.format(LOGO, title)
                     self.bot.output(response, kwargs['req'])
