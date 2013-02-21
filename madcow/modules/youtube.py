@@ -15,7 +15,7 @@ DOMAINS = frozenset({'youtube.com'})
 
 class Main(Module):
 
-    pattern = Module._any
+    pattern = re.compile(r'(https?://(?:\w+\.)?youtube\.com/\S+)', re.I)
     require_addressing = False
     priority = 90
     allow_threading = True
