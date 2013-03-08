@@ -34,7 +34,7 @@ except ImportError:
     signal = None
 
 # add our include path for third party libs
-PREFIX = os.path.realpath(os.path.dirname(__file__))
+PREFIX = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(PREFIX, 'include'))
 
 from madcow.util import gateway, get_logger, http, Request
@@ -43,7 +43,7 @@ from madcow.util.color import ColorLib
 from madcow.util.auth import AuthLib
 from madcow.util.text import encode, decode, set_encoding, get_encoding
 
-VERSION = 2, 2, 3
+VERSION = 2, 3, 0
 
 __version__ = '.'.join(str(_) for _ in VERSION)
 __author__ = 'Chris Jones <cjones@gmail.com>'
@@ -54,7 +54,7 @@ help_re = re.compile(r'^help(?:\s+(\w+))?$')
 
 class MadcowError(Exception):
 
-    pass
+    """Base madcow error"""
 
 
 class Madcow(object):
@@ -692,11 +692,13 @@ def daemonize():
     signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
 
-def run(base):
+def run(base, err=None, noeditor=False):
     """Execute the main bot"""
+    if err is None:
+        err = sys.stderr
 
     # if this is a new bot, create base and stop
-    base = os.path.realpath(base)
+    base = os.path.abspath(base)
     for subdir in 'db', 'log':
         dir = os.path.join(base, subdir)
         if not os.path.exists(dir):
@@ -705,8 +707,83 @@ def run(base):
     default_settings_file = os.path.join(PREFIX, 'conf', 'defaults.py')
     if not os.path.exists(settings_file):
         shutil.copy(default_settings_file, settings_file)
-        os.chmod(settings_file, 0644)
-        raise MadcowError('A new bot has been created at %s, please modify config and rerun' % base)
+        os.chmod(settings_file, 0640)
+
+        # TODO this code grew like a cancer. move it elsewhere, it's longer than the main loop..
+        if not noeditor:
+            # try to launch the editor configured in the user's environment instead
+            # of erroring out on first run, which is sort of rude.
+            try:
+                for env in 'EDITOR', 'VISUAL':
+                    ed = os.environ.get(env)
+                    if ed is not None:
+                        # handle both path lookup and explicit path to program
+                        if os.path.sep in ed:
+                            if not os.access(ed, os.F_OK | os.X_OK):
+                                ed = None
+                        else:
+                            path = os.environ.get('PATH', os.path.defpath)
+                            for dir in path.split(os.path.pathsep):
+                                bin = os.path.join(dir, ed)
+                                if os.access(bin, os.F_OK | os.X_OK):
+                                    ed = bin
+                                    break
+                            else:
+                                ed = None
+                        if ed is not None:
+                            ed = os.path.abspath(ed)
+                            break
+                else:
+                    ed = None
+
+                if ed is not None:
+                    # make sure the user is actually at a terminal before launching $EDITOR
+                    # there might be a better way to do this..? but it seems to do the trick.
+                    for fd in xrange(3):
+                        if not os.isatty(fd):
+                            break
+                    else:
+                        # NOTE: i am not sure this is technically correct, as it
+                        # would fail when the user specifies any arguments in the
+                        # EDTIOR env... i know PAGER actually evals() shell code in
+                        # some cases, allowing complex expressions but i am not even
+                        # gonna go there. if it becomes a problem, shlex.split may help.
+                        pid = os.fork()
+                        if pid == 0:
+                            os.execl(ed, ed, settings_file)
+                            os._exit(1)
+                        ret = 255
+                        while True:
+                            wpid, wstatus = os.waitpid(pid, 0)
+                            if pid == wpid:
+                                if os.WIFSIGNALED(wstatus):
+                                    ret = -os.WTERMSIG(wstatus)
+                                elif os.WIFEXITED(wstatus):
+                                    ret = os.WEXITSTATUS(wstatus)
+                                break
+                        if ret != os.EX_OK:
+                            print >> err
+                            print >> err, '{} exited with status: {:d}'.format(ed, ret)
+
+                        print >> err
+                        print >> err, 'if you are done configuring it, you may now rerun the bot to launch it'
+                        print >> err
+                        return ret
+
+            # the number of ways the above can go wrong are too numerous to test for, don't bother user with it
+            except (SystemExit, KeyboardInterrupt):
+                raise
+            except:
+                import traceback
+                traceback.print_exc()
+
+        # if they made it this far, invoking an editor was not in the cards. do things old-fashioned.
+        print >> err
+        print >> err, 'A new bot has been created, please configure it by editing this file, then rerun:'
+        print >> err
+        print >> err, settings_file
+        print >> err
+        return 0
 
     os.environ['MADCOW_BASE'] = base
     log = get_logger('madcow', stream=sys.stdout, unique=False)
@@ -721,7 +798,12 @@ def run(base):
 
         if settings.DETACH and protocol.allow_detach:
             log.info('turning into a daemon')
-            daemonize()
+            try:
+                daemonize()
+            except (SystemExit, KeyboardInterrupt):
+                raise
+            except:
+                pass
 
         if os.path.exists(settings.PIDFILE):
             log.warn('removing stale pidfile')
@@ -731,11 +813,15 @@ def run(base):
 
         protocol(base).start()
 
+    except SystemExit:
+        raise
     except:
         log.exception('A fatal error ocurred')
         raise
-
     finally:
-        if os.path.exists(settings.PIDFILE):
-            log.info('removing pidfile')
-            os.remove(settings.PIDFILE)
+        try:
+            if os.path.exists(settings.PIDFILE):
+                log.info('removing pidfile')
+                os.remove(settings.PIDFILE)
+        except:
+            pass

@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+"""run madcow as a standalone bot"""
+
+import importlib
+import argparse
+import sys
+import os
+
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+
+class MadcowVersion(argparse._VersionAction):
+
+    """argparse action to fetch the current madcow version"""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+            madcow = self.import_madcow(basedir=namespace.basedir)
+        except (SystemExit, KeyboardInterrupt):
+            raise
+        except:
+            ret, version = 1, 'UNKNOWN'
+        else:
+            ret, version = 0, madcow.__version__
+        parser.exit(ret, version + os.linesep)
+
+    @classmethod
+    def import_madcow(cls, basedir=None):
+        """attempt to import madcow from the given lib base"""
+        if basedir is None:
+            basedir = BASEDIR
+        sys.path.insert(0, basedir)
+        sys.dont_write_bytecode = True
+        return importlib.import_module('madcow')
+
+
+def main(args=None):
+    """command-line interface"""
+    parser = argparse.ArgumentParser(description=__doc__, add_help=False)
+    _ = parser.add_argument_group('options').add_argument
+    _('-b', dest='basedir', metavar='<dir>', default=BASEDIR,
+            help='base runtime dir [%(default)s]')
+    _('-d', dest='datadir', metavar='<dir>', default='data',
+            help='bot data dir (relative to base or absolute) [%(default)s]')
+    _('-n', dest='noeditor', default=False, action='store_true',
+            help="suppress launching $EDITOR settings.py on first run")
+    _('-h', action='help',
+            help='show this help message and exit')
+    _('-v', action=MadcowVersion,
+            help="show program's version number and exit")
+    opts = parser.parse_args(args)
+    madcow = MadcowVersion.import_madcow(basedir=opts.basedir)
+    madcow.run(base=opts.datadir, noeditor=opts.noeditor)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
