@@ -2,3 +2,7 @@ graft *
 prune dist
 prune contrib/django-memebot
 exclude setup.cfg
+include README.md
+include ChangeLog
+include LICENSE
+include run-standalone-madcow
