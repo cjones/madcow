@@ -139,6 +139,7 @@ AIM_USERNAME = 'aimusername'
 AIM_PASSWORD = 'aimpassword'
 AIM_PROFILE = 'Madcow InfoBot'
 AIM_AUTOJOIN_CHAT = True
+AIM_AUTOJOIN_LEVEL = 'o'  # who to accept invites from. o=owner, a=admin, r=registered, *=anyone. owner is set with OWNER_NICK above, the others are handled via internal admin management. the bot will always accept invites from owner.
 
 # settings for the silc protocol
 SILC_CHANNELS = ['#madcow']

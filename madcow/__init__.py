@@ -436,16 +436,15 @@ class User(object):
         self.user = user
         self.flags = flags
 
-    def is_asmin(self):
+    @property
+    def is_admin(self):
         """Boolean: user is an admin"""
         return u'a' in self.flags
 
+    @property
     def is_registered(self):
         """Boolean: user is registerd"""
-        if u'a' in self.flags or u'r' in self.flags:
-            return True
-        else:
-            return False
+        return self.is_admin or 'r' in self.flags
 
 
 class Admin(object):
@@ -504,7 +503,7 @@ class Admin(object):
         usage += self._basic_usage
         if nick in self.users:
             usage += self._loggedin_usage
-            if self.users[nick].is_asmin():
+            if self.users[nick].is_admin:
                 usage += self._admin_usage
         if self._help_re.search(command):
             return u'\n'.join(usage)
@@ -520,7 +519,7 @@ class Admin(object):
             return u'You are now logged out.'
 
         # functions past here require admin
-        if not user.is_asmin():
+        if not user.is_admin:
             return
 
         try:
@@ -624,6 +623,10 @@ class Admin(object):
             return u'Nice try.. notifying FBI'
         self.users[user] = User(user, self.authlib.get_flags(user))
         return u'You are now logged in. Message me "admin help" for help'
+
+    def getuser(self, nick):
+        if nick in self.users:
+            return self.users[nick]
 
 
 class Modules(object):

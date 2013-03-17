@@ -168,8 +168,37 @@ class OSCARConnection(oscar.BOSConnection):
         """Someone invited us to a chat room :("""
         self.bot.log.info(u'[AIM] Chat invite: ' + u', '.join(u'%s=%r' % item for item in locals().iteritems()))
         #self.bot.log.info(u'[AIM] Invited to chat %s by %s' % (shortName, user.name))
+
         if settings.AIM_AUTOJOIN_CHAT:
+            botuser = self.bot.admin.getuser(user.name)
+
+            is_owner = user.name == settings.OWNER_NICK
+            is_admin = botuser is not None and botuser.is_admin
+            is_reg = botuser is not None and botuser.is_registered
+
+            self.bot.log.info(u'[AIM] Chat invite from {}: is_owner={} is_admin={} is_registered={}'.format(
+                              user.name, is_owner, is_admin, is_reg))
+
+            if settings.AIM_AUTOJOIN_LEVEL == 'o':
+                allow = is_owner
+            elif settings.AIM_AUTOJOIN_LEVEL == 'a':
+                allow = is_owner or is_admin
+            elif settings.AIM_AUTOJOIN_LEVEL == 'r':
+                allow = is_owner or is_admin or is_reg
+            elif settings.AIM_AUTOJOIN_LEVEL == '*':
+                allow = True
+            else:
+                self.bot.log.warn(u'[AIM] Unknown permission level: {} (should be o, a, r, or *)',
+                                  settings.AIM_AUTOJOIN_LEVEL)
+                return
+            if not allow:
+                self.bot.log.warn(u'[AIM] Ignoring chat invite, insufficient permissions')
+                return
+
             self.bot.log.info(u'[AIM] Accepting chat invite')
+            # [2013/03/16 22:54:13 - INFO] [AIM] Chat invite: exchange=4, shortName='mycoolmadcowchat', inviteTime=1363499653, self=<madcow.protocol.aim.OSCARConnection instance at 0x1aaa320>, instance=0, user=<twisted.words.protocols.oscar.OSCARUser instance at 0x1aaadd0>, fullName='!aol://2719:10-4-mycoolmadcowchat', message='Please join me in this chat.'
+            #from IPython.Shell import IPShellEmbed as S
+            #S()()
             self.joinChat(exchange, fullName, instance)
 
     def receiveMessage(self, user, multiparts, flags):
