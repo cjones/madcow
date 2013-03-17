@@ -82,27 +82,10 @@ class Main(Module):
 
     def rate_imdb(self, name):
         """Get user rating from IMDB"""
-        page = geturl(self.imdb_search, {'s': 'tt', 'q': name}, referer=self.imdb_url)
+        page = geturl(self.imdb_search, {'s': 'tt', 'q': name, 'exact': 'true'}, referer=self.imdb_url)
         soup = BeautifulSoup(page)
-        if soup.title.renderContents() == 'IMDb Title Search':
-            main = soup.body.find('div', id='main')
-            name = self.normalize(name)
-            url = None
-            for p in main('p'):
-                if p.b is not None:
-                    section = p.b.renderContents()
-                    if section in ('Titles (Exact Matches)', 'Popular Titles', 'Titles (Partial Matches)'):
-                        for a in p('a'):
-                            text = a.renderContents()
-                            if text:
-                                normalized = self.normalize(text)
-                                if normalized == name:
-                                    url = urljoin(self.imdb_url, a['href'])
-                                    break
-                        if url:
-                            break
-            else:
-                raise ValueError('no exact matches')
+        if soup.title.renderContents() == 'Find - IMDb':
+            url = urljoin(self.imdb_url, soup.body.find('table', 'findList').tr.find('td', 'result_text').a['href'])
             soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
         rating = soup.find('span', itemprop='ratingValue').renderContents()
         realname = strip_html(soup.title.renderContents().replace(' - IMDb', ''))
@@ -111,7 +94,7 @@ class Main(Module):
     def gettop(self):
         """Get box office ratings"""
         soup = BeautifulSoup(geturl(self.imdb_top))
-        table = soup.body.find('div', id='boxoffice').table
+        table = soup.body.find('div', id='main').table
         data = []
         for row in table('tr')[1:]:
             items = row('td')
