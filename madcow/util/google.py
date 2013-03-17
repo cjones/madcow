@@ -117,10 +117,7 @@ class Google(object):
     def sunrise_sunset(self, query, location):
         """Ask google for the sunrise or sunset from location"""
         soup = BeautifulSoup(self.ua.open(self.search, {'q': '%s in %s' % (query, location)}))
-        image = soup.find('img', src=self.sun_re)
-        row1 = image.findNext('td')
-        row2 = row1.findNext('td')
-        result = strip_html(u'%s (%s)' % (self.decode(row1), self.decode(row2)))
+        result = strip_html(soup.find('li', 'knavi').renderContents())
         return self.whitespace_re.sub(u' ', result.strip())
 
     def clock(self, query):
