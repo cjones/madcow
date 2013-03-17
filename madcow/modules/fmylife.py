@@ -19,6 +19,7 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         soup = getsoup(self.spec_url % int(args[0]) if args[0] else self.rand_url)
         soup.find('div', id='submit').extract()
+        soup.body.find('div', 'bordered').extract()
         post = soup.body.find('div', 'post')
         id = int(post.find('a', 'fmllink')['href'].split('/')[-1])
         body = strip_html(decode(' '.join(link.renderContents() for link in post('a', 'fmllink')), 'utf-8'))
