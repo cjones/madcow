@@ -28,6 +28,9 @@ class Main(Module):
                            u'',
                            u'You were summoned by %s. Reason: %s' % (nick, reason)))
         smtp = SMTP(settings.SMTP_SERVER)
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
         if settings.SMTP_USER and settings.SMTP_PASS:
             smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
         smtp.sendmail(settings.SMTP_FROM, [encode(email, 'ascii')], encode(body))
