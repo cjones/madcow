@@ -171,7 +171,7 @@ class Main(Module):
         soup, title = self.wiki.get_soup(author)
         if title == self.wiki.error:
             return u"Couldn't find quotes for that.."
-        content = soup.find(u'div', attrs={u'id': u'bodyContent'})
+        content = soup.find(u'div', attrs={u'id': u'mw-content-text'})
         uls = content.findAll(u'ul', recursive=False)
         quotes = []
         for ul in uls:
