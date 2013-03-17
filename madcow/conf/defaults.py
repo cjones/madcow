@@ -75,7 +75,6 @@ MODULES = ['alias',               # allow users to make command aliases
            #'figlet',              # generate ascii fonts
            #'fmylife',             # fmylife complaint, random or by ID
            #'grufti',              # random response triggeres, like grufti bot
-           #'hugs',                # random group hug confession
            #'jinx',                # someone owes you a coke for being unoriginal
            #'joke',                # random joke
            #'karma',               # keep track of karma (nick++, nick--)
