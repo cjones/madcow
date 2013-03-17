@@ -7,32 +7,7 @@ from madcow.util.http import geturl
 from madcow.util.color import ColorLib
 from madcow.util.text import *
 
-FORMAT = u'Terror: %s, DoomsDay: %s, BodyCount: %s'
-
-class Terror(object):
-
-    _url = u'http://www.dhs.gov/dhspublic/getAdvisoryCondition'
-    _re_level = re.compile(r'<THREAT_ADVISORY CONDITION="(\w+)" />')
-    _color_map = {u'severe': u'red',
-                  u'high': u'orange',
-                  u'elevated': u'bright yellow',
-                  u'guarded': u'bright blue',
-                  u'low': u'bright green'}
-
-    def __init__(self, colorlib):
-        self.colorlib = colorlib
-
-    def level(self):
-        try:
-            doc = geturl(Terror._url)
-            level = self._re_level.search(doc).group(1)
-            color = self._color_map[level.lower()]
-            return self.colorlib.get_color(color, text=level)
-        except Exception, error:
-            self.log.warn(u'error in module %s' % self.__module__)
-            self.log.exception(error)
-            return u'UNKNOWN'
-
+FORMAT = u'DoomsDay: %s, BodyCount: %s'
 
 class DoomsDay(object):
 
@@ -80,9 +55,8 @@ class Main(Module):
 
     def init(self):
         colorlib = self.madcow.colorlib
-        self.terror = Terror(colorlib)
         self.doom = DoomsDay()
         self.iraq = IraqWar()
 
     def response(self, nick, args, kwargs):
-        return FORMAT % (self.terror.level(), self.doom.time(), self.iraq.bodycount())
+        return FORMAT % (self.doom.time(), self.iraq.bodycount())
