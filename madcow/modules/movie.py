@@ -32,7 +32,7 @@ class Main(Module):
     and_re = re.compile(r'\s+and\s+', re.I)
 
     def init(self):
-        self.sources = [('IMDB', self.rate_imdb), ('RT', self.rate_rt)]
+        self.sources = [('IMDB', self.rate_imdb), ('RT Critics', self.rate_rt), ('RT Audience', self.rate_rt_audience)]
 
     def response(self, nick, args, kwargs):
         if args[0] == 'rate':
@@ -79,6 +79,28 @@ class Main(Module):
                         return title, rating
                 except AttributeError:
                     pass
+ 
+    def rate_rt_audience(self, name):
+        """Audience Rating from rotten tomatoes"""
+        soup = getsoup(self.rt_search, {'search': name}, referer=self.rt_url)
+        ourname = self.normalize(name)
+        results = soup.find('ul', id='movie_results_ul')
+        if results is None:
+            rating = soup.find(name="span", attrs={ "class" : "meter popcorn numeric " }).renderContents() + "%"
+            title = strip_html(encode(soup.find('h1', 'movie_title').renderContents(), 'utf-8')).strip()
+            return title, rating
+        else:
+            for result in results('li'):
+                try:
+                    title = strip_html(result.find('div', 'media_block_content').h3.a.renderContents()).strip()
+                    if ourname == self.normalize(title):
+                        url = result.h3.a['href']
+                        innerSoup = getsoup(self.rt_url+url, { }, self.rt_search, {'search': name})
+                        rating = innerSoup.find(name="span", attrs= { "class" : "meter popcorn numeric " }).renderContents() + "%"
+                        return title, rating
+                except AttributeError:
+                    pass
+            return
 
     def rate_imdb(self, name):
         """Get user rating from IMDB"""
