@@ -159,6 +159,9 @@ class Request(object):
 
     def __init__(self, **kwargs):
         self.__dict__.update(self.defaults, **kwargs)
+        
+    def set_sendto(self, nick):
+        self.sendto = nick
 
     def make_private(self):
         if settings.PROTOCOL == 'irc':
