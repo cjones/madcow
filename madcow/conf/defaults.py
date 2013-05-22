@@ -61,6 +61,14 @@ MODULES = ['alias',               # allow users to make command aliases
            'wikiquotes',          # look up quotes from wikiquotes
            'yelp',                # get restaraunt rating/address
            'youtube',             # scrape youtube titles
+           'staff',               # mark users as 'staff'
+           'company',             # set company name for nick (req. staff module)
+           'realname',            # set real name for nick (req. staff module)
+           'notes',               # add a note to a nick (req. staff module)
+           'xray',                # see all staff-set data on a nick (req. staff module)
+           'blog',                # get the latest blog posts from RSS feed (specify URL below)
+           'links',               # create shortcut links (req. staff module)
+           'welcome',             # send a user a welcome message (set message below)
            #
            # the following modules are either silly, or potentially annoying/offensive.
            # they are disabled by default so you can make the decision about how
@@ -101,7 +109,7 @@ TASKS = [
         #'tweets',            # gateway for tweet timeline
         ]
 
-PRIVATE_MODULES = ['lyrics']  # list of modules (from MODULES above) that only respond in private message
+PRIVATE_MODULES = ['lyrics', 'company', 'realname', 'notes', 'xray']  # list of modules (from MODULES above) that only respond in private message
 
 #######################
 ### PROTOCOL CONFIG ###
@@ -172,6 +180,12 @@ DELICIOUS_SESSION_HANDLE = None
 
 # for the yelp plugin
 YELP_DEFAULT_LOCATION = 'San Francisco, CA'
+
+# for the blog plugin
+BLOG_RSS_URL = 'http://www.activestate.com/blog/rss.xml'
+
+# for the welcome plugin
+WELCOME_MSG = 'Have a good time!'
 
 ################
 ### FEATURES ###
