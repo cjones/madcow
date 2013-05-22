@@ -62,6 +62,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'youtube',             # scrape youtube titles
            'staff',               # mark users as 'staff'
            'company',             # set company name for nick (req. staff module)
+           'realname',            # set real name for nick (req. staff module)
            #
            # the following modules are either silly, or potentially annoying/offensive.
            # they are disabled by default so you can make the decision about how
@@ -102,7 +103,7 @@ TASKS = [
         #'tweets',            # gateway for tweet timeline
         ]
 
-PRIVATE_MODULES = ['lyrics', 'company']  # list of modules (from MODULES above) that only respond in private message
+PRIVATE_MODULES = ['lyrics', 'company', 'realname']  # list of modules (from MODULES above) that only respond in private message
 
 #######################
 ### PROTOCOL CONFIG ###
