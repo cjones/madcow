@@ -64,6 +64,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'company',             # set company name for nick (req. staff module)
            'realname',            # set real name for nick (req. staff module)
            'notes',               # add a note to a nick (req. staff module)
+           'xray',                # see all staff-set data on a nick (req. staff module)
            #
            # the following modules are either silly, or potentially annoying/offensive.
            # they are disabled by default so you can make the decision about how
@@ -104,7 +105,7 @@ TASKS = [
         #'tweets',            # gateway for tweet timeline
         ]
 
-PRIVATE_MODULES = ['lyrics', 'company', 'realname', 'notes']  # list of modules (from MODULES above) that only respond in private message
+PRIVATE_MODULES = ['lyrics', 'company', 'realname', 'notes', 'xray']  # list of modules (from MODULES above) that only respond in private message
 
 #######################
 ### PROTOCOL CONFIG ###
