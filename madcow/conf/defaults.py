@@ -66,6 +66,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'notes',               # add a note to a nick (req. staff module)
            'xray',                # see all staff-set data on a nick (req. staff module)
            'blog',                # get the latest blog posts from RSS feed (specify URL below)
+           'links',               # create shortcut links (req. staff module)
            #
            # the following modules are either silly, or potentially annoying/offensive.
            # they are disabled by default so you can make the decision about how
