@@ -65,6 +65,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'realname',            # set real name for nick (req. staff module)
            'notes',               # add a note to a nick (req. staff module)
            'xray',                # see all staff-set data on a nick (req. staff module)
+           'blog',                # get the latest blog posts from RSS feed (specify URL below)
            #
            # the following modules are either silly, or potentially annoying/offensive.
            # they are disabled by default so you can make the decision about how
@@ -176,6 +177,9 @@ DELICIOUS_SESSION_HANDLE = None
 
 # for the yelp plugin
 YELP_DEFAULT_LOCATION = 'San Francisco, CA'
+
+# for the blog plugin
+BLOG_RSS_URL = 'http://www.activestate.com/blog/rss.xml'
 
 ################
 ### FEATURES ###
