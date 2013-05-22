@@ -38,6 +38,7 @@ UNIQUE_MAX_FILES = 1000
 MODULES = ['alias',               # allow users to make command aliases
            'area',                # look up area codes
            'bbcnews',             # bbc news headlines
+           'beer',                # beer
            'calc',                # google calculator
            'clock',               # world clock
            'cnn',                 # show cnn headline
