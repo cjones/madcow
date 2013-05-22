@@ -67,6 +67,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'xray',                # see all staff-set data on a nick (req. staff module)
            'blog',                # get the latest blog posts from RSS feed (specify URL below)
            'links',               # create shortcut links (req. staff module)
+           'welcome',             # send a user a welcome message (set message below)
            #
            # the following modules are either silly, or potentially annoying/offensive.
            # they are disabled by default so you can make the decision about how
@@ -181,6 +182,9 @@ YELP_DEFAULT_LOCATION = 'San Francisco, CA'
 
 # for the blog plugin
 BLOG_RSS_URL = 'http://www.activestate.com/blog/rss.xml'
+
+# for the welcome plugin
+WELCOME_MSG = 'Have a good time!'
 
 ################
 ### FEATURES ###
