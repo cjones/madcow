@@ -34,8 +34,8 @@ staff <nick> add/remove        add/remove user from staff list (staff only)'
         dbm = self.learn.dbm(self.dbname)
         try:
             key = encode(nick.lower())
-            if dbm.has_key(nick):
-                del dbm[nick]
+            if dbm.has_key(key):
+                del dbm[key]
                 return True
             return False
         finally:
