@@ -74,6 +74,10 @@ class Google(object):
     def __init__(self):
         self.ua = UserAgent(handlers=[NoRedirects, NoErrors], agent=AGENT, debug=False)
 
+    def find(self, query):
+        """Return first 3 URLs"""
+        return self.search + '?q=' + query.replace(' ', '+') + '&hl=en&safe=off&num=3'
+
     def lucky(self, query):
         """Return I'm Feeling Lucky URL for given query"""
         opts = dict(self.luckyopts.items())
