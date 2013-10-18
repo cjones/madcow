@@ -1,14 +1,83 @@
-# artifacts
+# python bytecode
 *.pyo
 *.pyc
+
+# backups
+*.bak
+*?~
+
+# other VCS
+.svn/
+CVS/
+RCS/
+
+# common build artifacts
+*.class
 *.so
-# dev stuff
+*.dylib
+*.o
+*.d
+*.a
+
+# distutils output
 /build/
 /dist/
-/test.py
 /MANIFEST
+
+# dev stuff
+/test.py
+
+# git is not a place to backup releases plz
+*.tar.gz
+*.tar.bz2
+*.tgz
+*.tbz
+*.zip
+
 # data files when running in-place
 /settings.py
 /db/
 /log/
 /data/
+
+# apple bullshit
+.DS_Store
+.localized
+.localized/
+.metadata_never_index
+.TemporaryItems/
+.DocumentRevisions-V100/
+.Spotlight-V100/
+.Trashes/
+.fseventsd/
+.vol/
+._*
+._*/
+
+# logging
+typescript
+nohup.out
+*.log
+
+# common tmp file/dirs
+foo
+foo/
+foo.*
+foo.*/
+bar
+bar/
+bar.*
+bar.*/
+1
+2
+3
+tmp*
+tmp*/
+work/
+X.*
+X.*/
+Y.*
+Y.*/
+1/
+2/
+3/
