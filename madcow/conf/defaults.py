@@ -187,6 +187,13 @@ BLOG_RSS_URL = 'http://www.activestate.com/blog/rss.xml'
 # for the welcome plugin
 WELCOME_MSG = 'Have a good time!'
 
+# for pollmail plugin
+IMAP_SERVER = 'localhost'
+IMAP_PORT = 993
+IMAP_USERNAME = None
+IMAP_PASSWORD = None
+IMAP_USE_SSL = True
+
 ################
 ### FEATURES ###
 ################
