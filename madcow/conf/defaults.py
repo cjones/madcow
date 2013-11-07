@@ -92,6 +92,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'megahal',             # markov bot (requires you build C extension!)
            #'memebot',             # track urls and lay smackdown on old memes
            #'obama',               # countdown since change.. such as it has been
+           #'pollmail',            # poll an email account using IMAP for messages to echo to IRC
            #'roll',                # roll ad&d dice
            #'slut',                # how slutty is the phrase? (safesearch vs. regular)
            #'steam',               # allow queries into your steam group about who's online
