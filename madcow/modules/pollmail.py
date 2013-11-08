@@ -6,12 +6,13 @@ import json as JSON
 from madcow.util import Module
 from madcow.conf import settings
 from madcow.util.text import *
+from madcow.util.imap import ImapPoller
 
 # Todo:
 # Find a way to crate a single Poller that it used by the PollTask and the MainModule
 
 class Main(Module):
-    self.madcow.poller = Poller()
+    self.madcow.poller = ImapPoller()
     pattern = re.compile(r'^\s*mail\s+(.+?)\s*$')
     help = '\n'.join(['start - start automatic polling of email for messages', 'stop - stop automatic polling of email for messages', 'now - force one-time poll'])
     error = u"I had an error"
