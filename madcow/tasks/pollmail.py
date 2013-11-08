@@ -8,8 +8,10 @@ class Main(Task):
     frequency = settings.POLLMAIL_FREQUENCY
 
     def init(self, name, args, kwargs):
-        if not self.madcow.poller:
-           self.madcow.poller = ImapPoller(self.madcow)
+        try:
+            self.madcow.poller
+        except AttributeError:
+            self.madcow.poller = ImapPoller(self.madcow)
 
     def response(self):
-        self.madcow.poller.poll()
+        self.madcow.poller()

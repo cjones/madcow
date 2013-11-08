@@ -1,10 +1,21 @@
+from madcow.conf import settings
+import re
+import imaplib
+
 class ImapPoller(object):
     started = settings.POLLMAIL_AUTOSTART
+    message = re.compile(r'{{(.+)}}')
 
     def __init__(self, madcow):
         self.madcow = madcow
 
-    def response(self, forced):
+        try:
+            self.madcow.irc  # throws AttributeError if not IRC Connection
+            self.irc = True
+        except AttributeError:
+            self.irc = False
+
+    def __call__(self, forced=False):
         if not started and not forced:
             return
 
@@ -22,13 +33,15 @@ class ImapPoller(object):
 
     def start(self, nick):
         if nick != settings.OWNER_NICK:
-            return
+            return 'Permission denied.'
         started = True
+        return 'Okay'
 
     def stop(self, nick):
         if nick != settings.OWNER_NICK:
-            return
+            return 'Permission denied.'
         started = False
+        return 'Okay'
 
     def poll(self):
         if settings.IMAP_USE_SSL:
@@ -71,13 +84,13 @@ class ImapPoller(object):
             return True
 
         for json in jsons:
-            if 'password' in json && json['password'] is settings.POLLMAIL_PASSWORD:
+            if ('password' in json) and (json['password'] == settings.POLLMAIL_PASSWORD):
                 return True
 
         return False
 
     def send_msg(self, json):
-        if 'channels' in json and getattr(self.madcow, 'irc', False):
+        if 'channels' in json and self.irc:
                 channels = json['channels']
                 irc = self.madcow.irc
 
