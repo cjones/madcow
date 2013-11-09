@@ -8,9 +8,6 @@ from madcow.conf import settings
 from madcow.util.text import *
 from madcow.util.imap import ImapPoller
 
-# Todo:
-# Find a way to crate a single Poller that it used by the PollTask and the MainModule
-
 class Main(Module):
     pattern = re.compile(r'^\s*pollmail\s+(.+?)\s*$')
     help = '\n'.join([
