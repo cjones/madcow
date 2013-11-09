@@ -4,6 +4,15 @@ The pollmail module periodically checks an IMAP mailbox for mail, searches for J
 'msg' property of the JSON. It can optionally require at least one JSON message have a password property, so
 that people can't send arbitrary messages to output through your bot. Messages are deleted after being pulled.
 
+The JSON can be anywhere in the email, including the headers.
+
+Thus, if you can control the headers, you can do this:
+X-MADCOW: {{"msg": "I'll show up on IRC"}}
+
+The JSON with the password does not have to have a message. So you could also send another header:
+X-MADCOW-PASSWORD: {{"password": "supersecret"}}
+
+
 The pollmail module takes nine settings:
 
 POLLMAIL_FREQUENCY: How often to check for mail.
