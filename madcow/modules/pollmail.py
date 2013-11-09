@@ -12,7 +12,7 @@ from madcow.util.imap import ImapPoller
 # Find a way to crate a single Poller that it used by the PollTask and the MainModule
 
 class Main(Module):
-    pattern = re.compile(r'^\s*mail\s+(.+?)\s*$')
+    pattern = re.compile(r'^\s*pollmail\s+(.+?)\s*$')
     help = '\n'.join([
         'start - start automatic polling of email for messages',
         'stop - stop automatic polling of email for messages',
@@ -22,20 +22,25 @@ class Main(Module):
 
     def init(self):
         try:
-            self.madcow.poller
+            self.madcow.imap_poller
         except AttributeError:
-            self.madcow.poller = ImapPoller(self.madcow)
+            self.madcow.imap_poller = ImapPoller(self.madcow)
+
+        self.poller = self.madcow.imap_poller
 
     def response(self, nick, args, kwargs):
-        if args[0] is "pollmail":
-            command = args[1]
+        command = args[0]
 
-            if command is 'now':
-                self.poller(True)
-                return "All mail polled."
+        if command == 'now':
+            response = self.poller(True)
 
-            if command is 'start':
-                return self.poller.start(nick)
+            if response == "":
+                return "No new messages."
+            else:
+                return response
 
-            if command is 'stop':
-                return self.poller.stop(nick)
+        if command == 'start':
+            return self.poller.start(nick)
+
+        if command == 'stop':
+            return self.poller.stop(nick)

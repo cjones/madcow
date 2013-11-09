@@ -18,5 +18,5 @@ class Main(Task):
             self.madcow.poller = ImapPoller(self.madcow)
 
     def response(self, name, args, kwargs):
-        self.log.debug("Polling IMAP")
+        self.log.debug("[PollMail Task] Polling IMAP")
         return self.madcow.poller()

@@ -29,10 +29,7 @@ class ImapPoller(object):
 
         for mail in mails:
             self.madcow.log.debug("Checking next mail.")
-            self.madcow.log.debug(repr(mail))
-
             jsons = self.parse_mail(mail)
-
             self.madcow.log.debug("JSONs found: %i" % len(jsons))
 
             if (not self.security(jsons)):
@@ -41,7 +38,7 @@ class ImapPoller(object):
 
             self.madcow.log.debug("Security check succeeded.")
             msgs += [json['msg'] for json in jsons if 'msg' in json]
-            
+
         return '\n'.join(msgs)
 
     def start(self, nick):
