@@ -9,7 +9,6 @@ import json as jsonlib
 class ImapPoller(object):
     frequency = settings.POLLMAIL_FREQUENCY
     started = settings.POLLMAIL_AUTOSTART
-    message = re.compile(r'{({.+})}')
 
     def __init__(self, madcow):
         self.madcow = madcow
@@ -92,7 +91,7 @@ class ImapPoller(object):
 
         self.madcow.log.debug("Parsing Mail")
 
-        for match in self.message.findall(mail):
+        for match in settings.POLLMAIL_JSON_REGEX.findall(mail):
             self.madcow.log.debug("Possible JSON found: %s" % match)
 
             try:
