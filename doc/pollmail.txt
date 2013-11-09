@@ -1,0 +1,21 @@
+POLLMAIL MODULE HELP
+
+The pollmail module periodically checks an IMAP mailbox for mail, searches for JSON, and outputs the
+'msg' property of the JSON. It can optionally require at least one JSON message have a password property, so
+that people can't send arbitrary messages to output through your bot. Messages are deleted after being pulled.
+
+The pollmail module takes nine settings:
+
+POLLMAIL_FREQUENCY: How often to check for mail.
+POLLMAIL_USE_PASSWORD: Whether or not at least one JSON message has the password in it.
+POLLMAIL_PASSWORD: The password to check for.
+POLLMAIL_AUTOSTART: Only useful with the task -- sets whether the task should poll periodically at start.
+POLLMAIL_JSON_REGEX: The regex to look for JSON. By default, expects the JSON to be wraped by another set of curly braces.
+
+IMAP_SERVER, IMAP_PORT, IMAP_USERNAME, IMAP_PASSWORD, IMAP_USE_SSL: IMAP Connection settings
+
+The pollmail module responds to three commands:
+
+!pollmail now - Forces pollmail to poll.
+!pollmail start - Enables the pollmail task to poll periodically. Only allowed by OWNER_NICK.
+!pollmail stop - Disables the pollmail task from polling periodically. Only allowed by OWNER_NICK.
