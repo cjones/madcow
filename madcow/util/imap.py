@@ -14,17 +14,11 @@ class ImapPoller(object):
     def __init__(self, madcow):
         self.madcow = madcow
 
-        try:
-            self.madcow.irc  # throws AttributeError if not IRC Connection
-            self.irc = True
-        except AttributeError:
-            self.irc = False
-
         if None in [settings.IMAP_SERVER, settings.IMAP_PORT, settings.IMAP_PASSWORD, settings.IMAP_USERNAME]:
             raise ValueError("Imap Settings has a None value.")
 
     def __call__(self, forced=False):
-        self.madcow.log.debug("PollMail Called!")
+        msgs = []
 
         if not self.started and not forced:
             return
@@ -46,13 +40,9 @@ class ImapPoller(object):
                 continue  # Password in email not found.
 
             self.madcow.log.debug("Security check succeeded.")
-            self.madcow.log.debug("Sending messages.")
-
-            [self.send_msg(json) for json in jsons if 'msg' in json]
-
-
-            self.madcow.log.debug("All messages sent.")
-        self.madcow.log.debug("PollMail finished.")
+            msgs += [json['msg'] for json in jsons if 'msg' in json]
+            
+        return '\n'.join(msgs)
 
     def start(self, nick):
         if nick != settings.OWNER_NICK:
@@ -126,22 +116,3 @@ class ImapPoller(object):
                 return True
 
         return False
-
-    def send_msg(self, json):
-        self.madcow.log.debug("Sending message: %s" % json['msg'])
-
-        if 'channels' in json and self.irc:
-                channels = json['channels']
-                irc = self.madcow.irc
-
-                self.madcow.log.debug("Sending to channels: %s" % channels)
-                irc.privmsg_many(channels, json['msg'])
-        else:
-            self.madcow.log.debug("Sending to all channels.")
-            self.madcow.output(json['msg'], req_instance)
-
-# Hack.
-class Req(object):
-    colorize = False
-    sendto = 'All'
-req_instance = Req()

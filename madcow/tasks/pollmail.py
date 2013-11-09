@@ -19,4 +19,4 @@ class Main(Task):
 
     def response(self, name, args, kwargs):
         self.log.debug("Polling IMAP")
-        self.madcow.poller()
+        return self.madcow.poller()

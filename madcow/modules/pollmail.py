@@ -13,7 +13,11 @@ from madcow.util.imap import ImapPoller
 
 class Main(Module):
     pattern = re.compile(r'^\s*mail\s+(.+?)\s*$')
-    help = '\n'.join(['start - start automatic polling of email for messages', 'stop - stop automatic polling of email for messages', 'now - force one-time poll'])
+    help = '\n'.join([
+        'start - start automatic polling of email for messages',
+        'stop - stop automatic polling of email for messages',
+        'now - force one-time poll'
+    ])
     error = u"I had an error"
 
     def init(self):
