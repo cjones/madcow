@@ -118,9 +118,6 @@ class Response(object):
     def response(self, nick, args, kwargs):
         raise NotImplementedError
 
-    def response(self, nick, args, kwargs):
-        raise NotImplementedError
-
 
 class Module(Response):
 

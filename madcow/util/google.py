@@ -125,6 +125,7 @@ class Google(object):
         doc = self.ua.open(self.search, {'q': 'time in %s' % query})
         soup = BeautifulSoup(doc)
         table = soup.find('li', attrs={'class': re.compile('obcontainer')})
+        [subtable.extract() for subtable in table.findAll('table')]
         return re.sub(r'\s{2,}', ' ', strip_html(self.decode(table).strip())).strip()
 
     @staticmethod

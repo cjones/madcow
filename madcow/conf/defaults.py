@@ -106,8 +106,9 @@ MODULES = ['alias',               # allow users to make command aliases
 
 # these are modules that run on their own periodically if enabled. settings are below
 TASKS = [
-        #'ircops',             # automatically provide ops in irc
-        #'tweets',            # gateway for tweet timeline
+        #'ircops',                 # automatically provide ops in irc
+        #'pollmail'                # automatically poll imap mail
+        #'tweets',                 # gateway for tweet timeline
         ]
 
 PRIVATE_MODULES = ['lyrics', 'company', 'realname', 'notes', 'xray']  # list of modules (from MODULES above) that only respond in private message
@@ -189,6 +190,11 @@ BLOG_RSS_URL = 'http://www.activestate.com/blog/rss.xml'
 WELCOME_MSG = 'Have a good time!'
 
 # for pollmail plugin
+POLLMAIL_FREQUENCY = 60
+POLLMAIL_USE_PASSWORD = False
+POLLMAIL_PASSWORD = None
+POLLMAIL_AUTOSTART = False
+POLLMAIL_JSON_REGEX = r'{({.+})}'
 IMAP_SERVER = 'localhost'
 IMAP_PORT = 993
 IMAP_USERNAME = None
