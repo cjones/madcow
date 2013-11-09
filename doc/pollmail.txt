@@ -1,30 +1,39 @@
 POLLMAIL MODULE HELP
 
-The pollmail module periodically checks an IMAP mailbox for mail, searches for JSON, and outputs the
-'msg' property of the JSON. It can optionally require at least one JSON message have a password property, so
-that people can't send arbitrary messages to output through your bot. Messages are deleted after being pulled.
+The pollmail module is a unidirectional IMAP-to-IRC gateway.
 
-The JSON can be anywhere in the email, including the headers.
+It periodically checks an IMAP mailbox for mail, searches for JSON in that mail, and outputs the
+'msg' property of the JSON, if any. It can optionally require at least one JSON message to include a
+password property so that pollmail doesn't process spam or unintended mail. This poor mans'
+security should be complemented by (1) ensuring IMAP_USER_SSL is true (so password is not sent in the clear)
+and (2) keeping the email address private
+
+Messages are deleted on the IMAP server after being processed.
+
+JSON can be anywhere in the mail: headers, body, subject. Typically, you should include it in custom mail
+headers, but the capability to include it in the subj/body is convenient for senders who cannot output custom
+mail headers (e.g., sending from gmail, JIRA, or other 3rd-party applications)
 
 Thus, if you can control the headers, you can do this:
+
 X-MADCOW: {{"msg": "I'll show up on IRC"}}
 
-The JSON with the password does not have to have a message. So you could also send another header:
+The JSON specifying the password does not require a message. So you could also send another header:
 X-MADCOW-PASSWORD: {{"password": "supersecret"}}
 
-
-The pollmail module takes nine settings:
+The pollmail module has ten settings:
 
 POLLMAIL_FREQUENCY: How often to check for mail.
-POLLMAIL_USE_PASSWORD: Whether or not at least one JSON message has the password in it.
+POLLMAIL_USE_PASSWORD: Whether or not at least one JSON message must include a password
 POLLMAIL_PASSWORD: The password to check for.
 POLLMAIL_AUTOSTART: Only useful with the task -- sets whether the task should poll periodically at start.
-POLLMAIL_JSON_REGEX: The regex to look for JSON. By default, expects the JSON to be wraped by another set of curly braces.
+POLLMAIL_JSON_REGEX: The regex to look for JSON. By default, expects the JSON to be wraped by another set of
+curly braces: {{ ... }} *not { ... } in order to reduce the risk of accidentally processing unintended strings.
 
 IMAP_SERVER, IMAP_PORT, IMAP_USERNAME, IMAP_PASSWORD, IMAP_USE_SSL: IMAP Connection settings
 
 The pollmail module responds to three commands:
 
-!pollmail now - Forces pollmail to poll.
+!pollmail now - Forces pollmail to poll now
 !pollmail start - Enables the pollmail task to poll periodically. Only allowed by OWNER_NICK.
 !pollmail stop - Disables the pollmail task from polling periodically. Only allowed by OWNER_NICK.
