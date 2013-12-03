@@ -56,9 +56,9 @@ class Main(Module):
         """Parse page for definition"""
 
         # get definition
-        table = soup.body.find('table', id='entries')
-        word = self.render(table.find('td', 'word'))
-        entries = table('td', 'text', id=self.entry_re)
+        table = soup.body.find('div', id='entries')
+        word = self.render(table.find('div', 'word'))
+        entries = table('div', 'text', id=self.entry_re)
         size = len(entries)
         if not size:
             raise ValueError('no results?')
