@@ -92,6 +92,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'megahal',             # markov bot (requires you build C extension!)
            #'memebot',             # track urls and lay smackdown on old memes
            #'obama',               # countdown since change.. such as it has been
+           #'pollmail',            # poll an email account using IMAP for messages to echo to IRC
            #'roll',                # roll ad&d dice
            #'slut',                # how slutty is the phrase? (safesearch vs. regular)
            #'steam',               # allow queries into your steam group about who's online
@@ -105,8 +106,9 @@ MODULES = ['alias',               # allow users to make command aliases
 
 # these are modules that run on their own periodically if enabled. settings are below
 TASKS = [
-        #'ircops',             # automatically provide ops in irc
-        #'tweets',            # gateway for tweet timeline
+        #'ircops',                 # automatically provide ops in irc
+        #'pollmail'                # automatically poll imap mail
+        #'tweets',                 # gateway for tweet timeline
         ]
 
 PRIVATE_MODULES = ['lyrics', 'company', 'realname', 'notes', 'xray']  # list of modules (from MODULES above) that only respond in private message
@@ -186,6 +188,18 @@ BLOG_RSS_URL = 'http://www.activestate.com/blog/rss.xml'
 
 # for the welcome plugin
 WELCOME_MSG = 'Have a good time!'
+
+# for pollmail plugin
+POLLMAIL_FREQUENCY = 60
+POLLMAIL_USE_PASSWORD = False
+POLLMAIL_PASSWORD = None
+POLLMAIL_AUTOSTART = False
+POLLMAIL_JSON_REGEX = r'{({.+})}'
+IMAP_SERVER = 'localhost'
+IMAP_PORT = 993
+IMAP_USERNAME = None
+IMAP_PASSWORD = None
+IMAP_USE_SSL = True
 
 ################
 ### FEATURES ###
