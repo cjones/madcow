@@ -56,15 +56,14 @@ class Main(Module):
         """Parse page for definition"""
 
         # get definition
-        table = soup.body.find('div', id='entries')
-        word = self.render(table.find('div', 'word'))
-        entries = table('div', 'text', id=self.entry_re)
+        entries = soup.findAll('div', 'word')
         size = len(entries)
         if not size:
             raise ValueError('no results?')
         if idx >= size:
             idx = size - 1
         entry = entries[idx]
+        word  = self.render(entry)
 
         # torturous logic to guess number of entries
         pages = soup.body.find('div', 'pagination')
@@ -88,9 +87,9 @@ class Main(Module):
 
         # construct page
         result = u'[%d/%d] %s: ' % (orig_idx, total, word)
-        result += self.render(entry.find('div', 'definition'))
+        result += self.render(entry.findNextSibling('div', 'meaning'))
         try:
-            example = self.render(entry.find('div', 'example'))
+            example = self.render(entry.findNextSibling('div', 'example'))
             result += u' - Example: %s' % example
         except:
             pass
