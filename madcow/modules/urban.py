@@ -32,6 +32,7 @@ class Main(Module):
                 response = self.random()
         except Exception, error:
             response = u"That doesn't even exist in urban dictionary, stop making stuff up."
+	    return str(error), type(error)
         return u'%s: %s' % (nick, response)
 
     def lookup(self, query, idx=None):
@@ -56,9 +57,10 @@ class Main(Module):
         """Parse page for definition"""
 
         # get definition
-        table = soup.body.find('div', id='entries')
-        word = self.render(table.find('div', 'word'))
-        entries = table('div', 'text', id=self.entry_re)
+	
+        table = soup.body.find('div', id='content')
+        word = self.render(table.find('div', 'word'))      
+	entries = table('div', 'box')
         size = len(entries)
         if not size:
             raise ValueError('no results?')
@@ -85,10 +87,10 @@ class Main(Module):
                 total = highest * self.RESULTS_PER_PAGE
         if orig_idx > total:
             orig_idx = total
-
+	
         # construct page
         result = u'[%d/%d] %s: ' % (orig_idx, total, word)
-        result += self.render(entry.find('div', 'definition'))
+        result += self.render(entry.find('div', 'meaning'))
         try:
             example = self.render(entry.find('div', 'example'))
             result += u' - Example: %s' % example
