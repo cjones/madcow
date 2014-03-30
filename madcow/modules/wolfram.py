@@ -2,6 +2,8 @@
 
 from urlparse import ParseResult, urlunparse, urlparse
 from urllib import urlencode, urlopen
+
+import sys
 import re
 
 from lxml import etree
@@ -9,6 +11,10 @@ from lxml import etree
 from madcow.util.text import decode
 from madcow.conf import settings
 from madcow.util import Module
+
+
+uesc_re = re.compile(ur'\\:([0-9a-fA-F]{4})', re.U)
+xrespath = '/queryresult[@success="true"]/pod[@title="Result"]/*/plaintext/text()'
 
 
 class URI(ParseResult):
@@ -28,6 +34,8 @@ class URI(ParseResult):
     def __str__(self):
         return self.url
 
+api_uri = URI(scheme='http', netloc='api.wolframalpha.com', path='/v2/query')
+
 
 class XMLParseError(ValueError):
 
@@ -36,24 +44,24 @@ class XMLParseError(ValueError):
         self.xml = xml
 
 
-api_uri = URI(scheme='http', netloc='api.wolframalpha.com', path='/v2/query')
-
 def waquery(input, url=None, **opts):
-    uri = api_uri if url is None else URI.from_url(url)
-    opts['input'] = input
-    tree = etree.parse(urlopen(uri._replace(query=urlencode(opts)).url))
-    res = tree.xpath('/queryresult[@success="true"]/pod[@title="Result"]/*/plaintext/text()')
-    if res:
-        return decode(res[0]).strip()
-    raise XMLParseError(etree.tostring(tree.getroot()), 'unexpected xml structure')
+    tree = etree.parse(urlopen((URI.from_url(url) if url else api_uri)._replace(
+        query=urlencode(dict(opts, input=input))).url))
+    res = tree.xpath(xrespath)
+    if not res:
+        raise XMLParseError(etree.tostring(tree.getroot()), 'unexpected xml structure')
+    res = decode(res[0])
+    for match in uesc_re.finditer(res):
+        res = res.replace(match.group(0), unichr(int(match.group(1), 16)), 1)
+    return res.strip()
 
 
 class Main(Module):
 
-    pattern = re.compile(r'^\s*(?:wa|wolf(?:ram)?(?:\s*alpha)?)(?:\s+|\s*[:-]\s*)(.+?)\s*$', re.I)
     require_addressing = True
-    help = u"<wa|wolf[ram][alpha]> <query> - query wolfram alpha database"
-    error = u"no results, check logged xml response. NOTE: this module is very beta, so some things may not work. possibly many things. one might even venture to call this module 'alpha'"
+    pattern = re.compile(r'^\s*(?:wa|wolf(?:ram)?(?:\s*alpha)?)(?:\s+|\s*[:-]\s*)(.+?)\s*$', re.I)
+    help = u'<wa|wolf[ram][alpha]> <query> - query wolfram alpha database'
+    error = u'no results, check logs for exact xml response'
 
     def init(self):
         self.appid = settings.WOLFRAM_API_APPID
@@ -64,13 +72,12 @@ class Main(Module):
             try:
                 res = waquery(args[0], appid=self.appid, url=self.apiurl)
             except XMLParseError, exc:
-                self.log.warn(u'unhandled response for wolfram query. xml response:\n\n' + decode(exc.xml))
-                return u'{}: {} [check logged xml response]'.format(nick, self.error)
+                self.log.warn(u'unhandled response for wolfram query. xml response:')
+                self.log.warn(repr(exc.xml))
+                return u'{}: {}'.format(nick, self.error)
             except (SystemExit, KeyboardInterrupt):
                 raise
             except:
-                from sys import exc_info
-                return u'{}: internal exception: {}'.format(nick, decode(exc_info()[1]))
+                return u'{}: internal exception: {}'.format(nick, decode(sys.exc_value))
             else:
                 return u'{}: {}'.format(nick, res)
-
