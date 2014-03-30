@@ -43,7 +43,7 @@ MODULES = ['alias',               # allow users to make command aliases
            'clock',               # world clock
            'cnn',                 # show cnn headline
            'dictionary',          # definition of words
-           'election',        # current electoral vote predictor for 2008 US election
+           'election',            # current electoral vote predictor for 2008 US election
            'google',              # i'm feeling lucky query
            'learn',               # used for various modules to cache per-user data
            'movie',               # rate movie on imdb & rotten tomatoes
@@ -102,6 +102,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'webtender',           # how to make drinks!
            #'woot',                # latest woot offer
            #'djmemebot',           # memebot's django app backend integration
+           #'wolfram',             # wolfram alpha api access (see WOLFRAM_* settings below if you enable this)
            ]
 
 # these are modules that run on their own periodically if enabled. settings are below
@@ -200,6 +201,10 @@ IMAP_PORT = 993
 IMAP_USERNAME = None
 IMAP_PASSWORD = None
 IMAP_USE_SSL = True
+
+# for wolfram alpha api access
+WOLFRAM_API_APPID = None  # you need to sign up at wolframalpha.com and register for free api access
+WOLFRAM_API_URL = None  # only change this to override the standard api access url
 
 ################
 ### FEATURES ###
