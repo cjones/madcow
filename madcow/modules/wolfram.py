@@ -2,19 +2,11 @@
 
 from urlparse import ParseResult, urlunparse, urlparse
 from urllib import urlencode, urlopen
-
-import sys
 import re
-
 from lxml import etree
-
 from madcow.util.text import decode
 from madcow.conf import settings
 from madcow.util import Module
-
-
-uesc_re = re.compile(ur'\\:([0-9a-fA-F]{4})', re.U)
-xrespath = '/queryresult[@success="true"]/pod[@title="Result"]/*/plaintext/text()'
 
 
 class URI(ParseResult):
@@ -26,34 +18,16 @@ class URI(ParseResult):
     def __new__(cls, scheme='', netloc='', path='', params='', query='', fragment=''):
         return super(URI, cls).__new__(cls, scheme, netloc, path, params, query, fragment)
 
-    def to_url(self):
+    @property
+    def url(self):
         return urlunparse(self)
 
-    url = property(to_url)
 
-    def __str__(self):
-        return self.url
+class XPaths:
 
-api_uri = URI(scheme='http', netloc='api.wolframalpha.com', path='/v2/query')
-
-
-class XMLParseError(ValueError):
-
-    def __init__(self, xml, *args, **opts):
-        super(XMLParseError, self).__init__(*args, **opts)
-        self.xml = xml
-
-
-def waquery(input, url=None, **opts):
-    tree = etree.parse(urlopen((URI.from_url(url) if url else api_uri)._replace(
-        query=urlencode(dict(opts, input=input))).url))
-    res = tree.xpath(xrespath)
-    if not res:
-        raise XMLParseError(etree.tostring(tree.getroot()), 'unexpected xml structure')
-    res = decode(res[0])
-    for match in uesc_re.finditer(res):
-        res = res.replace(match.group(0), unichr(int(match.group(1), 16)), 1)
-    return res.strip()
+    result = '/queryresult[@success="true" and @error="false"]/pod[@id="Result"]/*/plaintext/text()'
+    suggests = '/queryresult[@success="false" and @error="false"]/didyoumeans/didyoumean/text()'
+    error = '/queryresult[@success="false" and @error="true"]'
 
 
 class Main(Module):
@@ -61,7 +35,8 @@ class Main(Module):
     require_addressing = True
     pattern = re.compile(r'^\s*(?:wa|wolf(?:ram)?(?:\s*alpha)?)(?:\s+|\s*[:-]\s*)(.+?)\s*$', re.I)
     help = u'<wa|wolf[ram][alpha]> <query> - query wolfram alpha database'
-    error = u'no results, check logs for exact xml response'
+    default_api_uri = URI(scheme='http', netloc='api.wolframalpha.com', path='/v2/query')
+    unicode_esc_re = re.compile(ur'\\:([0-9a-fA-F]{4})', re.U)
 
     def init(self):
         self.appid = settings.WOLFRAM_API_APPID
@@ -70,14 +45,41 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         if self.appid:
             try:
-                res = waquery(args[0], appid=self.appid, url=self.apiurl)
-            except XMLParseError, exc:
-                self.log.warn(u'unhandled response for wolfram query. xml response:')
-                self.log.warn(repr(exc.xml))
-                return u'{}: {}'.format(nick, self.error)
+                res = self.wolfram_query(args[0], appid=self.appid, url=self.apiurl)
             except (SystemExit, KeyboardInterrupt):
                 raise
             except:
-                return u'{}: internal exception: {}'.format(nick, decode(sys.exc_value))
+                self.log.exception('uncaught exception querying wolfram alpha')
+                res = u'unexpected exception during query, file a bug'
+            return u'{}: {}'.format(nick, res)
+
+    def log_xml(self, tree):
+        self.log.warn('WolframAlpha Response XML:')
+        self.log.warn(decode(etree.tostring(tree.getroot())))
+
+    def wolfram_query(self, input, url=None, **opts):
+        api_uri = URI.from_url(url) if url else self.default_api_uri
+        query_string = urlencode(dict(opts, input=input))
+        request_url = api_uri._replace(query=query_string).url
+        response = urlopen(request_url)
+        tree = etree.parse(response)
+        if tree.xpath(XPaths.error):
+            self.log_xml(tree)
+            result = 'Error response from the server, check logs.'
+        else:
+            result = tree.xpath(XPaths.result)
+            if result:
+                result = result[0]
             else:
-                return u'{}: {}'.format(nick, res)
+                result = 'No results.'
+                suggests = ', '.join(tree.xpath(XPaths.suggests)).strip()
+                if suggests:
+                    result += ' Did you mean: ' + suggests
+                else:
+                    self.log_xml(tree)
+                    result += ' This may be in error, check logs for XML response.'
+        result = decode(result)
+        for match in self.unicode_esc_re.finditer(result):
+            result = result.replace(match.group(0), unichr(int(match.group(1), 16)), 1)
+        return result.strip()
+
