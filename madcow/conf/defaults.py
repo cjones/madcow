@@ -102,6 +102,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'webtender',           # how to make drinks!
            #'woot',                # latest woot offer
            #'djmemebot',           # memebot's django app backend integration
+           #'wunderground',        # more advanced weathern, needs api key from weather underground
            #'wolfram',             # wolfram alpha api access (see WOLFRAM_* settings below if you enable this)
            ]
 
@@ -239,3 +240,14 @@ HTTP_COOKIES = True
 
 # for django memebot integration
 DJMEMEBOT_SETTINGS_FILE = '/path/to/memebot/settings.py'
+
+# for weather underground module: note: need an api key
+WUNDERGROUND_API_KEY = 'FILLMEIN'
+WUNDERGROUND_LANG = 'EN'
+WUNDERGROUND_PREFER_METRIC = False
+WUNDERGROUND_PRIMARY_ONLY = False
+WUNDERGROUND_API_SCHEME = 'http'
+WUNDERGROUND_API_NETLOC = 'api.wunderground.com'
+WUNDERGROUND_DO_COLOR = True
+WUNDERGROUND_USER_AGENT = None
+WUNDERGROUND_TIMEOUT = None
