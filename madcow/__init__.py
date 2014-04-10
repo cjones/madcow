@@ -89,8 +89,8 @@ class Madcow(object):
         self.admin = Admin(self)
 
         # load modules
-        self.modules = Modules(self, 'modules', settings.MODULES)
-        self.tasks = Modules(self, 'tasks', settings.TASKS)
+        self.modules = Modules(self, 'modules', settings.MODULES, supercedes=settings.MODULE_SUPERCEDES)
+        self.tasks = Modules(self, 'tasks', settings.TASKS, supercedes=settings.TASK_SUPERCEDES)
         self.usage_lines = self.modules.help + self.tasks.help
         self.usage_lines.append(u'help - this screen')
         self.usage_lines.append(u'version - get bot version')
@@ -635,12 +635,13 @@ class Modules(object):
 
     _pyext = re.compile(r'\.py$')
 
-    def __init__(self, madcow, subdir, names):
+    def __init__(self, madcow, subdir, names, supercedes=None):
         self.madcow = madcow
         self.subdir = subdir
         self.names = names
         self.modules = {}
         self.help = []
+        self.supercedes = supercedes
         self.load_modules()
 
     def load_modules(self):
@@ -667,6 +668,21 @@ class Modules(object):
                 self.madcow.log.warn('failed to load %s: %s', name, error)
                 if name in self.modules:
                     del self.modules[name]
+
+        # check if we enabled anything that conflicts
+        for master, slaves in self.supercedes.iteritems():
+            if master in self.modules:
+                module = self.modules[master]
+                if module['mod'].Main.enabled:
+                    if isinstance(slaves, basestring):
+                        slaves = [slaves]
+                    for slave in slaves:
+                        if slave in self.modules:
+                            slave_module = self.modules[slave]
+                            if slave_module['mod'].Main.enabled:
+                                slave_module['mod'].Main.enabled = False
+                                self.modules.pop(slave, None)
+                                self.madcow.log.warn('unloading module %s: superceded by %s', slave, master)
 
     def by_priority(self):
         """Return list of tuples for modules, sorted by priority"""

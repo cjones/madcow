@@ -102,7 +102,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'webtender',           # how to make drinks!
            #'woot',                # latest woot offer
            #'djmemebot',           # memebot's django app backend integration
-           #'wunderground',        # more advanced weathern, needs api key from weather underground
+           #'wunderground',        # advanced weather api access, (needs api key from wunderground.com)
            #'wolfram',             # wolfram alpha api access (see WOLFRAM_* settings below if you enable this)
            ]
 
@@ -114,6 +114,16 @@ TASKS = [
         ]
 
 PRIVATE_MODULES = ['lyrics', 'company', 'realname', 'notes', 'xray']  # list of modules (from MODULES above) that only respond in private message
+
+# Blacklist mechanism to disable modules when "better" ones are enabled, as
+# defined here. The master module is the dictionary key, and its subservients
+# are in the list. In the default below, for example, enabling wunderground.py
+# will force noaa.py and weather.py to unload. They have conflicting triggers,
+# as well as basically do the same thing. wunderground.py is the superior
+# plugin, however it requires one to enroll for (free) API access, which may
+# not be to everyone's taste or means.
+MODULE_SUPERCEDES = {'wunderground': ['noaa', 'weather']}
+TASK_SUPERCEDES = {}
 
 #######################
 ### PROTOCOL CONFIG ###
@@ -241,7 +251,8 @@ HTTP_COOKIES = True
 # for django memebot integration
 DJMEMEBOT_SETTINGS_FILE = '/path/to/memebot/settings.py'
 
-# for weather underground module: note: need an api key
+# for weather underground module: note: need an api key (api.wunderground.com)
+# to enable this, you must add/uncomment the module "wunderground" first.
 WUNDERGROUND_API_KEY = 'FILLMEIN'
 WUNDERGROUND_LANG = 'EN'
 WUNDERGROUND_PREFER_METRIC = False
@@ -250,4 +261,4 @@ WUNDERGROUND_API_SCHEME = 'http'
 WUNDERGROUND_API_NETLOC = 'api.wunderground.com'
 WUNDERGROUND_DO_COLOR = True
 WUNDERGROUND_USER_AGENT = None
-WUNDERGROUND_TIMEOUT = None
+WUNDERGROUND_TIMEOUT = 10
