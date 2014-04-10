@@ -1,59 +1,118 @@
-"""Get weather report"""
+"""Query Weather Underground API in various ways"""
 
-from madcow.util import Module, wunderground
+from madcow.util.wunderground import WeatherUnderground, APILookupError
+from madcow.util import Module
 from madcow.conf import settings
 from learn import Main as Learn
+
 import re
 
 class Main(Module):
 
-    pattern = re.compile(u'^\s*(xfc|xforecast|xweather|xws|xpws|xpwd|xalmanac|xstorms|xstorm|xw|xpw)(?:\s+(.+?))?\s*$')
+    defaults = {
+            'api_key': 'CHANGEME',
+            'lang': 'EN',
+            'prefer_metric': False,
+            'primary_only': False,
+            'api_scheme': 'http',
+            'api_netloc': 'api.wunderground.com',
+            'do_color': True,
+            'user_agent': None,
+            'timeout': 10,
+            }
+
+    trigger_map = {
+            'conditions': {
+                True: {
+                    'basic': ['pwb', 'pw'],
+                    'extended': ['pws', 'pwd'],
+                    'full': ['pwsx', 'pwdx'],
+                    },
+                False: {
+                    'basic': ['wb'],
+                    'extended': ['ws', 'weather', 'weath'],
+                    'full': ['wsx'],
+                    },
+                },
+            'data': {
+                False: {
+                    'almanac': ['alma', 'almanac', 'records', 'highs', 'lows'],
+                    'forecast': ['forecast', 'fc', 'fce', 'fcx'],
+                    'storm': ['storm', 'storms', 'hurricane', 'hurricanes'],
+                    },
+                },
+            }
+
+    triggers = set()
+    _method_triggers = []
+    help_lines = [u'Weather Underground query shortcuts:']
+    for query_type, station_types in trigger_map.iteritems():
+        for pws, handlers in station_types.iteritems():
+            for handler, _triggers in handlers.iteritems():
+                if _triggers:
+                    triggers.update(_triggers)
+                    trigger_desc = u'[{}]'.format('|'.join(_triggers))
+                    if query_type == 'conditions':
+                        meth_desc = u'look up weather conditions'
+                        notes = []
+                        if pws:
+                            notes.append(u'include personal weather stations')
+                        else:
+                            notes.append(u'official stations only')
+                        if handler == 'basic':
+                            notes.append(u'brief result')
+                        if handler == 'full':
+                            notes.append(u'extended result')
+                        if notes:
+                            meth_desc += u' ({})'.format(', '.join(notes))
+                    else:
+                        meth_desc = u'look up extended {} data'.format(handler)
+                    triggers.update(_triggers)
+                    help_lines.append(u'{} - {}'.format(trigger_desc, meth_desc))
+                    _method_triggers.append(('get_{}_{}'.format(handler, query_type), frozenset(_triggers), pws))
+
+    help = u'\n'.join(help_lines)
+    regex = r'^\s*({})(?:\s+(.+?))?\s*$'.format('|'.join(map(re.escape, sorted(triggers))))
+    pattern = re.compile(regex, re.IGNORECASE)
     require_addressing = True
 
-    help = u'[xfc|xforecast] forecast [xweather|xws] weather [xpws|xpwd] personal weather stations\n'
-    help += u'[xalmanac] historic [xstorms|xstorm] storm info'
-
-
     def init(self):
-        self.wu = wunderground.WeatherUnderground(
-                settings.WUNDERGROUND_API_KEY,
-                lang=getattr(settings, 'WUNDERGROUND_LANG', None) or 'EN',
-                prefer_metric=getattr(settings, 'WUNDERGROUND_PREFER_METRIC', False),
-                primary_only=getattr(settings, 'WUNDERGROUND_PRIMARY_ONLY', False),
-                api_scheme=getattr(settings, 'WUNDERGROUND_API_SCHEME', None) or 'http',
-                api_netloc=getattr(settings, 'WUNDERGROUND_API_NETLOC', None) or 'api.wunderground.com',
-                do_color=getattr(settings, 'WUNDERGROUND_DO_COLOR', True),
-                user_agent=getattr(settings, 'WUNDERGROUND_USER_AGENT', None),
-                timeout=getattr(settings, 'WUNDERGROUND_TIMEOUT', None),
-                log=self.madcow.log,
-                )
+        opts = {}
+        for key, default in self.defaults.iteritems():
+            setting = 'WUNDERGROUND_' + key.upper()
+            val = getattr(settings, setting, None)
+            if val is None:
+                val = default
+            opts[key] = val
+
+        self.api = WeatherUnderground(log=self.madcow.log, **opts)
         self.learn = Learn(madcow=self.madcow)
+        self.method_triggers = [(getattr(self.api, method_name), triggers, pws)
+                                for method_name, triggers, pws in self._method_triggers]
 
-    def response(self, nick, args, kwargs):
-        cmd = args[0]
-        query = args[1]
-
-        if not query:
-            location = self.learn.lookup('location', nick)
-        elif query.startswith('@'):
-            location = self.learn.lookup('location', query[1:])
+    def response(self, nick, args, kwargs, _strip=lambda x: x.strip()):
+        trigger, query = ('' if arg is None else _strip(arg) for arg in args)
+        trigger = trigger.lower()
+        for method, triggers, pws in self.method_triggers:
+            if trigger in triggers:
+                res = None
+                break
         else:
-            location = query
-        if location:
-            if cmd in ('xfc', 'xforecast'):
-                message = self.wu.get_forecast(location)
-            elif cmd in ('xweather', 'xws'):
-                message = self.wu.ext_conditions(location)
-            elif cmd in ('xpws', 'xpwd'):
-                message = self.wu.ext_conditions(location, pws=True)
-            elif cmd in ('xalmanac',):
-                message = self.wu.get_almanac(location)
-            elif cmd in ('xstorm', 'xstorms'):
-                message = self.wu.get_storms(location)
-            elif cmd in ('xw'):
-                message = self.wu.basic_conditions(location)
-            elif cmd in ('xpw'):
-                message = self.wu.basic_conditions(location, pws=True)
-        else:
-            message = u"I couldn't look that up"
-        return u'%s: %s' % (nick, message)
+            res = u': internal configuration error: no handler found for that keyword.'
+        if not res:
+            if not query:
+                loc = self.learn.lookup('location', nick)
+            elif query.startswith(u'@'):
+                loc = self.learn.lookup('location', query[1:])
+            else:
+                loc = query
+            if loc:
+                try:
+                    res = method(loc, pws=pws)
+                except APILookupError, exc:
+                    res = u'API lookup error: {}'.format(exc.message)
+            else:
+                res = u"I couldn't look that up: be sure to specify a query or set your default location with: set location <nick> <zip|city|airport_code>"
+        if len(_strip(res).splitlines()) == 1:
+            res = u'{}: {}'.format(nick, res)
+        return res
