@@ -238,10 +238,15 @@ GATEWAY_IMAGE_URL = 'http://example.com/images/'
 # watch a twitter account and bridge tweets to channels you are in
 TWITTER_CONSUMER_KEY = None
 TWITTER_CONSUMER_SECRET = None
-TWITTER_TOKEN_KEY = None
-TWITTER_TOKEN_SECRET = None
+TWITTER_ACCESS_TOKEN_KEY = None
+TWITTER_ACCESS_TOKEN_SECRET = None
 TWITTER_UPDATE_FREQ = 45
-TWITTER_CHANNELS = 'ALL'  # or list of channels
+TWITTER_OUTPUT = 'ALL'
+TWITTER_TWEET_FORMAT = u'>> tweet from {tweet.user.screen_name}: {tweet.text_clean} <<'
+TWITTER_DISABLE_CACHE = True
+TWITTER_ERR_ANNOUNCE = True
+TWITTER_ERR_ANNOUNCE_FREQ = 28800
+TWITTER_SOFT_LIMIT = 10
 
 # settings for modules that use http
 HTTP_TIMEOUT = 10
