@@ -19,7 +19,10 @@ from gruntle.memebot.utils import blacklist, first, get_domain_from_url
 from gruntle.memebot.utils.tzdatetime import tzdatetime
 from gruntle.memebot.exceptions import OldMeme
 
-current_site = Site.objects.get_current()
+try:
+    current_site = Site.objects.get_current()
+except:
+    pass
 
 class Model(models.Model):
 
@@ -218,9 +221,8 @@ class Link(Model):
     attr_storage = PickleField(null=True, blank=True, default=None)
     attr = AttributeManager(storage_field='attr_storage')
 
-    class Meta:
-
-        unique_together = 'normalized', 'source'
+    #class Meta:
+    #    unique_together = 'normalized', 'source'
 
     def __unicode__(self):
         return self.url
@@ -307,9 +309,8 @@ class Note(Model):
     # fields
     value = models.TextField(null=False, blank=False)
 
-    class Meta:
-
-        unique_together = 'user', 'link', 'value'
+    #class Meta:
+    #    unique_together = 'user', 'link', 'value'
 
     def __unicode__(self):
         return u'Note posted by %s to %s' % (self.user.username, self.link.url)
