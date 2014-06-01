@@ -16,7 +16,7 @@ sys.dont_write_bytecode = True
 from django.conf import settings
 from gruntle.memebot import models
 from django.db.models import get_models
-from django.db.models.fields import AutoField
+from django.db.models.fields import AutoField, DateTimeField
 
 def main():
     for model in get_models():
@@ -26,18 +26,17 @@ def main():
             print model._meta, olds.count(), news.count()
             for new in news:
                 new.delete()
-
-            #if news.count() > 0: print 'problems:', model._meta
             if olds.count() == 0:
                 print 'empty:', model._meta
             else:
+                fields = zip(*model._meta.get_fields_with_model())[0]
+                keys = []
+                for field in fields:
+                    if isinstance(field, DateTimeField):
+                        field.auto_now_add = field.auto_now = False
+                    keys.append(field.attname)
                 for old in olds:
-                    attrs = {}
-                    for field, _ in model._meta.get_fields_with_model():
-                        key = field.attname
-                        attrs[key] = getattr(old, key)
-                    new = model.objects.using('default').create(**attrs)
-
+                    model.objects.using('default').create(**{key: getattr(old, key) for key in keys})
 
 
 
