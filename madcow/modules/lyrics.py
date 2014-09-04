@@ -47,7 +47,9 @@ class Main(Module):
                     title = re.sub('\s+Lyrics\s+\|\s+SongMeanings.*$', '', soup.title.renderContents())
                 except StandardError:
                     title = 'Unknown artist/song, check parsing code!'
-                text = soup.find('div', id='textblock')
+                text = soup.find('div', attrs={'class': re.compile(r'.*lyric-box.*')})
+                for a in text('a'):
+                    a.extract()
             except StandardError:
                 self.log.warn('unable to find textblock from url {0!r} (query: {1!r})'.format(url, args[0]))
                 return u'{nick}: {error}'.format(error=self.error, **kwargs)
