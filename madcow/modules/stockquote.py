@@ -50,7 +50,10 @@ class Yahoo(object):
                 results.append(u'%s (%s) - %s: %.4f' % (name, symbol, trade_time, last_trade))
             else:
                 delta = last_trade - last_close
-                delta_perc = delta * 100.0 / last_close
+                try:
+                    delta_perc = delta * 100.0 / last_close
+                except ZeroDivisionError:
+                    delta_perc = 0.00
                 if delta < 0:
                     color = u'red'
                 elif delta > 0:
