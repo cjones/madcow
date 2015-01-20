@@ -9,7 +9,7 @@ GOOGLE = '\x1b[m\x0f\x1b[1m\x1b[34mG\x1b[31mo\x1b[33mo\x1b[34mg\x1b[32ml\x1b[31m
 class Main(Module):
 
     pattern = re.compile(r'^(?:search|g(?:oog(?:le)?)?)\s+(.+)\s*$', re.I)
-    require_addressing = True
+    require_addressing = False
     help = u"(g[oog[le]]|search) <query> - i'm feeling lucky"
     error = u'not so lucky today..'
 
@@ -18,4 +18,5 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         query = args[0]
-        return u'{}: {}: {}'.format(nick, GOOGLE, self.google.lucky(query))
+        feellucky = self.google.lucky(query)
+        return u'%s: %s: %s' % (nick, GOOGLE, feellucky)
