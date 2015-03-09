@@ -2,7 +2,7 @@
 REQUIREMENTS
 ============
 
-* python 2.7
+* Python 2.7
 
 * Various optional modules have their own requirements, though care has
   been taken to use only Python when at all possible. These requirements
