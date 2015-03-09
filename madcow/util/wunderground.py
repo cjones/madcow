@@ -179,31 +179,12 @@ class WeatherUnderground(object):
                   u'cat {Current.SaffirSimpsonCategory}) '
                   u'@{Current.lat},{Current.lon}: Winds {wind} | Gusting {gust}')
 
-    # temp ranges in F and its ANSI color
-    _temp_scale = [(None,  -20, '\x1b[0;5;35;40m'),  # blinking dark magenta
-                   ( -20,    0, '\x1b[0;35;40m'  ),  # dark magenta
-                   (   0,   15, '\x1b[0;1;35;40m'),  # bright magenta
-                   (  15,   32, '\x1b[0;1;34;40m'),  # bright blue
-                   (  32,   50, '\x1b[0;36;40m'  ),  # dark cyan
-                   (  50,   60, '\x1b[0;1;36;40m'),  # bright cyan
-                   (  60,   68, '\x1b[0;32;40m'  ),  # dark green
-                   (  68,   78, '\x1b[0;1;32;40m'),  # bright green
-                   (  78,   84, '\x1b[0;33;40m'  ),  # dark yellow
-                   (  84,   90, '\x1b[0;1;33;40m'),  # bright yellow
-                   (  90,   97, '\x1b[0;1;31;40m'),  # bright red
-                   (  97,  105, '\x1b[0;31;40m'  ),  # dark red
-                   ( 105, None, '\x1b[0;5;31;40m'),  # blinking dark red
-                   ]
-
-    # reset graphics/color attributes
-    _sgr0 ='\x1b[0m'
-
     # unicode degree symbol
     _deg = u'\u02da'
 
     def __init__(self, api_key, lang='EN', prefer_metric=False,
                  primary_only=False, api_scheme='http', fsep=' | ',
-                 api_netloc='api.wunderground.com', do_color=True,
+                 api_netloc='api.wunderground.com',
                  user_agent=None, timeout=10, log=None):
         """
         api_key - (str) REQUIRED! Sign up at api.wunderground.com for one.
@@ -227,13 +208,6 @@ class WeatherUnderground(object):
 
         api_netloc - (str) [default: "api.wunderground.com"] Hostname to make
                      API requests to.
-
-        do_color - (bool) Choose whether to use ANSI coloring of temperatures.
-                   This uses a color range along the axis: magenta -> blue ->
-                   green -> yellow -> red, with more comfortable temps in the
-                   green. See _temp_scale for the actual thresholds. This
-                   should be disabled for AIM or other mediums that cannot do
-                   ANSI graphics.
 
         agent - (str) User agent to use in request headers. Defaults to
                 impersonate a browser in a generic way, mostly for consistency
@@ -260,7 +234,6 @@ class WeatherUnderground(object):
         self.api_scheme = api_scheme
         self.fsep = fsep
         self.api_netloc = api_netloc
-        self.do_color = do_color
         self.agent = Agent(user_agent, log=log)
         self.timeout = timeout
         self.log = log
@@ -406,13 +379,6 @@ class WeatherUnderground(object):
         else:
             return u'{} ({})'.format(pri, sec)
 
-    def get_color(self, val):
-        """Gets a suitable ANSI color for the given temperature in farahnheit """
-        for _min, _max, color in self._temp_scale:
-            if ((_min is None or val >= _min) and
-                    (_max is None or val < _max)):
-                return color
-
     def format_temp(self, fval, prefer_metric=None, primary_only=None):
         """
         Given a temperature in fahranheit, return a formatted string. This
@@ -426,11 +392,7 @@ class WeatherUnderground(object):
             primary_only = self.primary_only
         fval = float(fval)
         cval = round((fval - 32.0) * (5.0 / 9.0), 1)
-        if self.do_color:
-            c1 = self.get_color(fval)
-            c0 = self._sgr0
-        else:
-            c0 = c1 = ''
+        c0 = c1 = ''
         f, c = map(u'{}{:.1f} {}{}{}'.format, (c1, c1), (fval, cval), (self._deg, self._deg), 'FC', (c0, c0))
         if prefer_metric:
             pri, sec = c, f
@@ -588,16 +550,7 @@ class WeatherUnderground(object):
         if not res:
             raise APILookupError('unable to fetch extended forecast data')
         with trapall:
-            res = u'Extended forecast for {}:\n{}'.format(data.current_observation.display_location.full, res)
-        if self.do_color:
-            # in-line colorizer. dubious code quality here.
-            for regex in self._tcol1_re, self._tcol2_re:
-                for match in regex.finditer(res):
-                    parts = list(match.groups())
-                    parts.insert(1, self.get_color(int(parts[1])))
-                    parts.insert(4, self._sgr0)
-                    res = res.replace(match.group(0), u''.join(parts))
-        return res
+            return u'Extended forecast for {}:\n{}'.format(data.current_observation.display_location.full, res)
 
     def get_storm_data(self, loc, data=None, pws=False, best=False, **opts):
         """

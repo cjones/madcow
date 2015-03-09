@@ -132,7 +132,7 @@ class ColorLib(object):
     def __init__(self, protocol):
         if protocol not in self._protocols:
             raise UnknownProtocol(protocol)
-        self.protocol = protocol
+        self.protocol = None  #protocol
         self.rainbow_offset = {}
 
     def _normalize_color(self, color):

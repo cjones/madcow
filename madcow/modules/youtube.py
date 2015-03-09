@@ -9,7 +9,6 @@ import cgi
 import re
 import os
 
-LOGO = u'\x1b[m\x0f\x1b[30m\x1b[47mYou\x1b[37m\x1b[41m\x1b[1mTube\x1b[m\x0f'
 SCHEMES = frozenset({'http', 'https'})
 DOMAINS = frozenset({'youtube.com'})
 
@@ -35,8 +34,7 @@ class Main(Module):
                 soup = getsoup(url)
                 title = strip_html(decode(soup.title.renderContents())).replace(u' - YouTube', u'').strip()
                 if title:
-                    response = u'{}: {}'.format(LOGO, title)
-                    self.bot.output(response, kwargs['req'])
+                    self.bot.output(title, kwargs['req'])
         except (KeyboardInterrupt, SystemExit):
             raise
         except:

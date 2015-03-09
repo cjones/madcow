@@ -23,35 +23,7 @@ class Weather(object):
         self.colorlib = colorlib
         self.log = logger
 
-    def _color_temp(self, temp, tempstr):
-        '''colorize the temperature string (tempstr) based on the temperature in farenheit (temp)'''
-        blink = False
-        if temp < 0:
-            color = u'magenta'
-        elif temp >=0 and temp < 40:
-            color = u'bright blue'
-        elif temp >= 40 and temp < 60:
-            color = u'cyan'
-        elif temp >= 60 and temp < 80:
-            color = u'green'
-        elif temp >= 80 and temp < 90:
-            color = u'yellow'
-        elif temp >= 90 and temp < 100:
-            color = u'red'
-        elif temp >= 100:
-            color = u'red'
-            blink = True
-        s = self.colorlib.get_color(color, text=tempstr)
-
-        # XXX this seems ill-conceived
-        if blink:
-            s = u'\x1b[5m' + s + u'\x1b[0m'
-        
-        return s
-    
     def _format_weather(self, data):
-        data['tempstr'] = self._color_temp(data['temp'], data['tempstr'])
-
         return ('%(loc)s - %(time)s: Conditions: %(conditions)s | Temperature: %(tempstr)s ' + \
                 '| Humidity: %(humidity)s | Wind: %(wind)s') % data
 
