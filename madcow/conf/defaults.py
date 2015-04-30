@@ -102,6 +102,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'webtender',           # how to make drinks!
            #'woot',                # latest woot offer
            #'djmemebot',           # memebot's django app backend integration
+           #'wikihow',             # mashup instructions from wikihow
            #'wunderground',        # advanced weather api access, (needs api key from wunderground.com)
            #'wolfram',             # wolfram alpha api access (see WOLFRAM_* settings below if you enable this)
            ]
