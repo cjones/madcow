@@ -79,6 +79,7 @@ MODULES = ['alias',               # allow users to make command aliases
            #'bible',               # get a quote from the bible
            #'care',                # generate a high-precision care-o-meter
            #'chp',                 # california real-time traffic reports
+           #'chuck',               # gets a random chuck norris fact
            #'delicious',           # post all urls to delicious (see config below)
            #'factoids',            # makes madcow remember stuff from chatter
            #'figlet',              # generate ascii fonts
