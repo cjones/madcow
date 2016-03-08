@@ -171,20 +171,30 @@ class Main(Module):
 
     def translate(self, text, src, dst):
         """Perform the translation"""
-        opts = {'client': 't',
-                'text': text,
+        opts = {'q': text,
+                'client': 't',
+                'sl': 'en',
+                'tl': 'es',
                 'hl': 'en',
-                'sl': self.langs[src],
-                'tl': self.langs[dst],
+                'dt': 'at',
+                'dt': 'bd',
+                'dt': 'ex',
+                'dt': 'ld',
+                'dt': 'md',
+                'dt': 'qca',
+                'dt': 'rw',
+                'dt': 'rm',
+                'dt': 'ss',
+                'dt': 't',
                 'ie': 'UTF-8',
                 'oe': 'UTF-8',
-                'multires': '0',
-                'prev': 'btn',
-                'ssel': '4',
-                'tsel': '4',
-                'sc': '1'}
-        url = 'http://translate.google.com/translate_a/t'
-        res = geturl(url, opts)
+                'ssel': '3',
+                'tsel': '3',
+                'kc': '0',
+                'tk': '286462.160648'}
+
+        url = 'http://translate.google.com/translate_a/single'
+        res = geturl(url, opts, referer='https://translate.google.com/')
         while u',,' in res:
             res = res.replace(u',,', u',"",')
         res = simplejson.loads(res)
