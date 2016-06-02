@@ -4,7 +4,7 @@
 ### MAIN CONFIG ###
 ###################
 
-PROTOCOL = 'cli'  # irc, aim, pysilc, shell, cli
+PROTOCOL = 'cli'  # irc, slack, aim, pysilc, shell, cli
 BOTNAME = 'madcow'  # will use this nickname in irc/silc and for addressing
 ALIASES = ['!']  # list of other nicks the bot will also respond to
 DETACH = False  # set to True to run as a daemon (UNIX only)
@@ -157,6 +157,10 @@ IRC_KEEPALIVE = True
 IRC_KEEPALIVE_FREQ = 30
 IRC_KEEPALIVE_TIMEOUT = 120
 IRC_GIVE_OPS_FREQ = 30
+
+# settings for slack protocol
+SLACK_TOKEN = ''
+SLACK_CHANNELS = ['general']
 
 # settings for the aim protocol
 AIM_USERNAME = 'aimusername'
