@@ -1,6 +1,5 @@
 """protocol support for slack websockets"""
 
-import threading
 import time
 import sys
 import os
@@ -29,9 +28,6 @@ class SlackProtocol(Madcow):
             time.sleep(0.5)
 
     def run(self):
-        #queue_thread = threading.Thread(target=self.queue_checker)
-        #queue_thread.start()
-
         while self.running:
             try:
                 self.check_response_queue()
