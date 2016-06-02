@@ -20,6 +20,7 @@ class Main(Module):
     error = u"I had a problem with that, sorry."
 
     def response(self, nick, args, kwargs):
+        kwargs['req'].blockquoted = True
         query = args[0]
         if query is None or query == u'':
             url = self.random_url

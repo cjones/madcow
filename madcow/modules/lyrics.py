@@ -20,6 +20,7 @@ class Main(Module):
         self.google = Google()
 
     def response(self, nick, args, kwargs):
+        kwargs['req'].quoted = True
         url = urlunparse(('https', 'www.google.com', 'search', '',
             urlencode({'num': '100', 'safe': 'off', 'hl': 'en', 'q': 'site:songmeanings.com ' + args[0]}), ''))
         soup = getsoup(url)

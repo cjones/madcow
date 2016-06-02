@@ -28,31 +28,73 @@ class SlackProtocol(Madcow):
             self.check_response_queue()
             time.sleep(0.5)
 
-
     def run(self):
-        queue_thread = threading.Thread(target=self.queue_checker)
-        queue_thread.start()
+        #queue_thread = threading.Thread(target=self.queue_checker)
+        #queue_thread.start()
+
         while self.running:
-            event = self.slack.get_event()
-            self.log.info(u'[SLACK] * %s', event.json)
-            event_type = event.event.get('type', 'unknown')
-            if event_type == 'hello':
-                self.online = True
-            elif self.online:
-                if event_type == 'message':
-                    req = Request(message=event.event['text'])
-                    req.nick = event.event['user']
-                    req.channel = event.event['channel']
-                    req.private = False
-                    self.check_addressing(req)
-                    self.process_message(req)
+            try:
+                self.check_response_queue()
+                try:
+                    event = self.slack._eventq.pop(0)
+                except IndexError:
+                    time.sleep(.2)
+                else:
+                    self.log.info(u'[SLACK] * %s', event.json)
+                    event_type = event.event.get('type', 'unknown')
+                    if event_type == 'hello':
+                        self.online = True
+                    elif self.online:
+                        if event_type == 'message':
+                            private = False  # TODO need to determine if this is in DM
+                            req = Request(message=event.event['text'])
+                            req.nick = event.event['user']
+                            req.channel = event.event['channel']
+                            req.private = private
+                            if private:
+                                req.sendto = req.nick
+                                req.addressed = True
+                            else:
+                                req.sendto = req.channel
+                                req.addressed = False
+                            req.message = decode(req.message)
+                            self.check_addressing(req)
+                            req.colorize = False
+                            self.process_message(req)
+            except KeyboardInterrupt:
+                self.running = False
+            except:
+                self.log.exception('Error in slack event loop')
 
     def protocol_output(self, message, req=None):
         if req.sendto is None:
             req.sendto = req.channel
-        for channel in (self.channels if req.sendto == 'ALL' else [req.sendto]):
-            self.slack.send_msg(message, channel_name=channel)
-            self.logpublic(channel, '<%s> %s' % (self.botname(), encode(message)))
+        if req.blockquoted and u'```' not in message:
+            message = u'```{}```'.format(message)
+        else:
+            if req.redquoted:
+                fmt = u'`{}`'
+                skip_re = re.compile(ur'`')
+            elif req.quoted:
+                fmt = u'> {}'
+                skip_re = re.compile(ur'^>')
+            else:
+                fmt = None
+                skip_re = None
+            if fmt is not None:
+                lines = []
+                for line in message.splitlines():
+                    line = line.strip()
+                    if line:
+                        if skip_re is None or skip_re.search(line) is None:
+                            line = fmt.format(line)
+                        lines.append(line)
+                message = u'\n'.join(lines)
+
+        if message:
+            for channel in (self.channels if req.sendto == 'ALL' else [req.sendto]):
+                self.slack.send_msg(message, channel_name=channel)
+                self.logpublic(channel, '<%s> %s' % (self.botname(), encode(message)))
 
 
 class ProtocolHandler(SlackProtocol):

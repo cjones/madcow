@@ -34,6 +34,7 @@ class Main(Module):
         self.zipfile = os.path.join(os.path.dirname(pyfiglet.__file__), 'fonts.zip')
 
     def response(self, nick, args, kwargs):
+        kwargs['req'].blockquoted = True
         figlet = pyfiglet.Figlet(zipfile=self.zipfile)
         figlet.set_font(font_name=random.choice(self.fonts))
         return encoding.convert(figlet.render_text(args[0]))

@@ -152,7 +152,13 @@ class Request(object):
                 'colorize': False,
                 'channel': None,
                 'addressed': False,
-                'action': False}
+                'action': False,
+
+                # some knobs only slack cares about
+                'blockquoted': False,
+                'quoted': False,
+                'redquoted': False,
+                }
 
     def __init__(self, **kwargs):
         self.__dict__.update(self.defaults, **kwargs)
