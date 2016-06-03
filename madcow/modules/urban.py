@@ -7,6 +7,11 @@ from madcow.util import Module, strip_html
 from madcow.util.http import getsoup, geturlopt
 from madcow.util.text import decode
 
+try:
+    from madcow.protocols.slack import SlackProtocol
+except ImportError:
+    SlackProtocol = None
+
 
 RESULTS_PER_PAGE = 7
 
@@ -78,22 +83,20 @@ class Main(Module):
         result = u'[{}/{}] {}: {}'.format(
                 orig_idx,
                 total,
-                render(entry.findPreviousSibling('div', 'def-header').find('a', 'word')),
-                render(entry),
+                self.render(entry.findPreviousSibling('div', 'def-header').find('a', 'word')),
+                self.render(entry),
                 )
         try:
-            result += u' - Example: ' + render(entry.findNextSibling('div', 'example'))
+            result += u' - Example: ' + self.render(entry.findNextSibling('div', 'example'))
         except (SystemExit, KeyboardInterrupt):
             raise
         except:
             pass
         return result
 
-
-def render(node, _newline_re=re.compile(r'(?:\r\n|[\r\n])')):
-    """Render node to text"""
-    data = node.renderContents()
-    if isinstance(data, str):
-        data = decode(data, 'utf-8')
-    return _newline_re.sub(' ', strip_html(data)).strip()
-
+    def render(self, node, _newline_re=re.compile(r'(?:\r\n|[\r\n])')):
+        """Render node to text"""
+        data = strip_html(decode(node.renderContents()))
+        if SlackProtocol is None or not isinstance(self.madcow, SlackProtocol):
+            data = _newline_re.sub(u' ', data).strip()
+        return data
