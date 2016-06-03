@@ -18,26 +18,6 @@ WIKIS = {'wikipedia': {
                  'error': 'Search results',
                  },
              },
-         'conservapedia': {
-             'keys': ['cp'],
-             'baseurl': 'http://www.conservapedia.com/',
-             'kwargs': {
-                 'random': '/Special:Random',
-                 'search': '/Special:Search',
-                 'advert': ' - Conservapedia',
-                 'error': 'Search results',
-                 },
-             },
-         'encyclopediadramatica': {
-             'keys': ['ed', 'drama'],
-             'baseurl': 'http://ohinternet.com/',
-             'kwargs': {
-                 'random': '/Special:Random',
-                 'search': '/Special:Search',
-                 'advert': ' - Oh Internet',
-                 'error': 'Search results',
-                 },
-             },
          }
 
 class WikiMedia(object):
