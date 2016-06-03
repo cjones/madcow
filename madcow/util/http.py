@@ -71,9 +71,9 @@ class UserAgent(object):
         self.debug = debug
 
     def open(self, url, opts=None, data=None, referer=None, size=-1,
-             add_headers=None):
+             add_headers=None, **kwargs):
         """Open URL and return unicode content"""
-        realurl = buildurl(opts=opts, **urlparse.urlparse(url)._asdict())
+        realurl = buildurl(opts=opts, **dict(urlparse.urlparse(url)._asdict(), **kwargs))
         if self.debug:
             print 'url = %r' % realurl
         request = urllib2.Request(realurl, data)
@@ -122,8 +122,8 @@ def setup(handlers=None, cookies=True, agent=AGENT, timeout=None):
     UA = UserAgent(handlers, cookies, agent)
 
 
-def geturl(url, opts=None, data=None, referer=None, size=-1, add_headers=None):
-    return getua().open(url, opts, data, referer, size, add_headers)
+def geturl(*args, **kwargs):
+    return getua().open(*args, **kwargs)
 
 geturl.__doc__ = UserAgent.open.__doc__
 
@@ -133,6 +133,12 @@ def getsoup(*args, **kwargs):
     return BeautifulSoup(geturl(*args, **kwargs))
 
 
+def is_sequence(obj):
+    t = type(obj)
+    return (issubclass(t, (collections.Iterable, collections.Iterator))
+            and not issubclass(t, basestring))
+
+
 def expandquery(query):
     if query is None:
         query = []
@@ -140,7 +146,8 @@ def expandquery(query):
         query = urlparse.parse_qsl(query)
     elif isinstance(query, collections.Mapping):
         query = list(query.iteritems())
-    return [(encode(k), [encode(v)] if isinstance(v, basestring) else v) for k, v in query]
+    return [(encode(key), map(encode, val if is_sequence(val) else [val]))
+            for key, val in query]
 
 
 def mergeopts(*opts):
@@ -169,4 +176,15 @@ def buildurl(scheme=None, netloc=None, host=None, port=None, path=None,
         scheme=scheme, netloc='{}:{}'.format(host, port) if port else host,
         path=path, query=urllib.urlencode(mergeopts(query, opts, kwargs), doseq=1),
         params=params, fragment=fragment))
+
+
+def getopt(query, opt):
+    for key, vals in expandquery(query):
+        if key == opt and vals:
+            return vals[0]
+
+
+def geturlopt(url, opt):
+    uri = urlparse.urlparse(url)
+    return getopt(uri.query, opt)
 
