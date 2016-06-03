@@ -7,12 +7,6 @@ from madcow.util import Module, strip_html
 from madcow.util.http import getsoup, geturlopt
 from madcow.util.text import decode
 
-try:
-    from madcow.protocols.slack import SlackProtocol
-except ImportError:
-    SlackProtocol = None
-
-
 RESULTS_PER_PAGE = 7
 
 _urban_url = 'http://www.urbandictionary.com/'
@@ -97,6 +91,6 @@ class Main(Module):
     def render(self, node, _newline_re=re.compile(r'(?:\r\n|[\r\n])')):
         """Render node to text"""
         data = strip_html(decode(node.renderContents()))
-        if SlackProtocol is None or not isinstance(self.madcow, SlackProtocol):
+        if self.madcow.proto != 'slack':
             data = _newline_re.sub(u' ', data).strip()
         return data
