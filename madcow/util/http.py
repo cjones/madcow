@@ -1,30 +1,15 @@
-#!/usr/bin/env python
-#
-# Copyright (C) 2007, 2008 Christopher Jones
-#
-# This file is part of Madcow.
-#
-# Madcow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Madcow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Madcow.  If not, see <http://www.gnu.org/licenses/>.
+"""Closely mimic a browser (kinda..)"""
 
-"""Closely mimic a browser"""
-
-import sys
-import urllib2
-import urlparse
-import urllib
-import encoding
 from gzip import GzipFile
+
+import collections
+import encoding
+import urlparse
+import httplib
+import urllib2
+import urllib
+import socket
+import sys
 import re
 
 try:
@@ -33,15 +18,47 @@ except ImportError:
     from StringIO import StringIO
 
 from BeautifulSoup import BeautifulSoup
+
 from text import encode, decode, get_encoding
 
-AGENT = u'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
+
+# just some random real user agent so we don't appear as a bot..
+AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:46.0) Gecko/20100101 Firefox/46.0'
 VERSION = sys.version_info[0] * 10 + sys.version_info[1]
 UA = None
 
-class UserAgent(object):
 
-    """Closely mimic a browser"""
+class odict(collections.MutableMapping):
+
+    def __init__(self, *args, **kwargs):
+        self._dict = {}
+        self._order = []
+        for key, val in dict(*args, **kwargs).iteritems():
+            self[key] = val
+
+    def __delitem__(self, key):
+        del self._dict[key]
+        self._order.remove(key)
+
+    def __getitem__(self, key):
+        return self._dict[key]
+
+    def __iter__(self):
+        return iter(self._order)
+
+    def __len__(self):
+        return len(self._order)
+
+    def __setitem__(self, key, val):
+        if key not in self._dict:
+            self._order.append(key)
+        self._dict[key] = val
+
+    def __str__(self):
+        return repr(self._dict)
+
+
+class UserAgent(object):
 
     def __init__(self, handlers=None, cookies=True, agent=AGENT, debug=False):
         if handlers is None:
@@ -56,17 +73,7 @@ class UserAgent(object):
     def open(self, url, opts=None, data=None, referer=None, size=-1,
              add_headers=None):
         """Open URL and return unicode content"""
-        url = list(urlparse.urlparse(url))
-        if opts:
-            for key in opts:
-                val = opts[key]
-                if isinstance(val, unicode):
-                    opts[key] = encode(val, 'utf-8')
-            query = [urllib.urlencode(opts)]
-            if url[4]:
-                query.append(url[4])
-            url[4] = u'&'.join(query)
-        realurl = urlparse.urlunparse(url)
+        realurl = buildurl(opts=opts, **urlparse.urlparse(url)._asdict())
         if self.debug:
             print 'url = %r' % realurl
         request = urllib2.Request(realurl, data)
@@ -77,24 +84,15 @@ class UserAgent(object):
                 request.add_header(*item)
         response = self.opener.open(request)
         data = response.read(size)
-
         import google
-        if isinstance(response, google.Response):
-            headers = None
-        else:
-            headers = response.headers
-
+        headers = None if isinstance(response, google.Response) else response.headers
         if headers and headers.get('content-encoding') == 'gzip':
             data = GzipFile(fileobj=StringIO(data)).read()
-
         return encoding.convert(data, headers)
 
     @staticmethod
     def settimeout(timeout):
         """Monkey-patch socket timeout if older urllib2"""
-
-        import httplib, socket
-
         def connect(self):
             try:
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -127,13 +125,48 @@ def setup(handlers=None, cookies=True, agent=AGENT, timeout=None):
 def geturl(url, opts=None, data=None, referer=None, size=-1, add_headers=None):
     return getua().open(url, opts, data, referer, size, add_headers)
 
+geturl.__doc__ = UserAgent.open.__doc__
 
-script_re = re.compile(r'<script.*?>.*?</script>', re.I | re.DOTALL)
 
 def getsoup(*args, **kwargs):
     """geturl wrapper to return soup minus scripts/styles"""
-    #page = script_re.sub('', page)  # XXX hack for newer version of BS
-    #for style in soup('style'): style.extract()
     return BeautifulSoup(geturl(*args, **kwargs))
 
-geturl.__doc__ = UserAgent.open.__doc__
+
+def expandquery(query):
+    if query is None:
+        query = []
+    elif isinstance(query, basestring):
+        query = urlparse.parse_qsl(query)
+    elif isinstance(query, collections.Mapping):
+        query = list(query.iteritems())
+    return [(encode(k), [encode(v)] if isinstance(v, basestring) else v) for k, v in query]
+
+
+def mergeopts(*opts):
+    merged = odict()
+    for opts in map(expandquery, opts):
+        for key, vals in opts:
+            merged.setdefault(key, []).extend(vals)
+    return expandquery(merged)
+
+
+def buildurl(scheme=None, netloc=None, host=None, port=None, path=None,
+             query=None, params=None, fragment=None, opts=None, **kwargs):
+    if netloc is not None:
+        host, _, port = netloc.partition(':')
+    if not host:
+        scheme, host = 'file', 'localhost'
+    elif port:
+        port = int(port)
+    if not scheme:
+        scheme = 'https' if port == 443 else 'http'
+    if (scheme == 'file' or
+            (scheme == 'http' and port == 80) or
+            (scheme == 'https' and port == 443)):
+        port = None
+    return urlparse.urlunparse(urlparse.urlparse('')._replace(
+        scheme=scheme, netloc='{}:{}'.format(host, port) if port else host,
+        path=path, query=urllib.urlencode(mergeopts(query, opts, kwargs), doseq=1),
+        params=params, fragment=fragment))
+
