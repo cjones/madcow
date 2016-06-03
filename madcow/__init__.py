@@ -68,6 +68,7 @@ class Madcow(object):
     _feedback_re = None
     _addrpre_re = None
     _punc = '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~'
+    _proto = None
 
     ### INITIALIZATION FUNCTIONS ###
 
@@ -117,6 +118,16 @@ class Madcow(object):
     @property
     def prefix(self):
         return PREFIX
+
+    @classmethod
+    def _get_proto(cls):
+        return cls.__module__.split('.')[-1]
+
+    @property
+    def proto(self):
+        if self._proto is None:
+            return self._get_proto()
+        return self._proto
 
     def start(self):
         """Start the bot"""
