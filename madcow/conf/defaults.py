@@ -66,6 +66,7 @@ MODULES = [
         'slut',                # how slutty is the phrase? (safesearch vs. regular)
         'spellcheck',          # spellcheck a word/phrase using google
         'stockquote',          # get yahoo stock quotes
+        'texts',               # random texts from last night
         'trek',                # generate star trek technobabble
         'urban',               # look up word/phrase on urban dictionary
         'weather',             # look up weather from wunderground
@@ -99,7 +100,6 @@ MODULES = [
         #'election',            # current electoral vote predictor for 2008 US election
         #'movie',               # rate movie on imdb & rotten tomatoes
         #'sunrise',             # get sunrise/sunset from google for your area
-        #'texts',               # random texts from last night
         #'translate',           # language translations
         #'yelp',                # get restaraunt rating/address
         ]
