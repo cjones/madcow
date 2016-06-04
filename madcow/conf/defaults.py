@@ -41,6 +41,8 @@ MODULES = [
         'artfart',             # random ascii art
         'bash',                # bash (irc/im) quotes
         'bbcnews',             # bbc news headlines
+        'beer',                # beer
+        'bible',               # get a quote from the bible
         'calc',                # google calculator
         'care',                # generate a high-precision care-o-meter
         'chuck',               # gets a random chuck norris fact
@@ -64,6 +66,7 @@ MODULES = [
         'spellcheck',          # spellcheck a word/phrase using google
         'stockquote',          # get yahoo stock quotes
         'trek',                # generate star trek technobabble
+        'urban',               # look up word/phrase on urban dictionary
         'weather',             # look up weather from wunderground
         'webtender',           # how to make drinks!
         'wikihow',             # mashup instructions from wikihow
@@ -90,8 +93,6 @@ MODULES = [
         #'xray',                # see all staff-set data on a nick (req. staff module)
 
         ## currently broken
-        #'beer',                # beer
-        #'bible',               # get a quote from the bible
         #'clock',               # world clock
         #'cnn',                 # show cnn headline
         #'election',            # current electoral vote predictor for 2008 US election
@@ -100,7 +101,6 @@ MODULES = [
         #'sunrise',             # get sunrise/sunset from google for your area
         #'texts',               # random texts from last night
         #'translate',           # language translations
-        #'urban',               # look up word/phrase on urban dictionary
         #'yelp',                # get restaraunt rating/address
         ]
 
