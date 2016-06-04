@@ -1,6 +1,7 @@
 """Get weather report"""
 
 from madcow.util import Module, encoding, strip_html
+from madcow.util.http import geturl
 from madcow.util.text import *
 from urlparse import urljoin
 from learn import Main as Learn
@@ -10,17 +11,17 @@ import re
 
 USAGE = u'set location <nick> <location>'
 
-class Weather(object):
+class Main(Module):
 
     base_url = u'http://api.wunderground.com/'
     locate_url = urljoin(base_url, u'auto/wui/geo/GeoLookupXML/index.xml')
     station_url = urljoin(base_url, u'auto/wui/geo/WXCurrentObXML/index.xml')
     pws_url = urljoin(base_url, u'weatherstation/WXCurrentObXML.asp')
     forecast_url = urljoin(base_url, u'auto/wui/geo/ForecastXML/index.xml')
-
-    def __init__(self, colorlib, logger):
-        self.colorlib = colorlib
-        self.log = logger
+    pattern = re.compile(u'^\s*(fc|forecast|weather|ws|pws)(?:\s+(.*)$)?')
+    require_addressing = True
+    help = u'fc|forecast, ws|weather, pws [zipcode|city,state|city,country|pws] - look up weather forecast/conditions'
+    error = u"Couldn't find that place, maybe a bomb dropped on it"
 
     def _format_weather(self, data):
         return ('%(loc)s - %(time)s: Conditions: %(conditions)s | Temperature: %(tempstr)s ' + \
@@ -90,18 +91,8 @@ class Weather(object):
             self.log.exception(e)
             return "error looking up conditions for location: %s" % location
 
-
-
-class Main(Module):
-
-    pattern = re.compile(u'^\s*(fc|forecast|weather|ws|pws)(?:\s+(.*)$)?')
-    require_addressing = True
-    help = u'fc|forecast, ws|weather, pws [zipcode|city,state|city,country|pws] - look up weather forecast/conditions'
-    error = u"Couldn't find that place, maybe a bomb dropped on it"
-
     def init(self):
         colorlib = self.madcow.colorlib
-        self.weather = Weather(colorlib, self.log)
         self.learn = Learn(madcow=self.madcow)
 
     def response(self, nick, args, kwargs):
@@ -116,11 +107,11 @@ class Main(Module):
             location = query
         if location:
             if cmd in ('fc', 'forecast'):
-                message = self.weather.forecast(location)
+                message = self.forecast(location)
             elif cmd in ('weather', 'ws'):
-                message = self.weather.official_station(location)
+                message = self.official_station(location)
             elif cmd == 'pws':
-                message = self.weather.personal_station(location)
+                message = self.personal_station(location)
         else:
             message = u"I couldn't look that up"
         return u'%s: %s' % (nick, message)
