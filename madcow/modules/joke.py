@@ -1,7 +1,6 @@
 """Get a random joke"""
 
 from madcow.util import Module, strip_html
-from madcow.util.http import geturl
 from madcow.util.text import *
 import re
 from urlparse import urljoin
@@ -29,7 +28,7 @@ class Main(Module):
             query = encode(query, 'utf-8')
             query = urllib.quote(query) + u'.php'
             url = urljoin(self.baseurl, query)
-        doc = geturl(url)
+        doc = self.geturl(url)
         result = self.joke.findall(doc)[0]
         result = strip_html(result)
 

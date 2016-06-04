@@ -11,7 +11,6 @@ the number of results for both are equal, the phrase is 0% slutty.
 
 import re
 from madcow.util import Module
-from madcow.util.http import geturl
 from urlparse import urljoin
 
 match_re = re.compile(r'About ([\d,]+) results')
@@ -39,13 +38,13 @@ def slutrating(phrase):
     phrase = cleanurl(phrase)
 
     try:
-        data = geturl(searchURL, opts={u'q': phrase, u'safe': u'off'})
+        data = self.geturl(searchURL, opts={u'q': phrase, u'safe': u'off'})
         unsafe = int(match_re.search(data).group(1).replace(u',', u''))
     except AttributeError:
         unsafe = 0
 
     try:
-        data = geturl(searchURL, opts={u'q': phrase, u'safe': u'active'})
+        data = self.geturl(searchURL, opts={u'q': phrase, u'safe': u'active'})
         try:
             filtered = filter_re.search(data).group(1)
             raise WordFiltered(filtered)

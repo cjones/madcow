@@ -1,6 +1,5 @@
 """Rate movies on IMDB/RT/MetaCritic"""
 
-from madcow.util.http import geturl, getsoup
 from urlparse import urljoin
 import re
 from BeautifulSoup import BeautifulSoup
@@ -63,7 +62,7 @@ class Main(Module):
 
     def rate_rt(self, name):
         """Rating from rotten tomatoes"""
-        soup = getsoup(self.rt_search, {'search': name}, referer=self.rt_url)
+        soup = self.getsoup(self.rt_search, {'search': name}, referer=self.rt_url)
         ourname = self.normalize(name)
         results = soup.find('ul', id='movie_results_ul')
         if results is None:
@@ -82,7 +81,7 @@ class Main(Module):
  
     def rate_rt_audience(self, name):
         """Audience Rating from rotten tomatoes"""
-        soup = getsoup(self.rt_search, {'search': name}, referer=self.rt_url)
+        soup = self.getsoup(self.rt_search, {'search': name}, referer=self.rt_url)
         ourname = self.normalize(name)
         results = soup.find('ul', id='movie_results_ul')
         if results is None:
@@ -95,7 +94,7 @@ class Main(Module):
                     title = strip_html(result.find('div', 'media_block_content').h3.a.renderContents()).strip()
                     if ourname == self.normalize(title):
                         url = result.h3.a['href']
-                        innerSoup = getsoup(self.rt_url+url, { }, self.rt_search, {'search': name})
+                        innerSoup = self.getsoup(self.rt_url+url, { }, self.rt_search, {'search': name})
                         rating = innerSoup.find(name="span", attrs= { "class" : "meter popcorn numeric " }).renderContents() + "%"
                         return title, rating
                 except AttributeError:
@@ -104,18 +103,18 @@ class Main(Module):
 
     def rate_imdb(self, name):
         """Get user rating from IMDB"""
-        page = geturl(self.imdb_search, {'s': 'tt', 'q': name, 'exact': 'true'}, referer=self.imdb_url)
+        page = self.geturl(self.imdb_search, {'s': 'tt', 'q': name, 'exact': 'true'}, referer=self.imdb_url)
         soup = BeautifulSoup(page)
         if soup.title.renderContents() == 'Find - IMDb':
             url = urljoin(self.imdb_url, soup.body.find('table', 'findList').tr.find('td', 'result_text').a['href'])
-            soup = BeautifulSoup(geturl(url, referer=self.imdb_search))
+            soup = BeautifulSoup(self.geturl(url, referer=self.imdb_search))
         rating = soup.find('span', itemprop='ratingValue').renderContents()
         realname = strip_html(soup.title.renderContents().replace(' - IMDb', ''))
         return realname, rating
 
     def gettop(self):
         """Get box office ratings"""
-        soup = BeautifulSoup(geturl(self.imdb_top))
+        soup = BeautifulSoup(self.geturl(self.imdb_top))
         table = soup.body.find('div', id='main').table
         data = []
         for row in table('tr')[1:]:

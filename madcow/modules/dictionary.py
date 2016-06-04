@@ -5,7 +5,6 @@
 from urlparse import urljoin
 from urllib import quote
 import re
-from madcow.util.http import getsoup
 from madcow.util import strip_html, Module
 from madcow.util.text import *
 
@@ -24,7 +23,7 @@ class Main(Module):
     def lookup(self, term, idx=1):
         """Lookup term in dictionary"""
         url = urljoin(self.define_url, quote(term.lower()))
-        soup = getsoup(url, referer=self.base_url)
+        soup = self.getsoup(url, referer=self.base_url)
         for br in soup('br'):
             br.extract()
         val = strip_html(decode(soup.renderContents(), 'utf-8'))

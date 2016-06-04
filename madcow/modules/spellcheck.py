@@ -4,7 +4,6 @@ from urlparse import urljoin
 import re
 from madcow.util import Module, strip_html
 from madcow.util.text import *
-from madcow.util.http import getsoup
 
 class Main(Module):
 
@@ -16,7 +15,7 @@ class Main(Module):
 
     def response(self, nick, args, kwargs):
         opts = {'hl': 'en', 'safe': 'off', 'q': args[0]}
-        soup = getsoup(self.google_search, opts, referer=self.google_url)
+        soup = self.getsoup(self.google_search, opts, referer=self.google_url)
         correct = soup.body.find('a', href=re.compile(r'^/search.*spell=1'))
         if correct:
             res = strip_html(decode(correct.renderContents(), 'utf-8'))

@@ -1,7 +1,6 @@
 """Star Trek failure generator"""
 
 from BeautifulSoup import BeautifulSoup
-from madcow.util.http import geturl
 from madcow.util import strip_html, Module
 import re
 
@@ -18,7 +17,7 @@ class Main(Module):
         self.col = self.madcow.colorlib.get_color
 
     def response(self, nick, args, kwargs):
-        fail = BeautifulSoup(geturl(self.url)).h1
+        fail = BeautifulSoup(self.geturl(self.url)).h1
         return self.spaces_re.sub(' ', strip_html(
             u'%s: %s: %s %s: %s' % (
                 nick, self.col('red', text='FAIL'),

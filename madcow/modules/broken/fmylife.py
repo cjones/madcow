@@ -1,7 +1,6 @@
 """Get a random confession from fmylife.com"""
 
 from madcow.util import Module, strip_html
-from madcow.util.http import getsoup
 from madcow.util.text import *
 from urlparse import urljoin
 import re
@@ -17,7 +16,7 @@ class Main(Module):
     error = u'Today I couldn\'t seem to access fmylife.com.. FML'
 
     def response(self, nick, args, kwargs):
-        soup = getsoup(self.spec_url % int(args[0]) if args[0] else self.rand_url)
+        soup = self.getsoup(self.spec_url % int(args[0]) if args[0] else self.rand_url)
         soup.find('div', id='submit').extract()
         soup.body.find('div', 'bordered').extract()
         post = soup.body.find('div', 'post')

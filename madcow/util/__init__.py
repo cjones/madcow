@@ -26,6 +26,7 @@ from datetime import datetime
 
 import logging as log
 import collections
+import contextlib
 import traceback
 import threading
 import tempfile
@@ -37,6 +38,7 @@ import os
 
 from madcow.conf import settings
 from text import encode, decode, get_encoding
+from madcow.util.http import getsoup, geturl
 
 DEFAULT_UNIQUE_TIMESTAMP_FORMAT = '%Y%m%d'
 DEFAULT_UNIQUE_MAX_FILES = 1000
@@ -117,6 +119,21 @@ class Response(object):
 
     def response(self, nick, args, kwargs):
         raise NotImplementedError
+
+    def geturl(self, *args, **kwargs):
+        return geturl(*args, **dict(kwargs, logger=self.log))
+
+    def getsoup(self, *args, **kwargs):
+        return getsoup(*args, **dict(kwargs, logger=self.log))
+
+    def ipython(self, *args, **kwargs):
+        if args:
+            frame_or_depth, args = args[0], args[1:]
+        else:
+            frame_or_depth = kwargs.pop('frame_or_depth', None)
+        if frame_or_depth is None:
+            frame_or_depth = 2
+        return ipython(frame_or_depth, *args, **kwargs)
 
 
 class Module(Response):
@@ -290,28 +307,56 @@ class strlist(list):
         return self.to_string()
 
 
+@contextlib.contextmanager
+def protect_context(*argv):
+    g = globals()
+    l = locals()
+    m = sys.modules
+    b = vars(m['__builtin__'])
+    o = g, l, m, b
+    s = map(dict, o)
+    a = sys.argv[:]
+    try:
+        sys.argv[:] = argv
+        yield
+    finally:
+        for x, y in zip(o, s):
+            x.clear()
+            x.update(y)
+        sys.argv[:] = a
+
+
+def unload_module(name):
+    parts = name.split('.')
+    npart = len(parts)
+    unload = []
+    for key in sys.modules:
+        keyparts = key.split('.')
+        common = os.path.commonprefix([parts, keyparts])
+        if len(common) == npart:
+            unload.append(key)
+    map(sys.modules.pop, unload)
+
+
 def ipython(frame_or_depth=1, runs=1, argv=None, _frame_type=type(sys._getframe()), _lock=threading.RLock(), **kwargs):
     """Embed an IPython shell in-line for debugging"""
     try:
         with _lock:
-            from IPython.Shell import IPShellEmbed
-            if IPShellEmbed.__dict__.setdefault('runs', 0) < runs:
-                IPShellEmbed.runs += 1
-                if isinstance(frame_or_depth, numbers.Integral):
-                    frame = sys._getframe(frame_or_depth)
-                elif isinstance(frame_or_depth, _frame_type):
-                    frame = frame_or_depth
-                else:
-                    raise TypeError('arg 1 must be frame or depth, not ' + type(frame_or_depth).__name__)
-                if argv is None:
-                    argv = ['ipython']
-                old_argv, sys.argv[:] = sys.argv[:], argv[:]
-                try:
+            with protect_context('ipython'):
+                unload_module('IPython')
+                map(unload_module, [key for key in sys.modules if key.startswith('ipy_')])
+                from IPython.Shell import IPShellEmbed
+                if IPShellEmbed.__dict__.setdefault('runs', 0) < runs:
+                    IPShellEmbed.runs += 1
+                    if isinstance(frame_or_depth, numbers.Integral):
+                        frame = sys._getframe(frame_or_depth)
+                    elif isinstance(frame_or_depth, _frame_type):
+                        frame = frame_or_depth
+                    else:
+                        raise TypeError('arg 1 must be frame or depth, not ' + type(frame_or_depth).__name__)
                     IPShellEmbed(user_ns=kwargs)(
                             header='locals: ' + ' '.join(sorted(frame.f_locals)) if frame.f_locals else '',
                             local_ns=frame.f_locals, global_ns=frame.f_globals)
-                finally:
-                    sys.argv[:] = old_argv[:]
     except (SystemExit, KeyboardInterrupt, EOFError):
         raise
     except:

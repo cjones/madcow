@@ -1,7 +1,6 @@
 """Handles WikiMedia queries"""
 
 from BeautifulSoup import BeautifulSoup
-from madcow.util.http import geturl
 from madcow.util import strip_html, Module
 from madcow.util.text import *
 from urlparse import urljoin
@@ -72,7 +71,7 @@ class WikiMedia(object):
         return summary
 
     def _getpage(self, url, opts=None):
-        page = geturl(url, referer=self.baseurl, opts=opts)
+        page = self.geturl(url, referer=self.baseurl, opts=opts)
         # HTMLParser doesn't handle this very well.. see:
         # http://www.crummy.com/software/BeautifulSoup/3.1-problems.html
         page = self.scripts_re.sub('', page)

@@ -2,7 +2,6 @@
 
 from madcow.util import Module, strip_html
 import re
-from madcow.util.http import geturl, getsoup
 from urlparse import urljoin
 from madcow.conf import settings
 
@@ -23,7 +22,7 @@ class Main(Module):
         players = []
         while page:
             url = self.group_url + '?p=%d' % page
-            soup = getsoup(url)
+            soup = self.getsoup(url)
             next = soup.body.find('div', 'pageLinks').find(text=self.next_re)
             if next is None:
                 page = None

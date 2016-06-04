@@ -1,7 +1,6 @@
 """Predicted Electoral Vote Count"""
 
 import re
-from madcow.util.http import getsoup
 from madcow.util.color import ColorLib
 from madcow.util import Module, strip_html
 
@@ -24,7 +23,7 @@ class Main(Module):
         pass
 
     def response(self, nick, args, kwargs):
-        soup = getsoup(self.baseurl)
+        soup = self.getsoup(self.baseurl)
         out = []
         for box in soup.find('div', 'score-box').findAll('div', 'box'):
             score = []

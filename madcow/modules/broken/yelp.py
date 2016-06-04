@@ -1,7 +1,6 @@
 """Restaraunt reviews"""
 
 from BeautifulSoup import BeautifulSoup
-from madcow.util.http import geturl
 from madcow.util import Module
 from learn import Main as Learn
 from urlparse import urljoin
@@ -48,7 +47,7 @@ class Main(Module):
 
         # perform search
         opts = opts={'find_desc': desc, 'ns': 1, 'find_loc': loc, 'rpp': 1}
-        page = geturl(SEARCHURL, opts)
+        page = self.geturl(SEARCHURL, opts)
 
         # extract meaningful data from first result
         soup = BeautifulSoup(page, convertEntities='html')

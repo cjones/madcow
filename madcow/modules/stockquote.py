@@ -1,7 +1,6 @@
 """Get stock quote from yahoo ticker"""
 
 from madcow.util import Module, strip_html
-from madcow.util.http import geturl
 from urllib import quote
 from madcow.util.color import ColorLib
 import locale
@@ -27,7 +26,7 @@ class Yahoo(object):
         """Looks up the symbol from finance.yahoo.com, returns formatted result"""
         symbols = [quote(symbol) for symbol in symbols.split()]
         url = Yahoo._quote_url.replace(u'SYMBOL', "+".join(symbols))
-        page = geturl(url)
+        page = self.geturl(url)
 
         results = []
         for line in page.splitlines():

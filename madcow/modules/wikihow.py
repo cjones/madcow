@@ -2,7 +2,6 @@
 # ported from https://raw.githubusercontent.com/EArmour/pyfibot/master/pyfibot/modules/module_wikihow.py
 
 from madcow.util import Module
-from madcow.util.http import getsoup
 from madcow.util.text import decode
 import random
 import re
@@ -38,7 +37,7 @@ class Main(Module):
         """".how (times) - Gives you random instructions from wikiHow, by default 3 steps"""
         steps = []
         for i in xrange(times):
-            page = getsoup("http://www.wikihow.com/Special:Randomizer")
+            page = self.getsoup("http://www.wikihow.com/Special:Randomizer")
             section = page.find("div", {"id": "steps"})
             if section: # Only one 'method'
                 allsteps = section.find("ol").findChildren("li", recursive=False)

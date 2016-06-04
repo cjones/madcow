@@ -5,7 +5,6 @@
 import re
 import simplejson
 from madcow.util import strip_html
-from madcow.util.http import geturl
 from madcow.util import Module
 
 class BabelError(Exception):
@@ -194,7 +193,7 @@ class Main(Module):
                 'tk': '286462.160648'}
 
         url = 'http://translate.google.com/translate_a/single'
-        res = geturl(url, opts, referer='https://translate.google.com/')
+        res = self.geturl(url, opts, referer='https://translate.google.com/')
         while u',,' in res:
             res = res.replace(u',,', u',"",')
         res = simplejson.loads(res)

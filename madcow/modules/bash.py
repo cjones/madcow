@@ -5,7 +5,6 @@
 import re
 import random
 from madcow.util import Module, strip_html
-from madcow.util.http import geturl
 
 class Bash(object):
 
@@ -67,7 +66,7 @@ class Main(Module):
         else:
             url = source.random
             opts = None
-        doc = geturl(url, opts=opts)
+        doc = self.geturl(url, opts=opts)
         entries = source.entries.findall(doc)
         if query:
             entries = filter(None, entries)

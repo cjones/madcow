@@ -2,7 +2,6 @@
 
 import re
 from madcow.util import Module, strip_html
-from madcow.util.http import geturl
 from urlparse import urljoin
 
 class Main(Module):
@@ -21,10 +20,10 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         try:
             query = args[0]
-            doc = geturl(self.search, opts={u'verbose': u'on', u'name': query})
+            doc = self.geturl(self.search, opts={u'verbose': u'on', u'name': query})
             drink = self.drink.search(doc).group(1)
             url = urljoin(self.baseurl, drink)
-            doc = geturl(url)
+            doc = self.geturl(url)
             title = self.title.search(doc).group(1)
             ingredients = self.ingredients.findall(doc)
             instructions = self.instructions.search(doc).group(1)

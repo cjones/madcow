@@ -60,7 +60,7 @@ class odict(collections.MutableMapping):
 
 class UserAgent(object):
 
-    def __init__(self, handlers=None, cookies=True, agent=AGENT, debug=False):
+    def __init__(self, handlers=None, cookies=True, agent=AGENT, debug=False, logger=None):
         if handlers is None:
             handlers = []
         if cookies:
@@ -71,11 +71,11 @@ class UserAgent(object):
         self.debug = debug
 
     def open(self, url, opts=None, data=None, referer=None, size=-1,
-             add_headers=None, **kwargs):
+             add_headers=None, logger=None, **kwargs):
         """Open URL and return unicode content"""
         realurl = buildurl(opts=opts, **dict(urlparse.urlparse(url)._asdict(), **kwargs))
-        if self.debug:
-            print 'url = %r' % realurl
+        if logger is not None:
+            logger.debug('open url: {}'.format(realurl))
         request = urllib2.Request(realurl, data)
         if referer:
             request.add_header(u'Referer', referer)

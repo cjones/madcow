@@ -4,7 +4,6 @@ from urlparse import urljoin
 import re
 
 from madcow.util import Module, strip_html
-from madcow.util.http import getsoup, geturlopt
 from madcow.util.text import decode
 
 RESULTS_PER_PAGE = 7
@@ -29,7 +28,7 @@ class Main(Module):
                     idx = int(idx)
                 res = self.lookup(query, idx)
             else:
-                res = self.parse(getsoup(_urban_random, referer=_urban_url))
+                res = self.parse(self.getsoup(_urban_random, referer=_urban_url))
         except (SystemExit, KeyboardInterrupt):
             raise
         except:
@@ -45,7 +44,7 @@ class Main(Module):
         page, idx = divmod(idx, RESULTS_PER_PAGE)
         if idx:
             page += 1
-        return self.parse(getsoup(_urban_search,
+        return self.parse(self.getsoup(_urban_search,
             referer=_urban_url, term=query, page=page),
             idx - 1, page, orig_idx)
 

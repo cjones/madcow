@@ -5,7 +5,6 @@ import random
 import re
 from BeautifulSoup import BeautifulSoup
 from madcow.util import strip_html, Module
-from madcow.util.http import geturl
 
 _pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
 _linebreak = re.compile(r'[\r\n]+')
@@ -97,7 +96,7 @@ class Wiki(object):
         else:
             opts = {u'search': query, u'go': u'Go'}
             url = urljoin(self.base_url, self.search_path)
-        page = geturl(url, referer=self.base_url, opts=opts,
+        page = self.geturl(url, referer=self.base_url, opts=opts,
                       size=self.sample_size)
 
         # create BeautifulSoup document tree

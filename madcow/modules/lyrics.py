@@ -5,7 +5,6 @@ from urllib import urlencode
 from cgi import parse_qsl
 import re
 from madcow.util import Module, strip_html
-from madcow.util.http import getsoup
 from madcow.util.google import Google, NonRedirectResponse
 from madcow.util.text import *
 
@@ -23,7 +22,7 @@ class Main(Module):
         kwargs['req'].quoted = True
         url = urlunparse(('https', 'www.google.com', 'search', '',
             urlencode({'num': '100', 'safe': 'off', 'hl': 'en', 'q': 'site:songmeanings.com ' + args[0]}), ''))
-        soup = getsoup(url)
+        soup = self.getsoup(url)
         new = None
         for h3 in soup.findAll('h3', attrs={'class': 'r'}):
             uri = urlparse(h3.a['href'])
@@ -34,7 +33,7 @@ class Main(Module):
                     new = urlunparse(uri._replace(query='', fragment=''))
                     break
                 elif re.search('/profiles/(submissions|interaction)/\d+/comments', uri.path) is not None:
-                    soup = getsoup(url)
+                    soup = self.getsoup(url)
                     for a in soup.find('a', title='Direct link to comment'):
                         new = urlunparse(urlparse(a.parent['href'])._replace(fragment='', query=''))
                         break
@@ -43,7 +42,7 @@ class Main(Module):
         if new:
             url = new
             try:
-                soup = getsoup(url)
+                soup = self.getsoup(url)
                 try:
                     title = re.sub('\s+Lyrics\s+\|\s+SongMeanings.*$', '', soup.title.renderContents())
                 except StandardError:

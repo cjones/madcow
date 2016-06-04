@@ -1,6 +1,5 @@
 """Mystery meat demistifier: Scrape youtube titles"""
 
-from madcow.util.http import getsoup
 from madcow.util.text import decode
 from madcow.util import Module, strip_html
 from urlparse import urlparse
@@ -31,7 +30,7 @@ class Main(Module):
                     '.'.join(uri.netloc.lower().split('.')[-2:]) in DOMAINS and
                     os.path.split(os.path.normpath(uri.path))[-1] == 'watch' and
                     'v' in cgi.parse_qs(uri.query)):
-                soup = getsoup(url)
+                soup = self.getsoup(url)
                 title = strip_html(decode(soup.title.renderContents())).replace(u' - YouTube', u'').strip()
                 if title:
                     self.bot.output(title, kwargs['req'])

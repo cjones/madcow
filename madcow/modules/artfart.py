@@ -7,7 +7,6 @@ import re
 import random
 import urllib
 from madcow.util import Module, strip_html
-from madcow.util.http import geturl
 
 class Main(Module):
 
@@ -29,7 +28,7 @@ class Main(Module):
             query = query.replace(u' ', u'_')
             query = urllib.quote(query) + u'.html'
             url = urljoin(self.baseurl, query)
-        doc = geturl(url)
+        doc = self.geturl(url)
         results = self.artfart.findall(doc)
         result = random.choice(results)
         title, art = result

@@ -3,7 +3,6 @@
 import re
 import feedparser
 from madcow.util import Module, strip_html
-from madcow.util.http import geturl
 from urlparse import urljoin
 
 class Main(Module):
@@ -23,7 +22,7 @@ class Main(Module):
         except:
             user = None
         if user is None or user == u'':
-            doc = geturl(self.randomURL)
+            doc = self.geturl(self.randomURL)
             user = re.search(u'"currentJournal":\s*"(.*?)"', doc).group(1)
         url = urljoin(self.baseURL, u'/users/%s/data/rss' % user)
         rss = feedparser.parse(url)

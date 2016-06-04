@@ -5,7 +5,6 @@
 from urlparse import urljoin
 from random import choice
 import re
-from madcow.util.http import getsoup
 from madcow.util import Module, strip_html, superscript
 from madcow.util.text import *
 
@@ -140,10 +139,12 @@ class Main(Module):
         elif book not in self.bibles:
             return u'Unknown bible.. why do you hate god so much?'
         opts = {'search': query, 'version': book}
-        soup = getsoup(self.bg_search, opts, referer=self.bg_search)
-        passage = soup.find('div', 'passage-wrap')
+        soup = self.getsoup(self.bg_search, opts, referer=self.bg_search)
+        passage = soup.find('div', {'class': re.compile('passage-content')})
         for name in 'heading passage-class-0', 'publisher-info-bottom':
-            passage.find('div', name).extract()
+            junk = passage.find('div', name)
+            if junk is not None:
+                junk.extract()
         response = []
         for para in passage('p'):
             response.append(para.renderContents())

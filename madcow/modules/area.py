@@ -4,7 +4,6 @@
 
 import re
 from madcow.util import Module
-from madcow.util.http import getsoup
 from madcow.util.text import *
 
 render = lambda node: decode(node.renderContents(), 'utf-8').strip()
@@ -19,7 +18,7 @@ class Main(Module):
     error = u"I couldn't look that up for some reason.  D:"
 
     def response(self, nick, args, kwargs):
-        soup = getsoup(self.url, {'InData': args[0]})
+        soup = self.getsoup(self.url, {'InData': args[0]})
         city = soup.body.find('table', bgcolor='#ffffcc').a
         return u'%s: %s: %s, %s' % (
                 nick, args[0], proper(render(city).capitalize()),

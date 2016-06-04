@@ -3,7 +3,6 @@
 import random
 import re
 from BeautifulSoup import BeautifulSoup
-from madcow.util.http import getsoup
 from madcow.util import strip_html, Module
 from madcow.util.text import *
 import re
@@ -21,5 +20,5 @@ class Main(Module):
 
 
 def get_text():
-    text = random.choice(getsoup(url).body.find('ul', id='texts-list')('div', 'text')).textarea
+    text = random.choice(self.getsoup(url).body.find('ul', id='texts-list')('div', 'text')).textarea
     return spam_re.sub(u'', decode(text.renderContents(), 'utf-8'))

@@ -1,7 +1,6 @@
 """Get a random joke"""
 
 from madcow.util import Module
-from madcow.util.http import geturl
 import re
 import json
 
@@ -14,5 +13,5 @@ class Main(Module):
     baseurl = u'http://api.icndb.com/jokes/random'
 
     def response(self, nick, args, kwargs):
-        doc = json.loads(geturl(self.baseurl))
+        doc = json.loads(self.geturl(self.baseurl))
         return doc['value']['joke'].replace('&quot', "'")
