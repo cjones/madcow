@@ -49,6 +49,7 @@ MODULES = [
         'dictionary',          # definition of words
         'factoids',            # makes madcow remember stuff from chatter
         'figlet',              # generate ascii fonts
+        'fmylife',             # fmylife complaint, random or by ID
         'google',              # i'm feeling lucky query
         'grufti',              # random response triggeres, like grufti bot
         'jinx',                # someone owes you a coke for being unoriginal
@@ -96,7 +97,6 @@ MODULES = [
         #'clock',               # world clock
         #'cnn',                 # show cnn headline
         #'election',            # current electoral vote predictor for 2008 US election
-        #'fmylife',             # fmylife complaint, random or by ID
         #'movie',               # rate movie on imdb & rotten tomatoes
         #'sunrise',             # get sunrise/sunset from google for your area
         #'texts',               # random texts from last night
