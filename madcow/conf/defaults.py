@@ -4,7 +4,7 @@
 ### MAIN CONFIG ###
 ###################
 
-PROTOCOL = 'cli'  # irc, slack, aim, pysilc, shell, cli
+PROTOCOL = 'cli'  # irc, slack, aim, pysilc, shell, cli, ipython
 BOTNAME = 'madcow'  # will use this nickname in irc/silc and for addressing
 ALIASES = ['!']  # list of other nicks the bot will also respond to
 DETACH = False  # set to True to run as a daemon (UNIX only)
@@ -25,8 +25,8 @@ PRIVATE_HELP = True  # if True, redirects "help" output to private message
 ###############
 
 LOGGING_LEVEL = 'INFO'  # DEBUG, INFO, WARN, ERROR
-LOGGING_FORMAT = '[%(time)s - %(level)s] %(message)s'
-LOGGING_TIME_FORMAT = '%Y/%m/%d %H:%M:%S'
+LOGGING_FORMAT = '%(time)s [%(level)s] %(message)s'
+LOGGING_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 LOGGING_ENCODING = ENCODING
 UNIQUE_TIMESTAMP_FORMAT = '%Y%m%d'
 UNIQUE_MAX_FILES = 1000
@@ -186,6 +186,7 @@ POLLMAIL_USE_PASSWORD = False
 POLLMAIL_PASSWORD = None
 POLLMAIL_AUTOSTART = False
 POLLMAIL_JSON_REGEX = r'{({.+})}'
+
 IMAP_SERVER = 'localhost'
 IMAP_PORT = 993
 IMAP_USERNAME = None
@@ -216,6 +217,7 @@ TWITTER_CONSUMER_KEY = None
 TWITTER_CONSUMER_SECRET = None
 TWITTER_ACCESS_TOKEN_KEY = None
 TWITTER_ACCESS_TOKEN_SECRET = None
+
 TWITTER_UPDATE_FREQ = 45
 TWITTER_OUTPUT = 'ALL'
 TWITTER_TWEET_FORMAT = u'>> tweet from {tweet.user.screen_name}: {tweet.text_clean} <<'
@@ -226,8 +228,10 @@ TWITTER_SOFT_LIMIT = 10
 
 # settings for modules that use http
 HTTP_TIMEOUT = 10
-HTTP_AGENT = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 HTTP_COOKIES = True
+
+# warning: changing this will probably break certain modules
+HTTP_AGENT = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
 
 # for django memebot integration
 DJMEMEBOT_SETTINGS_FILE = '/path/to/memebot/settings.py'

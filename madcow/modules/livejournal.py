@@ -17,6 +17,7 @@ class Main(Module):
     error = u"Couldn't load the page LJ returned D:"
 
     def response(self, nick, args, kwargs):
+        kwargs['req'].blockquoted = True
         try:
             user = args[0]
         except:

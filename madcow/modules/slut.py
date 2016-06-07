@@ -13,11 +13,6 @@ import re
 from madcow.util import Module
 from urlparse import urljoin
 
-match_re = re.compile(r'About ([\d,]+) results')
-filter_re = re.compile(r'The word <b>"(\w+)"</b> has been filtered from the search')
-baseURL = u'http://www.google.com/'
-searchURL = urljoin(baseURL, u'/search')
-
 class WordFiltered(Exception):
 
     """Indicates a word has been filtered by google safe search"""
@@ -29,37 +24,6 @@ class WordFiltered(Exception):
         return repr(self.word)
 
 
-def cleanurl(url):
-    return url.replace(u" ", u"+")
-
-
-def slutrating(phrase):
-
-    phrase = cleanurl(phrase)
-
-    try:
-        data = self.geturl(searchURL, opts={u'q': phrase, u'safe': u'off'})
-        unsafe = int(match_re.search(data).group(1).replace(u',', u''))
-    except AttributeError:
-        unsafe = 0
-
-    try:
-        data = self.geturl(searchURL, opts={u'q': phrase, u'safe': u'active'})
-        try:
-            filtered = filter_re.search(data).group(1)
-            raise WordFiltered(filtered)
-        except AttributeError:
-            pass
-        safe = int(match_re.search(data).group(1).replace(u',', u''))
-    except AttributeError:
-        safe = 0
-
-    value = float(unsafe - safe) / float(unsafe)
-    if value < 0:
-        value = 0
-    return value
-
-
 class Main(Module):
 
     enabled = True
@@ -68,10 +32,43 @@ class Main(Module):
     help = u"slutcheck <phrase> - see how slutty the phrase is"
     error = u'I failed to perform that lookup'
 
+    match_re = re.compile(r'About ([\d,]+) results')
+    filter_re = re.compile(r'The word <b>"(\w+)"</b> has been filtered from the search')
+    base_url = u'http://www.google.com/'
+    search_url = urljoin(base_url, u'/search')
+
+    def cleanurl(self, url):
+        return url.replace(u" ", u"+")
+
+    def slutrating(self, phrase):
+        phrase = self.cleanurl(phrase)
+
+        try:
+            data = self.geturl(self.search_url, q=phrase, safe='off')
+            unsafe = int(self.match_re.search(data).group(1).replace(u',', u''))
+        except AttributeError:
+            unsafe = 0
+
+        try:
+            data = self.geturl(self.search_url, q=phrase, safe='active')
+            try:
+                filtered = self.filter_re.search(data).group(1)
+                raise WordFiltered(filtered)
+            except AttributeError:
+                pass
+            safe = int(self.match_re.search(data).group(1).replace(u',', u''))
+        except AttributeError:
+            safe = 0
+
+        value = float(unsafe - safe) / float(unsafe)
+        if value < 0:
+            value = 0
+        return value
+
     def response(self, nick, args, kwargs):
         try:
             query = u" ".join(args)
-            rating = slutrating(query)
+            rating = self.slutrating(query)
             return u"%s is %.2f%% slutty." % (query, rating * 100)
         except TypeError, error:
             self.log.exception('what')

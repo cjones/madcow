@@ -23,6 +23,7 @@ class Main(Module):
         while page:
             url = self.group_url + '?p=%d' % page
             soup = self.getsoup(url)
+            self.ipython()
             next = soup.body.find('div', 'pageLinks').find(text=self.next_re)
             if next is None:
                 page = None
