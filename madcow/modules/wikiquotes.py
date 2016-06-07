@@ -1,26 +1,31 @@
 """Plugin to return random quote from WikiQuotes"""
 
 from urlparse import urljoin
+
 import random
 import re
+
 from BeautifulSoup import BeautifulSoup
 from madcow.util import strip_html, Module
 
-_pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
-_linebreak = re.compile(r'[\r\n]+')
-_whitespace = re.compile(r'\s{2,}')
-_author = u'random'
-_max = 10
 
-class Wiki(object):
+class Main(Module):
 
-    """Return summary from WikiMedia projects"""
+    base_url = u'http://en.wikiquote.org/'
+    advert = u' - Wikiquote'
+
+    pattern = re.compile(r'^\s*(?:wikiquote|wq)\s*(?:\s+(.*?)\s*)?$', re.I)
+    _linebreak = re.compile(r'[\r\n]+')
+    _whitespace = re.compile(r'\s{2,}')
+    _author = u'random'
+    _max = 10
+
+    require_addressing = True
+    help = u'wikiquote - get random quote from wikiquotes'
 
     # site-specific details, default is english wikipedia
-    base_url = u'http://en.wikipedia.org/'
     random_path = u'/wiki/Special:Random'
     search_path = u'/wiki/Special:Search'
-    advert = u' - Wikipedia, the free encyclopedia'
     error = u'Search results'
 
     # size of response
@@ -34,9 +39,6 @@ class Wiki(object):
     _whitespace = re.compile(r'[ \t\r\n]+')
     _sentence = re.compile(r'(.*?\.)\s+', re.DOTALL)
     _fix_punc = re.compile(r'\s+([,;:.])')
-
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
 
     def get_summary(self, query):
         soup, title = self.get_soup(query)
@@ -67,10 +69,10 @@ class Wiki(object):
 
         # clean up rendered text
         content = strip_html(content)                 # strip markup
-        content = Wiki._citations.sub(u'', content)   # remove citations
-        content = Wiki._parens.sub(u'', content)      # remove parentheticals
-        content = Wiki._whitespace.sub(u' ', content) # compress whitespace
-        content = Wiki._fix_punc.sub(r'\1', content) # fix punctuation
+        content = self._citations.sub(u'', content)   # remove citations
+        content = self._parens.sub(u'', content)      # remove parentheticals
+        content = self._whitespace.sub(u' ', content) # compress whitespace
+        content = self._fix_punc.sub(r'\1', content) # fix punctuation
         content = content.strip()                    # strip whitespace
 
         # search error
@@ -79,7 +81,7 @@ class Wiki(object):
 
         # generate summary by adding as many sentences as possible before limit
         summary = u'%s -' % title
-        for sentence in Wiki._sentence.findall(content):
+        for sentence in self._sentence.findall(content):
             if len(summary) + 1 + len(sentence) > self.summary_size:
                 break
             summary += u' %s' % sentence
@@ -96,8 +98,7 @@ class Wiki(object):
         else:
             opts = {u'search': query, u'go': u'Go'}
             url = urljoin(self.base_url, self.search_path)
-        page = self.geturl(url, referer=self.base_url, opts=opts,
-                      size=self.sample_size)
+        page = self.geturl(url, referer=self.base_url, opts=opts, size=self.sample_size)
 
         # create BeautifulSoup document tree
         soup = BeautifulSoup(page)
@@ -126,32 +127,17 @@ class Wiki(object):
             span.extract()
         for link in soup.findAll(u'a', text=u'IPA'):
             link.extract()
-        for span in soup.findAll(u'span', attrs={u'class': Wiki._audio}):
+        for span in soup.findAll(u'span', attrs={u'class': self._audio}):
             span.extract()
 
         return soup, title
-
-
-class WikiQuotes(Wiki):
-
-    base_url = u'http://en.wikiquote.org/'
-    advert = u' - Wikiquote'
-
-
-class Main(Module):
-
-    pattern = _pattern
-    require_addressing = True
-    help = u'wikiquote - get random quote from wikiquotes'
-
-    def init(self):
-        self.wiki = WikiQuotes()
 
     def get_random_quote(self, author=_author, max=_max):
         for i in range(0, max):
             try:
                 return self._get_random_quote(author=author)
             except:
+                raise
                 pass
         raise Exception(u'no parseable page found :(')
 
@@ -161,14 +147,14 @@ class Main(Module):
         contents = [unicode(part) for part in contents]
         quote = u' '.join(contents)
         quote = strip_html(quote)
-        quote = _linebreak.sub(u' ', quote)
-        quote = _whitespace.sub(u' ', quote)
+        quote = self._linebreak.sub(u' ', quote)
+        quote = self._whitespace.sub(u' ', quote)
         quote = quote.strip()
         return quote
 
     def _get_random_quote(self, author=_author):
-        soup, title = self.wiki.get_soup(author)
-        if title == self.wiki.error:
+        soup, title = self.get_soup(author)
+        if title == self.error:
             return u"Couldn't find quotes for that.."
         content = soup.find(u'div', attrs={u'id': u'mw-content-text'})
         uls = content.findAll(u'ul', recursive=False)

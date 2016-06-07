@@ -112,7 +112,7 @@ TASKS = [
         ]
 
 # list of modules (from MODULES above) that only respond in private message
-PRIVATE_MODULES = ['company', 'realname', 'notes', 'xray'] 
+PRIVATE_MODULES = ['company', 'realname', 'notes', 'xray']
 
 MODULE_SUPERCEDES = {}
 TASK_SUPERCEDES = {}

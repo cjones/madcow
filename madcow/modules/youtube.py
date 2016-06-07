@@ -19,9 +19,6 @@ class Main(Module):
     allow_threading = True
     terminate = False
 
-    def __init__(self, bot):
-        self.bot = bot
-
     def response(self, nick, args, kwargs):
         try:
             url = args[0]
@@ -33,8 +30,9 @@ class Main(Module):
                 soup = self.getsoup(url)
                 title = strip_html(decode(soup.title.renderContents())).replace(u' - YouTube', u'').strip()
                 if title:
-                    self.bot.output(title, kwargs['req'])
+                    self.madcow.output(title, kwargs['req'])
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
+            raise
             pass

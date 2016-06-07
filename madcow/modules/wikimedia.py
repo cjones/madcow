@@ -6,20 +6,51 @@ from madcow.util.text import *
 from urlparse import urljoin
 import re
 
-# wiki configuration
-WIKIS = {'wikipedia': {
-             'keys': ['wp', 'wiki', 'wikipedia'],
-             'baseurl': 'http://en.wikipedia.org/',
-             'kwargs': {
-                 'random': '/wiki/Special:Random',
-                 'search': '/wiki/Special:Search',
-                 'advert': ' - Wikipedia, the free encyclopedia',
-                 'error': 'Search results',
-                 },
-             },
-         }
+class Main(Module):
 
-class WikiMedia(object):
+    """Autoloaded by Madcow"""
+
+    def make_help(wikis):
+        """Generate madcow help from wiki config"""
+        help = []
+        for wiki, opts in wikis.iteritems():
+            item = []
+            if len(opts['keys']) > 1:
+                item.append('<')
+            item.append('|'.join(opts['keys']))
+            if len(opts['keys']) > 1:
+                item.append('>')
+            if opts['kwargs']['search']:
+                item.append(' ')
+            if opts['kwargs']['random']:
+                item.append('[')
+            else:
+                item.append('<')
+            item.append('query')
+            if opts['kwargs']['random']:
+                item.append(']')
+            else:
+                item.append('>')
+            item.append(' - search ' + wiki)
+            help.append(''.join(item))
+        return '\n'.join(help)
+
+    wikiconf = {
+            'wikipedia': {
+                'keys': ['wp', 'wiki', 'wikipedia'],
+                'baseurl': 'http://en.wikipedia.org/',
+                'kwargs': {
+                    'random': '/wiki/Special:Random',
+                    'search': '/wiki/Special:Search',
+                    'advert': ' - Wikipedia, the free encyclopedia',
+                    },
+                },
+            }
+
+    pattern = Module._any
+    terminate = False
+    help = make_help(wikiconf)
+    match_fmt = r'^\s*(?:%s)(?:\s+(.+?))?\s*$'
 
     citations_re = re.compile(r'\[.*?\]', re.DOTALL)
     parens_re = re.compile(r'\(.*?\)', re.DOTALL)
@@ -29,23 +60,45 @@ class WikiMedia(object):
     summary_size = 400
     scripts_re = re.compile(r'<script [^>]+>.*?</script>', re.I | re.DOTALL)
 
-    def __init__(self, baseurl, **kwargs):
-        self.baseurl = baseurl
-        self.__dict__.update(kwargs)
+    def init(self):
+        self.wikis = {}
+        for wiki, opts in self.wikiconf.iteritems():
+            self.wikis[wiki] = {
+                    'match_re': re.compile(self.match_fmt % '|'.join(opts['keys']), re.I),
+                    'baseurl': opts['baseurl'],
+                    'opts': opts['kwargs'],
+                    }
 
-    def getsummary(self, query):
-        if not self.search:
+    def response(self, nick, args, kwargs):
+        message = args[0]
+        for wiki, opts in self.wikis.iteritems():
+            try:
+                query = opts['match_re'].search(message).group(1)
+                if query:
+                    func, args = self.getsummary, (query,)
+                else:
+                    func, args = self.getrandom, ()
+                res = func(*args, **dict(opts['opts'], baseurl=opts['baseurl']))
+                if res:
+                    return u'%s: %s' % (nick, res)
+            except AttributeError:
+                pass
+
+    def getsummary(self, query, **kwargs):
+        if not kwargs['search']:
             return u"i don't know how to search this wiki!"
+        url = urljoin(kwargs['baseurl'], kwargs['search'])
         opts = {'search': query, 'go': 'Go'}
-        return self._getsummary(self.search_url, opts=opts)
+        return self._getsummary(url, opts=opts, **kwargs)
 
-    def getrandom(self):
-        if not self.random:
+    def getrandom(self, **kwargs):
+        if not kwargs['random']:
             return u"i don't know where random pages are on this wiki!"
-        return self._getsummary(self.random_url)
+        url = urljoin(kwargs['baseurl'], kwargs['random'])
+        return self._getsummary(url, **kwargs)
 
-    def _getsummary(self, url, opts=None):
-        soup, title = self._getpage(url, opts)
+    def _getsummary(self, url, opts=None, **kwargs):
+        soup, title = self._getpage(url, opts, **kwargs)
 
         spam = soup.find('div', attrs={'id': 'siteNotice'})
         if spam is not None:
@@ -70,8 +123,8 @@ class WikiMedia(object):
             summary += ' ' + sentence
         return summary
 
-    def _getpage(self, url, opts=None):
-        page = self.geturl(url, referer=self.baseurl, opts=opts)
+    def _getpage(self, url, opts=None, **kwargs):
+        page = self.geturl(url, referer=kwargs['baseurl'], opts=opts)
         # HTMLParser doesn't handle this very well.. see:
         # http://www.crummy.com/software/BeautifulSoup/3.1-problems.html
         page = self.scripts_re.sub('', page)
@@ -79,8 +132,8 @@ class WikiMedia(object):
 
         # get page title
         title = soup.title.string
-        if self.advert and self.advert in title:
-            title = title.replace(self.advert, '')
+        if kwargs['advert'] and kwargs['advert'] in title:
+            title = title.replace(kwargs['advert'], '')
 
         # remove all tabular data/sidebars
         for table in soup.findAll('table'):
@@ -109,67 +162,5 @@ class WikiMedia(object):
         return soup, title
 
     @property
-    def search_url(self):
-        return urljoin(self.baseurl, self.search)
-
-    @property
     def random_url(self):
         return urljoin(self.baseurl, self.random)
-
-
-def make_help(wikis):
-    """Generate madcow help from wiki config"""
-    help = []
-    for wiki, opts in wikis.iteritems():
-        item = []
-        if len(opts['keys']) > 1:
-            item.append('<')
-        item.append('|'.join(opts['keys']))
-        if len(opts['keys']) > 1:
-            item.append('>')
-        if opts['kwargs']['search']:
-            item.append(' ')
-        if opts['kwargs']['random']:
-            item.append('[')
-        else:
-            item.append('<')
-        item.append('query')
-        if opts['kwargs']['random']:
-            item.append(']')
-        else:
-            item.append('>')
-        item.append(' - search ' + wiki)
-        help.append(''.join(item))
-    return '\n'.join(help)
-
-
-class Main(Module):
-
-    """Autoloaded by Madcow"""
-
-    pattern = Module._any
-    terminate = False
-    help = make_help(WIKIS)
-    match_fmt = r'^\s*(?:%s)(?:\s+(.+?))?\s*$'
-
-    def init(self):
-        self.wikis = {}
-        for wiki, opts in WIKIS.iteritems():
-            match_re = self.match_fmt % '|'.join(opts['keys'])
-            match_re = re.compile(match_re, re.I)
-            handler = WikiMedia(opts['baseurl'], **opts['kwargs'])
-            self.wikis[wiki] = {'match_re': match_re, 'handler': handler}
-
-    def response(self, nick, args, kwargs):
-        message = args[0]
-        for wiki, opts in self.wikis.iteritems():
-            try:
-                query = opts['match_re'].search(message).group(1)
-                if query:
-                    response = opts['handler'].getsummary(query)
-                else:
-                    response = opts['handler'].getrandom()
-                if response:
-                    return u'%s: %s' % (nick, response)
-            except AttributeError:
-                pass

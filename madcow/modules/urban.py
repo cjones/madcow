@@ -5,6 +5,7 @@ import re
 
 from madcow.util import Module, strip_html
 from madcow.util.text import decode
+from madcow.util.http import geturlopt
 
 RESULTS_PER_PAGE = 7
 

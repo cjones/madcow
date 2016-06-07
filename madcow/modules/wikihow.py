@@ -31,7 +31,7 @@ class Main(Module):
             import traceback
             traceback.print_exc()
             results = ['i has an aerror when wikihowing. it may be down, who knows.']
-        return os.linesep.join('{}: {}'.format(nick, line) for line in results if line)
+        return u'\n'.join(u'{}: {}'.format(nick, line) for line in results if line)
 
     def getrandom(self, times=3):
         """".how (times) - Gives you random instructions from wikiHow, by default 3 steps"""
