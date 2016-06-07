@@ -9,7 +9,6 @@ class Main(Module):
 
     pattern = re.compile(r'^\s*(?:eyegore|steam)\s*$')
     help = 'steam - track people in community'
-    status_re = re.compile(r'friendBlock_(online|in-game)')
     next_re = re.compile(re.escape(r'&gt;&gt;'), re.I)
 
     def init(self):
@@ -18,29 +17,41 @@ class Main(Module):
         self.group_url = 'http://steamcommunity.com/groups/%s/members' % settings.STEAM_GROUP
 
     def response(self, nick, args, kwargs):
+        kwargs['req'].blockquoted = True
         page = 1
         players = []
         while page:
             url = self.group_url + '?p=%d' % page
             soup = self.getsoup(url)
-            self.ipython()
             next = soup.body.find('div', 'pageLinks').find(text=self.next_re)
             if next is None:
                 page = None
             else:
                 page = int(next.parent['href'].split('=', 1)[-1])
-            for player in soup.body('div', attrs={'class': self.status_re}):
-                name = strip_html(player.p.a.renderContents())
-                game = player.find('span', 'linkFriend_in-game')
-                if game is None:
-                    if settings.STEAM_SHOW_ONLINE:
-                        status = 'Online'
-                    else:
-                        status = None
+
+            member_list = soup.body.find('div', id='memberList')
+            members = member_list('div', {'class': re.compile(r'\bmember_block\b')})
+            for member in members:
+                rank_icon = member.find('div', 'rank_icon')
+                if rank_icon is not None:
+                    rank = rank_icon['title']
                 else:
-                    status = strip_html(game.renderContents()).split('\n')[-1].replace(' - Join', '')
-                if status:
-                    players.append('%s: %s' % (name, status))
+                    rank = 'Member'
+                content = member.find('div', {'class': re.compile(r'\bmember_block_content\b')})
+                classes = dict(content.attrs)['class'].strip().split()
+                online = 'online' in classes
+                offline = 'offline' in classes
+                if online and not offline:
+                    status = 'online'
+                elif offline and not online:
+                    status = 'offline'
+                else:
+                    status = 'unknown'
+                name = content.find('a', {'class': re.compile(r'\blinkFriend\b')})
+                name = name.renderContents().strip().decode('utf-8')
+                line = u'{} [{}] {}'.format(name, rank, status)
+                players.append(line)
+
         if players:
             return u'\n'.join(players)
         return u'No one online.'
