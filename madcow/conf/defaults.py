@@ -46,6 +46,7 @@ MODULES = [
         'calc',                # google calculator
         'care',                # generate a high-precision care-o-meter
         'chuck',               # gets a random chuck norris fact
+        'clock',               # world clock
         'dictionary',          # definition of words
         'factoids',            # makes madcow remember stuff from chatter
         'figlet',              # generate ascii fonts
@@ -95,7 +96,6 @@ MODULES = [
         #'xray',                # see all staff-set data on a nick (req. staff module)
 
         ## currently broken
-        #'clock',               # world clock
         #'cnn',                 # show cnn headline
         #'election',            # current electoral vote predictor for 2008 US election
         #'movie',               # rate movie on imdb & rotten tomatoes
