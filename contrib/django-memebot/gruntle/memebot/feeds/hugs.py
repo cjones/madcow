@@ -9,4 +9,4 @@ class Feed(BaseFeed):
 
     def filter(self, published_links):
         """Filter published links to the ones we care about"""
-        return published_links.filter(source__type='irc', source__name='#hugs')
+        return published_links.filter(source__type='slack', source__name='hugs')
