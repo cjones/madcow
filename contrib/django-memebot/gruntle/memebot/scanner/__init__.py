@@ -255,7 +255,24 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
                 link.resolved_url = result.resolved_url
                 link.content_type = result.content_type
                 link.content = result.content
-                link.title = result.title
+
+                # XXX some seriously broken shit going on witih emoji combinatorials, hack to make the links flow again
+                #link.title = result.title
+
+                safe_title = result.title
+                if safe_title is not None:
+                    if not isinstance(safe_title, unicode):
+                        if not isinstance(safe_title, str):
+                            safe_title = str(safe_title)
+                        safe_title = safe_title.decode('latin1')
+                    safe_title = safe_title.encode('ascii', 'ignore')
+                    safe_title = safe_title.decode('ascii')
+                    safe_title = safe_title.strip()
+                    if not safe_title:
+                        safe_title = None
+
+                link.title = safe_title
+
                 link.scanner = scanner_name
                 link.publish(commit=False)
 
