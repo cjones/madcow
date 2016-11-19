@@ -53,7 +53,8 @@ class Source(Model):
 
     # valid locations
     SOURCE_TYPES = [('irc', 'IRC'),
-                    ('web', 'Web')]
+                    ('web', 'Web'),
+                    ('slack', 'SlackAPI')]
 
     # fields
     type = models.CharField(null=False, blank=False, max_length=16, choices=SOURCE_TYPES)
@@ -64,7 +65,7 @@ class Source(Model):
         unique_together = 'type', 'name'
 
     def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.type)
+        return u'%s (%s)' % (self.name, self.get_type_display())
 
 
 class LinkManager(models.Manager):
