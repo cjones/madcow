@@ -15,7 +15,6 @@ from madcow.conf import settings
 
 
 class SlackProtocol(Madcow):
-    _slack_link_re = re.compile(r'[<](https?://[^>]{1,})[>]')
 
     def __init__(self, base):
         super(SlackProtocol, self).__init__(base)
@@ -27,6 +26,16 @@ class SlackProtocol(Madcow):
         while self.running:
             self.check_response_queue()
             time.sleep(0.5)
+
+    @staticmethod
+    def fixlinks(t, s=re.compile(r'[<](https?://.*?)[>]').search, j=''.join):
+        while True:
+            m = s(t)
+            if m is None:
+                break
+            x, y = t[:m.start()], t[m.end():]
+            t = j([x, ' ' if x else '', m.group(1), ' ' if y else '', y])
+        return t
 
     def run(self):
         while self.running:
@@ -44,7 +53,7 @@ class SlackProtocol(Madcow):
                     elif self.online:
                         if event_type == 'message':
                             private = False  # TODO need to determine if this is in DM
-                            req = Request(message=self._slack_link_re.sub(r'\1', event.event['text']))
+                            req = Request(message=self.fixlinks(event.event['text']))
                             req.nick = event.event['user']
                             req.channel = event.event['channel']
                             req.private = private
