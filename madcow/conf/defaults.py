@@ -69,6 +69,7 @@ MODULES = [
         'stockquote',          # get yahoo stock quotes
         'texts',               # random texts from last night
         'trek',                # generate star trek technobabble
+        'trump',               # god help us all
         'urban',               # look up word/phrase on urban dictionary
         'weather',             # look up weather from wunderground
         'webtender',           # how to make drinks!
