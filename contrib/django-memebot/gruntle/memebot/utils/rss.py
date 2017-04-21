@@ -1,7 +1,7 @@
 """RSS 2.0 feed generator"""
 
-from gruntle.memebot.utils import xml
-from gruntle.memebot.utils.tzdatetime import tzdatetime
+from memebot.utils import xml
+from memebot.utils.tzdatetime import tzdatetime
 
 __version__ = '0.1'
 

@@ -1,8 +1,8 @@
 """MemeBot Data Model"""
 
 import datetime
-import urlparse
-import urllib
+import urllib.parse
+import urllib.request, urllib.parse, urllib.error
 import cgi
 import re
 import os
@@ -11,13 +11,14 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
 from django.template import Context, loader
-from django.conf import settings
 from django.db import models
 
-from gruntle.memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
-from gruntle.memebot.utils import blacklist, first, get_domain_from_url
-from gruntle.memebot.utils.tzdatetime import tzdatetime
-from gruntle.memebot.exceptions import OldMeme
+from mezzanine.conf import settings
+
+from memebot.fields import SerializedDataField, PickleField, AttributeManager, KeyValueManager
+from memebot.utils import blacklist, first, get_domain_from_url
+from memebot.utils.tzdatetime import tzdatetime
+from memebot.exceptions import OldMeme
 
 try:
     current_site = Site.objects.get_current()
@@ -65,7 +66,7 @@ class Source(Model):
         unique_together = 'type', 'name'
 
     def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.get_type_display())
+        return '%s (%s)' % (self.name, self.get_type_display())
 
 
 class LinkManager(models.Manager):
@@ -157,26 +158,26 @@ class LinkManager(models.Manager):
         if '#' in url:
             try:
                 url, fragment = self.fragment_re.search(url).groups()
-            except StandardError:
+            except Exception:
                 pass
         if '?' in url:
             url, query = url.split('?', 1)
 
         netloc = netloc.lower()
-        netloc = urlparse.unquote(netloc).replace('+', ' ')
+        netloc = urllib.parse.unquote(netloc).replace('+', ' ')
         if netloc.startswith('www.') and len(netloc) > 4:
             netloc = netloc[4:]
         if netloc.endswith('.') and len(netloc) > 1:
             netloc = netloc[:-1]
         if url == '':
             url = '/'
-        url = urlparse.unquote(url).replace('+', ' ')
+        url = urllib.parse.unquote(url).replace('+', ' ')
         url = os.path.normpath(url)
         try:
-            query = urllib.urlencode([item for item in sorted(cgi.parse_qsl(query)) if item[1]])
-        except StandardError:
+            query = urllib.parse.urlencode([item for item in sorted(cgi.parse_qsl(query)) if item[1]])
+        except Exception:
             query = ''
-        return urlparse.urlunsplit((scheme, netloc, url, query, ''))
+        return urllib.parse.urlunsplit((scheme, netloc, url, query, ''))
 
     @staticmethod
     def is_valid_username(username):
@@ -247,7 +248,7 @@ class Link(Model):
         url = self.get_best_url()
         if self.title is None:
             return url
-        return u'[%s] %s' % (get_domain_from_url(url), self.title)
+        return '[%s] %s' % (get_domain_from_url(url), self.title)
 
     @property
     def rss_templates(self):
@@ -266,7 +267,7 @@ class Link(Model):
 
     @property
     def external_url(self):
-        return urlparse.urljoin(settings.FEED_BASE_URL, self.absolute_url)
+        return urllib.parse.urljoin(settings.FEED_BASE_URL, self.absolute_url)
 
     def publish(self, date=None, commit=True):
         """Publish this link"""
@@ -314,7 +315,7 @@ class Note(Model):
     #    unique_together = 'user', 'link', 'value'
 
     def __unicode__(self):
-        return u'Note posted by %s to %s' % (self.user.username, self.link.url)
+        return 'Note posted by %s to %s' % (self.user.username, self.link.url)
 
 
 class SerializedData(Model):
@@ -327,7 +328,7 @@ class SerializedData(Model):
     data = KeyValueManager(key_field='name', val_field='value')
 
     def __unicode__(self):
-        return u'%s=%r' % (self.name, self.value)
+        return '%s=%r' % (self.name, self.value)
 
 
 class AliasManager(models.Manager):
@@ -352,9 +353,9 @@ class AliasManager(models.Manager):
         into the newer, remove them, and create an alias pointing to the
         new user
         """
-        if isinstance(old_user, (str, unicode)):
+        if isinstance(old_user, str):
             old_user = User.objects.get(username=old_user.lower())
-        if isinstance(new_user, (str, unicode)):
+        if isinstance(new_user, str):
             new_user = User.objects.get(username=new_user.lower())
         alias = self.create(user=new_user, username=old_user.username)
         old_profile = old_user.get_profile()
@@ -387,7 +388,7 @@ class Alias(Model):
     username = models.CharField(null=False, blank=False, max_length=30, unique=True)
 
     def __unicode__(self):
-        return u'%s -> %s' % (self.username, self.user.username)
+        return '%s -> %s' % (self.username, self.user.username)
 
 
 class UserProfileManager(models.Manager):
@@ -411,7 +412,7 @@ class UserProfile(Model):
     objects = UserProfileManager()
 
     # relationships
-    user = models.ForeignKey(User, null=False, blank=False, unique=True)
+    user = models.OneToOneField(User, null=False, blank=False)
 
     # memebot posting stats
     posted_new = models.IntegerField(null=False, blank=False, default=0)
@@ -419,7 +420,7 @@ class UserProfile(Model):
     reposts = models.IntegerField(null=False, blank=False, default=0)
 
     def __unicode__(self):
-        return u'Profile for %s' % self.user.username
+        return 'Profile for %s' % self.user.username
 
     @property
     def sort_key(self):

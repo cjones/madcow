@@ -3,9 +3,9 @@
 from optparse import make_option
 import sys
 from django.core.management.base import NoArgsCommand, CommandError
-from django.conf import settings
-from gruntle.memebot.exceptions import LockError
-from gruntle.memebot import scanner
+from mezzanine.conf import settings
+from memebot.exceptions import LockError
+from memebot import scanner
 
 try:
     import multiprocessing as mp
@@ -42,7 +42,7 @@ class Command(NoArgsCommand):
         try:
             scanner.run(max_links=max_links, dry_run=dry_run, log_stream=log_stream, fork=fork,
                         num_workers=num_workers, use_multiprocessing=use_multiprocessing)
-        except LockError, exc:
+        except LockError as exc:
             raise CommandError(exc)
         except KeyboardInterrupt:
-            print '\nCancelled'
+            print('\nCancelled')

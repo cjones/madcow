@@ -1,10 +1,10 @@
 """Extract image from gallery view of imgur links, but grab the title on the way"""
 
-from gruntle.memebot.utils.browser import render_node, strip_site_name
-from gruntle.memebot.utils.browser import decode_entities
-from gruntle.memebot.scanner.image import ImageScanner
-from gruntle.memebot.exceptions import InvalidContent, trapped
-from gruntle.memebot.scanner import ScanResult
+from memebot.utils.browser import render_node, strip_site_name
+from memebot.utils.browser import decode_entities
+from memebot.scanner.image import ImageScanner
+from memebot.exceptions import InvalidContent, trapped
+from memebot.scanner import ScanResult
 
 class IMGurScanner(ImageScanner):
 

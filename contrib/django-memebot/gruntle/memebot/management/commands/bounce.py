@@ -3,14 +3,14 @@
 from optparse import make_option
 import sys
 from django.core.management.base import NoArgsCommand, CommandError
-from django.conf import settings
-from gruntle.memebot.models import Link
+from mezzanine.conf import settings
+from memebot.models import Link
 
 MIN_LINKS = 25
 DATEFMT = '%Y-%m-%d %H:%M:%S'
 
 def get_max_links():
-    from gruntle.memebot.feeds import get_feeds
+    from memebot.feeds import get_feeds
     return max([getattr(f[1], 'max_links', 0) for f in get_feeds()] + [MIN_LINKS])
 
 
@@ -37,7 +37,7 @@ class Command(NoArgsCommand):
             raise CommandError('there are already %d links pending scan' % pending_count)
         elif pending_count > 0:
             count -= pending_count
-            print >> sys.stderr, '%d links already pending, reducing count to %d bounces' % (pending_count, count)
+            print('%d links already pending, reducing count to %d bounces' % (pending_count, count), file=sys.stderr)
         pub_links = links.filter(state='published').order_by('-published')[:count]
         nlinks = pub_links.count()
         for i, link in enumerate(pub_links):
@@ -57,11 +57,11 @@ class Command(NoArgsCommand):
                     link.published = None
                     link.publish_id = None
                 link.save()
-            print '[%d/%d] %s: %s <%s> %s' % (
+            print('[%d/%d] %s: %s <%s> %s' % (
                     i + 1,
                     nlinks,
                     verb,
                     link.created.strftime(DATEFMT),
                     link.user.username,
                     link.url,
-                    )
+                    ))

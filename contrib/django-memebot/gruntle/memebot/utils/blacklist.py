@@ -1,13 +1,14 @@
 """DNS Blacklist"""
 
 import collections
-import urlparse
+import urllib.parse
 import socket
 import re
-from django.conf import settings
-from gruntle.memebot.decorators import memoize
-from gruntle.memebot.utils import text, flatten
-from gruntle.memebot.exceptions import BlackListError
+
+from mezzanine.conf import settings
+from memebot.decorators import memoize
+from memebot.utils import text, flatten
+from memebot.exceptions import BlackListError
 
 __all__ = ['BlackListResult', 'get_blacklist_for_url', 'get_blacklist', 'get_all_hosts', 'check', 'normalize']
 
@@ -75,19 +76,19 @@ class DNSBlackList(object):
         """Return blacklist entry if this host matches"""
         orig_host = self.normalize(host)
         for host in self.get_all_hosts(orig_host):
-            for rule, blacklist_re in self.rules_re.iteritems():
+            for rule, blacklist_re in self.rules_re.items():
                 if blacklist_re.search(host) is not None:
                     return BlackListResult(host=orig_host, match=host, rule=rule)
 
     @memoize
     def normalize(self, host):
         """Clean up hostname"""
-        items = text.decode(host).lower().rsplit(u':', 1)[0].split(u'.')
-        return text.encode(u'.'.join(item for item in (item.strip() for item in items) if item))
+        items = text.decode(host).lower().rsplit(':', 1)[0].split('.')
+        return text.encode('.'.join(item for item in (item.strip() for item in items) if item))
 
     def check(self, val):
         """Given a URL or hostname, raise BlackListError if in our list of hosts"""
-        url = urlparse.urlparse(val)
+        url = urllib.parse.urlparse(val)
         if url.scheme and url.netloc:
             host = url.netloc
             url = val

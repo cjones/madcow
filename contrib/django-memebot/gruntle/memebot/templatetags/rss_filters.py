@@ -1,12 +1,13 @@
 """Custom text filters"""
 
 from pprint import pformat
-from urlparse import urljoin
+from urllib.parse import urljoin
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
-from django.conf import settings
 from django import template
-from gruntle.memebot.utils import text
+from memebot.utils import text
+
+from mezzanine.conf import settings
 
 register = template.Library()
 
@@ -24,7 +25,7 @@ def summarize(value, size=None, cont=None):
         words = value[:size].split()
         if len(value) > size:
             words[-1] = cont
-        value = mark_safe(u' '.join(words))
+        value = mark_safe(' '.join(words))
     return value
 
 

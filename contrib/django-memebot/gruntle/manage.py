@@ -1,21 +1,16 @@
-#!/usr/bin/python
-
-"""Run project manager tool in local environment"""
-
-import sys
+#!/usr/bin/env python
 import os
+import sys
 
 sys.dont_write_bytecode = True
-os.environ['DEV_SERVER'] = 'true'
 
-from django.core.management import execute_manager, setup_environ
-import settings
+if __name__ == "__main__":
 
-def main():
-    """Command-line interface"""
-    if len(sys.argv) == 2 and sys.argv[1] == 'runserver':
-        sys.argv.append(settings.DEV_SERVER_ADDR)
-    execute_manager(settings)
+    from mezzanine.utils.conf import real_project_name
 
-if __name__ == '__main__':
-    sys.exit(main())
+    settings_module = "%s.settings" % real_project_name("gruntle")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings_module)
+
+    from django.core.management import execute_from_command_line
+
+    execute_from_command_line(sys.argv)

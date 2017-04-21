@@ -2,9 +2,10 @@
 
 import datetime
 import decimal
-import rfc822
 import time
 import os
+
+from memebot.utils import rfc822
 
 class TZContext(object):
 
@@ -138,7 +139,7 @@ class tzdatetime(datetime.datetime):
                 t = time.mktime(t)
             if isinstance(t, (float, decimal.Decimal)):
                 t = int(round(t, 0))
-            if not isinstance(t, (int, long)):
+            if not isinstance(t, int):
                 raise TypeError('unknown time format: ' + orig_type.__name__)
             t = datetime.datetime.fromtimestamp(t)
         if t.tzinfo is None:

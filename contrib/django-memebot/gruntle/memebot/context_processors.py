@@ -1,7 +1,7 @@
 """MemeBot context processors"""
 
 from django.contrib.sites.models import Site
-from django.conf import settings
+from mezzanine.conf import settings
 
 current_site = Site.objects.get_current()
 

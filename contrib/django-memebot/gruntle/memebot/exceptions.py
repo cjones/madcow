@@ -5,7 +5,7 @@ import re
 __all__ = ['MemebotError', 'OldMeme', 'ScannerError', 'BadResponse', 'ConfigError', 'InvalidContent',
            'NoMatch', 'LockError', 'TrapError', 'TrapErrors', 'trapped', 'reraise']
 
-class MemebotError(StandardError):
+class MemebotError(Exception):
 
     """Base error class for memebot"""
 
@@ -19,9 +19,9 @@ class BlackListError(MemebotError):
         self.url = url
 
     def __str__(self):
-        from gruntle.memebot.utils.text import encode, decode, format
+        from memebot.utils.text import encode, decode, format
         return encode(format('%s%s matched blacklist rule %r for host %r',
-                             self.blacklist.host, ('' if (self.url is None) else (u' (%s)' % decode(self.url))),
+                             self.blacklist.host, ('' if (self.url is None) else (' (%s)' % decode(self.url))),
                              self.blacklist.rule, self.blacklist.match))
 
 
@@ -55,7 +55,7 @@ class BadResponse(ScannerError):
         return self.response.code >= 400 and self.response.code <= 499 and self.response.code != 408
 
     def __str__(self):
-        from gruntle.memebot.utils.text import encode, format
+        from memebot.utils.text import encode, format
         return encode(format('%s responded with status: %d %s', self.link.url, self.response.code, self.response.msg))
 
 
@@ -73,7 +73,7 @@ class InvalidContent(ScannerError):
         self.msg = msg
 
     def __str__(self):
-        from gruntle.memebot.utils.text import encode, format
+        from memebot.utils.text import encode, format
         return encode(format('Invalid content parsing %s: %s', self.response.url,
                              'Unknown error' if self.msg is None else self.msg))
 
@@ -94,19 +94,19 @@ class NoMatch(ScannerError):
         """Yields name/value of re.py's flags"""
         for key in dir(re):
             val = getattr(re, key)
-            if key.isupper() and isinstance(val, (int, long)) and not key.startswith('_') and len(key) > 1:
+            if key.isupper() and isinstance(val, int) and not key.startswith('_') and len(key) > 1:
                 yield key, val
 
     @property
     def pattern(self):
         """Retrieve the pattern for compile regex from re.py's cache"""
-        for key, val in re._cache.iteritems():
+        for key, val in re._cache.items():
             if val is self.regex:
                 return key[1], [name for name, val in self.get_re_flags() if key[2] & val]
         return 'UNKNOWN', []
 
     def __str__(self):
-        from gruntle.memebot.utils.text import encode, format
+        from memebot.utils.text import encode, format
         pattern, flags = self.pattern
         return encode(format('No match (%s): %s %r != %r [%s]',
                              self.url, self.field, self.val,
@@ -151,7 +151,7 @@ class TrapErrors(object):
 
 def reraise(exc_type, exc_value, exc_traceback):
     """Lazy-ass shortcut so I can write reraise(*exc_info)"""
-    raise exc_type, exc_value, exc_traceback
+    raise exc_type(exc_value).with_traceback(exc_traceback)
 
 
 # default trapper that swallows errors

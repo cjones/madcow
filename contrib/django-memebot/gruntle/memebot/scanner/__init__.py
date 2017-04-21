@@ -2,17 +2,17 @@
 
 import collections
 import traceback
-import urlparse
+import urllib.parse
 import cgi
 import re
 
-from django.conf import settings
+from mezzanine.conf import settings
 
-from gruntle.memebot.decorators import logged, locked
-from gruntle.memebot.utils.browser import Browser
-from gruntle.memebot.utils import text
-from gruntle.memebot.models import Link
-from gruntle.memebot.exceptions import *
+from memebot.decorators import logged, locked
+from memebot.utils.browser import Browser
+from memebot.utils import text
+from memebot.models import Link
+from memebot.exceptions import *
 
 DEFAULT_NUM_WORKERS = 4
 
@@ -46,7 +46,7 @@ class Scanner(object):
         url_match = getattr(self, 'url_match', None)
         if url_match is None:
             url_match = {}
-        self.patterns = dict((field, self.get_regex(url_match, field)) for field in urlparse.ParseResult._fields)
+        self.patterns = dict((field, self.get_regex(url_match, field)) for field in urllib.parse.ParseResult._fields)
         self.query_patterns = [tuple(self.get_regex(query, key) for key in ('key', 'val'))
                                for query in url_match.get('queries', [])]
 
@@ -79,7 +79,7 @@ class Scanner(object):
 
         If context does not match, NoMatch is raised
         """
-        uri = urlparse.urlparse(response.url)
+        uri = urllib.parse.urlparse(response.url)
         results = []
         for field in uri._fields:
             regex = self.patterns[field]
@@ -181,7 +181,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
 
         else:
             import threading
-            from Queue import Queue
+            from queue import Queue
 
             lock = threading.RLock()
             mp = None
@@ -261,7 +261,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
 
                 safe_title = result.title
                 if safe_title is not None:
-                    if not isinstance(safe_title, unicode):
+                    if not isinstance(safe_title, str):
                         if not isinstance(safe_title, str):
                             safe_title = str(safe_title)
                         safe_title = safe_title.decode('latin1')
@@ -279,7 +279,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
                 # since this writes back immediately, hold until we know if this is a dry run
                 link._attr = result.attr
 
-        except TrapError, exc:
+        except TrapError as exc:
 
             # to match _attr temp storage above
             link._attr = None
@@ -314,7 +314,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
         else:
             link.save()
             if link._attr is not None:
-                for key, val in link._attr.iteritems():
+                for key, val in link._attr.items():
                     link.attr[key] = val
 
     if fork:
@@ -327,7 +327,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
                     break
                 process_link(link)
 
-        for _ in xrange(num_workers):
+        for _ in range(num_workers):
             run(worker)
         process = queue.put
     else:
@@ -336,7 +336,7 @@ def run(logger, max_links=None, dry_run=False, user_agent=None, timeout=None, ma
     for job in enumerate(links):
         process(job)
     if fork:
-        for _ in xrange(num_workers):
+        for _ in range(num_workers):
             queue.put(None)
         status = join()
         if status != 0:

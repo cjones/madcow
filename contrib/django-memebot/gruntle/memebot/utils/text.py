@@ -3,8 +3,8 @@
 import codecs
 import sys
 
-from gruntle.memebot.utils import zdict
-from gruntle.memebot.exceptions import *
+from memebot.utils import zdict
+from memebot.exceptions import *
 
 __all__ = ['get_encoding', 'set_encoding', 'encode', 'decode',
            'sencode', 'sdecode', 'cast', 'boolean', 'chomp', 'format']
@@ -131,15 +131,15 @@ class EncodingHandler(object):
     def decode(self, val, encoding=None):
         """Decode val to unicode, violently if necessary"""
         if val is None:
-            val = u''
-        elif not isinstance(val, unicode):
+            val = ''
+        elif not isinstance(val, str):
             if not isinstance(val, str):
                 try:
                     with TrapErrors():
                         val = str(val)
                 except TrapError:
                     val = ''
-            val = self.recode(val.decode, encoding, unicode)
+            val = self.recode(val.decode, encoding, str)
         return val
 
     def encode(self, val, encoding=None):
@@ -161,7 +161,7 @@ class EncodingHandler(object):
 
     def chomp(self, line, encoding=None):
         """Remove any trailing newline/linefeed characters"""
-        return_unicode = isinstance(line, unicode)
+        return_unicode = isinstance(line, str)
         line = self.encode(line, encoding)
         chars = list(line)
         while chars and chars[-1] in self.chomp_chars:
@@ -182,11 +182,11 @@ class EncodingHandler(object):
 
     def boolean(self, val, encoding=None):
         """Smartly cast val into boolean"""
-        if isinstance(val, (str, unicode)):
+        if isinstance(val, str):
             val = self.cast(val, encoding)
-        if isinstance(val, (int, long, float)):
+        if isinstance(val, (int, float)):
             return val > 0
-        if isinstance(val, unicode):
+        if isinstance(val, str):
             return val.lower() in self.truth_strings
         return bool(val)
 
@@ -197,21 +197,21 @@ class EncodingHandler(object):
         if args:
             objs.extend(args)
         if kwargs:
-            objs.extend(kwargs.iteritems())
-        recode = self.decode if (unicode in set(type(obj) for obj in objs)) else self.encode
+            objs.extend(iter(kwargs.items()))
+        recode = self.decode if (str in set(type(obj) for obj in objs)) else self.encode
         if args:
-            args = tuple(recode(arg, encoding) if isinstance(arg, (str, unicode)) else arg for arg in args)
+            args = tuple(recode(arg, encoding) if isinstance(arg, str) else arg for arg in args)
         if kwargs:
             kwargs = dict((self.encode(key, encoding),
-                           recode(val, encoding) if isinstance(val, (str, unicode)) else val)
-                          for key, val in kwargs.iteritems())
+                           recode(val, encoding) if isinstance(val, str) else val)
+                          for key, val in kwargs.items())
         format = recode(format, encoding)
         for opts in args, kwargs:
             if opts:
                 try:
                     with TrapErrors():
                         format = format % opts
-                except TrapError, exc:
+                except TrapError as exc:
                     with trapped:
                         format = recode('Error: %r %% %r -> %r' % (format, opts, exc.args[1]), encoding)
         return format

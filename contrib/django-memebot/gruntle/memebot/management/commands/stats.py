@@ -1,8 +1,8 @@
 """Quickly get some statistics about link activity"""
 
 from django.core.management.base import NoArgsCommand
-from gruntle.memebot.utils import human_readable_duration
-from gruntle.memebot.models import Link
+from memebot.utils import human_readable_duration
+from memebot.models import Link
 
 class Command(NoArgsCommand):
 
@@ -27,17 +27,17 @@ class Command(NoArgsCommand):
         published_link_count = published_links.count()
         invalid_link_count = invalid_links.count()
 
-        print 'Link Counts'
-        print '-----------'
-        print 'Total: %d' % link_count
-        print '    Pending: %d' % pending_link_count
-        print '        New: %d' % new_link_count
-        print '        Deferred: %d' % deferred_link_count
-        print '    Disabled: %d' % disabled_link_count
-        print '    Archived: %d' % archived_link_count
-        print '    Published: %d' % published_link_count
-        print '    Invalid: %d' % invalid_link_count
-        print
+        print('Link Counts')
+        print('-----------')
+        print('Total: %d' % link_count)
+        print('    Pending: %d' % pending_link_count)
+        print('        New: %d' % new_link_count)
+        print('        Deferred: %d' % deferred_link_count)
+        print('    Disabled: %d' % disabled_link_count)
+        print('    Archived: %d' % archived_link_count)
+        print('    Published: %d' % published_link_count)
+        print('    Invalid: %d' % invalid_link_count)
+        print()
 
         if link_count:
             last_link = links[0]
@@ -65,24 +65,24 @@ class Command(NoArgsCommand):
 
     @classmethod
     def print_link(cls, link, title=None, date_field=None, print_error=False):
-        print title
-        print '-' * len(title)
-        print 'ID: %d' % link.id
-        print 'URL: %s' % link.url
-        print '%s: %s' % (date_field.capitalize(), cls.format_date(getattr(link, date_field)))
-        print 'User: %s' % link.user.username
-        print 'State: %s' % link.get_state_display()
+        print(title)
+        print('-' * len(title))
+        print('ID: %d' % link.id)
+        print('URL: %s' % link.url)
+        print('%s: %s' % (date_field.capitalize(), cls.format_date(getattr(link, date_field))))
+        print('User: %s' % link.user.username)
+        print('State: %s' % link.get_state_display())
         if link.state == 'published':
             if link.content is None:
-                print 'Content: None'
+                print('Content: None')
             else:
-                print 'Type: %s' % link.content_type
-                print 'Size: %d' % len(link.content)
+                print('Type: %s' % link.content_type)
+                print('Size: %d' % len(link.content))
         else:
-            print 'Errors: %d' % link.error_count
+            print('Errors: %d' % link.error_count)
             if print_error and link.content_type == 'text/plain' and link.content:
                 lines = link.content.strip().splitlines()
                 if lines:
-                    print 'Error: %s' % lines[-1]
+                    print('Error: %s' % lines[-1])
 
-        print
+        print()

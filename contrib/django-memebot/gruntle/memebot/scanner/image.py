@@ -1,18 +1,18 @@
 """Looks for image links to cache locally"""
 
 try:
-    import cStringIO as stringio
+    import io as stringio
 except ImportError:
-    import StringIO as stringio
+    import io as stringio
 
 try:
     from PIL import Image
 except ImportError:
     Image = None
 
-from django.conf import settings
-from gruntle.memebot.scanner import Scanner, ScanResult
-from gruntle.memebot.exceptions import InvalidContent, ConfigError, trapped
+from mezzanine.conf import settings
+from memebot.scanner import Scanner, ScanResult
+from memebot.exceptions import InvalidContent, ConfigError, trapped
 
 class ImageScanner(Scanner):
 
@@ -33,7 +33,7 @@ class ImageScanner(Scanner):
         if image_type is None:
             image_type = settings.SCANNER_IMAGE_TYPE
 
-        if isinstance(image_resize_alg, (str, unicode)):
+        if isinstance(image_resize_alg, str):
             image_resize_alg = getattr(Image, image_resize_alg, None)
         if image_resize_alg is None:
             raise ConfigError('image resize algorithm invalid')

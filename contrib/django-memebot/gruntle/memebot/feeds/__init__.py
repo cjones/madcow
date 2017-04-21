@@ -1,15 +1,16 @@
 """Feed generation core"""
 
-from urlparse import urljoin
+from urllib.parse import urljoin
 import datetime
 import os
 
-from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from gruntle.memebot.models import SerializedData, Link
-from gruntle.memebot.decorators import logged, locked
-from gruntle.memebot.utils import AtomicWrite, first, plural, text, rss
+from mezzanine.conf import settings
+
+from memebot.models import SerializedData, Link
+from memebot.decorators import logged, locked
+from memebot.utils import AtomicWrite, first, plural, text, rss
 
 class LinkItem(rss.Item):
 
@@ -142,7 +143,7 @@ class BaseFeed(object):
             if force or self.has_new_links:
                 self.log.info('Rebuilding feed with %d items', link_count)
                 xml = RSSFeed(self).tostring(**kwargs)
-                with AtomicWrite(self.xml_file, backup=self.keep_xml_backup, perms=0644) as fp:
+                with AtomicWrite(self.xml_file, backup=self.keep_xml_backup, perms=0o644) as fp:
                     fp.write(xml)
                 self.log.info('Wrote %d bytes to: %s', len(xml), self.xml_file)
                 SerializedData.data[self.key] = self.newest_publish_id

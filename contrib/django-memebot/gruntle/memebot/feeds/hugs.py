@@ -1,6 +1,6 @@
 """All links posted to #hugs"""
 
-from gruntle.memebot.feeds import BaseFeed
+from memebot.feeds import BaseFeed
 
 class Feed(BaseFeed):
 

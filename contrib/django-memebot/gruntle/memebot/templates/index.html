@@ -1,0 +1,21 @@
+{% load staticfiles %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>gruntle.org</title>
+    <link rel="stylesheet" href="{% static "css/snowman.css" %}">
+    <script src="{% static "js/snowman.js" %}"></script>
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div id="wrapper">
+      <audio src="{% static "audio/sleigh.mp3" %}" autoplay="true" loop="true" volume="1.0"></audio>
+      <div id="snowflakes">&#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745; &#x2745;</div>
+      <div id="snowmen"><marquee scrolldelay="0" scrollamount="20">&#x2603; &#x2603; &#x2603; &#x2603; &#x2603; &#x2603; &#x2603; &#x2603; &#x2603; &#x2603; &#x2603;</marquee></div>
+    </div>
+    <script>init_snowman();</script>
+  </body>
+</html>

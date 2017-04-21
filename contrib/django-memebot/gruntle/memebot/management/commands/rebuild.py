@@ -3,9 +3,9 @@
 from optparse import make_option
 import sys
 from django.core.management.base import NoArgsCommand, CommandError
-from django.conf import settings
-from gruntle.memebot.exceptions import LockError
-from gruntle.memebot import feeds
+from mezzanine.conf import settings
+from memebot.exceptions import LockError
+from memebot import feeds
 
 class Command(NoArgsCommand):
 
@@ -19,7 +19,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, log_stream=None, force=False, **kwargs):
         try:
             feeds.run(log_stream=log_stream, force=force)
-        except LockError, exc:
+        except LockError as exc:
             raise CommandError(exc)
         except KeyboardInterrupt:
-            print '\nCancelled'
+            print('\nCancelled')

@@ -1,6 +1,6 @@
 """All images posted to #hugs (resized and cached locally)"""
 
-from gruntle.memebot.feeds import hugs
+from memebot.feeds import hugs
 
 class Feed(hugs.Feed):
 

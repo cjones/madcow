@@ -1,6 +1,6 @@
 """All links posted to #hugs, text-only SFW version"""
 
-from gruntle.memebot.feeds import hugs
+from memebot.feeds import hugs
 
 class Feed(hugs.Feed):
 

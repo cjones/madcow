@@ -6,12 +6,12 @@ import time
 import sys
 
 from django.core.management.base import NoArgsCommand, CommandError
-from django.conf import settings
+from mezzanine.conf import settings
 
-from gruntle.memebot.utils import human_readable_duration
-from gruntle.memebot.exceptions import TrapError, TrapErrors
-from gruntle.memebot.decorators import locked, logged
-from gruntle.memebot import scanner, feeds
+from memebot.utils import human_readable_duration
+from memebot.exceptions import TrapError, TrapErrors
+from memebot.decorators import locked, logged
+from memebot import scanner, feeds
 
 class Command(NoArgsCommand):
 
@@ -29,7 +29,7 @@ class Command(NoArgsCommand):
                 self.run(interval, log_stream=sys.stdout)
         except KeyboardInterrupt:
             raise CommandError('Interrupted')
-        except TrapError, exc:
+        except TrapError as exc:
             raise CommandError(exc.args[1])
 
     @logged('updater', append=True, method=True)
@@ -47,6 +47,6 @@ class Command(NoArgsCommand):
                 with TrapErrors():
                     scanner.run(logger=self.log)
                     feeds.run(logger=self.log, force=False)
-            except TrapError, exc:
+            except TrapError as exc:
                 self.log.error('Processing Error', exc_info=exc.args)
             last_update = now

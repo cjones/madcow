@@ -2,30 +2,30 @@
 
 import os
 
-from django.views.generic.simple import direct_to_template
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
+from mezzanine.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-from gruntle.memebot.decorators import login_or_apikey_required
-from gruntle.memebot.models import UserProfile, Link
-from gruntle.memebot.feeds import get_feed_names, get_feeds
-from gruntle.memebot.forms import CheckLinkForm
-from gruntle.memebot.utils import text
+from memebot.decorators import login_or_apikey_required
+from memebot.models import UserProfile, Link
+from memebot.feeds import get_feed_names, get_feeds
+from memebot.forms import CheckLinkForm
+from memebot.utils import text
 
 @login_required
 def view_index(request):
     """Site index"""
-    return direct_to_template(request, 'memebot/index.html', {})
+    return render(request, 'memebot/index.html', {})
 
 
 @login_required
 def view_scores(request):
     """View scoreboard"""
     profiles = UserProfile.objects.get_by_score()
-    return direct_to_template(request, 'memebot/scores.html', {'profiles': profiles})
+    return render(request, 'memebot/scores.html', {'profiles': profiles})
 
 
 @login_required
@@ -33,11 +33,11 @@ def browse_links(request):
     """Browse all links"""
     try:
         page = int(request.GET.get('page'))
-    except StandardError:
+    except Exception:
         page = 1
     try:
         per_page = int(request.GET.get('per_page'))
-    except StandardError:
+    except Exception:
         per_page = settings.BROWSE_LINKS_PER_PAGE
 
     start = (page - 1) * per_page
@@ -46,7 +46,7 @@ def browse_links(request):
     if not text.boolean(request.GET.get('disabled')):
         links = links.exclude(state='disabled')
     links = links.order_by('-created')[start:end]
-    return direct_to_template(request, 'memebot/browse.html', {'links': links})
+    return render(request, 'memebot/browse.html', {'links': links})
 
 
 def _get_link(publish_id, **kwargs):
@@ -64,13 +64,13 @@ def check_link(request):
 
     else:
         form = CheckLinkForm()
-    return direct_to_template(request, 'memebot/check-link.html', {'form': form})
+    return render(request, 'memebot/check-link.html', {'form': form})
 
 
 @login_required
 def view_link(request, publish_id):
     """Info about a link, TBD"""
-    return direct_to_template(request, 'memebot/view-link.html', {'link': _get_link(publish_id)})
+    return render(request, 'memebot/view-link.html', {'link': _get_link(publish_id)})
 
 
 ##############
@@ -87,7 +87,7 @@ def view_link_content(request, publish_id):
 def view_rss_index(request):
     """Index of available RSS feeds"""
     feeds = [(name, feed.description) for name, feed in get_feeds()]
-    return direct_to_template(request, 'memebot/rss-index.html', {'feeds': feeds})
+    return render(request, 'memebot/rss-index.html', {'feeds': feeds})
 
 
 def view_rss(request, name):

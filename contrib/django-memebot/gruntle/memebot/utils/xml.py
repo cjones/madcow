@@ -4,13 +4,13 @@ import contextlib
 import re
 
 try:
-    import cStringIO as stringio
+    import io as stringio
 except ImportError:
-    import StringIO as stringio
+    import io as stringio
 
 from lxml import etree
-from gruntle.memebot.utils import text
-from gruntle.memebot.utils.tzdatetime import tzdatetime
+from memebot.utils import text
+from memebot.utils.tzdatetime import tzdatetime
 
 DEFAULT_XML_DECLARATION = True
 DEFAULT_PRETTY_PRINT = True
@@ -64,7 +64,7 @@ class TreeBuilder(object):
 
     def add_pi(self, name, **attrib):
         """Add a ProcessingInstruction"""
-        text = self.attrib_text_re.search(etree.tostring(self.make_element('Fake', **attrib), encoding=unicode))
+        text = self.attrib_text_re.search(etree.tostring(self.make_element('Fake', **attrib), encoding=str))
         if text is not None:
             text = text.group(2)
         self.root.addprevious(etree.PI(name, text))
@@ -83,7 +83,7 @@ class TreeBuilder(object):
             val = etree.CDATA(val)
         nsmap = attrib.pop('nsmap', None)
         resolve_ns = attrib.pop('resolve_ns', True)
-        attrib = dict(i for i in (map(text.sdecode, i) for i in attrib.iteritems()) if None not in i)
+        attrib = dict(i for i in (list(map(text.sdecode, i)) for i in attrib.items()) if None not in i)
         if resolve_ns:
             ns, _, tag = name.rpartition(':')
             ns = self.root.nsmap.get(ns)
@@ -92,8 +92,8 @@ class TreeBuilder(object):
         else:
             tag = name
         element = etree.Element(tag, attrib, nsmap)
-        if isinstance(val, unicode):
-            val = val.replace(u'\x03', u'')  # XXX
+        if isinstance(val, str):
+            val = val.replace('\x03', '')  # XXX
         element.text = val
         return element
 

@@ -12,12 +12,12 @@ import os
 
 from django.core.management.base import NoArgsCommand, CommandError
 from django.db.models import Min
-from django.conf import settings
-from gruntle.memebot.models import Link
-from gruntle.memebot.utils import get_yesno, human_readable_duration
+from mezzanine.conf import settings
+from memebot.models import Link
+from memebot.utils import get_yesno, human_readable_duration
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -51,8 +51,8 @@ class Command(NoArgsCommand):
         archive = published_links.exclude(id__in=keep_ids)
         archive_count = archive.count()
 
-        print 'Number of published items to retain: %d' % len(keep_ids)
-        print 'Number of published items to archive: %d' % archive_count
+        print('Number of published items to retain: %d' % len(keep_ids))
+        print('Number of published items to archive: %d' % archive_count)
 
         # get some verification first, this is destructive as hell.
         if archive_count and get_yesno('\nContinue (y/N)? ', default=False):
@@ -61,12 +61,12 @@ class Command(NoArgsCommand):
             base, fmt = ['memebot', 'archive', now.strftime('%Y%m%d')], '%%0%dd' % len(str(MAX_UNIQUE_DIRS - 1))
             if not os.path.exists(settings.ARCHIVE_DIR):
                 os.makedirs(settings.ARCHIVE_DIR)
-            for i in xrange(MAX_UNIQUE_DIRS):
+            for i in range(MAX_UNIQUE_DIRS):
                 archive_dir = os.path.join(settings.ARCHIVE_DIR, '.'.join(base + [fmt % i]))
                 try:
                     os.mkdir(archive_dir)
                     break
-                except OSError, exc:
+                except OSError as exc:
                     if exc.errno != errno.EEXIST:
                         raise
             else:
@@ -77,7 +77,7 @@ class Command(NoArgsCommand):
                 sys.stderr.write('\r%s ... %d / %d' % (desc, i + 1, archive_count))
                 sys.stderr.flush()
 
-            print '\nBeginning dump ...'
+            print('\nBeginning dump ...')
             start = time.time()
             try:
 
@@ -88,7 +88,7 @@ class Command(NoArgsCommand):
                     with open(pickle_file, 'wb') as fp:
                         pickle.dump(link, fp)
                     update('Dumping', i)
-                print
+                print()
 
                 # nuke 'em
                 for i, link in enumerate(archive.only('id')):
@@ -103,7 +103,7 @@ class Command(NoArgsCommand):
                 if os.path.exists(tar_file):
                     os.remove(tar_file)
 
-                print '\nCreating %s ...' % os.path.basename(tar_file)
+                print('\nCreating %s ...' % os.path.basename(tar_file))
                 with tarfile.open(tar_file, 'w') as tar:
                     for basedir, subdirs, filenames in os.walk(archive_dir):
                         for filename in filenames:
@@ -114,13 +114,13 @@ class Command(NoArgsCommand):
                 shutil.rmtree(archive_dir)
                 bz2_file = tar_file + '.bz2'
 
-                print 'Creating %s ...' % os.path.basename(bz2_file)
+                print('Creating %s ...' % os.path.basename(bz2_file))
                 with bz2.BZ2File(bz2_file, 'w', 0, 9) as out_fp:
                     with open(tar_file, 'rb') as in_fp:
                         shutil.copyfileobj(in_fp, out_fp)
 
                 os.remove(tar_file)
-                print 'Archive is: ' + os.path.relpath(bz2_file, os.curdir)
+                print('Archive is: ' + os.path.relpath(bz2_file, os.curdir))
 
             finally:
-                print '\nFinished in ' + human_readable_duration(time.time() - start)
+                print('\nFinished in ' + human_readable_duration(time.time() - start))

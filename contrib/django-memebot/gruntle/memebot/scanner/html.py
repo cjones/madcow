@@ -2,11 +2,11 @@
 
 import re
 from BeautifulSoup import BeautifulSoup, NavigableString
-from gruntle.memebot.scanner import Scanner, ScanResult
-from gruntle.memebot.exceptions import InvalidContent, trapped
-from gruntle.memebot.utils import text, browser
-from gruntle.memebot.utils.browser import render_node, strip_site_name
-from django.conf import settings
+from memebot.scanner import Scanner, ScanResult
+from memebot.exceptions import InvalidContent, trapped
+from memebot.utils import text, browser
+from memebot.utils.browser import render_node, strip_site_name
+from mezzanine.conf import settings
 
 tag_re = re.compile(r'(</?(\w+)[^>]*>)')
 
@@ -64,7 +64,7 @@ class HTMLScanner(Scanner):
         html = text.decode(browser.prettify_node(soup.body))
         for orig, name in tag_re.findall(html):
             if name not in ('div', 'p'):
-                html = html.replace(orig, u' ')
+                html = html.replace(orig, ' ')
 
         # put it back into soup form and perform the main logic thingy here. the idea
         # is to walk each remaining node in the branch and look at the text contents of
@@ -92,7 +92,7 @@ class HTMLScanner(Scanner):
             words = article[:self.summary_size].split()
             if len(article) > self.summary_size:
                 words[-1] = self.summary_cont
-            return u' '.join(words)
+            return ' '.join(words)
 
 
 scanner = HTMLScanner()

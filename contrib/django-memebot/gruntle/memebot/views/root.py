@@ -2,18 +2,18 @@
 
 import time
 
-from django.views.generic.simple import direct_to_template
+from django.shortcuts import render
 from django.http import HttpResponse, Http404
-from gruntle.memebot.forms import AMPMTimeForm
+from memebot.forms import AMPMTimeForm
 
 def view_index(request):
     """Front page"""
-    return direct_to_template(request, 'root/index.html', {})
+    return render(request, 'index.html', {})
 
 
 def view_robots(request):
     """View the site robots.txt file"""
-    return direct_to_template(request, 'root/robots.txt', mimetype='text/plain')
+    return render(request, 'robots.txt', mimetype='text/plain')
 
 
 def friendly_404(request):
@@ -41,7 +41,7 @@ def view_calc(request):
 
     else:
         form = AMPMTimeForm()
-    return direct_to_template(request, 'root/calc.html', {'form': form, 'seconds': seconds})
+    return render(request, 'calc.html', {'form': form, 'seconds': seconds})
 
 
 def _convert_minecraft_time(h, m, p):

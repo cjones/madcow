@@ -2,13 +2,12 @@
 
 import functools
 import traceback
-import urlparse
+import urllib.parse
 import datetime
 import binascii
 import tempfile
 import logging
 import decimal
-import rfc822
 import socket
 import shutil
 import errno
@@ -17,6 +16,8 @@ import time
 import sys
 import os
 import re
+
+from memebot.utils import rfc822
 
 class DisableAutoTimestamps(object):
 
@@ -40,7 +41,7 @@ class DisableAutoTimestamps(object):
 
     def __exit__(self, *exc_info):
         """Restore original value"""
-        for key, values in self.old_values.iteritems():
+        for key, values in self.old_values.items():
             model, field_name = key
             auto_now_add, auto_now = values
             for field in model._meta.fields:
@@ -76,7 +77,7 @@ class AtomicWrite(object):
 
     def __enter__(self):
         """Enter context: Create temporary file for writing, copying stat() of original"""
-        from gruntle.memebot.exceptions import TrapErrors, TrapError, trapped, reraise
+        from memebot.exceptions import TrapErrors, TrapError, trapped, reraise
 
         # make sure the directory exists
         dirname, basename = os.path.split(self.file)
@@ -100,7 +101,7 @@ class AtomicWrite(object):
                             os.remove(backup_file)
                         shutil.copy2(self.file, backup_file)
                 self.fp = os.fdopen(self.fd, 'w')
-        except TrapError, exc:
+        except TrapError as exc:
             with trapped:
                 os.close(self.fd)
             if os.path.exists(self.temp_file):
@@ -113,7 +114,7 @@ class AtomicWrite(object):
 
     def __exit__(self, *exc_info):
         """Exist context: Move file into place with atomic os.rename() if no errors. Clean up cruft"""
-        from gruntle.memebot.exceptions import trapped
+        from memebot.exceptions import trapped
         if exc_info[1] is None:
             os.rename(self.temp_file, self.file)
         with trapped:
@@ -173,9 +174,9 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
 
     """Get a named logger configured to use the site log directory"""
 
-    from gruntle.memebot.exceptions import trapped
-    from gruntle.memebot.utils import text
-    from django.conf import settings
+    from memebot.exceptions import trapped
+    from memebot.utils import text
+    from mezzanine.conf import settings
 
     if level is None:
         level = settings.LOG_LEVEL
@@ -202,7 +203,7 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
     else:
         datestamp = datetime.date.today().strftime('%Y%m%d')
         fmt = '%%0%dd' % len(str(max_files - 1))
-        for i in xrange(max_files):
+        for i in range(max_files):
             file = os.path.join(dir, '.'.join((name, datestamp, fmt % i, 'log')))
             with trapped:
                 fd = os.open(file, tempfile._text_openflags, perms)
@@ -238,7 +239,7 @@ def get_logger(name, level=None, stream=None, append=False, dir=None,
         def prefix(self):
             if self.name:
                 return text.decode(text.format('[%s] ', self.name))
-            return u''
+            return ''
 
         def __getattribute__(self, key):
             try:
@@ -286,9 +287,9 @@ def get_domain():
 
 def get_domain_from_url(url):
     """Return normalized domain portion of the URL"""
-    from gruntle.memebot.utils import text
-    items = text.decode(urlparse.urlparse(url).netloc).lower().rsplit(u':', 1)[0].split(u'.')[-2:]
-    return text.encode(u'.'.join(item for item in (item.strip() for item in items) if item))
+    from memebot.utils import text
+    items = text.decode(urllib.parse.urlparse(url).netloc).lower().rsplit(':', 1)[0].split('.')[-2:]
+    return text.encode('.'.join(item for item in (item.strip() for item in items) if item))
 
 
 def make_unique_key(object):
@@ -298,7 +299,7 @@ def make_unique_key(object):
     except TypeError:
         name = type(object).__name__
         if isinstance(object, dict):
-            object = sorted(object.iteritems(), key=lambda item: item[0])
+            object = sorted(iter(object.items()), key=lambda item: item[0])
         elif isinstance(object, set):
             object = sorted(object)
         return hash((name, tuple(make_unique_key(item) for item in object)))
@@ -314,7 +315,7 @@ def _flatten(items):
     flat = []
     for item in items:
         if isinstance(item, dict):
-            item = sorted(item.iteritems(), key=lambda item: item[0])
+            item = sorted(iter(item.items()), key=lambda item: item[0])
         elif isinstance(item, set):
             item = sorted(item)
         if isinstance(item, (tuple, list)):
@@ -447,16 +448,16 @@ def get_yesno(prompt=None, timeout=None, default=None, beep=True):
                         result = default
                         break
 
-                except (IOError, OSError, select.error), exc:
+                except (IOError, OSError, select.error) as exc:
                     if not exc.args or exc.args[0] not in (errno.EINTR, errno.EAGAIN):
                         raise
 
             if result is True:
-                print 'Yes'
+                print('Yes')
             elif result is False:
-                print 'No'
+                print('No')
             else:
-                print
+                print()
             return result
 
     finally:

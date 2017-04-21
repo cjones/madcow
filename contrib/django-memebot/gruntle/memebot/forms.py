@@ -3,7 +3,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
-from gruntle.memebot.models import Link
+from memebot.models import Link
 
 class EditProfileForm(forms.ModelForm):
 

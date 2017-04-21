@@ -1,7 +1,7 @@
 """Extract image from gallery view of imgur links, but grab the title on the way"""
 
-from gruntle.memebot.scanner.image import ImageScanner
-from gruntle.memebot.exceptions import InvalidContent, trapped
+from memebot.scanner.image import ImageScanner
+from memebot.exceptions import InvalidContent, trapped
 
 class BoltScanner(ImageScanner):
 

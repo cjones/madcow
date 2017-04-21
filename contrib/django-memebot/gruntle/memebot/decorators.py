@@ -6,8 +6,8 @@ import sys
 
 from django.core.cache import cache
 
-from gruntle.memebot.utils import get_logger, text, locking, make_unique_key
-from gruntle.memebot.exceptions import *
+from memebot.utils import get_logger, text, locking, make_unique_key
+from memebot.exceptions import *
 
 class NoResult(object):
 
@@ -42,8 +42,8 @@ def logged(*logger_args, **default_logger_kwargs):
                         args = (logger,) + args
                     return wrapped_func(*args, **kwargs)
 
-            except TrapError, exc:
-                logger.error('Unhandled exception in %s', wrapped_func.func_name)
+            except TrapError as exc:
+                logger.error('Unhandled exception in %s', wrapped_func.__name__)
                 for line in traceback.format_exception(*exc.args):
                     logger.error(text.chomp(line))
                 reraise(*exc.args)
@@ -76,7 +76,7 @@ def memoize(*args, **kwargs):
 
     def decorator(wrapped_func):
         if _key_fmt is None:
-            key_fmt = 'memoize:%s:%%d' % wrapped_func.func_name
+            key_fmt = 'memoize:%s:%%d' % wrapped_func.__name__
         else:
             key_fmt = _key_fmt
 

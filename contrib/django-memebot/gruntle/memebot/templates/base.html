@@ -1,17 +1,20 @@
+{% load staticfiles %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>{% block title %}{{ site_domain }}{% endblock %} - {{ site_name }}</title>
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}external/css/redmond/jquery-ui.css" />
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+  <link rel="stylesheet" type="text/css" href="{% static "external/css/redmond/jquery-ui.css" %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static "css/main.css" %}"/>
+  {% comment %}
   {% ifnotequal site_style "main" %}
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/{{ site_style }}.css" />
+  <link rel="stylesheet" type="text/css" href="{% static "css/{{ site_style }}.css" />
   {% endifnotequal %}
+  {% endcomment %}
   {% block styles %}{% endblock %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}external/js/jquery.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}external/js/jquery-ui.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}external/js/jquery.metadata.js"></script>
+  <script type="text/javascript" src="{% static "external/js/jquery.min.js" %}"></script>
+  <script type="text/javascript" src="{% static "external/js/jquery-ui.min.js" %}"></script>
+  <script type="text/javascript" src="{% static "external/js/jquery.metadata.js" %}"></script>
   {% block scripts %}{% endblock %}
   {% block headers %}{% endblock %}
  </head>

@@ -1,6 +1,6 @@
 """Replays logfiles from madcow as if the bot had seen the chatter in the first place"""
 
-from itertools import imap
+
 
 import datetime
 import optparse
@@ -10,9 +10,9 @@ import re
 
 from django.core.management.base import BaseCommand, CommandError
 
-from gruntle.memebot.utils import get_logger
-from gruntle.memebot.models import Link
-from gruntle.memebot.exceptions import OldMeme, BlackListError
+from memebot.utils import get_logger
+from memebot.models import Link
+from memebot.exceptions import OldMeme, BlackListError
 
 USAGE_ERROR = 2
 NO_LOGFILES = 4
@@ -62,7 +62,7 @@ class Command(BaseCommand):
                         match = _logfile_re.search(basename)
                         if match is not None:
                             groups = match.groups()
-                            logfiles.append((datetime.date(*imap(int, groups[1:])), '#' + groups[0], logfile))
+                            logfiles.append((datetime.date(*map(int, groups[1:])), '#' + groups[0], logfile))
 
                 if logfiles:
                     logfiles.sort()
@@ -76,7 +76,7 @@ class Command(BaseCommand):
                                     groups = match.groups()
                                     nick = groups[3] or groups[4]
                                     if nick.lower() != 'madcow':
-                                        created_time = datetime.time(*imap(int, groups[:3]))
+                                        created_time = datetime.time(*map(int, groups[:3]))
                                         created = datetime.datetime.combine(created_date, created_time)
                                         if last_link is not None and created <= last_link:
                                             log.warn('Skipping log record %s@%s: in the past', nick, created)
@@ -87,9 +87,9 @@ class Command(BaseCommand):
                                                     link = Link.objects.add_link(url, nick, channel, 'irc',
                                                                                 created=created, modified=created)
                                                     log.info('Processed link to: %r', link)
-                                                except OldMeme, old:
+                                                except OldMeme as old:
                                                     log.warn('link was an old meme: %s' % url)
-                                                except BlackListError, exc:
+                                                except BlackListError as exc:
                                                     log.warn('link is blacklisted: %s' % url)
 
                 else:

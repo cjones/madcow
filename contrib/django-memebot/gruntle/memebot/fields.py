@@ -7,18 +7,18 @@ import gzip
 import sys
 
 try:
-    import cStringIO as stringio
+    import io as stringio
 except ImportError:
-    import StringIO as stringio
+    import io as stringio
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
 from django.db import models
-from django.conf import settings
-from gruntle.memebot.utils import text
+from mezzanine.conf import settings
+from memebot.utils import text
 
 __all__ = ['SerializedDataField', 'PickleField', 'AttributeDataWrapper',
            'AttributeManager', 'KeyValueDataWrapper', 'KeyValueManager']
@@ -26,8 +26,6 @@ __all__ = ['SerializedDataField', 'PickleField', 'AttributeDataWrapper',
 class SerializedDataField(models.Field):
 
     """Field that can save arbitrary binary data, compressed and base64 encoded into a text field"""
-
-    __metaclass__ = models.SubfieldBase
 
     HEADER = 'SerializedData:'
     DEFAULT_ENGINE = 'zlib'
@@ -50,7 +48,7 @@ class SerializedDataField(models.Field):
         level = kwargs.pop('level', None)
         if level is None:
             level = self.DEFAULT_LEVEL
-        if not isinstance(level, (int, long)):
+        if not isinstance(level, int):
             raise TypeError(text.format('compression_level must be an int, not %r', type(level).__name__))
         if ((level < 1) or (level > 9)):
             raise ValueError(text.format('compression_level must be between 1-9, not %d', level))
@@ -125,22 +123,20 @@ class SerializedDataField(models.Field):
                'gzip': Engine('g', gzip_compress, gzip_decompress),
                'dummy': Engine('d', dummy, dummy)}
 
-    engine_ids = dict((engine.id, engine) for engine in engines.itervalues())
+    engine_ids = dict((engine.id, engine) for engine in engines.values())
 
 
 class PickleField(models.Field):
 
     """Field that can store arbitrary python objects, pickling on the backend"""
 
-    __metaclass__ = models.SubfieldBase
-
     _header = 'PickleField:'
     _offset = len(_header)
 
     def to_python(self, value):
         """Convert serialized data into python object"""
-        if isinstance(value, (str, unicode)) and value.startswith(self._header):
-            if isinstance(value, unicode):
+        if isinstance(value, str) and value.startswith(self._header):
+            if isinstance(value, str):
                 value = value.encode('iso8859-1')
             value = pickle.loads(value[self._offset:])
         return value

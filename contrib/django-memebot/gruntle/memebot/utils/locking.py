@@ -4,16 +4,16 @@ import tempfile
 import time
 import os
 
-from django.conf import settings
+from mezzanine.conf import settings
 
-from gruntle.memebot.utils import text
-from gruntle.memebot.exceptions import *
+from memebot.utils import text
+from memebot.exceptions import *
 
 __all__ = ['Lock']
 
 DEFAULT_TIMEOUT = None
 DEFAULT_INTERVAL = 1
-DEFAULT_LOCK_PERMS = 0644
+DEFAULT_LOCK_PERMS = 0o644
 
 class Lock(object):
 

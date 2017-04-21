@@ -5,11 +5,11 @@ from optparse import make_option
 import sys
 
 from django.core.management.base import BaseCommand, CommandError
-from django.conf import settings
+from mezzanine.conf import settings
 
-from gruntle.memebot.exceptions import TrapError, TrapErrors
-from gruntle.memebot.utils import get_logger, ipython
-from gruntle.memebot.utils.browser import Browser
+from memebot.exceptions import TrapError, TrapErrors
+from memebot.utils import get_logger, ipython
+from memebot.utils.browser import Browser
 
 class Command(BaseCommand):
 
@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
         try:
             module = __import__('gruntle.memebot.scanner.' + scanner, globals(), locals(), ['scanner'])
-        except ImportError, exc:
+        except ImportError as exc:
             raise CommandError("Couldn't import %s: %s" % (scanner, exc))
 
         try:
@@ -73,7 +73,7 @@ class Command(BaseCommand):
 
                     log.info('Success: %r', result)
 
-            except TrapError, exc:
+            except TrapError as exc:
                 log.error('Problem parsing %r', url, exc_info=exc.args)
 
             if do_ipython:

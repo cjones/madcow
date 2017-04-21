@@ -1,18 +1,18 @@
 """Tools to mimic browser capabilities for scraping tasks"""
 
-import htmlentitydefs
+import html.entities
 import collections
-import cookielib
-import urlparse
-import urllib2
-import urllib
+import http.cookiejar
+import urllib.parse
+import urllib.request, urllib.error, urllib.parse
+import urllib.request, urllib.parse, urllib.error
 import gzip
 import re
 
 try:
-    import cStringIO as stringio
+    import io as stringio
 except ImportError:
-    import StringIO as stringio
+    import io as stringio
 
 try:
     from BeautifulSoup import BeautifulSoup
@@ -29,8 +29,8 @@ try:
 except ImportError:
     Image = None
 
-from gruntle.memebot.exceptions import *
-from gruntle.memebot.utils import text, inflate
+from memebot.exceptions import *
+from memebot.utils import text, inflate
 
 __all__ = ['Browser', 'decode_entities', 'render_node']
 
@@ -62,7 +62,7 @@ comment_re = re.compile(r'<!--.*?-->', re.DOTALL)
 whitespace_re = re.compile(r'\s+')  # for packing whitespace
 entity_dec_re = re.compile(r'(&#(\d+);)')  # &#32;
 entity_hex_re = re.compile(r'^(&#x([0-9a-fA-F]+);)')  # &#x3D;
-entity_name_re = re.compile(r'(&(%s);)' % '|'.join(map(re.escape, htmlentitydefs.name2codepoint)))  # &amp;
+entity_name_re = re.compile(r'(&(%s);)' % '|'.join(map(re.escape, html.entities.name2codepoint)))  # &amp;
 meta_refresh_re = re.compile(r'^refresh$', re.IGNORECASE)
 site_names_re = re.compile(r'(?:^|\.)(([^.]+)\.[^.]+)$')
 
@@ -85,7 +85,7 @@ class Response(collections.namedtuple('Response', 'code msg url real_url data_ty
         if self.data_type == 'soup':
             with trapped:
                 for param in self.data.head.find('meta', {'http-equiv': meta_refresh_re})['content'].split(';'):
-                    if param.startswith(u'url='):
+                    if param.startswith('url='):
                         return param[4:]
 
     def __str__(self):
@@ -123,8 +123,8 @@ class Browser(object):
 
         # add cookie processor to handlers if we want cookie support
         if support_cookies:
-            self.cookie_jar = cookielib.CookieJar()
-            handlers.append(urllib2.HTTPCookieProcessor(self.cookie_jar))
+            self.cookie_jar = http.cookiejar.CookieJar()
+            handlers.append(urllib.request.HTTPCookieProcessor(self.cookie_jar))
         else:
             self.cookie_jar = None
 
@@ -149,7 +149,7 @@ class Browser(object):
         self.max_redirects = max_redirects
         self.max_read = max_read
         self.timeout = timeout
-        self.opener = urllib2.build_opener(*handlers)
+        self.opener = urllib.request.build_opener(*handlers)
         self.opener.addheaders = self.headers = headers
 
         if etree is None:
@@ -167,7 +167,7 @@ class Browser(object):
             try:
                 with TrapErrors():
                     response = self._open(url, data, referer)
-            except TrapError, exc:
+            except TrapError as exc:
                 # exception on first attempt, just raise it, we got nothing useful
                 if response is None:
                     reraise(*exc.args)
@@ -187,12 +187,12 @@ class Browser(object):
         return response
 
     def _open(self, url, data=None, referer=None):
-        request = urllib2.Request(text.encode(url), data)
+        request = urllib.request.Request(text.encode(url), data)
         if referer is not None:
             request.add_header('Referer', referer)
         try:
             response = self.opener.open(request, timeout=self.timeout)
-        except urllib2.HTTPError, exc:
+        except urllib.error.HTTPError as exc:
             response = exc
         data = response.read(self.max_read)
         read = len(data)
@@ -250,52 +250,52 @@ class Browser(object):
 
 def decode_entities(html):
     """Convert HTML entity-encoded characters back to bytes"""
-    for a in ((x, unichr(int(v))) for x, v in entity_dec_re.findall(html)):
+    for a in ((x, chr(int(v))) for x, v in entity_dec_re.findall(html)):
         html = html.replace(*a)
-    for a in ((x, unichr(htmlentitydefs.name2codepoint[name])) for x, name in entity_name_re.findall(html)):
+    for a in ((x, chr(html.entities.name2codepoint[name])) for x, name in entity_name_re.findall(html)):
         html = html.replace(*a)
-    for a in ((x, unichr(int(v, 16))) for x, v in entity_hex_re.findall(html)):
+    for a in ((x, chr(int(v, 16))) for x, v in entity_hex_re.findall(html)):
         html = html.replace(*a)
     return html
 
 
 def render_node(node):
     """Try to turn a soup node into something resembling plain text"""
-    if isinstance(node, (str, unicode)):
+    if isinstance(node, str):
         html = node
     else:
         html = node.renderContents()
     html = text.decode(html)
-    html = html_tag_re.sub(u' ', html)
+    html = html_tag_re.sub(' ', html)
     html = decode_entities(html)
-    html = html.replace(u'\u00a0', ' ')
-    html = whitespace_re.sub(u' ', html)
+    html = html.replace('\u00a0', ' ')
+    html = whitespace_re.sub(' ', html)
     html = html.strip()
     return html
 
 
 def prettify_node(node):
     """Try to turn a soup node into something resembling readable html"""
-    if isinstance(node, (str, unicode)):
+    if isinstance(node, str):
         html = node
     else:
         html = node.prettify()
     html = text.decode(html)
-    html = lang_tag_re.sub(u' ', html)
-    html = comment_re.sub(u' ', html)
+    html = lang_tag_re.sub(' ', html)
+    html = comment_re.sub(' ', html)
     html = html.strip()
     lines = html.splitlines()
     lines = (line.rstrip() for line in lines)
     lines = (line for line in lines if line)
-    html = u'\n'.join(lines) + u'\n'
+    html = '\n'.join(lines) + '\n'
     return text.encode(html)
 
 
 def strip_site_name(title, url):
     """Try to strip site names from html titles"""
     try:
-        host = urlparse.urlparse(url).netloc.lower()
+        host = urllib.parse.urlparse(url).netloc.lower()
         pattern = '\s*[|-]\s*(?:%s)\s*$' % '|'.join(re.escape(name) for name in site_names_re.search(host).groups())
         return re.sub(pattern, '', title, flags=re.IGNORECASE)
-    except StandardError:
+    except Exception:
         return title

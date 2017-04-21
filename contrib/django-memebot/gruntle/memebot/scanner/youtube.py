@@ -1,9 +1,9 @@
 """Provides embedded youtube video for youtube links"""
 
-from django.conf import settings
-from gruntle.memebot.scanner import Scanner, ScanResult
-from gruntle.memebot.exceptions import InvalidContent, trapped
-from gruntle.memebot.utils.browser import render_node, strip_site_name
+from mezzanine.conf import settings
+from memebot.scanner import Scanner, ScanResult
+from memebot.exceptions import InvalidContent, trapped
+from memebot.utils.browser import render_node, strip_site_name
 
 class YouTubeScanner(Scanner):
 
