@@ -14,3 +14,4 @@ typescript
 *.swp
 env/
 python/
+dev.db
