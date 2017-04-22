@@ -1,0 +1,3 @@
+[submodule "contrib/django-memebot/cpython"]
+	path = contrib/django-memebot/cpython
+	url = git@github.com:python/cpython.git

@@ -14,7 +14,7 @@ run () (set -x; "$@")
 env () { run "$env" - PATH="$PATH" LANG=C LC_ALL=C SHELL="$sh" "$@"; }
 
 srcdir="$(pwd)"
-prefix="$(cd "$srcdir"/../.. && pwd)"/python
+prefix="$(cd "$srcdir"/.. && pwd)"/python
 build="$srcdir"/build
 ncpu=$(env "$sysctl" -n hw.ncpu || true)
 
