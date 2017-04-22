@@ -159,6 +159,12 @@ register_setting(
 )
 
 register_setting(
+    name="LOG_DIR",
+    editable=False,
+    default=os.path.join(settings.MEDIA_ROOT, "logs"),
+)
+
+register_setting(
     name="LOG_PERMS",
     editable=False,
     default=420,
