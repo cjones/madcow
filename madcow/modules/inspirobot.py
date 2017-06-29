@@ -18,4 +18,4 @@ class Main(Module):
     def response(self, nick, args, kwargs):
         r = requests.get(url)
         if r.ok:
-          return '\n'.join(r.content)
+          return r.content
