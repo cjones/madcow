@@ -42,7 +42,7 @@ class SlackProtocol(Madcow):
             try:
                 self.check_response_queue()
                 try:
-                    event = self.slack._eventq.pop(0)
+                    event = self.slack._eventq.get(False)
                 except IndexError:
                     time.sleep(.2)
                 else:
